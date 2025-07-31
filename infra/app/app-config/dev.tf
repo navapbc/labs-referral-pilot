@@ -5,7 +5,7 @@ module "dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "dev"
   network_name                    = "dev"
-  domain_name                     = null
+  domain_name                     = "referral-pilot-dev.navateam.com"
   enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
@@ -17,6 +17,9 @@ module "dev_config" {
   # Support local development against the dev instance.
   extra_identity_provider_callback_urls = ["http://localhost"]
   extra_identity_provider_logout_urls   = ["http://localhost"]
+
+  service_cpu    = 512
+  service_memory = 2048
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

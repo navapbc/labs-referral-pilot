@@ -7,12 +7,12 @@ locals {
   owner = "NavaPBC"
 
   # URL of project source code repository
-  code_repository_url = "https://github.com/NavaPBC/labs-referral-pilot"
+  code_repository_url = "https://github.com/navapbc/labs-referral-pilot"
 
   # Default AWS region for project (e.g. us-east-1, us-east-2, us-west-1).
   # This is dependent on where your project is located (if regional)
   # otherwise us-east-1 is a good default
-  default_region = "us-east-2"
+  default_region = "us-east-1"
 
   github_actions_role_name = "${local.project_name}-github-actions"
 }
