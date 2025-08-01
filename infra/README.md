@@ -70,18 +70,17 @@ Generally, you should use the Make targets or the underlying bin scripts, but yo
 
 To set up this project for the first time (i.e., it has never been deployed to the target AWS account):
 
-1. [Install this template](/README.md#installation) into an application that meets the [Application Requirements](/README.md#application-requirements)
-    1. You may need to tweak the generated [project configuration](/infra/project-config/main.tf) depending on your needs. <!-- markdown-link-check-disable-line -->
-2. [Set up infrastructure developer tools](/docs/infra/set-up-infrastructure-tools.md)
-3. [Set up AWS account](/docs/infra/set-up-aws-account.md)
-4. [Set up the virtual network (VPC)](/docs/infra/set-up-network.md)
-5. Optionally [set up system notifications for CI/CD workflows](/docs/infra/system-notifications.md)
-6. For each application:
+
+1. [Set up infrastructure developer tools](/docs/infra/set-up-infrastructure-tools.md)
+1. [Set up AWS account](/docs/infra/set-up-aws-account.md)
+1. [Set up the virtual network (VPC)](/docs/infra/set-up-network.md)
+1. Optionally [set up system notifications for CI/CD workflows](/docs/infra/system-notifications.md)
+1. For each application:
     1. [Set up application build repository](/docs/infra/set-up-app-build-repository.md)
-    2. [Set up application database](/docs/infra/set-up-database.md)
-    3. [Set up application environment](/docs/infra/set-up-app-env.md)
-    4. [Configure environment variables and secrets](/docs/infra/environment-variables-and-secrets.md)
-    5. [Set up background jobs](/docs/infra/background-jobs.md)
+    1. [Set up application database](/docs/infra/set-up-database.md)
+    1. [Set up application environment](/docs/infra/set-up-app-env.md)
+    1. [Configure environment variables and secrets](/docs/infra/environment-variables-and-secrets.md)
+    1. [Set up background jobs](/docs/infra/background-jobs.md)
 
 ### 🆕 New developer
 
