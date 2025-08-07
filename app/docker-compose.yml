@@ -20,18 +20,29 @@ services:
       args:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-app}
-    # command: ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]  #TODO MRH
+    ports:
+      # For Hayhooks
+      - "1416:1416"
+    environment:
+      # Set API keys for LLM clients from .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+      # Don't send telemetry to Haystack
+      - HAYSTACK_TELEMETRY_ENABLED=False
+
+      # Configure Hayhooks
+      # HAYHOOKS_SHOW_TRACEBACKS is useful for development
+      - HAYHOOKS_SHOW_TRACEBACKS=true
+      # TODO LATER: for security, add Hayhooks CORS settings
+      # https://docs.haystack.deepset.ai/docs/hayhooks#environment-variables
     env_file:
       - path: ./local.env
         required: true
-      - path: ./override.env
-        required: false
-    ports:
-      - 8080:3000
-    volumes:
-      - ./:/app
-    depends_on:
-      - app-db
+
+
 
 volumes:
   app-dbdata:
