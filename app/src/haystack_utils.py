@@ -77,3 +77,12 @@ def to_chat_messages(
         messages.append(chat_msg)
 
     return messages
+
+def get_prompt_template(prompt_name):
+    # Get the template from Phoenix
+    client = ()
+    # Pull a prompt by name
+    prompt = client.prompts.get(prompt_identifier=prompt_name, tag="staging")
+    prompt_data = prompt._dumps()
+    logger.info("Retrieved prompt: %s", pformat(prompt_data))
+    return prompt

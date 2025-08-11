@@ -9,7 +9,7 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 
 # https://github.com/deepset-ai/hayhooks?tab=readme-ov-file#sharing-code-between-pipeline-wrappers
-from common import haystack_utils, phoenix_utils
+import haystack_utils
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -21,7 +21,6 @@ class PipelineWrapper(BasePipelineWrapper):
     def setup(self) -> None:
         logger.info("Setting up %s", self.__class__.__name__)
 
-        phoenix_utils.configure_phoenix()
         self.pipeline = self._create_pipeline()
 
     def _create_pipeline(self) -> Pipeline:
