@@ -33,11 +33,9 @@ services:
       # Don't send telemetry to Haystack
       - HAYSTACK_TELEMETRY_ENABLED=False
 
-      # Configure Hayhooks
-      # HAYHOOKS_SHOW_TRACEBACKS is useful for development
-      - HAYHOOKS_SHOW_TRACEBACKS=true
-      # TODO LATER: for security, add Hayhooks CORS settings
-      # https://docs.haystack.deepset.ai/docs/hayhooks#environment-variables
+      # For observability
+      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006
+      - PHOENIX_PROJECT_NAME=local-docker-project
     env_file:
       - path: ./local.env
         required: true

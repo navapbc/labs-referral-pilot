@@ -11,6 +11,8 @@ from haystack.document_stores.in_memory import InMemoryDocumentStore
 # https://github.com/deepset-ai/hayhooks?tab=readme-ov-file#sharing-code-between-pipeline-wrappers
 import haystack_utils
 
+from common import phoenix_utils
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO

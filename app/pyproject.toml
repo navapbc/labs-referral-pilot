@@ -23,6 +23,12 @@ psycopg = {extras = ["binary"], version = "^3.1.10"}
 pydantic-settings = "^2.0.3"
 haystack-ai = "^2.16.1"
 hayhooks = "^0.10.0"
+arize-phoenix-client = "^1.15.0"
+opentelemetry-sdk = "^1.36.0"
+opentelemetry-exporter-otlp = "^1.36.0"
+arize-phoenix-otel = "^0.12.1"
+openai = "^1.99.8"
+openinference-instrumentation-haystack = "^0.1.24"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"

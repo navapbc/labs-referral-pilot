@@ -52,34 +52,17 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 RUN poetry install --no-root --with dev
 
 COPY . /app
+RUN ln -s  /app/src/pipelines/ /app
+
+# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
+ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
 
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
 # Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
-
-
-
-# https://docs.haystack.deepset.ai/docs/docker
-FROM deepset/haystack:base-v2.14.0 AS dev2
-#ARG RUN_USER
-#USER ${RUN_USER}
-
-# Install wget for Docker Compose healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends wget && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY src .
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
-ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=.
-
-ENV LOG=DEBUG
-# Haystack pipelines defined under pipelines folder are automatically deployed on Hayhooks startup
-CMD ["poetry", "run", "hayhooks", "--host", "0.0.0.0"]
+CMD ["poetry", "run", "hayhooks", "run", "--host", "0.0.0.0"]
 
 #---------
 # Release
