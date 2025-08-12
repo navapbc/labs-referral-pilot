@@ -9,8 +9,5 @@ class AppConfig(PydanticBaseEnvConfig):
     host: str = "127.0.0.1"
     port: int = 3000
 
-    # If None, defaults to PHOENIX_COLLECTOR_ENDPOINT env variable value or "http://localhost:6006"
-    phoenix_base_url: str = None
-
 
 config = AppConfig()
