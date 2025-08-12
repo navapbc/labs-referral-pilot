@@ -30,16 +30,9 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
-      # Don't send telemetry to Haystack
-      - HAYSTACK_TELEMETRY_ENABLED=False
-
-      # For observability
-      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006
-      - PHOENIX_PROJECT_NAME=local-docker-project
     env_file:
       - path: ./local.env
         required: true
-
 
 
 volumes:

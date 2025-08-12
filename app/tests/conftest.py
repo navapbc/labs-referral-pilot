@@ -110,7 +110,6 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
 ####################
 
 
-
 @pytest.fixture
 def api_auth_token(monkeypatch):
     auth_token = "abcd1234"
