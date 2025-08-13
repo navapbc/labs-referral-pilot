@@ -62,8 +62,8 @@ ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
 ENV HOST=0.0.0.0
 
 # Run the application.
-#CMD ["poetry", "run", "hayhooks", "run", "--host", "0.0.0.0"]
-CMD ["poetry", "run", "uvicorn", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:3000"]
+
 
 #---------
 # Release
@@ -115,4 +115,4 @@ ENV HOST=0.0.0.0
 USER ${RUN_USER}
 
 # Run the application.
-CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:3000"]
