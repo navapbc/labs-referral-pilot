@@ -56,6 +56,7 @@ RUN ln -s  /app/src/pipelines/ /app
 
 # https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
+ENV HAYHOOKS_PIPELINES_DIR=app/src/pipelines
 
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
@@ -77,7 +78,6 @@ ARG RUN_USER
 RUN mkdir -p /tmp
 VOLUME ["/tmp"]
 
-# TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
 
 WORKDIR /app
 

@@ -23,13 +23,6 @@ services:
     ports:
       # For Hayhooks
       - "3000:3000"
-    environment:
-      # Set API keys for LLM clients from .env file
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-
     env_file:
       - path: ./local.env
         required: true
