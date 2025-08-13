@@ -115,4 +115,4 @@ ENV HOST=0.0.0.0
 USER ${RUN_USER}
 
 # Run the application.
-CMD ["poetry", "run", "uvicorn", "-k", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["poetry", "run", "gunicorn", "-k", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "3000"]
