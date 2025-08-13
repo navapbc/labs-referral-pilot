@@ -63,7 +63,7 @@ ENV HOST=0.0.0.0
 
 # Run the application.
 #CMD ["poetry", "run", "hayhooks", "run", "--host", "0.0.0.0"]
-CMD ["poetry", "run", "uvicorn", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "1416"]
+CMD ["poetry", "run", "uvicorn", "src.app:hayhooks_app", "--host", "0.0.0.0", "--port", "3000"]
 
 #---------
 # Release

@@ -22,7 +22,7 @@ services:
         - RUN_USER=${RUN_USER:-app}
     ports:
       # For Hayhooks
-      - "1416:1416"
+      - "3000:3000"
     environment:
       # Set API keys for LLM clients from .env file
       - OPENAI_API_KEY=${OPENAI_API_KEY}
