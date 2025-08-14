@@ -3,6 +3,7 @@ from pathlib import Path
 from haystack import Pipeline
 from hayhooks import BasePipelineWrapper
 
+
 class PipelineWrapper(BasePipelineWrapper):
     """
     A generic health-check pipeline for Hayhooks.
