@@ -2,7 +2,6 @@ import logging
 
 import _pytest.monkeypatch
 import boto3
-
 import moto
 import pytest
 

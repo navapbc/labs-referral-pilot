@@ -1,6 +1,7 @@
 import os
 
 import uvicorn
+
 from hayhooks.settings import settings
 from hayhooks import create_app
 
