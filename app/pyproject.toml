@@ -3,7 +3,7 @@ name = "template-application"
 version = "0.1.0"
 description = "A template API for building ontop of"
 packages = [{ include = "src" }]
-authors = ["Nava Engineering <engineering@navapbc.com>"]
+authors = ["Nava Labs <labs-dst@navapbc.com>"]
 
 [tool.poetry.dependencies]
 # See docs for details on upgrading your Python version
