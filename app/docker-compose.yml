@@ -23,6 +23,8 @@ services:
     ports:
       # For Hayhooks
       - "3000:3000"
+    volumes:
+        - ./:/app
     env_file:
       - path: ./local.env
         required: true

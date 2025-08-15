@@ -18,12 +18,14 @@ dictionaries). Where pydantic is not used, plain Python dataclasses are
 generally preferred.
 
 - [OpenAPI Specification][oas-docs]
+- [Haystack][haystack-docs]
 - [SQLAlchemy][sqlalchemy-home] ([source code][sqlalchemy-src])
 - [Alembic][alembic-home] ([source code][alembic-src])
 - [pydantic][pydantic-home] ([source code][pydantic-src])
 - [poetry](https://python-poetry.org/docs/) - Python dependency management
 
 [oas-docs]: http://spec.openapis.org/oas/v3.0.3
+[haystack-docs]: https://docs.haystack.deepset.ai/docs/intro
 
 [pydantic-home]:https://pydantic-docs.helpmanual.io/
 [pydantic-src]: https://github.com/samuelcolvin/pydantic/

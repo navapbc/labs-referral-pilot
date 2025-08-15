@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "template-application"
+name = "template-application-haystack"
 version = "0.1.0"
-description = "A template API for building ontop of"
+description = "A template Haystack App"
 packages = [{ include = "src" }]
 authors = ["Nava Labs <labs-dst@navapbc.com>"]
 
 [tool.poetry.dependencies]
 # See docs for details on upgrading your Python version
-python = "3.12.11"
+python = "~3.12"
 SQLAlchemy = {version = "^2.0.21", extras = ["mypy"]}
 alembic = "^1.12.0"
 python-dotenv = "^1.0.0"
