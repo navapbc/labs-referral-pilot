@@ -4,5 +4,5 @@
 # https://github.com/goodwithtech/dockle#accept-suspicious-environment-variables--files--file-extensions
 # DOCKLE_ACCEPT_FILES="file1,path/to/file2,file3/path,etc"
 
-# The apiflask/settings file is a stub file that apiflask creates, and has no sensitive data in. We are ignoring it since it is unused
-DOCKLE_ACCEPT_FILES=app/.venv/lib/python3.13/site-packages/apiflask/settings.py
+# Hayhooks has an out of the box example and it uses a settings file, we don't need or use it but need to ignore it
+DOCKLE_ACCEPT_FILES=app/.venv/lib/python3.12/site-packages/hayhooks/settings.py
