@@ -17,6 +17,10 @@ hayhooks_app = create_app()
 async def health_check():
     return {"status": "ok", "detail": "Hello World!"}
 
+# route for POST /hello that accepts a name query parameter
+@hayhooks_app.post("/hello")
+async def hello(name: str = "World"):
+    return {"message": f"Hello, {name}!"}
 
 if __name__ == "__main__":
     uvicorn.run("app:hayhooks_app", host=settings.host, port=settings.port)
