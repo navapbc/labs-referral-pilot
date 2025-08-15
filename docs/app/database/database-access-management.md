@@ -15,9 +15,6 @@ For example, **do this**
 ```python
 ### right way ###
 
-from flask import current_app
-import src.adapters.db as db
-
 def some_service_func(session: db.Session)
     with db_session.begin(): # start transaction
         session.query(FooBar).update({"x": 5})
@@ -33,9 +30,6 @@ and **don't do this**
 
 ```python
 ### wrong way ###
-
-from flask import current_app
-import src.adapters.db as db
 
 def some_service_func()
     db_client = db.get_db(current_app)
