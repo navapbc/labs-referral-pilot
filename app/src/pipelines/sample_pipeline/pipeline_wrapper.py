@@ -1,6 +1,8 @@
-from haystack import Pipeline
-from hayhooks import BasePipelineWrapper
 from pathlib import Path
+
+from hayhooks import BasePipelineWrapper
+from haystack import Pipeline
+
 
 class PipelineWrapper(BasePipelineWrapper):
     """

@@ -28,7 +28,10 @@ services:
     env_file:
       - path: ./local.env
         required: true
-
+      - path: ./override.env
+        required: false
+    depends_on:
+      - app-db
 
 volumes:
   app-dbdata:

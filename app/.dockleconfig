@@ -4,5 +4,4 @@
 # https://github.com/goodwithtech/dockle#accept-suspicious-environment-variables--files--file-extensions
 # DOCKLE_ACCEPT_FILES="file1,path/to/file2,file3/path,etc"
 
-# Hayhooks has an out of the box example and it uses a settings file, we don't need or use it but need to ignore it
-DOCKLE_ACCEPT_FILES=app/.venv/lib/python3.12/site-packages/hayhooks/settings.py
+

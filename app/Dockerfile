@@ -52,7 +52,6 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 RUN poetry install --no-root --with dev
 
 COPY . /app
-RUN ln -s  /app/src/pipelines/ /app
 
 # https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
