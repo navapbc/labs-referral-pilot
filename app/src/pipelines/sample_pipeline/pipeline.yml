@@ -1,9 +1,0 @@
-# pipelines/sample_pipeline/pipeline.yml
-components:
-  prompt_builder:
-    type: haystack.components.builders.PromptBuilder
-    init_parameters:
-      template: "I am the Hayhooks Parrot. You said: {{ text }}"
-connections: []
-metadata: {}
-max_loops_allowed: 5
