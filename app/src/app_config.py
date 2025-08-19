@@ -6,6 +6,8 @@ class AppConfig(PydanticBaseEnvConfig):
     # from accessing the application. This is especially important if you are
     # running the application locally on a public network. This needs to be
     # overriden to 0.0.0.0 when running in a container
-    # See https://flask.palletsprojects.com/en/2.2.x/api/#flask.Flask.run
     host: str = "127.0.0.1"
     port: int = 3000
+
+
+config = AppConfig()

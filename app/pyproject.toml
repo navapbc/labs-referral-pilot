@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "template-application-flask"
+name = "template-application-haystack"
 version = "0.1.0"
-description = "A template flask API for building ontop of"
+description = "A template Haystack App"
 packages = [{ include = "src" }]
-authors = ["Nava Engineering <engineering@navapbc.com>"]
+authors = ["Nava Labs <labs-dst@navapbc.com>"]
 
 [tool.poetry.dependencies]
 # See docs for details on upgrading your Python version
-python = "~3.13"
+python = "~3.12"
 SQLAlchemy = {version = "^2.0.21", extras = ["mypy"]}
 alembic = "^1.12.0"
 python-dotenv = "^1.0.0"
@@ -16,12 +16,15 @@ botocore = "^1.31.62"
 boto3 = "^1.28.62"
 smart-open = "^6.1.0"
 pytz = "^2023.3.post1"
-APIFlask = "^2.0.2"
 marshmallow-dataclass = {extras = ["enum", "union"], version = "^8.5.8"}
 marshmallow = "^3.20.1"
 gunicorn = "^21.2.0"
 psycopg = {extras = ["binary"], version = "^3.1.10"}
 pydantic-settings = "^2.0.3"
+haystack-ai = "^2.16.1"
+hayhooks = "^0.10.0"
+openai = "^1.99.8"
+openinference-instrumentation-haystack = "^0.1.24"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"

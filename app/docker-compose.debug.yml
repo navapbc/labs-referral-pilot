@@ -9,6 +9,7 @@ services:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-app}
     env_file: local.env
+    # TODO - Update this to work with Haystack
     command: [
       "poetry", "run", "python", "-m", "debugpy",
       "--listen", "0.0.0.0:5678",

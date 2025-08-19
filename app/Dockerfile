@@ -4,7 +4,7 @@
 # The build stage that will be used to deploy to the various environments
 # needs to be called `release` in order to integrate with the repo's
 # top-level Makefile
-FROM python:3.13-slim AS base
+FROM python:3.12-slim AS base
 # See docs for details on upgrading your Python version
 
 # Install poetry, the package manager.
@@ -53,12 +53,16 @@ RUN poetry install --no-root --with dev
 
 COPY . /app
 
+# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
+ENV HAYHOOKS_PIPELINES_DIR=app/src/pipelines
+
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
 # Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:3000"]
+
 
 #---------
 # Release
@@ -72,7 +76,6 @@ ARG RUN_USER
 RUN mkdir -p /tmp
 VOLUME ["/tmp"]
 
-# TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
 
 WORKDIR /app
 
@@ -97,7 +100,7 @@ RUN poetry install --no-root --only main
 # include section in pyproject.toml. Also note that if you change the name or
 # version section in pyproject.toml, you will need to change the dist/... to match
 # or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/template_application_flask-0.1.0-py3-none-any.whl'
+RUN poetry build --format wheel && poetry run pip install 'dist/template_application_haystack-0.1.0-py3-none-any.whl'
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defined in pyproject.toml
@@ -110,4 +113,4 @@ ENV HOST=0.0.0.0
 USER ${RUN_USER}
 
 # Run the application.
-CMD ["poetry", "run", "gunicorn", "src.app:create_app()"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:8000"]
