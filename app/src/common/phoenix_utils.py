@@ -38,27 +38,27 @@ def service_alive() -> bool:
         projects = client.projects.list()
         logger.info("Phoenix service is alive: %s", projects)
         return True
-    except httpx.HTTPStatusError as error:
-        logger.info("Phoenix service is not alive: %s", error)
     except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException) as error:
         logger.info("Phoenix service is not alive: %s", error)
-        return False
     except Exception as error:
         logger.error("Unexpected error when checking Phoenix service: %s", error)
-        return False
+    return False
 
 
 USE_PHOENIX_OTEL_REGISTER = True
 BATCH_OTEL = False
 
+_TRACER_CONFIGURED = False
+
 
 def configure_phoenix(only_if_alive: bool = True) -> None:
-    "Set only_if_alive=False to fail fast if Phoenix is not reachable."
+    "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
         return
 
-    if opentelemetry.trace._TRACER_PROVIDER:
-        logger.info("Opentelemetry tracing already configured; skipping")
+    global _TRACER_CONFIGURED
+    if _TRACER_CONFIGURED:
+        logger.info("Opentelemetry tracing already configured")
         return
 
     # endpoint = config.phoenix_base_url
@@ -94,6 +94,11 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         tracer_provider.add_span_processor(processor)
         # PHOENIX_API_KEY env variable seems to be used by HaystackInstrumentor
         HaystackInstrumentor().instrument(tracer_provider=tracer_provider)
+
+    if opentelemetry.trace.get_tracer_provider() is None:
+        raise RuntimeError("Failed to configure OpenTelemetry tracer provider")
+
+    _TRACER_CONFIGURED = True
 
 
 def get_prompt_template(prompt_name: str) -> phoenix.client.types.prompts.PromptVersion:
