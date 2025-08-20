@@ -59,8 +59,8 @@ services:
     depends_on:
       app-db:
         condition: service_healthy
-      wait_for_phoenix:
-        condition: service_completed_successfully
+      # wait_for_phoenix:
+      #   condition: service_completed_successfully
 
 volumes:
   app-dbdata:
