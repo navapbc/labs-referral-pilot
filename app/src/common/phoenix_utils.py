@@ -69,7 +69,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     # and PHOENIX_API_KEY to handle authentication to Phoenix.
     phoenix.otel.register(
         endpoint=trace_endpoint,
-        batch=BATCH_OTEL,
+        batch=config.batch_otel,
         # Auto-instrument based on installed OpenInference dependencies
         auto_instrument=True,
     )
