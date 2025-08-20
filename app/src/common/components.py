@@ -20,33 +20,3 @@ class EchoNode:
         full_prompt = history + prompt
         logger.info("Full prompt: %s", pformat(full_prompt))
         return {"full_prompt": full_prompt}
-
-
-# def to_chat_messages(
-#     msg_list: Sequence[dict | v1.PromptMessage | ChatMessage],
-# ) -> list[ChatMessage]:
-#     messages = []
-#     for msg in msg_list:
-#         if isinstance(msg, ChatMessage):
-#             chat_msg = msg
-#             messages.append(chat_msg)
-#             continue
-#         elif not isinstance(msg, dict):
-#             raise ValueError(f"Expected dict or ChatMessage, got {type(msg)}")
-
-#         role = msg["role"]
-#         content = msg["content"]
-#         if role == "system":
-#             assert isinstance(content, str), f"Expected string, got {type(content)}"
-#             chat_msg = ChatMessage.from_system(content)
-#         elif role == "user":
-#             assert isinstance(content, str), f"Expected string, got {type(content)}"
-#             chat_msg = ChatMessage.from_user(content)
-#         elif role == "assistant":
-#             assert isinstance(content, str), f"Expected string, got {type(content)}"
-#             chat_msg = ChatMessage.from_assistant(content)
-#         else:
-#             raise ValueError(f"Unexpected role: {role} for message {msg}")
-#         messages.append(chat_msg)
-
-#     return messages
