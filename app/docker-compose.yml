@@ -37,7 +37,7 @@ services:
   # which queries Phoenix for prompt templates during startup.
   wait_for_phoenix:
     image: alpine:latest
-    entrypoint: "sleep 5"
+    entrypoint: /bin/sh -c "for i in $(seq 1 30); do nc -z phoenix 6006 && exit 0; sleep 1; done; echo 'Phoenix did not become ready in time.'; exit 1"
 
   app:
     build:
