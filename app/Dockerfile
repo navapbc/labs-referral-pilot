@@ -11,11 +11,6 @@ FROM python:3.12-slim AS base
 # https://python-poetry.org
 RUN pip install --no-cache-dir poetry==1.5
 
-# Temporary fix for 'Hash Sum mismatch' error many are seeing
-RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
-    echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
-    echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
-
 RUN apt-get update \
     # Install security updates
     # https://pythonspeed.com/articles/security-updates-in-docker/

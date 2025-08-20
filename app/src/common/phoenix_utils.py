@@ -27,13 +27,13 @@ formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s")
 logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
 
-def create_client() -> phoenix.client.Client:
+def _create_client() -> phoenix.client.Client:
     logger.info("Creating Phoenix client to %s", config.phoenix_base_url)
     return phoenix.client.Client(base_url=config.phoenix_base_url)
 
 
 def service_alive() -> bool:
-    client = create_client()
+    client = _create_client()
     try:
         projects = client.projects.list()
         logger.info("Phoenix service is alive: %s", projects)
@@ -45,15 +45,13 @@ def service_alive() -> bool:
     return False
 
 
-USE_PHOENIX_OTEL_REGISTER = True
-BATCH_OTEL = False
-
 _TRACER_CONFIGURED = False
 
 
 def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
+        logger.error("Phoenix service is not reachable, skipping configuration.")
         return
 
     global _TRACER_CONFIGURED
@@ -65,47 +63,18 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     trace_endpoint = f"{config.phoenix_base_url}/v1/traces"
     logger.info("Using Phoenix OTEL endpoint: %s", trace_endpoint)
 
-    # Both implementations produce the same traces
-    if USE_PHOENIX_OTEL_REGISTER:
-        # Using Phoenix docs: https://arize.com/docs/phoenix/tracing/integrations-tracing/haystack
-        logger.info("Using phoenix.otel.register")
-        # This uses PHOENIX_COLLECTOR_ENDPOINT and PHOENIX_PROJECT_NAME env variables
-        # and PHOENIX_API_KEY to handle authentication to Phoenix.
-        phoenix.otel.register(
-            endpoint=trace_endpoint,
-            batch=BATCH_OTEL,
-            # Auto-instrument based on installed OpenInference dependencies
-            auto_instrument=True,
-        )
-    else:
-        # Using Haystack docs: https://haystack.deepset.ai/integrations/arize-phoenix
-        # This is a more manual setup that uses HaystackInstrumentor
-        # Since this doesn't use PHOENIX_PROJECT_NAME, it logs to the 'default' Phoenix project
-        logger.info("Using HaystackInstrumentor")
-        tracer_provider = otel_sdk_trace.TracerProvider()
-        # Set the URL since PHOENIX_COLLECTOR_ENDPOINT is not used by HaystackInstrumentor
-        span_exporter = otel_trace_exporter.OTLPSpanExporter(trace_endpoint)
-        processor: otel_sdk_trace.export.SpanProcessor
-        if BATCH_OTEL:
-            processor = otel_sdk_trace.export.BatchSpanProcessor(span_exporter)
-        else:
-            # Send traces immediately
-            processor = otel_sdk_trace.export.SimpleSpanProcessor(span_exporter)
-        tracer_provider.add_span_processor(processor)
-        # PHOENIX_API_KEY env variable seems to be used by HaystackInstrumentor
-        HaystackInstrumentor().instrument(tracer_provider=tracer_provider)
+    # Using Phoenix docs: https://arize.com/docs/phoenix/tracing/integrations-tracing/haystack
+    logger.info("Using phoenix.otel.register")
+    # This uses PHOENIX_COLLECTOR_ENDPOINT and PHOENIX_PROJECT_NAME env variables
+    # and PHOENIX_API_KEY to handle authentication to Phoenix.
+    phoenix.otel.register(
+        endpoint=trace_endpoint,
+        batch=BATCH_OTEL,
+        # Auto-instrument based on installed OpenInference dependencies
+        auto_instrument=True,
+    )
 
     if opentelemetry.trace.get_tracer_provider() is None:
         raise RuntimeError("Failed to configure OpenTelemetry tracer provider")
 
     _TRACER_CONFIGURED = True
-
-
-def get_prompt_template(prompt_name: str) -> phoenix.client.types.prompts.PromptVersion:
-    # Get the template from Phoenix
-    client = create_client()
-    # Pull a prompt by name
-    prompt = client.prompts.get(prompt_identifier=prompt_name, tag="staging")
-    prompt_data = prompt._dumps()
-    logger.info("Retrieved prompt: %s", pformat(prompt_data))
-    return prompt
