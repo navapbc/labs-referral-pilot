@@ -40,7 +40,12 @@ def service_alive() -> bool:
         return True
     except httpx.HTTPStatusError as error:
         logger.info("Phoenix service is not alive: %s", error)
-    return False
+    except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException) as error:
+        logger.info("Phoenix service is not alive: %s", error)
+        return False
+    except Exception as error:
+        logger.error("Unexpected error when checking Phoenix service: %s", error)
+        return False
 
 
 USE_PHOENIX_OTEL_REGISTER = True
