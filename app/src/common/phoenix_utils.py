@@ -2,14 +2,17 @@ import logging
 from pprint import pformat
 
 import httpx
+
 # OpenTelemetry is a common standard for general observability
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
 import opentelemetry.sdk.trace as otel_sdk_trace
 import opentelemetry.trace
+
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
 import phoenix.client
 import phoenix.otel
+
 # Arize's OpenInference is a set of conventions that is complimentary to OpenTelemetry
 from openinference.instrumentation.haystack import HaystackInstrumentor
 
