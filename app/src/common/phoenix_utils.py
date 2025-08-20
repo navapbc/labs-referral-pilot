@@ -6,9 +6,6 @@ import logging
 
 import httpx
 
-# OpenTelemetry is a common standard for general observability
-import opentelemetry.trace
-
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
 import phoenix.client
@@ -39,18 +36,10 @@ def service_alive() -> bool:
     return False
 
 
-_TRACER_CONFIGURED = False
-
-
 def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
         logger.error("Phoenix service is not reachable, skipping configuration.")
-        return
-
-    global _TRACER_CONFIGURED
-    if _TRACER_CONFIGURED:
-        logger.info("Opentelemetry tracing already configured")
         return
 
     trace_endpoint = f"{config.phoenix_collector_endpoint}/v1/traces"
@@ -66,8 +55,3 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         # Auto-instrument based on installed OpenInference dependencies
         auto_instrument=True,
     )
-
-    if opentelemetry.trace.get_tracer_provider() is None:
-        raise RuntimeError("Failed to configure OpenTelemetry tracer provider")
-
-    _TRACER_CONFIGURED = True
