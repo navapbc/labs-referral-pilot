@@ -25,16 +25,7 @@ logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logg
 
 def create_client() -> phoenix.client.Client:
     logger.info("Creating Phoenix client to %s", config.phoenix_base_url)
-    if config.disable_ssl_verification:
-        # For other calls (i.e., in Haystack pipelines), something like no_ssl_verification()
-        # in haystack_rag.py is needed to disable SSL verification.
-        # For local development, we shouldn't enable SSL at all.
-        logger.warning("SSL verification is disabled for this call, but not other calls")
-        client = httpx.Client(base_url=config.phoenix_base_url, verify=False)
-    else:
-        client = None
-
-    return phoenix.client.Client(base_url=config.phoenix_base_url, http_client=client)
+    return phoenix.client.Client(base_url=config.phoenix_base_url)
 
 
 def service_alive() -> bool:

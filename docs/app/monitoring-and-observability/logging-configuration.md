@@ -33,7 +33,7 @@ We have two separate ways of formatting the logs which are controlled by the `LO
 
 ## Logging Extra Data in a Request
 
-The [src.logging.flask_logger](../../../app/src/logging/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
+The `../../../app/src/logging/flask_logger.py` module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
 
 ## PII Masking
 
