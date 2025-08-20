@@ -6,7 +6,6 @@ from typing import List
 
 from haystack import component
 from haystack.dataclasses.chat_message import ChatMessage
-from phoenix.client.__generated__ import v1
 
 logger = logging.getLogger(__name__)
 
