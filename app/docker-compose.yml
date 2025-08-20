@@ -12,6 +12,32 @@ services:
       - "5432:5432"
     volumes:
       - app-dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phoenix:
+    image: arizephoenix/phoenix:version-10.9.1-nonroot
+    depends_on:
+      - app-db
+    ports:
+      - "6006:6006" # UI and OTLP HTTP collector
+      # - "4317:4317" # OTLP gRPC collector
+    environment:
+      # https://arize.com/docs/phoenix/self-hosting/features/authentication
+      # - PHOENIX_ENABLE_AUTH=True
+      # - PHOENIX_SECRET=${PHOENIX_SECRET}
+      - PHOENIX_SQL_DATABASE_URL=postgresql://app:secret123@app-db:5432/postgres
+
+
+  # Since Phoenix doesn't have a status or healthcheck endpoint,
+  # sleep for a while before starting the backend service,
+  # which queries Phoenix for prompt templates during startup.
+  wait_for_phoenix:
+    image: alpine:latest
+    entrypoint: "sleep 5"
 
   app:
     build:
@@ -31,7 +57,10 @@ services:
       - path: ./override.env
         required: false
     depends_on:
-      - app-db
+      app-db:
+        condition: service_healthy
+      wait_for_phoenix:
+        condition: service_completed_successfully
 
 volumes:
   app-dbdata:
