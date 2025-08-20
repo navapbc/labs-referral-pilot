@@ -53,9 +53,6 @@ RUN poetry install --no-root --with dev
 
 COPY . /app
 
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
-ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
-
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
 # Set the host to 0.0.0.0 to make the server available external
@@ -81,9 +78,6 @@ VOLUME ["/tmp"]
 WORKDIR /app
 
 COPY . /app
-
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
-ENV HAYHOOKS_ADDITIONAL_PYTHON_PATH=/app/src
 
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 

@@ -28,8 +28,8 @@ logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logg
 
 
 def _create_client() -> phoenix.client.Client:
-    logger.info("Creating Phoenix client to %s", config.phoenix_base_url)
-    return phoenix.client.Client(base_url=config.phoenix_base_url)
+    logger.info("Creating Phoenix client to %s", config.phoenix_collector_endpoint)
+    return phoenix.client.Client(base_url=config.phoenix_collector_endpoint)
 
 
 def service_alive() -> bool:
@@ -59,12 +59,11 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         logger.info("Opentelemetry tracing already configured")
         return
 
-    # endpoint = config.phoenix_base_url
-    trace_endpoint = f"{config.phoenix_base_url}/v1/traces"
+    trace_endpoint = f"{config.phoenix_collector_endpoint}/v1/traces"
     logger.info("Using Phoenix OTEL endpoint: %s", trace_endpoint)
 
     # Using Phoenix docs: https://arize.com/docs/phoenix/tracing/integrations-tracing/haystack
-    logger.info("Using phoenix.otel.register")
+    logger.info("Using phoenix.otel.register with batch_otel=%s", config.batch_otel)
     # This uses PHOENIX_COLLECTOR_ENDPOINT and PHOENIX_PROJECT_NAME env variables
     # and PHOENIX_API_KEY to handle authentication to Phoenix.
     phoenix.otel.register(

@@ -6,7 +6,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
 
-from common import components, phoenix_utils
+from src.common import components
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,6 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "sample_pipeline"
 
     def setup(self) -> None:
-        phoenix_utils.configure_phoenix()
         self.pipeline = Pipeline()
         self.pipeline.add_component("echo_component", components.EchoNode())
 
