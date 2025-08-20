@@ -81,6 +81,9 @@ WORKDIR /app
 
 COPY . /app
 
+# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
+ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
+
 # Remove any existing virtual environments that might exist. This
 # might happen if testing out building the release image from a local machine
 # that has a virtual environment within the project app folder.
