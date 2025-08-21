@@ -1,18 +1,12 @@
 import logging
-from pprint import pformat
-
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
-from haystack.dataclasses.chat_message import ChatMessage
-
-from src.common import components
-
 logger = logging.getLogger(__name__)
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
-from common import components, phoenix_utils
+from src.common import components, phoenix_utils
 
 logger = logging.getLogger(__name__)
 
@@ -26,41 +20,21 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `{pipeline_name}/run` endpoint
     def run_api(self, question: str) -> dict:
-        results = self.pipeline.run(
-            {
-                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": []},
-            }
-        )
-        logger.info("Results: %s", pformat(results))
-        return results
 
-    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
-    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
-    def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
-        logger.info("Running chat completion with model: %s, messages: %s", model, messages)
-        question = hayhooks.get_last_user_message(messages)
-        logger.info("Question: %s", question)
-        return hayhooks.streaming_generator(
-            pipeline=self.pipeline,
-            pipeline_run_args={
-                "echo_component": {
-                    "prompt": [ChatMessage.from_user(question)],
-                    "history": messages[:-1],
-                }
-            },
-        )
-        generator = AmazonBedrockChatGenerator(model="amazon.nova-lite-v1:0")  # TODO MRH change
-        messages = [ChatMessage.from_system("Your role is to say hello to the name provided in the question"),
+        generator = AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0")
+        messages = [ChatMessage.from_system("Your role is to say hello to the name provided in the question, if no name is found politely inform the user that no name was provided"),
                     ChatMessage.from_user(question)]
 
         response = generator.run(messages)
+        """message_text = response['replies'][0]._content[0].text
+
         results = self.pipeline.run(
             {
-                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": [], "response": response},
+                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": [], "response": message_text},
             }
         )
-        logger.info("Results: %s", pformat(results))
-        return results
+        logger.info("Results: %s", pformat(results))"""
+        return response
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
