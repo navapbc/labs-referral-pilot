@@ -39,7 +39,11 @@ def service_alive() -> bool:
 def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
-        raise RuntimeError("Phoenix service is not reachable, cannot configure Phoenix.")
+        logger.error(
+            "Cannot configure Phoenix: service is not reachable at %s",
+            config.phoenix_collector_endpoint,
+        )
+        return
 
     trace_endpoint = f"{config.phoenix_collector_endpoint}/v1/traces"
     logger.info("Using Phoenix OTEL endpoint: %s", trace_endpoint)
