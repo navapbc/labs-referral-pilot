@@ -11,7 +11,7 @@ import httpx
 import phoenix.client
 import phoenix.otel
 
-from .app_config import config
+from src.app_config import config
 
 logger = logging.getLogger(__name__)
 
