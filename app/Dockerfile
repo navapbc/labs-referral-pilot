@@ -121,6 +121,10 @@ ENV PATH="/app/.venv/bin:$PATH"
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
+# Append intermediate certificate to .../site-packages/certifi/cacert.pem
+RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
+    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/aws_ca_root_cert >> $CERTIFI_CACERT_FILE
+
 USER ${RUN_USER}
 
 # Run the application.
