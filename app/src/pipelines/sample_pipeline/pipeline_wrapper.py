@@ -1,10 +1,12 @@
 import logging
+import os
 from pprint import pformat
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
+from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
 from common import components, phoenix_utils
 
@@ -21,9 +23,15 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `{pipeline_name}/run` endpoint
     def run_api(self, question: str) -> dict:
+
+        generator = AmazonBedrockChatGenerator(model="amazon.nova-lite-v1:0")  # TODO MRH change
+        messages = [ChatMessage.from_system("Your role is to say hello to the name provided in the question"),
+                    ChatMessage.from_user(question)]
+
+        response = generator.run(messages)
         results = self.pipeline.run(
             {
-                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": []},
+                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": [], "response": response},
             }
         )
         logger.info("Results: %s", pformat(results))
