@@ -48,7 +48,6 @@ services:
       args:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-app}
-        - INTERMEDIATE_CACERT=${INTERMEDIATE_CACERT:-Not using local.env; populate .env}
     ports:
       # For Hayhooks
       - "3000:3000"

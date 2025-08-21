@@ -17,6 +17,7 @@ coverage.*
 .venv
 
 # Environment variables
+.env
 .envrc
 override.env
 
