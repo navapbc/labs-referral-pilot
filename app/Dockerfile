@@ -16,14 +16,14 @@ RUN apt-get update \
     # https://pythonspeed.com/articles/security-updates-in-docker/
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
-    build-essential \
-    libpq-dev \
-    postgresql \
-    wget \
+    # build-essential \
+    # libpq-dev \
+    # postgresql \
+    # wget \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && rm -fr /var/lib/apt/lists/* \
-    && rm /etc/ssl/private/ssl-cert-snakeoil.key
+    && rm -rf /var/lib/apt/lists \
+    && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
 
 ARG RUN_UID
 ARG RUN_USER
@@ -53,7 +53,6 @@ RUN poetry install --no-root --with dev
 
 COPY . /app
 
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
 # Set the host to 0.0.0.0 to make the server available external
@@ -61,7 +60,7 @@ ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 ENV HOST=0.0.0.0
 
 # Run the application.
-CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:3000"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--workers", "1", "src.app:hayhooks_app", "-b 0.0.0.0:3000"]
 
 
 #---------
@@ -76,12 +75,10 @@ ARG RUN_USER
 RUN mkdir -p /tmp
 VOLUME ["/tmp"]
 
-
 WORKDIR /app
 
 COPY . /app
 
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
 # Remove any existing virtual environments that might exist. This
