@@ -27,6 +27,7 @@ openai = "^1.99.8"
 openinference-instrumentation-haystack = "^0.1.24"
 arize-phoenix-client = "^1.15.3"
 arize-phoenix-otel = "^0.13.0"
+amazon-bedrock-haystack = "^3.10.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
