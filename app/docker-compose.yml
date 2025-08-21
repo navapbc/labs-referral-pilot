@@ -46,9 +46,6 @@ services:
         required: true
       - path: ./override.env
         required: false
-    environment:
-      # Set API keys for LLM clients from .env file
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       app-db:
         condition: service_healthy

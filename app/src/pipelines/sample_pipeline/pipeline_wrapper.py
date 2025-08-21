@@ -1,4 +1,6 @@
 import logging
+from pprint import pformat
+
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
@@ -26,14 +28,13 @@ class PipelineWrapper(BasePipelineWrapper):
                     ChatMessage.from_user(question)]
 
         response = generator.run(messages)
-        """message_text = response['replies'][0]._content[0].text
 
         results = self.pipeline.run(
             {
-                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": [], "response": message_text},
+                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": []},
             }
         )
-        logger.info("Results: %s", pformat(results))"""
+        logger.info("Results: %s", pformat(response))
         return response
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility

@@ -53,7 +53,6 @@ RUN poetry install --no-root --with dev
 
 COPY . /app
 
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
 # Set the host to 0.0.0.0 to make the server available external
@@ -80,7 +79,6 @@ WORKDIR /app
 
 COPY . /app
 
-# https://github.com/deepset-ai/hayhooks/tree/main/examples/shared_code_between_wrappers
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
 # Remove any existing virtual environments that might exist. This
