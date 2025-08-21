@@ -42,16 +42,6 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
 
 FROM base AS dev
 
-# Do this as root so cacert.pem can be modified
-# Using the `truststore` library worked outside of Docker, but did not work inside a Docker container
-# so the current solution is to add the intermediate CA cert to the CA cert file.
-# https://stackoverflow.com/questions/27068163/python-requests-not-handling-missing-intermediate-certificate-only-from-one-mach
-ARG INTERMEDIATE_CACERT
-ENV INTERMEDIATE_CACERT=${INTERMEDIATE_CACERT:-"not set"}
-# Append intermediate certificate to /opt/venv/lib/python3.12/site-packages/certifi/cacert.pem
-# RUN CERTIFI_CACERT_FILE=$(python -c "import certifi; print(certifi.where())") \
-#     && [ -f "$CERTIFI_CACERT_FILE" ] && echo "$INTERMEDIATE_CACERT" >> $CERTIFI_CACERT_FILE
-
 ARG RUN_USER
 USER ${RUN_USER}
 WORKDIR /app
@@ -63,6 +53,16 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 RUN poetry install --no-root --with dev
 
 COPY . /app
+
+# Do this as root so cacert.pem can be modified
+# Using the `truststore` library worked outside of Docker, but did not work inside a Docker container
+# so the current solution is to add the intermediate CA cert to the CA cert file.
+# https://stackoverflow.com/questions/27068163/python-requests-not-handling-missing-intermediate-certificate-only-from-one-mach
+ARG INTERMEDIATE_CACERT
+ENV INTERMEDIATE_CACERT=${INTERMEDIATE_CACERT:-"INTERMEDIATE_CACERT is not set"}
+# Append intermediate certificate to .../site-packages/certifi/cacert.pem
+RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
+    && [ -f "$CERTIFI_CACERT_FILE" ] && echo "$INTERMEDIATE_CACERT" >> $CERTIFI_CACERT_FILE
 
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 

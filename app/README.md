@@ -57,7 +57,7 @@ cat server.crt rootCA.crt > server-fullchain.crt
 
 3. Restart Phoenix
 
-4. Update Phoenix client (i.e., Haystack backend) -- refer to `.local.env`
+4. Update Phoenix client (i.e., Haystack backend) -- refer to `.env` and `local.env`
    * Set `PHOENIX_COLLECTOR_ENDPOINT` to the secured Phoenix instance (i.e., `https` prefix)
    * (For Lightsail instance of Phoenix)
 Ensure `INTERMEDIATE_CACERT` is set to the Amazon intermediate certificate.

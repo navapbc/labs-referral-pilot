@@ -13,7 +13,6 @@
 .vscode
 
 # Ignore local environment variables which can contain environment secrets
-.env
 .envrc
 
 # Python testing stuff
