@@ -14,12 +14,12 @@ import phoenix.otel
 from .app_config import config
 
 logger = logging.getLogger(__name__)
-formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s")
-logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
 
 def _create_client() -> phoenix.client.Client:
     logger.info("Creating Phoenix client to %s", config.phoenix_collector_endpoint)
+    # If base_url is None, then phoenix.client.Client defaults to PHOENIX_COLLECTOR_ENDPOINT
+    # env variable value or "http://localhost:6006"
     return phoenix.client.Client(base_url=config.phoenix_collector_endpoint)
 
 
@@ -39,8 +39,7 @@ def service_alive() -> bool:
 def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
-        logger.error("Phoenix service is not reachable, skipping configuration.")
-        return
+        raise RuntimeError("Phoenix service is not reachable, cannot configure Phoenix.")
 
     trace_endpoint = f"{config.phoenix_collector_endpoint}/v1/traces"
     logger.info("Using Phoenix OTEL endpoint: %s", trace_endpoint)

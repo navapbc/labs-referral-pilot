@@ -1,8 +1,11 @@
+import logging
 from typing import Dict
 
 from hayhooks import create_app
 
 from src.common import phoenix_utils
+
+logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
 phoenix_utils.configure_phoenix()
 
