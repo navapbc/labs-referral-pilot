@@ -7,6 +7,8 @@ locals {
     HAYHOOKS_SHOW_TRACEBACKS = "true"
     # Don't send telemetry to Haystack
     HAYSTACK_TELEMETRY_ENABLED = "False"
+    # Where Haystack will connect to Phoenix
+    PHOENIX_COLLECTOR_ENDPOINT = "https://phoenix.referral-pilot-${var.environment}.navateam.com:6006"
     # Example environment variables
     # WORKER_THREADS_COUNT    = 4
     # LOG_LEVEL               = "info"

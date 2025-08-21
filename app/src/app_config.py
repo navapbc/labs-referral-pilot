@@ -9,5 +9,8 @@ class AppConfig(PydanticBaseEnvConfig):
     host: str = "127.0.0.1"
     port: int = 3000
 
+    phoenix_collector_endpoint: str = "https://phoenix:6006"
+    batch_otel: bool = True
+
 
 config = AppConfig()

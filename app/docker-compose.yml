@@ -26,18 +26,8 @@ services:
       - "6006:6006" # UI and OTLP HTTP collector
       # - "4317:4317" # OTLP gRPC collector
     environment:
-      # https://arize.com/docs/phoenix/self-hosting/features/authentication
-      # - PHOENIX_ENABLE_AUTH=True
-      # - PHOENIX_SECRET=${PHOENIX_SECRET}
       - PHOENIX_SQL_DATABASE_URL=postgresql://app:secret123@app-db:5432/postgres
 
-
-  # Since Phoenix doesn't have a status or healthcheck endpoint,
-  # sleep for a while before starting the backend service,
-  # which queries Phoenix for prompt templates during startup.
-  wait_for_phoenix:
-    image: alpine:latest
-    entrypoint: /bin/sh -c "for i in $(seq 1 30); do nc -z phoenix 6006 && exit 0; sleep 1; done; echo 'Phoenix did not become ready in time.'; exit 1"
 
   app:
     build:
@@ -62,8 +52,6 @@ services:
     depends_on:
       app-db:
         condition: service_healthy
-      # wait_for_phoenix:
-      #   condition: service_completed_successfully
 
 volumes:
   app-dbdata:
