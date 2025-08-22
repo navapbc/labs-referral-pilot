@@ -13,7 +13,6 @@ Based on [this documentation](https://arize.com/docs/phoenix/release-notes/04.20
       - Copy `certs` folder to Lightsail instance: `scp -i $SSH_KEY_PEM_FILE -r certs ec2-user@${STATIC_IP}`
    * (For local dev environment) Create self-signed certificate for Phoenix instance
 ```sh
-# Starting at the project root folder
 # This 'certs' folder will be mounted as a volume in the phoenix Docker container
 mkdir certs && cd certs
 # Generate root CA's private key
