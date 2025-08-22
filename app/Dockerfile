@@ -41,6 +41,7 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
 #-----------
 
 FROM base AS dev
+
 ARG RUN_USER
 USER ${RUN_USER}
 WORKDIR /app
@@ -52,6 +53,13 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 RUN poetry install --no-root --with dev
 
 COPY . /app
+
+# Using the `truststore` library worked outside of Docker, but did not work inside a Docker container
+# so the current solution is to add the intermediate CA cert to the CA cert file.
+# https://stackoverflow.com/questions/27068163/python-requests-not-handling-missing-intermediate-certificate-only-from-one-mach
+# Append certificate to .../site-packages/certifi/cacert.pem
+RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
+    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/aws_ca_intermediate_cert certs/local_dev_only_selfsigned_ca_root_cert >> $CERTIFI_CACERT_FILE
 
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
@@ -109,6 +117,10 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
+
+# Append certificate to .../site-packages/certifi/cacert.pem
+RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
+    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/aws_ca_intermediate_cert >> $CERTIFI_CACERT_FILE
 
 USER ${RUN_USER}
 
