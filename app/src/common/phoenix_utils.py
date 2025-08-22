@@ -30,7 +30,7 @@ def service_alive() -> bool:
         logger.info("Phoenix service is alive: %s", projects)
         return True
     except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException) as error:
-        logger.info("Phoenix service is not alive: %s", error)
+        logger.error("Error connecting to Phoenix service: %s", error)
     except Exception as error:
         logger.error("Unexpected error when checking Phoenix service: %s", error)
     return False
@@ -40,7 +40,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
         logger.error(
-            "Cannot configure Phoenix: service is not reachable at %s",
+            "Cannot configure Phoenix service at %s",
             config.phoenix_collector_endpoint,
         )
         return
