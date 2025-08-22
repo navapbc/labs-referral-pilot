@@ -61,7 +61,7 @@ cat server.crt rootCA.crt > server-fullchain.crt
    * (For Lightsail instance of Phoenix) Add Amazon's intermediate CA certificate by ensuring `certs/aws_ca_intermediate_cert` is set to the Amazon intermediate CA certificate.
      (Export the "Amazon RSA 2048 M04" intermediate certificate using a browser pointed at
   the Phoenix instance.)
-   * (For local dev environment) Add self-signed root CA certificate as a trusted CA  by ensuring `certs/selfsigned_ca_root_cert` is set to the self-signed root CA certificate.
+   * (For local dev environment) Add self-signed root CA certificate as a trusted CA  by ensuring `certs/local_dev_only_selfsigned_ca_root_cert` is set to the self-signed root CA certificate.
      (Use the contents of `rootCA.crt` created in step 1 above.)
 
 5. Restart Phoenix client
