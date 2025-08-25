@@ -21,6 +21,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists \
     && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
 
+RUN pip install --upgrade urllib3
+
 ARG RUN_UID
 ARG RUN_USER
 
