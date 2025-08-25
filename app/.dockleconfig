@@ -5,3 +5,6 @@
 
 # Hayhooks has an out of the box example and it uses a settings file, we don't need or use it but need to ignore it
 DOCKLE_ACCEPT_FILES=app/.venv/lib/python3.12/site-packages/hayhooks/settings.py,app/.venv/lib/python3.12/site-packages/phoenix/otel/settings.py
+
+# python:3.12-slim doesn't clear package caches after apt-get install; we do so in our own Dockerfile
+DOCKLE_IGNORES=DKL-DI-0005
