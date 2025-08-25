@@ -22,7 +22,7 @@ RUN apt-get update \
     # wget \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists \
     && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
 
 ARG RUN_UID
