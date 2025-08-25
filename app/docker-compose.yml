@@ -38,6 +38,10 @@ services:
       - PHOENIX_TLS_KEY_FILE_PASSWORD=
       # For verifying client certificates
       - PHOENIX_TLS_VERIFY_CLIENT=False
+
+      # See README.md to enable authentication locally
+      # - PHOENIX_ENABLE_AUTH=True
+      # - PHOENIX_SECRET=ThisSecretIsForLocalDevOnly202508251033
     volumes:
       - ./certs:/certs
 
