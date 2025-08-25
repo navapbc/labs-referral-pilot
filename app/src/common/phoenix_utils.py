@@ -1,7 +1,3 @@
-"""
-'make format-check' fails this file even after 'make format'
-isort:skip_file
-"""
 import logging
 
 import httpx
