@@ -66,3 +66,18 @@ cat server.crt rootCA.crt > server-fullchain.crt
      (Use the contents of `rootCA.crt` created in step 1 above.)
 
 5. Restart Phoenix client
+
+
+### Enabling authentication in Phoenix
+
+Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/authentication), set `PHOENIX_SECRET` in `docker-compose.yaml` as follows.
+* Add these environment variables to the `phoenix` service:
+```
+      - PHOENIX_ENABLE_AUTH=True
+      - PHOENIX_SECRET=SomeLongSecretThatIsUsedToSignJWTsForTheDeployment
+```
+* Restart and log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
+* Add PHOENIX_API_KEY environment variable in `override.env` for the Haystack service to authenticate to Phoenix:
+```
+      - PHOENIX_API_KEY=<paste API key>
+```
