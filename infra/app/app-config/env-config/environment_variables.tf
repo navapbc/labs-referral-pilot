@@ -27,8 +27,10 @@ locals {
   #   }
   # }
   secrets = {
-    PHOENIX_API_KEY = "manual"
-    secret_store_name = "/${var.app_name}-${var.environment}/phoenix-api-key"
+    PHOENIX_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}-${var.environment}/phoenix-api-key"
+    }
 
     # Example generated secret
     # RANDOM_SECRET = {
