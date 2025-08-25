@@ -59,7 +59,7 @@ COPY . /app
 # https://stackoverflow.com/questions/27068163/python-requests-not-handling-missing-intermediate-certificate-only-from-one-mach
 # Append certificate to .../site-packages/certifi/cacert.pem
 RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
-    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/aws_ca_intermediate_cert certs/local_dev_only_selfsigned_ca_root_cert >> $CERTIFI_CACERT_FILE
+    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/local_dev_only_selfsigned_ca_root_cert >> $CERTIFI_CACERT_FILE
 
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
@@ -117,10 +117,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
-
-# Append certificate to .../site-packages/certifi/cacert.pem
-RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
-    && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/aws_ca_intermediate_cert >> $CERTIFI_CACERT_FILE
 
 USER ${RUN_USER}
 

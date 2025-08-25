@@ -10,6 +10,7 @@ Based on [this documentation](https://arize.com/docs/phoenix/release-notes/04.20
       - Request certificate in ACM
       - Created CNAME record based on request result for ACM to validate request
       - Upon ACM validation, exported certificate from ACM; download and move to a `certs` folder
+      - Append the contents of `certificate_chain.txt` to the end of `certificate.pem`
       - Copy `certs` folder to Lightsail instance: `scp -i $SSH_KEY_PEM_FILE -r certs ec2-user@${STATIC_IP}`
    * (For local dev environment) Create self-signed certificate for Phoenix instance
 ```sh
