@@ -16,14 +16,14 @@ RUN apt-get update \
     # https://pythonspeed.com/articles/security-updates-in-docker/
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
-    # build-essential \
-    # libpq-dev \
-    # postgresql \
-    # wget \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -rf /var/lib/apt/lists \
     && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
+
+# The system version of this library in python:3.12-slim contains
+# a vulnerability, so upgrade it
+RUN pip install --no-cache-dir --upgrade urllib3==2.5.0
 
 ARG RUN_UID
 ARG RUN_USER
