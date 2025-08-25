@@ -76,8 +76,8 @@ Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/au
       - PHOENIX_ENABLE_AUTH=True
       - PHOENIX_SECRET=SomeLongSecretThatIsUsedToSignJWTsForTheDeployment
 ```
-* Log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
-* Add PHOENIX_API_KEY environment variable in `local.env` for the haystack service:
+* Restart and log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
+* Add PHOENIX_API_KEY environment variable in `override.env` for the Haystack service to authenticate to Phoenix:
 ```
       - PHOENIX_API_KEY=<paste API key>
 ```
