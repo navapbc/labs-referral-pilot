@@ -4,13 +4,21 @@ from pprint import pformat
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
-logger = logging.getLogger(__name__)
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
-from src.common import components, phoenix_utils
+from src.common import components
 
 logger = logging.getLogger(__name__)
+
+
+system_prompt = (
+    "Your role is to say hello to the name provided by the user, if no name is found politely inform the "
+    "user. Also respond by telling them you are an AI chatbot and tell them which model you are running. "
+    "Assure them any PII is haandled securely in AWS Bedrock. You should only greet the user, do not repond "
+    "to any questions or prompts."
+)
+model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -20,18 +28,19 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = Pipeline()
         self.pipeline.add_component("echo_component", components.EchoNode())
 
-    # Called for the `{pipeline_name}/run` endpoint
-    def run_api(self, question: str) -> dict:
-
-        generator = AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0")
-        messages = [ChatMessage.from_system("Your role is to say hello to the name provided in the question, if no name is found politely inform the user that no name was provided"),
-                    ChatMessage.from_user(question)]
+    # Called for the `sample_pipeline/run` endpoint
+    def run_api(self, name: str) -> dict:
+        generator = AmazonBedrockChatGenerator(model=model)
+        messages = [
+            ChatMessage.from_system(system_prompt),
+            ChatMessage.from_user(name),
+        ]
 
         response = generator.run(messages)
 
-        results = self.pipeline.run(
+        self.pipeline.run(
             {
-                "echo_component": {"prompt": [ChatMessage.from_user(question)], "history": []},
+                "echo_component": {"prompt": [ChatMessage.from_user(name)], "history": []},
             }
         )
         logger.info("Results: %s", pformat(response))
