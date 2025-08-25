@@ -4,7 +4,7 @@
 # The build stage that will be used to deploy to the various environments
 # needs to be called `release` in order to integrate with the repo's
 # top-level Makefile
-FROM python:3.12-slim AS base
+FROM python:3.13-slim AS base
 # See docs for details on upgrading your Python version
 
 # Install poetry, the package manager.
@@ -18,8 +18,7 @@ RUN apt-get update \
     && apt-get install --no-install-recommends --yes \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists \
     && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
 
 ARG RUN_UID
