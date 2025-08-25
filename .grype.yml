@@ -18,3 +18,8 @@ ignore:
   - fix-state: unknown
   # https://github.com/anchore/grype/issues/1172
   - vulnerability: GHSA-xqr8-7jwr-rhp7
+  # These have been backported to Python 3.12.11, but not yet
+  # updated in the grype database
+  # See: https://security.snyk.io/package/linux/chainguard:latest/python-3.12
+  - vulnerability: CVE-2025-8194 
+  - vulnerability: CVE-2025-6069
