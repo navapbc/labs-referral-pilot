@@ -21,7 +21,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists \
     && rm -f /etc/ssl/private/ssl-cert-snakeoil.key
 
-RUN pip install --upgrade urllib3
+# The system version of this library in python:3.12-slim contains
+# a vulnerability, so upgrade it
+RUN pip install --no-cache-dir --upgrade urllib3==2.5.0
 
 ARG RUN_UID
 ARG RUN_USER
