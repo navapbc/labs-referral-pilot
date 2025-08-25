@@ -27,9 +27,9 @@ openai = "^1.99.8"
 openinference-instrumentation-haystack = "^0.1.24"
 arize-phoenix-client = "^1.15.3"
 arize-phoenix-otel = "^0.13.0"
-certifi = "^2025.8.3"
 
 [tool.poetry.group.dev.dependencies]
+certifi = "^2025.8.3"
 black = "^23.9.1"
 isort = "^5.12.0"
 mypy = "^1.5.1"
@@ -60,9 +60,7 @@ db-migrate-down-all = "src.db.migrations.run:downall"
 line-length = 100
 
 [tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
+profile = "black"
 use_parentheses = true
 line_length = 100
 
