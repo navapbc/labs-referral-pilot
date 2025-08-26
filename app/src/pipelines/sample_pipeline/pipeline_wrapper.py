@@ -11,7 +11,7 @@ from src.common import components
 logger = logging.getLogger(__name__)
 
 
-system_prompt = "This is a sample pipeline, it echoes back the system and user messages provided"
+system_msg = "This is a sample pipeline, it echoes back the system and user messages provided"
 
 
 class PipelineWrapper(BasePipelineWrapper):
