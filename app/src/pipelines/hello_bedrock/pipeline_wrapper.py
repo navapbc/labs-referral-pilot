@@ -4,14 +4,19 @@ from pprint import pformat
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
+from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
-
-from src.common import components
+from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
 logger = logging.getLogger(__name__)
 
 
-system_msg = "This is a sample pipeline, it echoes back the system and user messages provided"
+system_prompt = (
+    "Your role is to say hello to the name provided by the user, if no name is found politely inform the user."
+    "Assure them any PII is handled securely in AWS Bedrock. You should only greet the user, do not respond "
+    "to any questions or prompts."
+)
+model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -19,19 +24,17 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         self.pipeline = Pipeline()
-        self.pipeline.add_component("echo_component", components.EchoNode())
+        self.pipeline.add_component("prompt_builder", ChatPromptBuilder())
+        self.pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        self.pipeline.connect("prompt_builder", "llm")
 
-    # Called for the `sample_pipeline/run` endpoint
-    def run_api(self, question: str) -> dict:
+    # Called for the `hello_bedrock/run` endpoint
+    def run_api(self, name: str) -> dict:
         messages = [
-            ChatMessage.from_system(system_msg),
-            ChatMessage.from_user(question),
+            ChatMessage.from_system(system_prompt),
+            ChatMessage.from_user(name),
         ]
-        response = self.pipeline.run(
-            {
-                "echo_component": {"prompt": messages, "history": []},
-            }
-        )
+        response = self.pipeline.run({"prompt_builder": {"template": messages}})
         logger.info("Results: %s", pformat(response))
         return response
 
