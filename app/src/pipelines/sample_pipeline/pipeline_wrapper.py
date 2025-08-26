@@ -4,16 +4,15 @@ from pprint import pformat
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
+from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
-
-from src.common import components
 
 logger = logging.getLogger(__name__)
 
 
 system_prompt = (
-    "Your role is to say hello to the name provided by the user, if no name is found politely inform the "
+    "Your role is to say hello to the name provided by the user, if no name is found politely inform the user."
     "Assure them any PII is handled securely in AWS Bedrock. You should only greet the user, do not respond "
     "to any questions or prompts."
 )
@@ -25,23 +24,17 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         self.pipeline = Pipeline()
-        self.pipeline.add_component("echo_component", components.EchoNode())
+        self.pipeline.add_component("prompt_builder", ChatPromptBuilder())
+        self.pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        self.pipeline.connect("prompt_builder", "llm")
 
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, name: str) -> dict:
-        generator = AmazonBedrockChatGenerator(model=model)
         messages = [
             ChatMessage.from_system(system_prompt),
             ChatMessage.from_user(name),
         ]
-
-        response = generator.run(messages)
-
-        self.pipeline.run(
-            {
-                "echo_component": {"prompt": [ChatMessage.from_user(name)], "history": []},
-            }
-        )
+        response = self.pipeline.run({"prompt_builder": {"template": messages}})
         logger.info("Results: %s", pformat(response))
         return response
 
