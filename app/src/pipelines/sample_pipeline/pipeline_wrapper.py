@@ -24,7 +24,7 @@ class PipelineWrapper(BasePipelineWrapper):
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
         messages = [
-            ChatMessage.from_system(system_prompt),
+            ChatMessage.from_system(system_msg),
             ChatMessage.from_user(question),
         ]
         response = self.pipeline.run(
