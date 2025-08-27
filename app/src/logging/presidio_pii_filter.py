@@ -75,7 +75,9 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
 
         try:
             # Analyze the text for PII
-            fields_for_redaction: list[recognizer_result.RecognizerResult] = self._analyzer.analyze(text=value, entities=self._entities, language="en")
+            fields_for_redaction: list[recognizer_result.RecognizerResult] = self._analyzer.analyze(
+                text=value, entities=self._entities, language="en"
+            )
 
             # Converting analyzer recognizer result into the anonymizer entity
             # https://github.com/microsoft/presidio/issues/1396
@@ -92,7 +94,9 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
             # If PII is found, anonymize it
             if anonymizer_redaction_list:
                 anonymized_text = self._anonymizer.anonymize(
-                    text=value, analyzer_results=anonymizer_redaction_list, operators=self._operators
+                    text=value,
+                    analyzer_results=anonymizer_redaction_list,
+                    operators=self._operators,
                 )
                 return anonymized_text.text
 
