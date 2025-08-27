@@ -48,7 +48,7 @@ pytest = "^7.4.2"
 pytest-watch = "^4.2.0"
 pytest-lazy-fixture = "^0.6.3"
 types-pyyaml = "^6.0.12.11"
-setuptools = "^70.0.0"
+setuptools = "^78.1.1"
 debugpy = "^1.8.1"
 ruff = "^0.4.9"
 
