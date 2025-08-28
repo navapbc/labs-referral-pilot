@@ -1,4 +1,5 @@
 import logging
+import os
 
 import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
@@ -59,7 +60,10 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     )
 
     if config.redact_pii:
-        span_exporter = otel_trace_exporter.OTLPSpanExporter(trace_endpoint)
+        phoenix_api_key = os.environ.get("PHOENIX_API_KEY")
+        span_exporter = otel_trace_exporter.OTLPSpanExporter(
+            endpoint=trace_endpoint, headers={"Authorization": f"Bearer {phoenix_api_key}"}
+        )
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)
         # Add the pii processor to the otel instance
