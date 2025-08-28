@@ -1,9 +1,7 @@
 import logging
-import os
 
 import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
-import opentelemetry.sdk.trace as otel_sdk_trace
 
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
@@ -14,8 +12,6 @@ from src.app_config import config
 from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
 
 logger = logging.getLogger(__name__)
-
-redact_pii = os.environ.get("REDACT_PII", "true").lower() == "true"
 
 
 def _create_client() -> phoenix.client.Client:
@@ -61,9 +57,8 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         auto_instrument=True,
     )
 
-    if redact_pii:
+    if config.redact_pii:
         span_exporter = otel_trace_exporter.OTLPSpanExporter(trace_endpoint)
-        tracer_provider.add_span_processor(otel_sdk_trace.export.BatchSpanProcessor(span_exporter))
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)
         tracer_provider.add_span_processor(pii_processor)
