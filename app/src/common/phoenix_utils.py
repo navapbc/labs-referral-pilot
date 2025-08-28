@@ -63,7 +63,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
 
     if redact_pii:
         span_exporter = otel_trace_exporter.OTLPSpanExporter(trace_endpoint)
-        otel_sdk_trace.export.BatchSpanProcessor(span_exporter)
+        tracer_provider.add_span_processor(otel_sdk_trace.export.BatchSpanProcessor(span_exporter))
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)
         tracer_provider.add_span_processor(pii_processor)

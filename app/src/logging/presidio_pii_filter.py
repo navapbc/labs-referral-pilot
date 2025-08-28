@@ -205,6 +205,7 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
         """Shuts down the processor and exporter."""
         self._exporter.shutdown()
 
-    def force_flush(self, timeout_millis: int = 30000):  # type: ignore[no-untyped-def]
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
         """Forces flush of pending spans."""
         self._exporter.force_flush(timeout_millis)
+        return True
