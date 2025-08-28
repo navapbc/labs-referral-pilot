@@ -218,3 +218,12 @@ sleep-5:
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+
+##################################################
+# Application scripts
+##################################################
+
+# Usage: make add-support-listing NAME="SupportName" FILE="path/to/file"
+add-support-listing:
+	$(PY_RUN_CMD) python -m src.ingestion.add_support_listing "$(NAME)" "$(FILE)"

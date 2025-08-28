@@ -29,6 +29,7 @@ arize-phoenix-client = "^1.15.3"
 arize-phoenix-otel = "^0.13.0"
 amazon-bedrock-haystack = "^3.10.0"
 certifi = "^2025.8.3"
+pypdf = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2025.8.3"
