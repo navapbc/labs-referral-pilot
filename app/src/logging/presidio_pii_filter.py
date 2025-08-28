@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, Dict, List, Optional
 
 from opentelemetry.sdk.trace import Event, ReadableSpan, Span, SpanProcessor
@@ -7,6 +8,8 @@ from presidio_analyzer import AnalyzerEngine, recognizer_result
 from presidio_analyzer.nlp_engine import NlpEngineProvider
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig, RecognizerResult
+
+logger = logging.getLogger(__name__)
 
 
 class PresidioRedactionSpanProcessor(SpanProcessor):
@@ -102,7 +105,7 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
 
             return value
         except Exception as e:
-            print(f"Error redacting string: {str(e)}")
+            logger.error(f"Error redacting string: {str(e)}")
             return "[REDACTION_ERROR]"
 
     def _redact_value(self, value: Any) -> Any:
@@ -145,7 +148,7 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
                 redacted_attributes[key] = redacted_value
             except Exception as e:
                 redacted_attributes[key] = "[REDACTION_ERROR]"
-                print(f"Error redacting attribute {key}: {str(e)}")
+                logger.error(f"Error redacting attribute {key}: {str(e)}")
 
         return redacted_attributes
 
