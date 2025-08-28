@@ -1091,6 +1091,21 @@ dnspython = ">=2.0.0"
 idna = ">=2.0.0"
 
 [[package]]
+name = "en_core_web_lg"
+version = "3.8.0"
+description = "English pipeline optimized for CPU. Components: tok2vec, tagger, parser, senter, ner, attribute_ruler, lemmatizer."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "en_core_web_lg-3.8.0-py3-none-any.whl", hash = "sha256:293e9547a655b25499198ab15a525b05b9407a75f10255e405e8c3854329ab63"},
+]
+
+[package.source]
+type = "url"
+url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"
+
+[[package]]
 name = "factory-boy"
 version = "3.3.3"
 description = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
@@ -5566,4 +5581,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12"
-content-hash = "d6338684c74a4f82c0af04ba7a6f67791776936efd43246725edc534aaf08cb8"
+content-hash = "738af84ee76cbf650a9e53350a4e7e6df3214bdad101dc31bd284a324d67e400"

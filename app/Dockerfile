@@ -61,8 +61,6 @@ COPY . /app
 RUN CERTIFI_CACERT_FILE=$(poetry run python -c "import certifi; print(certifi.where())") \
     && [ -f "$CERTIFI_CACERT_FILE" ] && cat certs/local_dev_only_selfsigned_ca_root_cert >> $CERTIFI_CACERT_FILE
 
-# MS Presidio depends upon
-RUN poetry install "en-core-web-lg @https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"
 
 ENV HAYHOOKS_PIPELINES_DIR=/app/src/pipelines
 
@@ -102,9 +100,6 @@ RUN rm -fr /app/.venv
 # See https://python-poetry.org/docs/configuration/#virtualenvsin-project
 # See https://python-poetry.org/docs/configuration/#using-environment-variables
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-
-# MS Presidio depends upon
-RUN poetry install "en-core-web-lg @https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"
 
 
 # Install production runtime dependencies only
