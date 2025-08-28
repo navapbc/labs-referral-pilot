@@ -39,7 +39,7 @@ services:
       # For verifying client certificates
       - PHOENIX_TLS_VERIFY_CLIENT=False
       # In case we want to disable PII Redaction
-      - REDACT_PII=True
+      - REDACT_PII=${REDACT_PII}
 
       # See README.md to enable authentication locally
       # - PHOENIX_ENABLE_AUTH=True

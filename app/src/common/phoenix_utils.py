@@ -7,6 +7,7 @@ import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_expor
 # Arize's Phoenix observability platform
 import phoenix.client
 import phoenix.otel
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from src.app_config import config
 from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
@@ -61,4 +62,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         span_exporter = otel_trace_exporter.OTLPSpanExporter(trace_endpoint)
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)
+        # Add the pii processor to the otel instance
+        if config.batch_otel:
+            tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
         tracer_provider.add_span_processor(pii_processor)
