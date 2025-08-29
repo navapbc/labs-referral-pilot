@@ -29,6 +29,10 @@ arize-phoenix-client = "^1.15.3"
 arize-phoenix-otel = "^0.13.0"
 amazon-bedrock-haystack = "^3.10.0"
 certifi = "^2025.8.3"
+presidio-analyzer = "^2.2.359"
+presidio-anonymizer = "^2.2.359"
+spacy = "^3.8.7"
+en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"}
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2025.8.3"
@@ -45,7 +49,7 @@ pytest = "^7.4.2"
 pytest-watch = "^4.2.0"
 pytest-lazy-fixture = "^0.6.3"
 types-pyyaml = "^6.0.12.11"
-setuptools = "^70.0.0"
+setuptools = "^78.1.1"
 debugpy = "^1.8.1"
 ruff = "^0.4.9"
 
