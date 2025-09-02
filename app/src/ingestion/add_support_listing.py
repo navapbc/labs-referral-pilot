@@ -1,30 +1,28 @@
 "Add SupportListing and associated Support records to the DB"
+
 import argparse
-import sys
-from pprint import pprint
+import json
+import os
 import pdb
+import sys
+from pathlib import Path
+from pprint import pprint
+
+# from typing import Any, Dict
+from haystack import Pipeline
 
 # from haystack.components.converters import PDFToTextConverter
 # from haystack.components.generators import OpenAIChatGenerator
-from haystack.components.builders import PromptBuilder
-from haystack import Pipeline
-# from haystack.dataclasses import Document
-
-import json
-import os
-from typing import Any, Dict
-
-from haystack import Pipeline
-from haystack.dataclasses import ByteStream, Document
-from haystack.components.converters import PyPDFToDocument, MultiFileConverter
+from haystack.components.builders import ChatPromptBuilder, PromptBuilder
+from haystack.components.converters import PyPDFToDocument
 from haystack.components.preprocessors import DocumentSplitter
-from haystack.components.builders import PromptBuilder
-from haystack.components.builders import ChatPromptBuilder
-from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from haystack.dataclasses import Document
 from haystack.dataclasses.chat_message import ChatMessage
+from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
-from pathlib import Path
 # from haystack.components.converters import PyPDFToDocument
+from pydantic import BaseModel, Field
+
 
 def pdf2doc(pdf_filepath: str) -> Document:
     # There's also PDFMinerToDocument (for a different pdf extractor) and MultiFileConverter (for variety of file types but requires more dependencies)
@@ -33,15 +31,43 @@ def pdf2doc(pdf_filepath: str) -> Document:
     return result['documents'][0]
 
 
-SYSTEM_PROMPT_TEMPLATE = """
-Given the document content below, return a JSON list of objects.
+def split_doc(doc: Document, passages_per_doc: int = 11, overlap: int = 1) -> list[Document]:
+    """
+    Split document into multiple documents, each consisting of passages.
+    A passage is delimited by '\n\n'
+    """
+    assert doc.content
+    # Path(f"{args.name}_document.json").write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
+
+    # Remove leading/trailing whitespace from each line so that 'passage' splitting works
+    lines = [line.strip() for line in doc.content.splitlines()]
+    doc.content = "\n".join(lines)
+
+    # Split the document into "passages"
+    splitter = DocumentSplitter(
+        split_by="passage",
+        split_length=passages_per_doc,
+        split_overlap=overlap,
+    )
+    result = splitter.run(documents=[doc])
+    return result['documents']
+
+
+class Support(BaseModel):
+    name: str
+    urls: list[str]
+    emails: list[str]
+    addresses: list[str]
+    phone_numbers: list[str]
+    description: str = Field(description="2-sentence summary, including offerings")
+
+
+SYSTEM_PROMPT_TEMPLATE = f"""
+Using only the document content provided by the user, return a JSON list of objects.
 Each object must match exactly this schema:
-{
-  "name": string|null,
-  "addresses": string[],
-  "phone_numbers": string[],
-  "description": string      // 2-sentence summary, including offerings
-}
+```
+{Support.schema_json(indent=2)}
+```
 
 Rules:
 - Output ONLY raw JSON (no markdown fences, no commentary).
@@ -73,74 +99,27 @@ def build_pipeline() -> Pipeline:
     #         respect_sentence_boundary=True,
     #     ),
     # )
+    # TODO: If document exceeds LLM limit, split document with some overlap and make multiple calls to the LLM
+    #       Then merge the LLM JSON results, resolving any entries with the same name
     messages = [
         ChatMessage.from_system(SYSTEM_PROMPT_TEMPLATE),
         ChatMessage.from_user(USER_TEMPLATE),
     ]
     pipe.add_component("prompt_builder", ChatPromptBuilder(template=messages, required_variables="*"))
+    # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
+    # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
+    # Bedrock might differ based on the throughput settings.
+    # even with a larger context window.
     pipe.add_component(
         "llm",
-        AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0")
+        AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+                                   generation_kwargs={"max_tokens": 8192})
     )
 
     # pipe.connect("pdf_to_text.documents", "splitter.documents")
     # pipe.connect("splitter.documents", "prompt_builder.documents")
     pipe.connect("prompt_builder", "llm")
     return pipe
-
-
-def __summarize_pdf_to_json(pdf_path: str, model_name: str = "gpt-4o-mini") -> Dict[str, Any]:
-    """
-    Run the pipeline on a local PDF and return parsed JSON from the LLM.
-    """
-    if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"PDF not found: {pdf_path}")
-
-    # Load PDF as ByteStream so Haystack's converter can read it
-    with open(pdf_path, "rb") as f:
-        bs = ByteStream(data=f.read(), meta={"filename": os.path.basename(pdf_path)})
-
-    pipe = build_pipeline(model_name=model_name)
-
-    # Execute the pipeline. Converter expects `sources=[ByteStream(...)]`
-    result = pipe.run(
-        data={
-            "pdf_to_text": {"sources": [bs]},
-            # PromptBuilder receives docs via connection; no direct input needed.
-            # OpenAIGenerator gets the prompt from PromptBuilder via connection.
-        }
-    )
-
-    # Haystack OpenAIGenerator returns a list of strings in `replies`
-    replies = result["llm"]["replies"]
-    if not replies:
-        raise RuntimeError("LLM returned no content.")
-
-    raw = replies[0].strip()
-
-    # Be strict: try to parse JSON; if the model hallucinated extra text, attempt a salvage.
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        # Soft salvage: find first/last braces
-        start = raw.find("{")
-        end = raw.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            return json.loads(raw[start : end + 1])
-        # If still failing, raise with context
-        raise ValueError(f"Model did not return valid JSON. Raw reply was:\n{raw}")
-
-
-# if __name__ == "__main__":
-#     import argparse
-
-#     parser = argparse.ArgumentParser(description="Summarize a PDF to JSON via Haystack + OpenAI.")
-#     parser.add_argument("pdf", help="Path to the PDF file")
-#     parser.add_argument("--model", default="gpt-4o-mini", help="OpenAI model name")
-#     args = parser.parse_args()
-
-#     summary = __summarize_pdf_to_json(args.pdf, model_name=args.model)
-#     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 
 def create_pipeline() -> Pipeline:
@@ -172,31 +151,53 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(f"Name: {args.name}, Filepath: {args.filepath}")
 
+    if not os.path.exists(args.filepath):
+        raise FileNotFoundError(f"PDF not found: {args.filepath}")
+
     phase = 2
     if phase == 1:
         doc = pdf2doc(args.filepath)
         assert doc.content
+        print("Doc content length:", len(doc.content))
 
-        # Save doc to JSON file
-        Path(f"{args.name}_document.json").write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
+        split_docs = split_doc(doc)
+        print(f"Number of split docs: {len(split_docs)}")
+        print("Doc lengths:", [len(d.content) if d.content else 0 for d in split_docs])
+        # pdb.set_trace()
 
-        doc.content = doc.content[:1000]
-        Path(f"{args.name}_document1.json").write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
+        for i, d in enumerate(split_docs):
+            Path(f"{args.name}_document{i}.json").write_text(json.dumps(d.to_dict(), indent=2), encoding="utf-8")
     elif phase == 2:
         _pipeline = build_pipeline()
 
-        # _doc_content = Path(f"{args.name}__document1.txt").read_text(encoding="utf-8")
-        json_dict = json.loads(Path(f"{args.name}_document1.json").read_text(encoding="utf-8"))
-        # TODO: If document exceeds LLM limit, split document with some overlap and make multiple calls to the LLM
-        #       Then merge the LLM JSON results, resolving any entries with the same name
-        docs = [Document.from_dict(json_dict)]
-        _result = _pipeline.run({"prompt_builder": {"documents": docs}})
-        # pprint(_result['llm']['replies'])
-        assert len(_result['llm']['replies']) == 1
-        reply = _result['llm']['replies'][0]
-        print(reply.text)
-        support_entries = json.loads(reply.text)
-        pdb.set_trace()
+        path = Path(f"{args.name}_supports.json")
+        # TODO: https://docs.haystack.deepset.ai/docs/asyncpipeline
+        supports = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(supports, dict):
+            supports = {entry['name']: entry for entry in supports}
+        for i in range(9, 12):
+            _doc_content = Path(f"{args.name}_document{i}.json").read_text(encoding="utf-8")
+            json_dict = json.loads(_doc_content)
+            docs = [Document.from_dict(json_dict)]
+            assert docs[0].content
+            print("Doc content length:", len(docs[0].content))
+
+            _result = _pipeline.run({"prompt_builder": {"documents": docs, "schema": JSON_SCHEMA}})
+            # pprint(_result['llm']['replies'])
+            assert len(_result['llm']['replies']) == 1
+            reply = _result['llm']['replies'][0]
+            # Important to check if tokens have reached the limit for the LLM
+            pprint(reply.meta)
+            support_entries = json.loads(reply.text)
+            print("Number of support entries:", len(support_entries))
+            print([entry['name'] for entry in support_entries])
+            # Path(f"{args.name}_support_entries{i}.json").write_text(json.dumps(support_entries, indent=2), encoding="utf-8")
+
+            supports.update({entry['name']: entry for entry in support_entries})
+            print("Total supports:", len(supports))
+            # pdb.set_trace()
+            path.write_text(json.dumps(list(supports.values()), indent=2), encoding="utf-8")
+
     else:
         # 1. Read the file contents and extract Support entries using LLM via a Haystack pipeline
         _pipeline = create_pipeline()
