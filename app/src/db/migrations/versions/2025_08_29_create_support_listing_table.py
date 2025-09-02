@@ -32,7 +32,8 @@ def upgrade():
             nullable=False,
             server_default=sa.text("now()"),
         ),
-        sa.Column("uri", sa.Text(), nullable=False),
+        sa.Column("name", sa.Text(), nullable=False, unique=True),
+        sa.Column("uri", sa.Text(), nullable=False, unique=False),
     )
     # ### end Alembic commands ###
 
