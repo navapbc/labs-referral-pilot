@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import asyncio
 import os
 import pdb
 import sys
@@ -9,7 +10,7 @@ from pathlib import Path
 from pprint import pprint
 
 # from typing import Any, Dict
-from haystack import Pipeline
+from haystack import Pipeline, AsyncPipeline
 
 # from haystack.components.converters import PDFToTextConverter
 # from haystack.components.generators import OpenAIChatGenerator
@@ -28,7 +29,7 @@ def pdf2doc(pdf_filepath: str) -> Document:
     # There's also PDFMinerToDocument (for a different pdf extractor) and MultiFileConverter (for variety of file types but requires more dependencies)
     converter = PyPDFToDocument()
     result = converter.run(sources=[Path(pdf_filepath)])
-    return result['documents'][0]
+    return result["documents"][0]
 
 
 def split_doc(doc: Document, passages_per_doc: int = 11, overlap: int = 1) -> list[Document]:
@@ -50,7 +51,7 @@ def split_doc(doc: Document, passages_per_doc: int = 11, overlap: int = 1) -> li
         split_overlap=overlap,
     )
     result = splitter.run(documents=[doc])
-    return result['documents']
+    return result["documents"]
 
 
 class Support(BaseModel):
@@ -75,7 +76,7 @@ Rules:
 - Keep strings concise; avoid line breaks inside values.
 """
 
-USER_TEMPLATE="""
+USER_TEMPLATE = """
 Document content:
 {% for doc in documents %}
 {{ doc.content }}
@@ -83,61 +84,62 @@ Document content:
 """
 
 
-def build_pipeline() -> Pipeline:
-    """
-    Create a Haystack v2 pipeline:
-      PDF -> text -> split -> prompt -> OpenAI LLM
-    """
-    pipe = Pipeline()
-    # pipe.add_component("pdf_to_text", PyPDFToDocument())  # inputs: sources=[ByteStream]
-    # pipe.add_component(
-    #     "splitter",
-    #     DocumentSplitter(
-    #         split_by="word",
-    #         split_length=900,
-    #         split_overlap=120,
-    #         respect_sentence_boundary=True,
-    #     ),
-    # )
-    # TODO: If document exceeds LLM limit, split document with some overlap and make multiple calls to the LLM
-    #       Then merge the LLM JSON results, resolving any entries with the same name
+def build_pipeline() -> AsyncPipeline:
+    pipe = AsyncPipeline()
     messages = [
         ChatMessage.from_system(SYSTEM_PROMPT_TEMPLATE),
         ChatMessage.from_user(USER_TEMPLATE),
     ]
-    pipe.add_component("prompt_builder", ChatPromptBuilder(template=messages, required_variables="*"))
+    pipe.add_component(
+        "prompt_builder", ChatPromptBuilder(template=messages, required_variables="*")
+    )
     # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
     # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
     # Bedrock might differ based on the throughput settings.
     # even with a larger context window.
-    pipe.add_component(
-        "llm",
-        AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-                                   generation_kwargs={"max_tokens": 8192})
+    llm = AmazonBedrockChatGenerator(
+        model="us.anthropic.claude-3-5-sonnet-20241022-v2:0", generation_kwargs={"max_tokens": 8192}
     )
+    pipe.add_component("llm", llm)
+    # If needed, add OutputValidator to retry the LLM call -- https://haystack.deepset.ai/tutorials/28_structured_output_with_loop
 
-    # pipe.connect("pdf_to_text.documents", "splitter.documents")
-    # pipe.connect("splitter.documents", "prompt_builder.documents")
     pipe.connect("prompt_builder", "llm")
     return pipe
 
 
-def create_pipeline() -> Pipeline:
-    # Initialize components
-    pdf_converter = PDFToTextConverter()
-    prompt_builder = PromptBuilder(template="Extract the key information from the following document: {{documents.content}}")
-    llm_generator = AmazonBedrockChatGenerator(model="us.anthropic.claude-3-5-sonnet-20241022-v2:0")
+async def run_pipeline(pipeline: AsyncPipeline, doc: Document) -> list[dict]:
+    # _doc_content = Path(f"{args.name}_document{i}.json").read_text(encoding="utf-8")
+    # json_dict = json.loads(_doc_content)
+    # docs = [Document.from_dict(json_dict)]
+    docs = [doc]
+    assert docs[0].content
+    print("subDoc content length:", len(docs[0].content))
 
-    # Build the pipeline
-    pipeline = Pipeline()
-    pipeline.add_component("converter", pdf_converter)
-    pipeline.add_component("prompt_builder", prompt_builder)
-    pipeline.add_component("llm", llm_generator)
+        # await asyncio.sleep(10)  # Simulate an I/O-bound operation
+        # return [{"name": "Sample Support"}]
 
-    # Connect the components
-    pipeline.connect("converter.output", "prompt_builder.documents")
-    pipeline.connect("prompt_builder.prompt", "llm.prompt")
-    return pipeline
+    _result = await pipeline.run_async({"prompt_builder": {"documents": docs}})
+    # pprint(_result['llm']['replies'])
+    assert len(_result["llm"]["replies"]) == 1
+    reply = _result["llm"]["replies"][0]
+    # Important to check if tokens have reached the limit for the LLM
+    pprint(reply.meta)
+    support_entries = json.loads(reply.text)
+    print("Number of support entries:", len(support_entries))
+    print([entry["name"] for entry in support_entries])
+    # Path(f"{args.name}_support_entries{i}.json").write_text(json.dumps(support_entries, indent=2), encoding="utf-8")
+    return support_entries
+
+
+async def run_pipeline_and_join_results(docs: list[Document]) -> dict:
+    """The main asynchronous function to orchestrate tasks."""
+    tasks = [run_pipeline(_pipeline, doc) for doc in docs]
+    # Schedule the asynchronous functions to run concurrently
+    results = await asyncio.gather(*tasks)
+    all_results = [item for sublist in results for item in sublist]
+    supports = {entry["name"]: entry for entry in all_results}
+    # pdb.set_trace()
+    return supports
 
 
 # Basic Needs Resource Guide.pdf https://drive.google.com/file/d/1u2LCOoJC7jpPUE6wsQ2ZdiNYaqTb5NzT/view?usp=sharing
@@ -154,59 +156,33 @@ if __name__ == "__main__":
     if not os.path.exists(args.filepath):
         raise FileNotFoundError(f"PDF not found: {args.filepath}")
 
-    phase = 2
-    if phase == 1:
-        doc = pdf2doc(args.filepath)
-        assert doc.content
-        print("Doc content length:", len(doc.content))
+    doc = pdf2doc(args.filepath)
+    assert doc.content
+    print("Doc content length:", len(doc.content))
 
-        split_docs = split_doc(doc)
-        print(f"Number of split docs: {len(split_docs)}")
-        print("Doc lengths:", [len(d.content) if d.content else 0 for d in split_docs])
-        # pdb.set_trace()
+    # Lengthy document content results in incomplete LLM responses, so split document with some overlap
+    # and make multiple calls to the LLM and merge the LLM JSON results, resolving any entries with the same name
+    split_docs = split_doc(doc)
+    print(f"Number of split docs: {len(split_docs)}")
+    print("Doc lengths:", [len(d.content) if d.content else 0 for d in split_docs])
 
-        for i, d in enumerate(split_docs):
-            Path(f"{args.name}_document{i}.json").write_text(json.dumps(d.to_dict(), indent=2), encoding="utf-8")
-    elif phase == 2:
-        _pipeline = build_pipeline()
+    # for i, d in enumerate(split_docs):
+    #     Path(f"{args.name}_document{i}.json").write_text(json.dumps(d.to_dict(), indent=2), encoding="utf-8")
 
-        path = Path(f"{args.name}_supports.json")
-        # TODO: https://docs.haystack.deepset.ai/docs/asyncpipeline
-        supports = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(supports, dict):
-            supports = {entry['name']: entry for entry in supports}
-        for i in range(9, 12):
-            _doc_content = Path(f"{args.name}_document{i}.json").read_text(encoding="utf-8")
-            json_dict = json.loads(_doc_content)
-            docs = [Document.from_dict(json_dict)]
-            assert docs[0].content
-            print("Doc content length:", len(docs[0].content))
+    _pipeline = build_pipeline()
 
-            _result = _pipeline.run({"prompt_builder": {"documents": docs, "schema": JSON_SCHEMA}})
-            # pprint(_result['llm']['replies'])
-            assert len(_result['llm']['replies']) == 1
-            reply = _result['llm']['replies'][0]
-            # Important to check if tokens have reached the limit for the LLM
-            pprint(reply.meta)
-            support_entries = json.loads(reply.text)
-            print("Number of support entries:", len(support_entries))
-            print([entry['name'] for entry in support_entries])
-            # Path(f"{args.name}_support_entries{i}.json").write_text(json.dumps(support_entries, indent=2), encoding="utf-8")
+    path = Path(f"{args.name}_supports.json")
+    supports = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(supports, dict):
+        supports = {entry["name"]: entry for entry in supports}
+    print("Loaded Total supports:", len(supports))
 
-            supports.update({entry['name']: entry for entry in support_entries})
-            print("Total supports:", len(supports))
-            # pdb.set_trace()
-            path.write_text(json.dumps(list(supports.values()), indent=2), encoding="utf-8")
-
-    else:
-        # 1. Read the file contents and extract Support entries using LLM via a Haystack pipeline
-        _pipeline = create_pipeline()
-        _result = _pipeline.run({"converter": {"sources": [args.filepath]}})
-        print(json.dumps(_result, indent=2, ensure_ascii=False))
-        print(_result["llm"]["replies"])
+    # TODO: https://docs.haystack.deepset.ai/docs/asyncpipeline
+    supports |= asyncio.run(run_pipeline_and_join_results(split_docs[0:4]))
+    print("Total supports:", len(supports))
+    path.write_text(json.dumps(list(supports.values()), indent=2), encoding="utf-8")
 
     # 2. Look up the SupportListing by name (unique)
     # 3. Delete existing Support entries and replace with new ones
 
     print("Done")
-
