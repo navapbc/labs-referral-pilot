@@ -31,13 +31,11 @@ def upgrade():
             "addresses",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            server_default=sa.text("'{}'::text[]"),
         ),
         sa.Column(
             "phone_numbers",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            server_default=sa.text("'{}'::text[]"),
         ),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("website", sa.Text(), nullable=True),
@@ -45,7 +43,6 @@ def upgrade():
             "email_addresses",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            server_default=sa.text("'{}'::text[]"),
         ),
         sa.PrimaryKeyConstraint("support_listing_id", "name", name="pk_support"),
     )
