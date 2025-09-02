@@ -12,5 +12,5 @@ class SupportListing(Base, IdMixin, TimestampMixin):
 
     name: Mapped[str]
     uri: Mapped[str] = mapped_column(
-        comment="origin of the Support Listing for later reference and record keeping"
+        comment="origin of the Support Listing; a file path or a website URL"
     )
