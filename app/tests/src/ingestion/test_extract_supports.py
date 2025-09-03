@@ -1,10 +1,9 @@
 import pytest
-import pdb
-from haystack.dataclasses import Document
-from haystack.dataclasses import ChatMessage
 from haystack import component
+from haystack.dataclasses import ChatMessage, Document
 
 from src.ingestion import extract_supports
+
 
 @pytest.fixture
 def document() -> Document:
@@ -127,6 +126,7 @@ MOCK_LLM_RESPONSE = """[
   }
 ]"""
 
+
 @component
 class MockLLM:
     def __init__(self):
@@ -142,7 +142,14 @@ def test_extract_support_entries(monkeypatch, document: Document) -> None:
 
     supports = extract_supports.extract_support_entries("Test Support Listing", document)
     assert len(supports) == 4
-    assert supports["All Saints Episcopal Church"].addresses == ['209 W 27th St. Austin. TX 78705']
-    assert supports["First Baptist Church of Austin"].addresses == ['901 Trinity St, Austin. TX 78701']
-    assert supports["Foundation for the Homeless"].addresses == ['PO Box 140946, Austin, TX 78714', '1300 Lavaca Street, Austin, TX']
-    assert supports["Baptist Community Center"].addresses == ['2000 East 2nd Street, Austin, Texas 78702']
+    assert supports["All Saints Episcopal Church"].addresses == ["209 W 27th St. Austin. TX 78705"]
+    assert supports["First Baptist Church of Austin"].addresses == [
+        "901 Trinity St, Austin. TX 78701"
+    ]
+    assert supports["Foundation for the Homeless"].addresses == [
+        "PO Box 140946, Austin, TX 78714",
+        "1300 Lavaca Street, Austin, TX",
+    ]
+    assert supports["Baptist Community Center"].addresses == [
+        "2000 East 2nd Street, Austin, Texas 78702"
+    ]
