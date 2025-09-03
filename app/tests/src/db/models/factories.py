@@ -100,9 +100,7 @@ class SupportFactory(BaseFactory):
     class Meta:
         model = support_listing.Support
 
-    support_listing = factory.SubFactory(
-        SupportListingFactory
-    )  # factory.LazyAttribute(lambda support: support.support_listing.id)
+    )
 
     name = factory.Faker("name")
     addresses = factory.Faker("address")
