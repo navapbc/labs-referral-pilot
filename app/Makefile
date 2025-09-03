@@ -224,6 +224,6 @@ help: ## Prints the help documentation and info about each command
 # Application scripts
 ##################################################
 
-# Usage: make add-support-listing NAME="SupportName" FILE="path/to/file"
-add-support-listing:
-	$(PY_RUN_CMD) python -m src.ingestion.add_support_listing "$(NAME)" "$(FILE)"
+# Usage: make extract-supports NAME="SupportName" FILE="path/to/file"
+extract-supports:
+	$(PY_RUN_CMD) python -m src.ingestion.extract_supports "$(NAME)" "$(FILE)"
