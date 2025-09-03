@@ -15,7 +15,10 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack.dataclasses import Document
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+
 from pydantic import BaseModel, Field
+from smart_open import open as smart_open
+from tempfile import NamedTemporaryFile
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,15 @@ def extract_from_pdf(pdf_filepath: str) -> Document:
     # There's also PDFMinerToDocument (for a different pdf extractor) and
     # MultiFileConverter (for variety of file types but requires more dependencies)
     converter = PyPDFToDocument()
-    result = converter.run(sources=[Path(pdf_filepath)])
+
+    # Create a temporary file to hold the PDF data for the converter in case the file is not local
+    with smart_open(pdf_filepath, "rb") as pdf_file:
+        # Create temp file
+        with NamedTemporaryFile(mode='wb') as tmpfile:
+            tmpfile.write(pdf_file.read())
+            temp_file = Path(tmpfile.name)
+
+            result = converter.run(sources=[temp_file])
     return result["documents"][0]
 
 
@@ -136,7 +147,7 @@ def extract_support_entries(name: str, input_file: str) -> dict[str, Support]:
     # and make multiple calls to the LLM and merge the LLM JSON results, resolving any entries with the same name
     split_docs = split_doc(doc)
     logger.info(
-        "Split into %d docs with lengths: %s",
+        "Split into %d subdocs with lengths: %s",
         len(split_docs),
         [len(d.content) if d.content else 0 for d in split_docs],
     )
