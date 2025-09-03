@@ -159,7 +159,7 @@ def extract_support_entries(name: str, input_file: str) -> dict[str, Support]:
         if not isinstance(loaded_supports, dict):
             supports |= {entry["name"]: entry for entry in loaded_supports}
         logger.info("Loaded %d previous supports", len(supports))
-    split_docs = split_docs[:3]
+    # split_docs = split_docs[:3]
 
     pipeline = build_pipeline()
     supports |= asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
