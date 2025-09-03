@@ -22,7 +22,7 @@ from smart_open import open as smart_open
 logger = logging.getLogger(__name__)
 
 
-def extract_from_pdf(pdf_filepath: str) -> Document:
+def extract_from_pdf(pdf_filepath: str) -> Document:  # pragma: no cover
     if not os.path.exists(pdf_filepath):
         raise FileNotFoundError(f"File not found: {pdf_filepath}")
 
@@ -88,6 +88,16 @@ USER_TEMPLATE = """Document content:
 """
 
 
+def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
+    # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
+    # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
+    # Bedrock might differ based on the throughput settings.
+    # even with a larger context window.
+    return AmazonBedrockChatGenerator(
+        model="us.anthropic.claude-3-5-sonnet-20241022-v2:0", generation_kwargs={"max_tokens": 8192}
+    )
+
+
 def build_pipeline() -> AsyncPipeline:
     pipe = AsyncPipeline()
 
@@ -98,15 +108,7 @@ def build_pipeline() -> AsyncPipeline:
     pipe.add_component(
         "prompt_builder", ChatPromptBuilder(template=messages, required_variables="*")
     )
-
-    # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
-    # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
-    # Bedrock might differ based on the throughput settings.
-    # even with a larger context window.
-    llm = AmazonBedrockChatGenerator(
-        model="us.anthropic.claude-3-5-sonnet-20241022-v2:0", generation_kwargs={"max_tokens": 8192}
-    )
-    pipe.add_component("llm", llm)
+    pipe.add_component("llm", create_llm())
     # If needed, add OutputValidator to retry the LLM call -- https://haystack.deepset.ai/tutorials/28_structured_output_with_loop
 
     pipe.connect("prompt_builder", "llm")
@@ -138,11 +140,7 @@ async def run_pipeline_and_join_results(pipeline: AsyncPipeline, docs: list[Docu
     return {entry["name"]: entry for entry in all_results}
 
 
-def extract_support_entries(name: str, input_file: str) -> dict[str, Support]:
-    doc = extract_from_pdf(input_file)
-    assert doc.content
-    logger.info("Extracted content length: %d", len(doc.content))
-
+def extract_support_entries(name: str, doc: Document) -> dict[str, Support]:
     # Lengthy document content results in incomplete LLM responses, so split document with some overlap
     # and make multiple calls to the LLM and merge the LLM JSON results, resolving any entries with the same name
     split_docs = split_doc(doc)
@@ -177,7 +175,7 @@ SAVE_TO_FILE = False
 # To test:
 # Download Basic Needs Resource Guide.pdf https://drive.google.com/file/d/1u2LCOoJC7jpPUE6wsQ2ZdiNYaqTb5NzT/view?usp=sharing
 # make extract-supports NAME="Basic Needs Resources" FILE=Basic\ Needs\ Resource\ Guide.pdf
-def main() -> None:
+def main() -> None:  # pragma: no cover
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     parser = argparse.ArgumentParser()
@@ -185,7 +183,10 @@ def main() -> None:
     parser.add_argument("filepath")
     args = parser.parse_args()
 
-    extracted_supports = extract_support_entries(args.name, args.filepath)
+    doc = extract_from_pdf(args.filepath)
+    assert doc.content
+    logger.info("Extracted content length: %d", len(doc.content))
+    extracted_supports = extract_support_entries(args.name, doc)
 
     # TODO: Look up the SupportListing by name (unique)
     logger.info("Checking for existing SupportListing: %r", args.name)
