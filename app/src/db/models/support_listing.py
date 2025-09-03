@@ -11,7 +11,9 @@ class SupportListing(Base, IdMixin, TimestampMixin):
     __tablename__ = "support_listing"
 
     name: Mapped[str] = mapped_column(
-        nullable=False, unique=True, comment="name of the support listing; a human-readable identifier"
+        nullable=False,
+        unique=True,
+        comment="name of the support listing; a human-readable identifier",
     )
     uri: Mapped[str] = mapped_column(
         nullable=False,
