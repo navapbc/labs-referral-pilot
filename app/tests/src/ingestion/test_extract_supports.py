@@ -2,6 +2,8 @@ import pytest
 from haystack import component
 from haystack.dataclasses import ChatMessage, Document
 
+from src.adapters import db
+from src.db.models.support_listing import SupportListing
 from src.ingestion import extract_supports
 
 
@@ -153,3 +155,26 @@ def test_extract_support_entries(monkeypatch, document: Document) -> None:
     assert supports["Baptist Community Center"].addresses == [
         "2000 East 2nd Street, Austin, Texas 78702"
     ]
+
+
+def test_save_to_db(db_session: db.Session):
+    db_session.query(SupportListing).delete()
+
+    # Add new DB record
+    name = "Test Support Listing"
+    support_listing = SupportListing(name=name, uri="some/path/to/file.pdf")
+    extract_supports.save_to_db(db_session, support_listing, {})
+    assert db_session.query(SupportListing).count() == 1
+    listing_record = (
+        db_session.query(SupportListing).where(SupportListing.name == name).one_or_none()
+    )
+    assert listing_record.uri == "some/path/to/file.pdf"
+
+    # Update the record
+    support_listing = SupportListing(name=name, uri="different/path/to/file.pdf")
+    extract_supports.save_to_db(db_session, support_listing, {})
+    assert db_session.query(SupportListing).count() == 1
+    listing_record = (
+        db_session.query(SupportListing).where(SupportListing.name == name).one_or_none()
+    )
+    assert listing_record.uri == "different/path/to/file.pdf"

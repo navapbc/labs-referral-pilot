@@ -19,6 +19,10 @@ from haystack_integrations.components.generators.amazon_bedrock import AmazonBed
 from pydantic import BaseModel, Field
 from smart_open import open as smart_open
 
+from src.adapters import db
+from src.app_config import config
+from src.db.models.support_listing import SupportListing
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +35,7 @@ def extract_from_pdf(pdf_filepath: str) -> Document:  # pragma: no cover
     converter = PyPDFToDocument()
 
     # Since the converter only accept local files,
-    # create a temporary file to hold the PDF data in case the file is not local.
+    # create a temporary file to hold the PDF data in case the file is not local
     with smart_open(pdf_filepath, "rb") as pdf_file:
         # Create temp file
         with NamedTemporaryFile(mode="wb") as tmpfile:
@@ -91,8 +95,7 @@ USER_TEMPLATE = """Document content:
 def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
     # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
     # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
-    # Bedrock might differ based on the throughput settings.
-    # even with a larger context window.
+    # Bedrock might differ based on the throughput settings
     return AmazonBedrockChatGenerator(
         model="us.anthropic.claude-3-5-sonnet-20241022-v2:0", generation_kwargs={"max_tokens": 8192}
     )
@@ -157,7 +160,7 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, Support]:
         if not isinstance(loaded_supports, dict):
             supports |= {entry["name"]: entry for entry in loaded_supports}
         logger.info("Loaded %d previous supports", len(supports))
-    # split_docs = split_docs[:3]
+    # split_docs = split_docs[:1]
 
     pipeline = build_pipeline()
     supports |= asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
@@ -170,6 +173,30 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, Support]:
 
 # FIXME: temporary
 SAVE_TO_FILE = False
+
+
+def save_to_db(
+    db_session: db.Session, support_listing: SupportListing, support_entries: dict[str, Support]
+):
+    existing_listing = (
+        db_session.query(SupportListing)
+        .where(SupportListing.name == support_listing.name)
+        .one_or_none()
+    )
+    if existing_listing:
+        logger.info("Update existing SupportListing: %r", existing_listing.name)
+        existing_listing.uri = support_listing.uri
+
+        logger.info("Deleting Support records associated with: %r", support_listing.name)
+        # TODO: Delete existing Support entries and replace with new ones
+    else:
+        logger.info("Adding new SupportListing: %r", support_listing.name)
+        db_session.add(support_listing)
+
+    # TODO: Populate support records
+    for support in support_entries.values():
+        # db_session.add(support)
+        ...
 
 
 # To test:
@@ -188,12 +215,11 @@ def main() -> None:  # pragma: no cover
     logger.info("Extracted content length: %d", len(doc.content))
     extracted_supports = extract_support_entries(args.name, doc)
 
-    # TODO: Look up the SupportListing by name (unique)
-    logger.info("Checking for existing SupportListing: %r", args.name)
-    # TODO: Delete existing Support entries and replace with new ones
-    logger.info("Deleting Support records associated with: %r", args.name)
-    # TODO: Populate support records
     for support in extracted_supports.values():
         logger.info("Support: %r", support.name)
+
+    with config.db_session() as db_session, db_session.begin():
+        support_listing = SupportListing(name=args.name, uri=args.filepath)
+        save_to_db(db_session, support_listing, extracted_supports)
 
     logger.info("Done")

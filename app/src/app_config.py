@@ -1,3 +1,6 @@
+from functools import cached_property
+
+from src.adapters import db
 from src.util.env_config import PydanticBaseEnvConfig
 
 
@@ -13,6 +16,13 @@ class AppConfig(PydanticBaseEnvConfig):
     batch_otel: bool = True
 
     redact_pii: bool = True
+
+    @cached_property
+    def db_client(self) -> db.PostgresDBClient:
+        return db.PostgresDBClient()
+
+    def db_session(self) -> db.Session:
+        return self.db_client.get_session()
 
 
 config = AppConfig()
