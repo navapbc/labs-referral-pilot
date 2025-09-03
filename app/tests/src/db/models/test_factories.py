@@ -3,8 +3,14 @@ from datetime import date, datetime
 import pytest
 
 import src.adapters.db as db
+from src.db.models.support_listing import Support, SupportListing
 from src.db.models.user_models import User
-from tests.src.db.models.factories import RoleFactory, UserFactory
+from tests.src.db.models.factories import (
+    RoleFactory,
+    SupportFactory,
+    SupportListingFactory,
+    UserFactory,
+)
 
 user_params = {
     "first_name": "Alvin",
@@ -95,3 +101,35 @@ def test_role_factory_create(enable_factory_create):
     role = RoleFactory.create()
     assert role.user is not None
     assert len(role.user.roles) == 1
+
+
+def test_support_listing_factory_create(enable_factory_create, db_session: db.Session):
+    db_session.query(SupportListing).delete()
+
+    support_listing = SupportListingFactory.create()
+
+    db_record = (
+        db_session.query(SupportListing)
+        .filter(SupportListing.id == support_listing.id)
+        .one_or_none()
+    )
+
+    assert support_listing.id == db_record.id
+    assert support_listing.name == db_record.name
+    assert support_listing.uri == db_record.uri
+
+
+def test_support_factory_create(enable_factory_create, db_session: db.Session):
+    db_session.query(Support).delete()
+
+    support = SupportFactory.create()
+
+    db_record = db_session.query(Support).filter(Support.id == support.id).one_or_none()
+
+    assert support.id is not None
+    assert support.name == db_record.name
+    assert support.addresses == db_record.addresses
+    assert support.phone_numbers == db_record.phone_numbers
+    assert support.description == db_record.description
+    assert support.website == db_record.website
+    assert support.email_addresses == db_record.email_addresses

@@ -18,6 +18,7 @@ from sqlalchemy.orm import scoped_session
 import src.adapters.db as db
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
+from src.db.models import support_listing
 
 _db_session: Optional[db.Session] = None
 
@@ -84,3 +85,28 @@ class UserFactory(BaseFactory):
     is_active = factory.Faker("boolean")
 
     roles = factory.RelatedFactoryList(RoleFactory, size=2, factory_related_name="user")
+
+
+class SupportListingFactory(BaseFactory):
+    class Meta:
+        model = support_listing.SupportListing
+
+    id = Generators.UuidObj
+    name = factory.Faker("name")
+    uri = factory.Faker("uri")
+
+
+class SupportFactory(BaseFactory):
+    class Meta:
+        model = support_listing.Support
+
+    support_listing = factory.SubFactory(
+        SupportListingFactory
+    )  # factory.LazyAttribute(lambda support: support.support_listing.id)
+
+    name = factory.Faker("name")
+    addresses = factory.Faker("address")
+    phone_numbers = factory.Faker("phone_number")
+    description = factory.Faker("sentence")
+    website = factory.Faker("url")
+    email_addresses = factory.Faker("email")
