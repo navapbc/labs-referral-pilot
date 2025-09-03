@@ -7,6 +7,7 @@ import logging
 import os
 from pathlib import Path
 from pprint import pformat
+from tempfile import NamedTemporaryFile
 
 from haystack import AsyncPipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -15,10 +16,8 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack.dataclasses import Document
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
-
 from pydantic import BaseModel, Field
 from smart_open import open as smart_open
-from tempfile import NamedTemporaryFile
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +30,11 @@ def extract_from_pdf(pdf_filepath: str) -> Document:
     # MultiFileConverter (for variety of file types but requires more dependencies)
     converter = PyPDFToDocument()
 
-    # Create a temporary file to hold the PDF data for the converter in case the file is not local
+    # Since the converter only accept local files,
+    # create a temporary file to hold the PDF data in case the file is not local.
     with smart_open(pdf_filepath, "rb") as pdf_file:
         # Create temp file
-        with NamedTemporaryFile(mode='wb') as tmpfile:
+        with NamedTemporaryFile(mode="wb") as tmpfile:
             tmpfile.write(pdf_file.read())
             temp_file = Path(tmpfile.name)
 
