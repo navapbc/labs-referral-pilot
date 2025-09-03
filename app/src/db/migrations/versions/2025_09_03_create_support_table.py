@@ -26,13 +26,13 @@ def upgrade():
             "addresses",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            comment="The address(es), as a list, of the the support resource(s)",
+            comment="The address(es), as a list, of the support resource(s)",
         ),
         sa.Column(
             "phone_numbers",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            comment="The phone number(s), as a list, of the the support resource(s)",
+            comment="The phone number(s), as a list, of the support resource(s)",
         ),
         sa.Column(
             "description", sa.Text(), nullable=True, comment="Description summarizing the resource"

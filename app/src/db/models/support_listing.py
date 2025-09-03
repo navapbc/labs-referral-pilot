@@ -40,13 +40,13 @@ class Support(Base, IdMixin, TimestampMixin):
     addresses: Mapped[List[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
-        comment="The address(es), as a list, of the the support resource(s)",
+        comment="The address(es), as a list, of the support resource(s)",
     )
 
     phone_numbers: Mapped[List[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
-        comment="The phone number(s), as a list, of the the support resource(s)",
+        comment="The phone number(s), as a list, of the support resource(s)",
     )
 
     description: Mapped[Optional[str]] = mapped_column(
