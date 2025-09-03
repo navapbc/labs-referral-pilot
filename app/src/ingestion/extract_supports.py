@@ -148,7 +148,7 @@ def extract_support_entries(name: str, input_file: str) -> dict[str, Support]:
         if not isinstance(loaded_supports, dict):
             supports |= {entry["name"]: entry for entry in loaded_supports}
         logger.info("Loaded %d previous supports", len(supports))
-        split_docs = split_docs[:3]
+    split_docs = split_docs[:3]
 
     pipeline = build_pipeline()
     supports |= asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
@@ -166,7 +166,7 @@ SAVE_TO_FILE = False
 # To test:
 # Download Basic Needs Resource Guide.pdf https://drive.google.com/file/d/1u2LCOoJC7jpPUE6wsQ2ZdiNYaqTb5NzT/view?usp=sharing
 # make extract-supports NAME="Basic Needs Resources" FILE=Basic\ Needs\ Resource\ Guide.pdf
-if __name__ == "__main__":
+def main() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     parser = argparse.ArgumentParser()
@@ -177,8 +177,11 @@ if __name__ == "__main__":
     extracted_supports = extract_support_entries(args.name, args.filepath)
 
     # TODO: Look up the SupportListing by name (unique)
-    logger.info("Checking for existing: %r", args.name)
+    logger.info("Checking for existing SupportListing: %r", args.name)
     # TODO: Delete existing Support entries and replace with new ones
-    logger.info("Deleting support DB records associated with: %r", args.name)
+    logger.info("Deleting Support records associated with: %r", args.name)
+    # TODO: Populate support records
+    for support in extracted_supports.values():
+        logger.info("Support: %r", support.name)
 
     logger.info("Done")

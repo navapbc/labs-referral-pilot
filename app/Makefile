@@ -226,4 +226,4 @@ help: ## Prints the help documentation and info about each command
 
 # Usage: make extract-supports NAME="SupportName" FILE="path/to/file"
 extract-supports:
-	$(PY_RUN_CMD) python -m src.ingestion.extract_supports "$(NAME)" "$(FILE)"
+	$(PY_RUN_CMD) extract-supports "$(NAME)" "$(FILE)"
