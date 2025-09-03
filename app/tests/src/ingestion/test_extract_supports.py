@@ -44,7 +44,7 @@ Baptist Community Center
 (512) 472-7592
 Call for an appointment Monday through Friday (8:30am-l2noon * lpm-5pm). To receive
 services. bring photo ID, SS card
-"""
+"""  # noqa: W293
     return Document(content=content)
 
 
