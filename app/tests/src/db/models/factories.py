@@ -100,7 +100,7 @@ class SupportFactory(BaseFactory):
     class Meta:
         model = support_listing.Support
 
-    )
+    support_listing = factory.SubFactory(SupportListingFactory)
 
     name = factory.Faker("name")
     addresses = factory.Faker("address")
