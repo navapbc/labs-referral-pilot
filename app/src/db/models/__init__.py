@@ -1,6 +1,6 @@
 import logging
 
-from . import base, support_listing, user_models
+from src.db.models import base, support_listing, user_models
 
 logger = logging.getLogger(__name__)
 
