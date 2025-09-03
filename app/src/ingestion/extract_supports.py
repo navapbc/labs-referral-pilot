@@ -1,4 +1,4 @@
-"Add SupportListing and associated Support records to the DB"
+"Add SupportListing and associated Support records to the DB by extracting file contents."
 
 import argparse
 import asyncio
