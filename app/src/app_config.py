@@ -12,5 +12,7 @@ class AppConfig(PydanticBaseEnvConfig):
     phoenix_collector_endpoint: str = "https://phoenix:6006"
     batch_otel: bool = True
 
+    redact_pii: bool = True
+
 
 config = AppConfig()
