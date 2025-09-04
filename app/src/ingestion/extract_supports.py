@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from pprint import pformat
 from tempfile import NamedTemporaryFile
+from typing import Iterable
 
 from haystack import AsyncPipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -21,7 +22,7 @@ from smart_open import open as smart_open
 
 from src.adapters import db
 from src.app_config import config
-from src.db.models.support_listing import SupportListing
+from src.db.models.support_listing import Support, SupportListing
 
 logger = logging.getLogger(__name__)
 
@@ -66,19 +67,19 @@ def split_doc(doc: Document, passages_per_doc: int = 11, overlap: int = 1) -> li
     return result["documents"]
 
 
-class Support(BaseModel):
+class SupportEntry(BaseModel):
     name: str
-    urls: list[str]
+    website: str | None
     emails: list[str]
     addresses: list[str]
     phone_numbers: list[str]
-    description: str = Field(description="2-sentence summary, including offerings")
+    description: str | None = Field(description="2-sentence summary, including offerings")
 
 
 SYSTEM_PROMPT_TEMPLATE = f"""Using only the document content provided by the user, return a JSON list of objects.
 Each object must match exactly this schema:
 ```
-{json.dumps(Support.model_json_schema(), indent=2)}
+{json.dumps(SupportEntry.model_json_schema(), indent=2)}
 ```
 
 Rules:
@@ -143,7 +144,7 @@ async def run_pipeline_and_join_results(pipeline: AsyncPipeline, docs: list[Docu
     return {entry["name"]: entry for entry in all_results}
 
 
-def extract_support_entries(name: str, doc: Document) -> dict[str, Support]:
+def extract_support_entries(name: str, doc: Document) -> dict[str, SupportEntry]:
     # Lengthy document content results in incomplete LLM responses, so split document with some overlap
     # and make multiple calls to the LLM and merge the LLM JSON results, resolving any entries with the same name
     split_docs = split_doc(doc)
@@ -153,30 +154,19 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, Support]:
         [len(d.content) if d.content else 0 for d in split_docs],
     )
 
-    supports: dict[str, dict] = {}
-    path = Path(f"{name}_supports.json")
-    if SAVE_TO_FILE and path.exists():
-        loaded_supports = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(loaded_supports, dict):
-            supports |= {entry["name"]: entry for entry in loaded_supports}
-        logger.info("Loaded %d previous supports", len(supports))
-    # split_docs = split_docs[:1]
+    split_docs = split_docs[:1]
 
     pipeline = build_pipeline()
-    supports |= asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
+    supports = asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
     logger.info("Total supports: %d", len(supports))
-    if SAVE_TO_FILE:
-        path.write_text(json.dumps(list(supports.values()), indent=2), encoding="utf-8")
-    support_entries = {name: Support(**data) for name, data in supports.items()}
+    support_entries = {name: SupportEntry(**data) for name, data in supports.items()}
     return support_entries
 
 
-# FIXME: temporary
-SAVE_TO_FILE = False
-
-
 def save_to_db(
-    db_session: db.Session, support_listing: SupportListing, support_entries: dict[str, Support]
+    db_session: db.Session,
+    support_listing: SupportListing,
+    support_entries: Iterable[SupportEntry],
 ):
     existing_listing = (
         db_session.query(SupportListing)
@@ -188,15 +178,28 @@ def save_to_db(
         existing_listing.uri = support_listing.uri
 
         logger.info("Deleting Support records associated with: %r", support_listing.name)
-        # TODO: Delete existing Support entries and replace with new ones
+        db_session.query(Support).where(Support.support_listing_id == existing_listing.id).delete()
     else:
         logger.info("Adding new SupportListing: %r", support_listing.name)
         db_session.add(support_listing)
+        # Flush the session to get the ID populated
+        db_session.flush()
 
-    # TODO: Populate support records
-    for support in support_entries.values():
-        # db_session.add(support)
-        ...
+    support_listing_id = existing_listing.id if existing_listing else support_listing.id
+    assert support_listing_id
+    print(f"SupportListing ID: {support_listing_id}")
+    # Populate support records
+    for support in support_entries:
+        support_record = Support(
+            support_listing_id=support_listing_id,
+            name=support.name,
+            addresses=support.addresses,
+            phone_numbers=support.phone_numbers,
+            description=support.description,
+            website=support.website,
+            email_addresses=support.emails,
+        )
+        db_session.add(support_record)
 
 
 # To test:
@@ -220,6 +223,6 @@ def main() -> None:  # pragma: no cover
 
     with config.db_session() as db_session, db_session.begin():
         support_listing = SupportListing(name=args.name, uri=args.filepath)
-        save_to_db(db_session, support_listing, extracted_supports)
+        save_to_db(db_session, support_listing, extracted_supports.values())
 
     logger.info("Done")

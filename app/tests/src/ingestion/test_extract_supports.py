@@ -3,7 +3,7 @@ from haystack import component
 from haystack.dataclasses import ChatMessage, Document
 
 from src.adapters import db
-from src.db.models.support_listing import SupportListing
+from src.db.models.support_listing import Support, SupportListing
 from src.ingestion import extract_supports
 
 
@@ -75,7 +75,7 @@ def test_split_doc(document: Document) -> None:
 MOCK_LLM_RESPONSE = """[
   {
     "name": "All Saints Episcopal Church",
-    "urls": [],
+    "website": null,
     "emails": [],
     "addresses": [
       "209 W 27th St. Austin. TX 78705"
@@ -87,7 +87,7 @@ MOCK_LLM_RESPONSE = """[
   },
   {
     "name": "First Baptist Church of Austin",
-    "urls": [],
+    "website": null,
     "emails": [],
     "addresses": [
       "901 Trinity St, Austin. TX 78701"
@@ -99,9 +99,7 @@ MOCK_LLM_RESPONSE = """[
   },
   {
     "name": "Foundation for the Homeless",
-    "urls": [
-      "http://www.austinecho.org/ca"
-    ],
+    "website": null,
     "emails": [
       "info@foundationhomeless.org"
     ],
@@ -116,7 +114,7 @@ MOCK_LLM_RESPONSE = """[
   },
   {
     "name": "Baptist Community Center",
-    "urls": [],
+    "website": null,
     "emails": [],
     "addresses": [
       "2000 East 2nd Street, Austin, Texas 78702"
@@ -163,18 +161,62 @@ def test_save_to_db(db_session: db.Session):
     # Add new DB record
     name = "Test Support Listing"
     support_listing = SupportListing(name=name, uri="some/path/to/file.pdf")
-    extract_supports.save_to_db(db_session, support_listing, {})
+    support_entries = [
+        extract_supports.SupportEntry(
+            name="Episcopal Church",
+            website=None,
+            emails=[],
+            addresses=["209 W 27th St. Austin. TX 78705"],
+            phone_numbers=["(512) 476-3589"],
+            description="Provides various assistance services.",
+        ),
+        extract_supports.SupportEntry(
+            name="First Baptist Church of Austin",
+            website=None,
+            emails=[],
+            addresses=[],
+            phone_numbers=[],
+            description=None,
+        ),
+    ]
+    extract_supports.save_to_db(db_session, support_listing, support_entries)
+
+    # Check the SupportListing
     assert db_session.query(SupportListing).count() == 1
     listing_record = (
         db_session.query(SupportListing).where(SupportListing.name == name).one_or_none()
     )
     assert listing_record.uri == "some/path/to/file.pdf"
 
-    # Update the record
+    # Check the Support records
+    supports = {support.name: support for support in listing_record.supports}
+    assert len(supports) == 2
+    assert supports["Episcopal Church"].addresses == ["209 W 27th St. Austin. TX 78705"]
+    assert supports["First Baptist Church of Austin"].addresses == []
+    assert supports["Episcopal Church"].description == "Provides various assistance services."
+    assert supports["First Baptist Church of Austin"].description is None
+
+    # Now update the SupportListing record URI with 1 support entry
     support_listing = SupportListing(name=name, uri="different/path/to/file.pdf")
-    extract_supports.save_to_db(db_session, support_listing, {})
+    support_entry = extract_supports.SupportEntry(
+        name="Replacement",
+        website=None,
+        emails=[],
+        addresses=[],
+        phone_numbers=[],
+        description="Replacement description",
+    )
+
+    # Check the updated SupportListing
+    extract_supports.save_to_db(db_session, support_listing, [support_entry])
     assert db_session.query(SupportListing).count() == 1
     listing_record = (
         db_session.query(SupportListing).where(SupportListing.name == name).one_or_none()
     )
     assert listing_record.uri == "different/path/to/file.pdf"
+
+    # Check the new Support record
+    db_session.refresh(listing_record)
+    supports = {support.name: support for support in listing_record.supports}
+    assert len(supports) == 1
+    assert supports["Replacement"].description == "Replacement description"
