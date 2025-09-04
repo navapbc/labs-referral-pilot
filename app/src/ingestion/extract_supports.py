@@ -154,8 +154,6 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, SupportEntry]
         [len(d.content) if d.content else 0 for d in split_docs],
     )
 
-    split_docs = split_docs[:1]
-
     pipeline = build_pipeline()
     supports = asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
     logger.info("Total supports: %d", len(supports))
@@ -187,7 +185,6 @@ def save_to_db(
 
     support_listing_id = existing_listing.id if existing_listing else support_listing.id
     assert support_listing_id
-    print(f"SupportListing ID: {support_listing_id}")
     # Populate support records
     for support in support_entries:
         support_record = Support(
