@@ -1,6 +1,10 @@
 import logging
+from typing import List, Optional
+from uuid import UUID
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, Text
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.models.base import Base, IdMixin, TimestampMixin
 
@@ -18,4 +22,41 @@ class SupportListing(Base, IdMixin, TimestampMixin):
     uri: Mapped[str] = mapped_column(
         nullable=False,
         comment="origin of the Support Listing; a file path or a website URL",
+    )
+
+
+class Support(Base, IdMixin, TimestampMixin):
+    __tablename__ = "support"
+
+    support_listing_id: Mapped[UUID] = mapped_column(
+        ForeignKey("support_listing.id", ondelete="CASCADE")
+    )
+    support_listing: Mapped[SupportListing] = relationship(SupportListing)
+
+    name: Mapped[str] = mapped_column(nullable=False, comment="The name for the support resource")
+
+    addresses: Mapped[List[str]] = mapped_column(
+        ARRAY(Text),
+        nullable=False,
+        comment="The address(es), as a list, of the support resource",
+    )
+
+    phone_numbers: Mapped[List[str]] = mapped_column(
+        ARRAY(Text),
+        nullable=False,
+        comment="The phone number(s), as a list, of the support resource",
+    )
+
+    description: Mapped[Optional[str]] = mapped_column(
+        nullable=True, comment="Description summarizing the resource"
+    )
+
+    website: Mapped[Optional[str]] = mapped_column(
+        nullable=True, comment="The full URL for the resource"
+    )
+
+    email_addresses: Mapped[List[str]] = mapped_column(
+        ARRAY(Text),
+        nullable=False,
+        comment="The email address(es) as a list to contact the resource",
     )
