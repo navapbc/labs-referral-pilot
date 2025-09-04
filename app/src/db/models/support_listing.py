@@ -24,6 +24,10 @@ class SupportListing(Base, IdMixin, TimestampMixin):
         comment="origin of the Support Listing; a file path or a website URL",
     )
 
+    supports: Mapped[list["Support"]] = relationship(
+        "Support", back_populates="support_listing", cascade="all, delete"
+    )
+
 
 class Support(Base, IdMixin, TimestampMixin):
     __tablename__ = "support"
