@@ -3,7 +3,7 @@ from haystack import component
 from haystack.dataclasses import ChatMessage, Document
 
 from src.adapters import db
-from src.db.models.support_listing import Support, SupportListing
+from src.db.models.support_listing import SupportListing
 from src.ingestion import extract_supports
 
 
