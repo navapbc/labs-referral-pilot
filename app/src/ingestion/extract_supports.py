@@ -165,7 +165,7 @@ def save_to_db(
     db_session: db.Session,
     support_listing: SupportListing,
     support_entries: Iterable[SupportEntry],
-):
+) -> None:
     existing_listing = (
         db_session.query(SupportListing)
         .where(SupportListing.name == support_listing.name)
