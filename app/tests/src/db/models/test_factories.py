@@ -114,9 +114,9 @@ def test_support_listing_factory_create(enable_factory_create, db_session: db.Se
         .one_or_none()
     )
 
-    assert support_listing.id == db_record.id
-    assert support_listing.name == db_record.name
-    assert support_listing.uri == db_record.uri
+    assert db_record.id == support_listing.id
+    assert db_record.name == support_listing.name
+    assert db_record.uri == support_listing.uri
 
 
 def test_support_factory_create(enable_factory_create, db_session: db.Session):
@@ -127,9 +127,9 @@ def test_support_factory_create(enable_factory_create, db_session: db.Session):
     db_record = db_session.query(Support).filter(Support.id == support.id).one_or_none()
 
     assert support.id is not None
-    assert support.name == db_record.name
-    assert support.addresses == db_record.addresses
-    assert support.phone_numbers == db_record.phone_numbers
-    assert support.description == db_record.description
-    assert support.website == db_record.website
-    assert support.email_addresses == db_record.email_addresses
+    assert db_record.name == support.name
+    assert db_record.addresses == support.addresses
+    assert db_record.phone_numbers == support.phone_numbers
+    assert db_record.description == support.description
+    assert db_record.website == support.website
+    assert db_record.email_addresses == support.email_addresses

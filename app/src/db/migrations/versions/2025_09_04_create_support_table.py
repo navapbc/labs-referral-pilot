@@ -1,8 +1,8 @@
 """create support table
 
-Revision ID: dfb8d1c41707
+Revision ID: e7fc051e7823
 Revises: 4d134292e5e3
-Create Date: 2025-09-03 20:06:17.387035
+Create Date: 2025-09-04 14:07:33.630457
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "dfb8d1c41707"
+revision = "e7fc051e7823"
 down_revision = "4d134292e5e3"
 branch_labels = None
 depends_on = None
@@ -21,30 +21,28 @@ def upgrade():
     op.create_table(
         "support",
         sa.Column("support_listing_id", sa.UUID(), nullable=False),
-        sa.Column("name", sa.Text(), nullable=False, comment="Human usable name for the support"),
+        sa.Column("name", sa.Text(), nullable=False, comment="The name for the support resource"),
         sa.Column(
             "addresses",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            comment="The address(es), as a list, of the support resource(s)",
+            comment="The address(es), as a list, of the support resource",
         ),
         sa.Column(
             "phone_numbers",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            comment="The phone number(s), as a list, of the support resource(s)",
+            comment="The phone number(s), as a list, of the support resource",
         ),
         sa.Column(
             "description", sa.Text(), nullable=True, comment="Description summarizing the resource"
         ),
-        sa.Column(
-            "website", sa.Text(), nullable=True, comment="The full URL for the specific resource"
-        ),
+        sa.Column("website", sa.Text(), nullable=True, comment="The full URL for the resource"),
         sa.Column(
             "email_addresses",
             postgresql.ARRAY(sa.Text()),
             nullable=False,
-            comment="The email address(es) as a list to contact the referral resource",
+            comment="The email address(es) as a list to contact the resource",
         ),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column(
@@ -66,7 +64,6 @@ def upgrade():
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("support_pkey")),
-        sa.UniqueConstraint("name", name=op.f("support_name_uniq")),
     )
     # ### end Alembic commands ###
 

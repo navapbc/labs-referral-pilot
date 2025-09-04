@@ -33,20 +33,18 @@ class Support(Base, IdMixin, TimestampMixin):
     )
     support_listing: Mapped[SupportListing] = relationship(SupportListing)
 
-    name: Mapped[str] = mapped_column(
-        nullable=False, unique=True, comment="Human usable name for the support"
-    )
+    name: Mapped[str] = mapped_column(nullable=False, comment="The name for the support resource")
 
     addresses: Mapped[List[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
-        comment="The address(es), as a list, of the support resource(s)",
+        comment="The address(es), as a list, of the support resource",
     )
 
     phone_numbers: Mapped[List[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
-        comment="The phone number(s), as a list, of the support resource(s)",
+        comment="The phone number(s), as a list, of the support resource",
     )
 
     description: Mapped[Optional[str]] = mapped_column(
@@ -54,11 +52,11 @@ class Support(Base, IdMixin, TimestampMixin):
     )
 
     website: Mapped[Optional[str]] = mapped_column(
-        nullable=True, comment="The full URL for the specific resource"
+        nullable=True, comment="The full URL for the resource"
     )
 
     email_addresses: Mapped[List[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
-        comment="The email address(es) as a list to contact the referral resource",
+        comment="The email address(es) as a list to contact the resource",
     )
