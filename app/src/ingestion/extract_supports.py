@@ -114,6 +114,7 @@ def build_pipeline() -> AsyncPipeline:
     )
     pipe.add_component("llm", create_llm())
     # If needed, add OutputValidator to retry the LLM call -- https://haystack.deepset.ai/tutorials/28_structured_output_with_loop
+    # Can update to use structured responses when https://github.com/deepset-ai/haystack/issues/8276 is complete
 
     pipe.connect("prompt_builder", "llm")
     return pipe
