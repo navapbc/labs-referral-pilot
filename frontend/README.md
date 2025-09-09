@@ -92,7 +92,7 @@ Similar to the Next.js application, Storybook can be ran natively or in a Docker
 From the `frontend/` directory:
 
 1. `npm run storybook`
-2. Navigate to [localhost:6006](http://localhost:6006) to view
+2. Navigate to [localhost:6007](http://localhost:6007) to view
 
 ##### Other scripts
 
@@ -105,7 +105,7 @@ Alternatively, you can run Storybook in a Docker container.
 From the `frontend/` directory:
 
 1. `make storybook`
-2. Navigate to [localhost:6006](http://localhost:6006) to view
+2. Navigate to [localhost:6007](http://localhost:6007) to view
 
 ## 🐛 Testing
 

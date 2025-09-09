@@ -15,7 +15,7 @@
     "lint-fix": "npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
     "start": "next start",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6007 --no-open",
     "storybook-build": "storybook build",
     "test": "jest --ci --coverage",
     "test-update": "jest --update-snapshot",

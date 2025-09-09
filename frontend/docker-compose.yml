@@ -29,4 +29,4 @@ services:
       - ./stories:/app/stories
     restart: always
     ports:
-      - 6006:6006
+      - 6007:6007
