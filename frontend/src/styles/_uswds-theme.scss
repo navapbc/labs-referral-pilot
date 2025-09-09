@@ -1,0 +1,27 @@
+/*
+----------------------------------------
+USWDS settings overrides
+----------------------------------------
+See https://designsystem.digital.gov/documentation/settings/
+for a full list of available settings.
+----------------------------------------
+*/
+
+@use "uswds-core" with (
+  // Disable scary but mostly irrelevant warnings:
+  $theme-show-notifications: false,
+
+  // Specify USWDS font and image paths.
+  // Same paths are successfully used for both Next.js and Storybook.
+  $theme-font-path: add-base-path("/uswds/fonts"),
+  $theme-image-path: add-base-path("/uswds/img"),
+  // Ensure utility classes always override other styles
+  $utilities-use-important: true,
+
+  // Use USWDS defaults for typography
+  $theme-style-body-element: true,
+  $theme-font-type-sans: "public-sans",
+  $theme-global-content-styles: true,
+  $theme-global-link-styles: true,
+  $theme-global-paragraph-styles: true
+);
