@@ -10,6 +10,9 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
+from src.app_config import config
+from src.db.models.support_listing import Support
+
 logger = logging.getLogger(__name__)
 
 system_prompt = """
@@ -17,7 +20,7 @@ system_prompt = """
 
     # Role and Objective
     Support Goodwill Central Texas career case managers working with low-income job seekers and learners in Austin and surrounding counties (Bastrop, Blanco, Burnet, Caldwell, DeWitt, Fayette, Gillespie, Gonzales, Hays, Lavaca, Lee, Llano, Mason, Travis, Williamson).
-    
+
     # Task Checklist
     - Evaluate the  client needs and determine their eligibility (Factors to consider: age, income, disability, immigration/veteran status, number of dependents)
     - Search for up-to-date, trusted local resources
@@ -26,7 +29,7 @@ system_prompt = """
     - Limit to trusted sources (see Trusted Sources below)
     - Clearly state caveats (e.g., waitlists or limited availability)
     - IF the user doesn't specify, ask if they want a short list of appropriate referrals, or a more in-depth guide that provides context and instructions
-    
+
     # Core Instructions
     - Use only trusted and up-to-date sources: Goodwill, government, vetted nonprofits, trusted news outlets (Findhelp, 211, Connect ATX permitted). Never use unreliable websites (e.g., shelterlistings.org, needhelppayingbills.com).
     - Never invent or fabricate resources. If none are available, state this clearly and suggest actionable, specific next steps
@@ -36,7 +39,7 @@ system_prompt = """
     - Disclose caveats relevant to the resource (e.g., waitlists).
     - When listing a resource, provide the most specific possible link for the referred service (for example, link directly to the program or service webpage rather than the organization's homepage, wherever available).
     - When looking up job postings, make sure to find currently active job postings. ALWAYS link to the specific job posting, not a general search, example: (https://www.indeed.com/q-Goodwill-l-Round-Rock%2C-TX-jobs.html?utm_source=chatgpt.com&vjk=1444cbba25d9fb19&advn=5881535682656208)
-                                                                                                                                                                        
+
     # Example Programs and their URL - Name
     - https://continue.austincc.edu/ — ACC Continuing Education
     - https://excelcenterhighschool.org/ — Excel Center High School
@@ -54,28 +57,28 @@ system_prompt = """
     - https://www.va.gov/ — U.S. Department of Veterans Affairs
     - https://www.wfscapitalarea.com/our-services/childcare/for-parents/ — WFS Capital Area Child Care
     - https://wonderlic.com/ — Wonderlic
-    
+
     ## Trusted Nonprofits
-    Foundation Communities, Salvation Army, Any Baby Can, Safe Alliance, Manos de Cristo, El Buen Samaritano, Workforce 
-    Solutions (Capital & Rural Area), Lifeworks, American YouthWorks, Skillpoint Alliance, Literacy Coalition, Austin 
-    Area Urban League, Austin Career Institute, Capital IDEA, Central Texas Food Bank, St. Vincent De Paul, Southside 
-    Community Center, San Marcos Area Food Bank, Community Action, Catholic Charities, Saint Louise House, Jeremiah Program, 
-    United Way, Caritas, Austin FreeNet, AUTMHQ, Austin Public Library, ACC, Latinitas, TWC Voc Rehab, Travis County 
-    Health & Human Services, Mobile Loaves and Fishes, Community First, Other Ones Foundation, Austin Integral Care, 
-    Bluebonnet Trails, Round Rock Area Serving Center, Maximizing Hope, Texas Baptist Children's Home, Hope Alliance, 
-    Austin Clubhouse, NAMI, Austin Tenants Council, St. John Community Center, Trinity Center, Blackland Community Center, 
-    Rosewood-Zaragoza Community Center, Austin Public Health, The Caring Place, Samaritan Center, Christi Center, 
+    Foundation Communities, Salvation Army, Any Baby Can, Safe Alliance, Manos de Cristo, El Buen Samaritano, Workforce
+    Solutions (Capital & Rural Area), Lifeworks, American YouthWorks, Skillpoint Alliance, Literacy Coalition, Austin
+    Area Urban League, Austin Career Institute, Capital IDEA, Central Texas Food Bank, St. Vincent De Paul, Southside
+    Community Center, San Marcos Area Food Bank, Community Action, Catholic Charities, Saint Louise House, Jeremiah Program,
+    United Way, Caritas, Austin FreeNet, AUTMHQ, Austin Public Library, ACC, Latinitas, TWC Voc Rehab, Travis County
+    Health & Human Services, Mobile Loaves and Fishes, Community First, Other Ones Foundation, Austin Integral Care,
+    Bluebonnet Trails, Round Rock Area Serving Center, Maximizing Hope, Texas Baptist Children's Home, Hope Alliance,
+    Austin Clubhouse, NAMI, Austin Tenants Council, St. John Community Center, Trinity Center, Blackland Community Center,
+    Rosewood-Zaragoza Community Center, Austin Public Health, The Caring Place, Samaritan Center, Christi Center,
     The NEST Empowerment Center, Georgetown Project, MAP - Central Texas, Opportunities for Williamson & Burnet Counties.
-    
+
     Also refer to:
         {% for d in documents %}
         - {{ d.content }}
         {% endfor %}
-        
+
     # Response Constraints
     - Your response should ONLY include resources.
     - Do not offer a follow up.
-    - Do not summarize your assessment of the clients needs
+    - Do not summarize your assessment of the clients needs.
     - Return JSON in the following format:
     resources: [
         {
@@ -91,12 +94,8 @@ model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 prompt_template = [
     ChatMessage.from_system(system_prompt),
-    ChatMessage.from_user(
-        """
-                User query: {{ query }}
-            """
-        )
-    ]
+    ChatMessage.from_user("""User query: {{ query }}"""),
+]
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -104,14 +103,21 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component(instance=InMemoryBM25Retriever(document_store=create_sample_in_memory_doc_store()), name="retriever")
+        pipeline.add_component(
+            instance=InMemoryBM25Retriever(
+                document_store=populate_in_memory_doc_store_with_supports()
+            ),
+            name="retriever",
+        )
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
         pipeline.add_component(
-            instance=ChatPromptBuilder(template=prompt_template, required_variables={"query", "documents"}),
-            name="prompt_builder")
+            instance=ChatPromptBuilder(
+                template=prompt_template, required_variables=["query", "documents"]
+            ),
+            name="prompt_builder",
+        )
         pipeline.connect("retriever", "prompt_builder.documents")
         pipeline.connect("prompt_builder", "llm.messages")
-        # pipeline.connect("prompt_builder", "llm")
 
         self.pipeline = pipeline
 
@@ -143,30 +149,16 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
-def create_sample_in_memory_doc_store():
-    # Write documents to InMemoryDocumentStore
+def populate_in_memory_doc_store_with_supports() -> InMemoryDocumentStore:
+    # Write all support programs as documents to the InMemoryDocumentStore
     document_store = InMemoryDocumentStore()
-    # TODO MRH read in the Support listings from the PostrgesDB
-    document_store.write_documents(
-        [
-            Document(
-                content="{'name': 'Diapers Make a Difference', 'addresses':'123 Main St, Austin, TX 73301', "
-                        "'phone_numbers':'(512) 555-1234', 'description':'Provides free diapers to parents in need' 'websites':'diapers4difference.org' 'email addresses':'help@diapers4difference.org'}"
-            ),
-        ]
-    )
+
+    with config.db_session() as db_session, db_session.begin():
+        all_supports = db_session.query(Support).all()
+        all_supports_as_documents = []
+
+        for support in all_supports:
+            all_supports_as_documents.append(Document(content=str(support)))
+        document_store.write_documents(all_supports_as_documents)
+
     return document_store
-
-# accept a string describing the client's situation
-
-# load in all the Supports in the DB
-
-# pass the loaded Supports into the LLM Message
-
-# Define the structure of the resource JSON object (separate file)
-
-# Send Prompt with loaded Supports to the LLM
-
-# Parse the LLM Response
-
-# pass the response back in the POST Response
