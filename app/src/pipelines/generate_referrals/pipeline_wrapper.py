@@ -167,7 +167,5 @@ def populate_in_memory_doc_store_with_supports() -> InMemoryDocumentStore:
             logger.info("adding support to local storage %s", support_as_str)
             all_supports_as_documents.append(Document(content=support_as_str))
         document_store.write_documents(all_supports_as_documents)
-    logger.info(
-        "added supports to local storage %s", all_supports_as_documents
-    )
+    logger.info("added supports to local storage %s", all_supports_as_documents)
     return document_store
