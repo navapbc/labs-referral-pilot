@@ -62,7 +62,6 @@ build-backend = "poetry.core.masonry.api"
 db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
-db-seed-support-listings = "src.db.models.postgres.support_listing_util:populate_support_listings"
 extract-supports= "src.ingestion.extract_supports:main"
 
 [tool.black]

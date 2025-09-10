@@ -4,11 +4,9 @@ from pprint import pformat
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
-from haystack import Document, Pipeline
+from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.dataclasses.chat_message import ChatMessage
-from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
@@ -46,13 +44,12 @@ system_prompt = """
     - When listing a resource, provide the most specific possible link for the referred service (for example, link directly to the program or service webpage rather than the organization's homepage, wherever available).
 
     List of resources to choose from:
-        {% for d in documents %}
-        - {{ d.content }}
+        {% for s in supports %}
+        - {{ s.content }}
         {% endfor %}
 
     # Response Constraints
     - Your response should ONLY include resources.
-    - Do not offer a follow up.
     - Do not summarize your assessment of the clients needs.
     - limit the description for a resource to be less than 255 words.
     - Return a JSON list of resources in the following format:
@@ -71,30 +68,27 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component(
-            instance=InMemoryBM25Retriever(
-                document_store=populate_in_memory_doc_store_with_supports()
-            ),
-            name="retriever",
-        )
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                template=prompt_template, required_variables=["query", "documents", "resource_json"]
+                template=prompt_template, required_variables=["query", "supports", "resource_json"]
             ),
             name="prompt_builder",
         )
-        pipeline.connect("retriever", "prompt_builder.documents")
         pipeline.connect("prompt_builder", "llm.messages")
 
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str) -> dict:
+        supports_from_db = retrieve_supports_from_db()
         response = self.pipeline.run(
             {
-                "retriever": {"query": query},
-                "prompt_builder": {"query": query, "resource_json": resource_as_json},
+                "prompt_builder": {
+                    "query": query,
+                    "supports": supports_from_db,
+                    "resource_json": resource_as_json,
+                },
             }
         )
         logger.info("Results: %s", pformat(response))
@@ -117,21 +111,15 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
-def populate_in_memory_doc_store_with_supports() -> InMemoryDocumentStore:
-    # Write all support programs as documents to the InMemoryDocumentStore
-    document_store = InMemoryDocumentStore()
-
+def retrieve_supports_from_db() -> list[str]:
+    all_supports: list[str] = []
     with config.db_session() as db_session, db_session.begin():
-        all_supports = db_session.query(Support).all()
-        all_supports_as_documents = []
+        all_db_supports = db_session.query(Support).all()
 
-        for support in all_supports:
+        for support in all_db_supports:
             support_dict = {
                 c.key: getattr(support, c.key) for c in inspect(Support).mapper.column_attrs
             }
             support_as_str = json.dumps(support_dict, default=str)
-            logger.info("adding support to local storage %s", support_as_str)
-            all_supports_as_documents.append(Document(content=support_as_str))
-        document_store.write_documents(all_supports_as_documents)
-    logger.info("added supports to local storage %s", all_supports_as_documents)
-    return document_store
+            all_supports.append(support_as_str)
+    return all_supports
