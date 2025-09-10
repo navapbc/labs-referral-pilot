@@ -164,10 +164,10 @@ def populate_in_memory_doc_store_with_supports() -> InMemoryDocumentStore:
                 c.key: getattr(support, c.key) for c in inspect(Support).mapper.column_attrs
             }
             support_as_str = json.dumps(support_dict, default=str)
-            logger.info(f"adding support to local storage{support_as_str}", support_as_str)
+            logger.info("adding support to local storage %s", support_as_str)
             all_supports_as_documents.append(Document(content=support_as_str))
         document_store.write_documents(all_supports_as_documents)
     logger.info(
-        f"added supports to local storage{all_supports_as_documents}", all_supports_as_documents
+        "added supports to local storage %s", all_supports_as_documents
     )
     return document_store
