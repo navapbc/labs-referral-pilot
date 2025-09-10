@@ -45,36 +45,6 @@ system_prompt = """
     - Disclose caveats relevant to the resource (e.g., waitlists).
     - When listing a resource, provide the most specific possible link for the referred service (for example, link directly to the program or service webpage rather than the organization's homepage, wherever available).
 
-    #Example Programs and their URL - Name
-    - https://continue.austincc.edu/ — ACC Continuing Education
-    - https://excelcenterhighschool.org/ — Excel Center High School
-    - https://www.feedingamerica.org/find-your-local-foodbank — Feeding America
-    - https://www.gctatraining.org/ — GCTA Training
-    - https://www.ged.com/ — GED Testing
-    - https://www.goodwillcentraltexas.org/ — Goodwill Central Texas
-    - https://www.gsgtalentsolutions.com/ — GSG Talent Solutions
-    - https://www.hhs.texas.gov/ — Texas Health & Human Services
-    - https://www.indeed.com/cmp/Goodwill-Central-Texas/jobs — Indeed (GCT Jobs)
-    - https://library.austintexas.gov/ — Austin Public Library
-    - https://www.centraltexasfoodbank.org/ — Central TX Food Bank
-    - https://texaswic.org/ — Texas WIC
-    - https://www.twc.texas.gov/ — Texas Workforce Commission
-    - https://www.va.gov/ — U.S. Department of Veterans Affairs
-    - https://www.wfscapitalarea.com/our-services/childcare/for-parents/ — WFS Capital Area Child Care
-    - https://wonderlic.com/ — Wonderlic
-
-    ##Trusted Nonprofits
-    Foundation Communities, Salvation Army, Any Baby Can, Safe Alliance, Manos de Cristo, El Buen Samaritano, Workforce
-    Solutions (Capital & Rural Area), Lifeworks, American YouthWorks, Skillpoint Alliance, Literacy Coalition, Austin
-    Area Urban League, Austin Career Institute, Capital IDEA, Central Texas Food Bank, St. Vincent De Paul, Southside
-    Community Center, San Marcos Area Food Bank, Community Action, Catholic Charities, Saint Louise House, Jeremiah Program,
-    United Way, Caritas, Austin FreeNet, AUTMHQ, Austin Public Library, ACC, Latinitas, TWC Voc Rehab, Travis County
-    Health & Human Services, Mobile Loaves and Fishes, Community First, Other Ones Foundation, Austin Integral Care,
-    Bluebonnet Trails, Round Rock Area Serving Center, Maximizing Hope, Texas Baptist Children's Home, Hope Alliance,
-    Austin Clubhouse, NAMI, Austin Tenants Council, St. John Community Center, Trinity Center, Blackland Community Center,
-    Rosewood-Zaragoza Community Center, Austin Public Health, The Caring Place, Samaritan Center, Christi Center,
-    The NEST Empowerment Center, Georgetown Project, MAP - Central Texas, Opportunities for Williamson & Burnet Counties.
-
     List of resources to choose from:
         {% for d in documents %}
         - {{ d.content }}
