@@ -14,6 +14,9 @@ locals {
           "referral-pilot-dev.navateam.com" = {
             source = "issued"
           }
+          "app.referral-pilot-dev.navateam.com" = {
+            source = "issued"
+          }
 
           # Example certificate configuration for a certificate that is issued elsewhere and imported into the project
           # (currently not supported, will be supported via https://github.com/navapbc/template-infra/issues/559)
