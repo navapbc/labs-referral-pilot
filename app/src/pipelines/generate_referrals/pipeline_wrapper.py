@@ -39,9 +39,6 @@ system_prompt = """
     #Core Instructions
     - Use only trusted and up-to-date sources: Goodwill, government, vetted nonprofits, trusted news outlets (Findhelp, 211, Connect ATX permitted). Never use unreliable websites (e.g., shelterlistings.org, needhelppayingbills.com).
     - Never invent or fabricate resources. If none are available, state this clearly and suggest actionable, specific next steps
-    - Before significant tool or search actions, briefly state your intent and required inputs.
-    - Disclose caveats relevant to the resource (e.g., waitlists).
-    - When listing a resource, provide the most specific possible link for the referred service (for example, link directly to the program or service webpage rather than the organization's homepage, wherever available).
 
     List of resources to choose from:
         {% for s in supports %}
