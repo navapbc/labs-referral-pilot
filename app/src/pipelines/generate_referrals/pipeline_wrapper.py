@@ -1,3 +1,4 @@
+import json
 import logging
 from pprint import pformat
 
@@ -9,6 +10,7 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from sqlalchemy.inspection import inspect
 
 from src.app_config import config
 from src.db.models.support_listing import Support
@@ -158,7 +160,14 @@ def populate_in_memory_doc_store_with_supports() -> InMemoryDocumentStore:
         all_supports_as_documents = []
 
         for support in all_supports:
-            all_supports_as_documents.append(Document(content=str(support)))
+            support_dict = {
+                c.key: getattr(support, c.key) for c in inspect(Support).mapper.column_attrs
+            }
+            support_as_str = json.dumps(support_dict, default=str)
+            logger.info(f"adding support to local storage{support_as_str}", support_as_str)
+            all_supports_as_documents.append(Document(content=support_as_str))
         document_store.write_documents(all_supports_as_documents)
-
+    logger.info(
+        f"added supports to local storage{all_supports_as_documents}", all_supports_as_documents
+    )
     return document_store
