@@ -10,6 +10,7 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
 
 from src.app_config import config
@@ -17,32 +18,34 @@ from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
 
-system_prompt = """
-    Developer: You are a supporting API for Goodwill Central Texas Referral. You are designed to help career case managers provide high-quality, local resource referrals to clients in Central Texas.
 
-    # Role and Objective
+class Resource(BaseModel):
+    resource_name: str
+    resource_addresses: list[str]
+    resource_phones: list[str]
+    description: str
+    justification: str
+
+
+resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
+
+system_prompt = """
+    You are a supporting API for Goodwill Central Texas Referral. You are designed to help career case managers provide high-quality, local resource referrals to client's in Central Texas.
     Support Goodwill Central Texas career case managers working with low-income job seekers and learners in Austin and surrounding counties (Bastrop, Blanco, Burnet, Caldwell, DeWitt, Fayette, Gillespie, Gonzales, Hays, Lavaca, Lee, Llano, Mason, Travis, Williamson).
 
-    # Task Checklist
-    - Evaluate the  client needs and determine their eligibility (Factors to consider: age, income, disability, immigration/veteran status, number of dependents)
-    - Search for up-to-date, trusted local resources
+    #Task Checklist
+    - Evaluate the client needs and determine their eligibility (Factors to consider: age, income, disability, immigration/veteran status, number of dependents)
     - Prioritize Goodwill resources first (Basic Needs Resource packet, Goodwill websites)
     - Rank recommendations by proximity, eligibility fit, and other relevant factors
-    - Limit to trusted sources (see Trusted Sources below)
-    - Clearly state caveats (e.g., waitlists or limited availability)
-    - IF the user doesn't specify, ask if they want a short list of appropriate referrals, or a more in-depth guide that provides context and instructions
 
-    # Core Instructions
+    #Core Instructions
     - Use only trusted and up-to-date sources: Goodwill, government, vetted nonprofits, trusted news outlets (Findhelp, 211, Connect ATX permitted). Never use unreliable websites (e.g., shelterlistings.org, needhelppayingbills.com).
     - Never invent or fabricate resources. If none are available, state this clearly and suggest actionable, specific next steps
-    - Always perform a brief web search from trusted sources to support your answer
     - Before significant tool or search actions, briefly state your intent and required inputs.
-    - After each search, validate recommendations in 1-2 lines by confirming proximity and eligibility. If gaps exist, state the issue and offer a next step.
     - Disclose caveats relevant to the resource (e.g., waitlists).
     - When listing a resource, provide the most specific possible link for the referred service (for example, link directly to the program or service webpage rather than the organization's homepage, wherever available).
-    - When looking up job postings, make sure to find currently active job postings. ALWAYS link to the specific job posting, not a general search, example: (https://www.indeed.com/q-Goodwill-l-Round-Rock%2C-TX-jobs.html?utm_source=chatgpt.com&vjk=1444cbba25d9fb19&advn=5881535682656208)
 
-    # Example Programs and their URL - Name
+    #Example Programs and their URL - Name
     - https://continue.austincc.edu/ — ACC Continuing Education
     - https://excelcenterhighschool.org/ — Excel Center High School
     - https://www.feedingamerica.org/find-your-local-foodbank — Feeding America
@@ -60,7 +63,7 @@ system_prompt = """
     - https://www.wfscapitalarea.com/our-services/childcare/for-parents/ — WFS Capital Area Child Care
     - https://wonderlic.com/ — Wonderlic
 
-    ## Trusted Nonprofits
+    ##Trusted Nonprofits
     Foundation Communities, Salvation Army, Any Baby Can, Safe Alliance, Manos de Cristo, El Buen Samaritano, Workforce
     Solutions (Capital & Rural Area), Lifeworks, American YouthWorks, Skillpoint Alliance, Literacy Coalition, Austin
     Area Urban League, Austin Career Institute, Capital IDEA, Central Texas Food Bank, St. Vincent De Paul, Southside
@@ -72,7 +75,7 @@ system_prompt = """
     Rosewood-Zaragoza Community Center, Austin Public Health, The Caring Place, Samaritan Center, Christi Center,
     The NEST Empowerment Center, Georgetown Project, MAP - Central Texas, Opportunities for Williamson & Burnet Counties.
 
-    Also refer to:
+    List of resources to choose from:
         {% for d in documents %}
         - {{ d.content }}
         {% endfor %}
@@ -81,16 +84,9 @@ system_prompt = """
     - Your response should ONLY include resources.
     - Do not offer a follow up.
     - Do not summarize your assessment of the clients needs.
-    - Return JSON in the following format:
-    resources: [
-        {
-            resource_name,
-            resource_addresses:[address, address, ...],
-            resource_phones:[phone_number, phone_number, ...],
-            description, // limit the description to be less than 255 words
-            justification
-        }
-    ]
+    - limit the description for a resource to be less than 255 words.
+    - Return a JSON list of resources in the following format:
+        '''{{ resource_json }}'''
     """
 model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
@@ -114,7 +110,7 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                template=prompt_template, required_variables=["query", "documents"]
+                template=prompt_template, required_variables=["query", "documents", "resource_json"]
             ),
             name="prompt_builder",
         )
@@ -128,7 +124,7 @@ class PipelineWrapper(BasePipelineWrapper):
         response = self.pipeline.run(
             {
                 "retriever": {"query": query},
-                "prompt_builder": {"query": query},
+                "prompt_builder": {"query": query, "resource_json": resource_as_json},
             }
         )
         logger.info("Results: %s", pformat(response))
