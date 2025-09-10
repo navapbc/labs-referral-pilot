@@ -11,6 +11,12 @@
     },
     {
         "pattern": "https://navalabs.atlassian.net/browse/DST-"
+    },
+    {
+      "pattern": "https://www.terraform.io/"
+    },
+    {
+      "pattern": "https://developer.hashicorp.com/"
     }
   ],
   "replacementPatterns": [
