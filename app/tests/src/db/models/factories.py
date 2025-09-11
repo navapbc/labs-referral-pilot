@@ -103,8 +103,9 @@ class SupportFactory(BaseFactory):
     support_listing = factory.SubFactory(SupportListingFactory)
 
     name = factory.Faker("name")
-    addresses = factory.Faker("address")
-    phone_numbers = factory.Faker("phone_number")
-    description = factory.Faker("sentence")
-    website = factory.Faker("url")
-    email_addresses = factory.Faker("email")
+    addresses = factory.LazyFunction(lambda: [fake.address().replace("\n", ", ")])
+    phone_numbers = factory.LazyFunction(lambda: [fake.phone_number()])
+    email_addresses = factory.LazyFunction(lambda: [fake.email()])
+
+    description = factory.LazyFunction(lambda: fake.sentence())
+    website = factory.LazyFunction(lambda: fake.url())
