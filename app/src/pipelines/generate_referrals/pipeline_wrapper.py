@@ -45,7 +45,7 @@ system_prompt = """
         - {{ s.content }}
         {% endfor %}
 
-    # Response Constraints
+## Response Constraints
     - Your response should ONLY include resources.
     - Do not summarize your assessment of the clients needs.
     - limit the description for a resource to be less than 255 words.
