@@ -48,7 +48,7 @@ List of resources to choose from:
 ## Response Constraints
     - Your response should ONLY include resources.
     - Do not summarize your assessment of the clients needs.
-    - limit the description for a resource to be less than 255 words.
+    - Limit the description for a resource to be less than 255 words.
     - Return a JSON list of resources in the following format:
         '''{{ resource_json }}'''
     """
