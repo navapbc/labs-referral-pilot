@@ -18,6 +18,10 @@ const primaryLinks = [
     i18nKey: "nav_link_health",
     href: "/health",
   },
+  {
+    i18nKey: "nav_link_generate_referrals",
+    href: "/generate-referrals",
+  },
 ] as const;
 
 const Header = () => {

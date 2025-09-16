@@ -1,11 +1,6 @@
-@forward "uswds-theme";
-@forward "uswds";
-@forward "uswds-theme-custom-styles";
+/*@import "node_modules/tailwindcss";
+@import "node_modules/tw-animate-css";*/
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/*
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -123,4 +118,3 @@
     @apply bg-background text-foreground;
   }
 }
-*/
