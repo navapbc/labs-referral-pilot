@@ -22,6 +22,7 @@ from smart_open import open as smart_open
 
 from src.adapters import db
 from src.app_config import config
+from src.common import haystack_utils, phoenix_utils
 from src.db.models.support_listing import Support, SupportListing
 
 logger = logging.getLogger(__name__)
@@ -76,21 +77,7 @@ class SupportEntry(BaseModel):
     description: str | None = Field(description="2-sentence summary, including offerings")
 
 
-SYSTEM_PROMPT_TEMPLATE = f"""Using only the document content provided by the user, return a JSON list of objects.
-Each object must match exactly this schema:
-```
-{json.dumps(SupportEntry.model_json_schema(), indent=2)}
-```
-
-Rules:
-- Output ONLY raw JSON (no markdown fences, no commentary).
-- If a field is missing in the PDF, use null or [] as appropriate.
-- Keep strings concise; avoid line breaks inside values.
-"""
-
-USER_TEMPLATE = """Document content:
-{{ doc.content }}
-"""
+OUTPUT_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
 
 
 def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
@@ -105,12 +92,10 @@ def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
 def build_pipeline() -> AsyncPipeline:
     pipe = AsyncPipeline()
 
-    messages = [
-        ChatMessage.from_system(SYSTEM_PROMPT_TEMPLATE),
-        ChatMessage.from_user(USER_TEMPLATE),
-    ]
+    prompt_ver = phoenix_utils.get_prompt_template("extract_supports")
+    chat_template = haystack_utils.to_chat_messages(prompt_ver._template["messages"])
     pipe.add_component(
-        "prompt_builder", ChatPromptBuilder(template=messages, required_variables="*")
+        "prompt_builder", ChatPromptBuilder(template=chat_template, required_variables="*")
     )
     pipe.add_component("llm", create_llm())
     # If needed, add OutputValidator to retry the LLM call -- https://haystack.deepset.ai/tutorials/28_structured_output_with_loop
@@ -124,7 +109,7 @@ async def run_pipeline(pipeline: AsyncPipeline, doc: Document) -> list[dict]:
     assert doc.content
     logger.info("Running pipeline with subdoc content length: %d", len(doc.content))
 
-    _result = await pipeline.run_async({"prompt_builder": {"doc": doc}})
+    _result = await pipeline.run_async({"prompt_builder": {"schema": OUTPUT_SCHEMA, "doc": doc}})
     assert len(_result["llm"]["replies"]) == 1
     reply = _result["llm"]["replies"][0]
     # Useful info for checking if tokens have reached the limit for the LLM
@@ -154,6 +139,7 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, SupportEntry]
         len(split_docs),
         [len(d.content) if d.content else 0 for d in split_docs],
     )
+    split_docs = split_docs[:3]
 
     pipeline = build_pipeline()
     supports = asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))
@@ -186,8 +172,8 @@ def save_to_db(
 
     support_listing_id = existing_listing.id if existing_listing else support_listing.id
     assert support_listing_id
-    # Populate support records
     for support in support_entries:
+        logger.info("Adding Support record: %r", support.name)
         support_record = Support(
             support_listing_id=support_listing_id,
             name=support.name,
@@ -215,9 +201,6 @@ def main() -> None:  # pragma: no cover
     assert doc.content
     logger.info("Extracted content length: %d", len(doc.content))
     extracted_supports = extract_support_entries(args.name, doc)
-
-    for support in extracted_supports.values():
-        logger.info("Support: %r", support.name)
 
     with config.db_session() as db_session, db_session.begin():
         support_listing = SupportListing(name=args.name, uri=args.filepath)

@@ -72,11 +72,12 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         tracer_provider.add_span_processor(pii_processor)
 
 
-def get_prompt_template(prompt_name, client):
+def get_prompt_template(prompt_name: str) -> phoenix.client.types.PromptVersion:
     """Retrieve a prompt template from Phoenix by name.
     https://arize.com/docs/phoenix/sdk-api-reference/python/overview#prompt-management
     """
     prompt_params = which_prompt_version(prompt_name)
+    client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(
         "Retrieved prompt with %r: id='%s'\n%s", prompt_params, prompt.id, pformat(prompt._dumps())

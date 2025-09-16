@@ -30,6 +30,7 @@ class AppConfig(PydanticBaseEnvConfig):
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "sample_rag": "UHJvbXB0VmVyc2lvbjox",
+        "extract_supports": "UHJvbXB0VmVyc2lvbjoz",
     }
 
 
