@@ -1,5 +1,7 @@
 'use client';
-import {Button, Label, Textarea} from "@trussworks/react-uswds"; /*TODO Use the ShadCN components*/
+import { Button } from "@/src/components/ui/button"
+import { Label } from "@/src/components/ui/label"
+import { Textarea } from "@/src/components/ui/textarea"
 import {Resource} from "@/src/types/resources";
 
 import {useState} from 'react';
@@ -35,21 +37,22 @@ export default function Page() {
   }
 
   return <>
-    <div className="max-w-2xl space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="client_details">Client Details</Label>
+    <div className="">
+      <form className="">
+        {/* grid w-full max-w-sm items-center gap-3 */}
+        <Label htmlFor="client-details">Client Details</Label>
         <Textarea
-          id="client_details"
-          name="client_details"
+          id="client-details"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add client details here…"
           rows={4}
         />
-      </div>
-      <Button type="button" onClick={handleClick} disabled={loading} className="margin-top-2">
-        {loading ? 'Generating...' : 'Generate Referrals'}
-      </Button>
+        <Button type="button" onClick={handleClick} disabled={loading} className="margin-top-2">
+          {loading ? 'Generating...' : 'Generate Referrals'}
+        </Button>
+      </form>
+
       {displayResourcesFromResult(result)}
     </div>
   </>;

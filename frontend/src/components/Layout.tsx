@@ -5,7 +5,7 @@ import {
   useMessages,
   useTranslations,
 } from "next-intl";
-import { GovBanner, Grid, GridContainer } from "@trussworks/react-uswds";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Footer from "./Footer";
 import Header from "./Header";
@@ -25,7 +25,6 @@ const Layout = ({ children, locale }: Props) => {
       <a className="usa-skipnav" href="#main-content">
         {t("skip_to_main")}
       </a>
-      <GovBanner language={locale?.match(/^es-?/) ? "spanish" : "english"} />
       <NextIntlClientProvider
         locale={locale}
         messages={pick(messages, "components.Header")}
@@ -40,7 +39,6 @@ const Layout = ({ children, locale }: Props) => {
           </Grid>
         </GridContainer>
       </main>
-      <Footer />
     </div>
   );
 };
