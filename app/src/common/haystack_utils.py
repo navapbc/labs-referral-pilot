@@ -3,10 +3,18 @@ from typing import Sequence
 from haystack.dataclasses.chat_message import ChatMessage
 from phoenix.client.__generated__ import v1
 
+from src.common import phoenix_utils
+
+
+def get_phoenix_prompt(prompt_name: str) -> list[ChatMessage]:
+    prompt_ver = phoenix_utils.get_prompt_template(prompt_name)
+    return to_chat_messages(prompt_ver._template["messages"])
+
 
 def to_chat_messages(
     msg_list: Sequence[dict | v1.PromptMessage | ChatMessage],
 ) -> list[ChatMessage]:
+    """Convert a list of dicts or Phoenix PromptMessage to a list of Haystack ChatMessage."""
     messages = []
     for msg in msg_list:
         if isinstance(msg, ChatMessage):

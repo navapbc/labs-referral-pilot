@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
 
 from src.app_config import config
-from src.common import components, haystack_utils, phoenix_utils
+from src.common import components, haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
@@ -35,20 +35,16 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        # pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
-        pipeline.add_component("llm", components.EchoNode())
+        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
-        prompt_ver = phoenix_utils.get_prompt_template("generate_referrals")
-        prompt_template = haystack_utils.to_chat_messages(prompt_ver._template["messages"])
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
             instance=ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
             ),
             name="prompt_builder",
         )
-        # pipeline.connect("prompt_builder", "llm.messages")
-        pipeline.connect("prompt_builder", "llm.prompt")
-        pipeline.connect("prompt_builder", "llm.history")
+        pipeline.connect("prompt_builder", "llm.messages")
 
         self.pipeline = pipeline
 

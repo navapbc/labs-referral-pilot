@@ -15,14 +15,13 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import PyPDFToDocument
 from haystack.components.preprocessors import DocumentSplitter
 from haystack.dataclasses import Document
-from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel, Field
 from smart_open import open as smart_open
 
 from src.adapters import db
 from src.app_config import config
-from src.common import haystack_utils, phoenix_utils
+from src.common import haystack_utils
 from src.db.models.support_listing import Support, SupportListing
 
 logger = logging.getLogger(__name__)
@@ -92,8 +91,7 @@ def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
 def build_pipeline() -> AsyncPipeline:
     pipe = AsyncPipeline()
 
-    prompt_ver = phoenix_utils.get_prompt_template("extract_supports")
-    chat_template = haystack_utils.to_chat_messages(prompt_ver._template["messages"])
+    chat_template = haystack_utils.get_phoenix_prompt("extract_supports")
     pipe.add_component(
         "prompt_builder", ChatPromptBuilder(template=chat_template, required_variables="*")
     )
