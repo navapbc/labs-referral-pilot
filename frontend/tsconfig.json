@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "paths":{ "@/*": ["./src/*", "./*"]},
     "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
@@ -35,5 +36,5 @@
     ".storybook/**/*",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

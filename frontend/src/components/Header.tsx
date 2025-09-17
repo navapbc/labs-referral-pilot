@@ -2,12 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import {
-  NavMenuButton,
-  PrimaryNav,
-  Title,
-  Header as USWDSHeader,
-} from "@trussworks/react-uswds";
 
 const primaryLinks = [
   {
@@ -36,13 +30,10 @@ const Header = () => {
 
   return (
     <>
-      <div
-        className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
-      />
-      <USWDSHeader basic={true}>
-        <div className="usa-nav-container">
-          <div className="usa-navbar">
-            <Title className="desktop:margin-top-2">
+      <div>
+        <div className="">
+          <div className="">
+            <div className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
                 <span className="margin-right-1">
                   <img
@@ -55,19 +46,18 @@ const Header = () => {
                 </span>
                 <span className="font-sans-lg flex-fill">{t("title")}</span>
               </div>
-            </Title>
-            <NavMenuButton
+            </div>
+            <button
               onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
-            />
+            >{t("nav_menu_toggle")}</button>
           </div>
-          <PrimaryNav
+          {/*<div
             items={navItems}
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
-          ></PrimaryNav>
+          ></div>*/}
         </div>
-      </USWDSHeader>
+      </div>
     </>
   );
 };

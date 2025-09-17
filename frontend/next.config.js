@@ -1,5 +1,6 @@
 // @ts-check
 const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
+const path = require("path");
 const sassOptions = require("./scripts/sassOptions");
 
 /**
@@ -21,10 +22,15 @@ const nextConfig = {
   output: "standalone",
   sassOptions: appSassOptions,
   // Continue to support older browsers (ES5)
-  transpilePackages: [
-    // https://github.com/trussworks/react-uswds/issues/2605
-    "@trussworks/react-uswds",
-  ],
+  transpilePackages: [],
+
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(__dirname, "src"),
+    };
+    return config;
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

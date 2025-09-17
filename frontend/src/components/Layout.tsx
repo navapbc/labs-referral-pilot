@@ -1,13 +1,13 @@
 import { pick } from "lodash";
+import "../app/globals.css";
+
 
 import {
   NextIntlClientProvider,
   useMessages,
   useTranslations,
 } from "next-intl";
-import { GovBanner, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Footer from "./Footer";
 import Header from "./Header";
 
 type Props = {
@@ -22,25 +22,22 @@ const Layout = ({ children, locale }: Props) => {
   return (
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
-      <a className="usa-skipnav" href="#main-content">
+      {/* <a className="" href="#main-content">
         {t("skip_to_main")}
       </a>
-      <GovBanner language={locale?.match(/^es-?/) ? "spanish" : "english"} />
       <NextIntlClientProvider
         locale={locale}
         messages={pick(messages, "components.Header")}
       >
         <Header />
-      </NextIntlClientProvider>
-      {/* grid-col-fill so that the footer sticks to the bottom of tall screens */}
-      <main id="main-content" className="usa-section grid-col-fill">
-        <GridContainer>
-          <Grid row>
-            <Grid col>{children}</Grid>
-          </Grid>
-        </GridContainer>
+      </NextIntlClientProvider>*/}
+      <main id="main-content" className="grid-col-fill">
+        <div>
+          <div >
+            <div >{children}</div>
+          </div>
+        </div>
       </main>
-      <Footer />
     </div>
   );
 };

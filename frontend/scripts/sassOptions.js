@@ -8,8 +8,6 @@ const sass = require("sass");
 function sassOptions(basePath = "") {
   return {
     includePaths: [
-      "./node_modules/@uswds",
-      "./node_modules/@uswds/uswds/packages",
     ],
     functions: {
       "add-base-path($path)": (path) => {

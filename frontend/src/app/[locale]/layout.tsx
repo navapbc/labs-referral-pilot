@@ -6,7 +6,7 @@ import { Metadata } from "next";
 
 import Layout from "src/components/Layout";
 
-import "src/styles/styles.scss";
+import "@/app/globals.css";
 
 export const metadata: Metadata = {
   icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`],
