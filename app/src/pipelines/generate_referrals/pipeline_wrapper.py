@@ -12,8 +12,8 @@ from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
 
 from src.app_config import config
-from src.db.models.support_listing import Support
 from src.common import components, haystack_utils, phoenix_utils
+from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
 

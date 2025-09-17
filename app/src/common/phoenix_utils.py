@@ -106,10 +106,11 @@ def copy_deployed_prompts():
     assert args.api_key
     logger.info("Copying prompts from %s", args.url)
     src_client = _create_client(args.url, api_key=args.api_key)
+    local_client = _create_client()
     for prompt in list_prompts(src_client):
         # The prompt id is base64 encoding of 'Prompt:N' where N is simply a counter
         logger.info("Copying prompt: %r with id=%r)", prompt["name"], prompt["id"])
-        copy_prompt(src_client, prompt["name"])
+        copy_prompt(src_client, local_client, prompt["name"])
 
 
 def list_prompts(client):
@@ -118,7 +119,8 @@ def list_prompts(client):
     return response.json()["data"]
 
 
-def copy_prompt(src_client, prompt_name):
+def copy_prompt(src_client, local_client, prompt_name):
+    "Copy a prompt from src_client to local_client"
     if prompt_name not in config.PROMPT_VERSIONS:
         logger.warning("No version id found for prompt %r -- skipping", prompt_name)
         return
@@ -126,9 +128,17 @@ def copy_prompt(src_client, prompt_name):
     prompt_ver = src_client.prompts.get(prompt_version_id=config.PROMPT_VERSIONS[prompt_name])
     logger.info("Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps()))
 
-    local_client = _create_client()
     logger.info("Creating prompt %r in %r", prompt_name, local_client._client.base_url)
     # If prompt_name already exists, a new prompt version will be created
     local_client.prompts.create(
         version=prompt_ver, name=prompt_name, prompt_description=prompt_ver._description
     )
+
+
+def list_prompt_version_ids(prompt_name, client):
+    "List all version ids for a given prompt name. client.prompts doesn't have a list_versions() method."
+    response = client._client.get(f"/v1/prompts/{prompt_name}/versions")
+    resp_data = response.json()["data"]
+    # version tags are not in the response
+    return [ver["id"] for ver in resp_data]
+    # To get tags for the version: client.prompts.tags.list(prompt_version_id=version_id)
