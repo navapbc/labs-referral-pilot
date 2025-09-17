@@ -19,7 +19,9 @@ from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
 logger = logging.getLogger(__name__)
 
 
-def _create_client(url: str = config.phoenix_collector_endpoint, api_key: str | None = None) -> Client:
+def _create_client(
+    url: str = config.phoenix_collector_endpoint, api_key: str | None = None
+) -> Client:
     logger.info("Creating Phoenix client to %s", url)
     return Client(base_url=url, api_key=api_key)
 
