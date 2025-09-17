@@ -137,7 +137,6 @@ def extract_support_entries(name: str, doc: Document) -> dict[str, SupportEntry]
         len(split_docs),
         [len(d.content) if d.content else 0 for d in split_docs],
     )
-    split_docs = split_docs[:3]
 
     pipeline = build_pipeline()
     supports = asyncio.run(run_pipeline_and_join_results(pipeline, split_docs))

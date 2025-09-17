@@ -18,15 +18,15 @@ def to_chat_messages(
     messages = []
     for msg in msg_list:
         if isinstance(msg, ChatMessage):
-            chat_msg = msg
-            messages.append(chat_msg)
+            messages.append(msg)
             continue
-        elif not isinstance(msg, dict):
+        elif not isinstance(msg, dict):  # PromptMessage is a TypedDict
             raise ValueError(f"Expected dict or ChatMessage, got {type(msg)}")
 
         role = msg["role"]
         content = msg["content"]
 
+        assert isinstance(content, list), f"Expected list content, got {type(content)}: {content}"
         assert len(content) == 1, f"Expected single content, got {len(content)} items: {content}"
         assert content[0]["type"] == "text", f"Expected text content, got {content[0]['type']}"
         assert "text" in content[0], f"Expected 'text' in content[0], got {content[0]}"

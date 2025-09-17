@@ -5,12 +5,13 @@ from pprint import pformat
 
 import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
+import phoenix.otel
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
-import phoenix.client
-import phoenix.otel
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from phoenix.client import Client
+from phoenix.client.types import PromptVersion
 
 from src.app_config import config
 from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
@@ -18,9 +19,9 @@ from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
 logger = logging.getLogger(__name__)
 
 
-def _create_client(url=config.phoenix_collector_endpoint, api_key=None) -> phoenix.client.Client:
+def _create_client(url: str = config.phoenix_collector_endpoint, api_key: str | None = None) -> Client:
     logger.info("Creating Phoenix client to %s", url)
-    return phoenix.client.Client(base_url=url, api_key=api_key)
+    return Client(base_url=url, api_key=api_key)
 
 
 def service_alive() -> bool:
@@ -72,7 +73,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         tracer_provider.add_span_processor(pii_processor)
 
 
-def get_prompt_template(prompt_name: str) -> phoenix.client.types.PromptVersion:
+def get_prompt_template(prompt_name: str) -> PromptVersion:
     """Retrieve a prompt template from Phoenix by name.
     https://arize.com/docs/phoenix/sdk-api-reference/python/overview#prompt-management
     """
@@ -85,7 +86,7 @@ def get_prompt_template(prompt_name: str) -> phoenix.client.types.PromptVersion:
     return prompt
 
 
-def which_prompt_version(prompt_name):
+def which_prompt_version(prompt_name: str) -> dict:
     if config.environment == "local":
         # Get the latest version regardless of tags
         return {"prompt_identifier": prompt_name}
@@ -94,7 +95,7 @@ def which_prompt_version(prompt_name):
     return {"prompt_version_id": config.PROMPT_VERSIONS[prompt_name]}
 
 
-def copy_deployed_prompts():
+def copy_deployed_prompts() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     parser = argparse.ArgumentParser()
@@ -113,13 +114,13 @@ def copy_deployed_prompts():
         copy_prompt(src_client, local_client, prompt["name"])
 
 
-def list_prompts(client):
+def list_prompts(client: Client) -> list[dict]:
     "client.prompts doesn't have a list() method, so use the underlying httpx client."
     response = client._client.get("/v1/prompts")
     return response.json()["data"]
 
 
-def copy_prompt(src_client, local_client, prompt_name):
+def copy_prompt(src_client: Client, local_client: Client, prompt_name: str) -> None:
     "Copy a prompt from src_client to local_client"
     if prompt_name not in config.PROMPT_VERSIONS:
         logger.warning("No version id found for prompt %r -- skipping", prompt_name)
@@ -135,7 +136,7 @@ def copy_prompt(src_client, local_client, prompt_name):
     )
 
 
-def list_prompt_version_ids(prompt_name, client):
+def list_prompt_version_ids(prompt_name: str, client: Client) -> list[str]:
     "List all version ids for a given prompt name. client.prompts doesn't have a list_versions() method."
     response = client._client.get(f"/v1/prompts/{prompt_name}/versions")
     resp_data = response.json()["data"]

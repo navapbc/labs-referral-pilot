@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
 
 from src.app_config import config
-from src.common import components, haystack_utils
+from src.common import haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
