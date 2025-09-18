@@ -8,7 +8,7 @@ export function View() {
       <h1>{t("title")}</h1>
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
-      <p className="usa-intro">
+      <p className="">
         {t.rich("intro", {
           LinkToNextJs: (content) => (
             <a href="https://nextjs.org/docs">{content}</a>
@@ -17,7 +17,7 @@ export function View() {
       </p>
       <div className="measure-6">
         {t.rich("body", {
-          ul: (content) => <ul className="usa-list">{content}</ul>,
+          ul: (content) => <ul className="">{content}</ul>,
           li: (content) => <li>{content}</li>,
         })}
 

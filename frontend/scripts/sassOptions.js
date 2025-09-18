@@ -7,10 +7,7 @@ const sass = require("sass");
  */
 function sassOptions(basePath = "") {
   return {
-    includePaths: [
-      "./node_modules/@uswds",
-      "./node_modules/@uswds/uswds/packages",
-    ],
+    includePaths: [],
     functions: {
       "add-base-path($path)": (path) => {
         return new sass.SassString(`${basePath}${path.getValue()}`);

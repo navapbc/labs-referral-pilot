@@ -33,10 +33,7 @@ const Header = () => {
   ));
 
   return (
-    <>
-      <div
-        className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
-      />
+    <> {/* TODO remove references to usa- styling */}
       <header>
         <div className="usa-nav-container">
           <div className="usa-navbar">
