@@ -21,10 +21,7 @@ const nextConfig = {
   output: "standalone",
   sassOptions: appSassOptions,
   // Continue to support older browsers (ES5)
-  transpilePackages: [
-    // https://github.com/trussworks/react-uswds/issues/2605
-    "@trussworks/react-uswds",
-  ],
+  transpilePackages: [],
 };
 
 module.exports = withNextIntl(nextConfig);

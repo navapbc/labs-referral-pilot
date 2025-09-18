@@ -4,7 +4,7 @@
  */
 import { Loader, Preview } from "@storybook/react";
 
-import "../src/styles/styles.scss";
+import "./app/globals.css"
 
 import { defaultLocale, locales } from "../src/i18n/config";
 import { getMessagesWithFallbacks } from "../src/i18n/getMessagesWithFallbacks";
