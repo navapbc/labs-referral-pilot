@@ -6,9 +6,9 @@ export const runtime = 'nodejs'; // (optional) stick to Node for widest compat
 
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
-    if (typeof text !== 'string' || !text.trim()) {
-      return NextResponse.json({ error: 'Invalid `text`' }, { status: 400 });
+    const { clientDescription } = await req.json();
+    if (typeof clientDescription !== 'string' || !clientDescription.trim()) {
+      return NextResponse.json({ error: 'Invalid `client description`' }, { status: 400 });
     }
 
     // Build URL + headers (keep secrets on server)
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const upstream = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ query:text }),
+      body: JSON.stringify({ query:clientDescription }),
       cache: 'no-store',        // avoid caching responses
       signal: ac.signal,
     });
