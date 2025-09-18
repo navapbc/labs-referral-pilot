@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {Resource} from "@/src/types/resources";
 
+const generateReferralsURL = process.env.ENVIRONMENT == "dev" ? "https://referral-pilot-dev.navateam.com/generate_referrals/run" : "http://localhost:3000/generate_referrals/run"
+console.log(generateReferralsURL) // TODO update the logic above to be ready for when we deploy to a PROD env
+
 export const runtime = 'nodejs'; // (optional) stick to Node for widest compat
 
 export async function POST(req: NextRequest) {
@@ -12,10 +15,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Build URL + headers (keep secrets on server)
-    const url = `https://referral-pilot-dev.navateam.com/generate_referrals/run`; //${process.env.EXTERNAL_API_URL}
+    const url = generateReferralsURL;
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.EXTERNAL_API_KEY}`, // no NEXT_PUBLIC here
+      Authorization: `Bearer ${process.env.EXTERNAL_API_KEY}`, // no NEXT_PUBLIC here   ---
     };
 
     const ac = new AbortController();
