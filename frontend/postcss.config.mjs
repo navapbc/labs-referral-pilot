@@ -3,11 +3,9 @@
  * does out of the box.
  * https://github.com/storybookjs/storybook/issues/23234
  */
-module.exports = {
+export default {
   plugins: {
     '@tailwindcss/postcss': {},
     autoprefixer: {},
   },
 };
-
-//export default{ plugins:{'@tailwindcss/postcss': {},},}

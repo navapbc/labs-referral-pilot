@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {Resource} from "@/src/types/resources";
 
-const generateReferralsURL = process.env.ENVIRONMENT == "dev" ? "https://referral-pilot-dev.navateam.com/generate_referrals/run" : "http://localhost:3000/generate_referrals/run"
+const generateReferralsURL = "http://0.0.0.0:3000/generate_referrals/run" // process.env.ENVIRONMENT == "dev" ? "https://referral-pilot-dev.navateam.com/generate_referrals/run" : "http://localhost:3000/generate_referrals/run"
 console.log(generateReferralsURL) // TODO update the logic above to be ready for when we deploy to a PROD env
 
 export const runtime = 'nodejs'; // (optional) stick to Node for widest compat
