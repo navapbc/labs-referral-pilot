@@ -16,12 +16,12 @@ def seed_supports(enable_factory_create, db_session: db.Session):
 
 
 def test_format_support_strings(seed_supports):
-    supports_from_db = format_support_strings()
+    support_strings = format_support_strings()
 
-    assert len(supports_from_db) == len(seed_supports)
+    assert len(support_strings) == len(seed_supports)
 
     db_supports = {support.id: support for support in seed_supports}
-    for k, v in supports_from_db.items():
+    for k, v in support_strings.items():
         support = db_supports[k]
         # Verify that support data is somewhere in the resulting strings
         assert support.name in v

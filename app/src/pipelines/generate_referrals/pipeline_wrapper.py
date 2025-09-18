@@ -1,6 +1,7 @@
 import json
 import logging
 from pprint import pformat
+from uuid import UUID
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
@@ -18,9 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 class Resource(BaseModel):
-    resource_name: str
-    resource_addresses: list[str]
-    resource_phones: list[str]
+    name: str
+    addresses: list[str]
+    phones: list[str]
+    emails: list[str]
+    website: str
     description: str
     justification: str
 
@@ -79,7 +82,7 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
-def format_support_strings() -> dict[str, str]:
+def format_support_strings() -> dict[UUID, str]:
     with config.db_session() as db_session, db_session.begin():
         return {
             support.id: (
