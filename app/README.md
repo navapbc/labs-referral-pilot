@@ -81,3 +81,11 @@ Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/au
 ```
       - PHOENIX_API_KEY=<paste API key>
 ```
+
+### Copying prompts from the deployed Phoenix
+
+For local development, you'll likely want to replicate the prompts in the deployed Phoenix instance onto your local Phoenix instance.
+To do so, add the `DEPLOYED_PHOENIX_URL` and `DEPLOYED_PHOENIX_API_KEY` environment variables to `override.env`.
+Create a system API key at `$DEPLOYED_PHOENIX_URL/settings/general`.
+Then run `make copy-prompts`. This will copy the prompt versions specified in `app_config.py`, which are the ones used in the deployed app.
+Remember to do this every time the prompt version is updated in `app_config.py`. When running locally, the latest version of the prompt is used.

@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 from pprint import pformat
@@ -100,15 +99,13 @@ def which_prompt_version(prompt_name: str) -> dict:
 def copy_deployed_prompts() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("url")
-    parser.add_argument("api_key")
-    args = parser.parse_args()
+    url = os.environ.get("DEPLOYED_PHOENIX_URL")
+    api_key = os.environ.get("DEPLOYED_PHOENIX_API_KEY")
+    logger.info("Copying prompts from %s with API key: %r", url, api_key)
+    assert url, "DEPLOYED_PHOENIX_URL is not set -- add it to override.env"
+    assert api_key, "DEPLOYED_PHOENIX_API_KEY is not set -- add it to override.env"
 
-    assert args.url
-    assert args.api_key
-    logger.info("Copying prompts from %s", args.url)
-    src_client = _create_client(args.url, api_key=args.api_key)
+    src_client = _create_client(url, api_key=api_key)
     local_client = _create_client()
     for prompt in list_prompts(src_client):
         # The prompt id is base64 encoding of 'Prompt:N' where N is simply a counter
