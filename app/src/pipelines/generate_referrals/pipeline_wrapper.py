@@ -1,6 +1,7 @@
 import json
 import logging
 from pprint import pformat
+from uuid import UUID
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
@@ -9,7 +10,6 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
-from sqlalchemy.inspection import inspect
 
 from src.app_config import config
 from src.common import haystack_utils
@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 class Resource(BaseModel):
-    resource_name: str
-    resource_addresses: list[str]
-    resource_phones: list[str]
+    name: str
+    addresses: list[str]
+    phones: list[str]
+    emails: list[str]
+    website: str
     description: str
     justification: str
 
@@ -50,12 +52,12 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str) -> dict:
-        supports_from_db = retrieve_supports_from_db()
+        supports_from_db = format_support_strings()
         response = self.pipeline.run(
             {
                 "prompt_builder": {
                     "query": query,
-                    "supports": supports_from_db,
+                    "supports": supports_from_db.values(),
                     "resource_json": resource_as_json,
                 },
             }
@@ -80,15 +82,16 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
-def retrieve_supports_from_db() -> list[str]:
-    all_supports: list[str] = []
+def format_support_strings() -> dict[UUID, str]:
     with config.db_session() as db_session, db_session.begin():
-        all_db_supports = db_session.query(Support).all()
-
-        for support in all_db_supports:
-            support_dict = {
-                c.key: getattr(support, c.key) for c in inspect(Support).mapper.column_attrs
-            }
-            support_as_str = json.dumps(support_dict, default=str)
-            all_supports.append(support_as_str)
-    return all_supports
+        return {
+            support.id: (
+                f"Name: {support.name}\n"
+                f"- Description: {support.description}\n"
+                f"- Addresses: {', '.join(support.addresses)}\n"
+                f"- Phones: {', '.join(support.phone_numbers)}\n"
+                f"- Website: {support.website}\n"
+                f"- Email Addresses: {', '.join(support.email_addresses)}\n"
+            )
+            for support in db_session.query(Support).all()
+        }
