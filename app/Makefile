@@ -228,6 +228,5 @@ help: ## Prints the help documentation and info about each command
 extract-supports:
 	$(PY_RUN_CMD) extract-supports "$(NAME)" "$(FILE)"
 
-# Usage: make copy-prompts URL="https://phoenix.....navateam.com:6006" API_KEY="abc123..."
 copy-prompts:
-	$(PY_RUN_CMD) copy-prompts "$(URL)" "$(API_KEY)"
+	$(PY_RUN_CMD) copy-prompts
