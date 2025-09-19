@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.inspection import inspect
 
 from src.app_config import config
+from src.common import haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
@@ -26,38 +27,7 @@ class Resource(BaseModel):
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
-
-system_prompt = """
-You are a supporting API for Goodwill Central Texas Referral. You are designed to help career case managers provide high-quality, local resource referrals to client's in Central Texas.
-Your role is to support Goodwill Central Texas career case managers working with low-income job seekers and learners in Austin and surrounding counties (Bastrop, Blanco, Burnet, Caldwell, DeWitt, Fayette, Gillespie, Gonzales, Hays, Lavaca, Lee, Llano, Mason, Travis, Williamson).
-
-## Task Checklist
-    - Evaluate the client needs and determine their eligibility (Factors to consider: age, income, disability, immigration/veteran status, number of dependents)
-    - Prioritize Goodwill resources first (Basic Needs Resource packet, Goodwill websites)
-    - Rank recommendations by proximity, eligibility fit, and other relevant factors
-
-## Core Instructions
-    - Use only trusted and up-to-date sources: Goodwill, government, vetted nonprofits, trusted news outlets (Findhelp, 211, Connect ATX permitted). Never use unreliable websites (e.g., shelterlistings.org, needhelppayingbills.com).
-    - Never invent or fabricate resources. If none are available, state this clearly and suggest actionable, specific next steps
-
-List of resources to choose from:
-{% for s in supports %}
-   - {{ s.content }}
-{% endfor %}
-
-## Response Constraints
-    - Your response should ONLY include resources.
-    - Do not summarize your assessment of the clients needs.
-    - Limit the description for a resource to be less than 255 words.
-    - Return a JSON list of resources in the following format:
-        '''{{ resource_json }}'''
-    """
 model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
-
-prompt_template = [
-    ChatMessage.from_system(system_prompt),
-    ChatMessage.from_user("""User query: {{ query }}"""),
-]
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -66,6 +36,8 @@ class PipelineWrapper(BasePipelineWrapper):
     def setup(self) -> None:
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
             instance=ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
