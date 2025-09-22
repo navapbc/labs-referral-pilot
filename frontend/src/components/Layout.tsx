@@ -19,11 +19,11 @@ const Layout = ({ children, locale }: Props) => {
   return (
     // Stick the footer to the bottom of the page
     <div className="">
-      {/*<NextIntlClientProvider
+      <NextIntlClientProvider
         locale={locale}
-        messages={pick(messages, "components.Header")}
+        children={children}
       >
-      </NextIntlClientProvider>*/}
+      </NextIntlClientProvider>
       <main id="main-content" className="">
         <div >{children}</div>
       </main>

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import {Resource} from "@/src/types/resources";
+import {Resource} from "@/types/resources";
 
 import {useState} from 'react';
 import {Sparkles} from "lucide-react";
@@ -37,43 +37,29 @@ export default function Page() {
     }
   }
 
-  return <>
+  return (
+    <>
       <div>
-        <div className="space-y-3">
-          <Textarea
-            placeholder="Add additional details about the client's specific situation, needs, and circumstances here..."
-            name="clientDescriptionInput"
-            value={clientDescription}
-            onChange={(e) => setClientDescription(e.target.value)}
-            className="min-h-[350px] text-base border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <Button
-          type="button"
-          onClick={() => handleClick()}
-          disabled={!clientDescription.trim() || loading}
-          style={{
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            padding: "12px 32px",
-            fontSize: "18px",
-            fontWeight: "500",
-            borderRadius: "6px",
-            border: "none",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-            transition: "all 0.2s ease-in-out",
-          }}
-        >
-          <Sparkles className="w-5 h-5" />
-          {loading ? "Generating Resources..." : "Find Resources"}
-        </Button>
+        <Textarea
+          placeholder="Add additional details about the client's specific situation, needs, and circumstances here..."
+          name="clientDescriptionInput"
+          value={clientDescription}
+          onChange={(e) => setClientDescription(e.target.value)}
+          className="min-h-[140rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500"
+        />
       </div>
+      <Button
+        type="button"
+        onClick={() => handleClick()}
+        disabled={!clientDescription.trim() || loading}
+        size="lg"
+      >
+        <Sparkles className="w-5 h-5" />
+        {loading ? "Generating Resources..." : "Find Resources"}
+      </Button>
       {displayResourcesFromResult(result)}
-  </>;
+    </>
+  )
 }
 
 function displayResourcesFromResult(result: Resource[] | null){
@@ -81,7 +67,7 @@ function displayResourcesFromResult(result: Resource[] | null){
   if (result.length === 0) return <div className="margin-top-2">No resources found.</div>;
 
   return (
-    <ul className="usa-list margin-top-3">
+    <ul className="margin-top-3">
       {result.map((r, i) => (
         <li key={i} className="margin-bottom-2">
           <strong className="display-block">{r.name}</strong>
