@@ -7,6 +7,8 @@ import {Resource} from "@/types/resources";
 import {useState} from 'react';
 import {Sparkles} from "lucide-react";
 
+import "@/app/globals.css"
+
 
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("")
@@ -45,14 +47,14 @@ export default function Page() {
           name="clientDescriptionInput"
           value={clientDescription}
           onChange={(e) => setClientDescription(e.target.value)}
-          className="min-h-[140rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500"
+          className="min-h-[8rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500"
         />
       </div>
       <Button
         type="button"
         onClick={() => handleClick()}
         disabled={!clientDescription.trim() || loading}
-        size="lg"
+        className="min-h-[10-rem]"
       >
         <Sparkles className="w-5 h-5" />
         {loading ? "Generating Resources..." : "Find Resources"}
