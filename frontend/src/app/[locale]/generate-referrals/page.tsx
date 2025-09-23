@@ -50,14 +50,14 @@ export default function Page() {
             name="clientDescriptionInput"
             value={clientDescription}
             onChange={(e) => setClientDescription(e.target.value)}
-            className="min-h-[8rem] min-w-[14rem] max-w-[50rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500 "
+            className="min-h-[8rem] min-w-[16rem] text-base border-gray-300 focus:ring-blue-500 "
           />
         </div>
         <Button
           type="button"
           onClick={() => handleClick()}
           disabled={!clientDescription.trim() || loading}
-          className="max-w-[16rem] ml-3 mr-3"
+          className="min-w-[16rem] ml-3 mr-3 generate-referrals-button"
         >
           <Sparkles className="w-5 h-5" />
           {loading ? "Generating Resources..." : "Find Resources"}
@@ -75,7 +75,7 @@ function displayResourcesFromResult(result: Resource[] | null){
   return (
     <div className="m-3">
       {result.map((r, i) => (
-        <Card key={i} className="bg-white shadow-sm mb-2">
+        <Card key={i} className="bg-white shadow-sm mb-2 min-w-[16rem]">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
