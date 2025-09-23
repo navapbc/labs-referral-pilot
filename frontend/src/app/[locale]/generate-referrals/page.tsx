@@ -8,6 +8,8 @@ import {useState} from 'react';
 import {Sparkles} from "lucide-react";
 
 import "@/app/globals.css"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import Link from "next/link";
 
 
 export default function Page() {
@@ -41,25 +43,27 @@ export default function Page() {
 
   return (
     <>
-      <div>
-        <Textarea
-          placeholder="Add additional details about the client's specific situation, needs, and circumstances here..."
-          name="clientDescriptionInput"
-          value={clientDescription}
-          onChange={(e) => setClientDescription(e.target.value)}
-          className="min-h-[8rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500"
-        />
+      <div className="flex flex-col gap-4">
+        <div className="m-3">
+          <Textarea
+            placeholder="Add details about the client's specific situation, needs, and circumstances here..."
+            name="clientDescriptionInput"
+            value={clientDescription}
+            onChange={(e) => setClientDescription(e.target.value)}
+            className="min-h-[8rem] min-w-[14rem] max-w-[50rem] text-base border-green-300 focus:ring-red-500 focus:border-green-500 "
+          />
+        </div>
+        <Button
+          type="button"
+          onClick={() => handleClick()}
+          disabled={!clientDescription.trim() || loading}
+          className="max-w-[16rem] ml-3 mr-3"
+        >
+          <Sparkles className="w-5 h-5" />
+          {loading ? "Generating Resources..." : "Find Resources"}
+        </Button>
+        {displayResourcesFromResult(result)}
       </div>
-      <Button
-        type="button"
-        onClick={() => handleClick()}
-        disabled={!clientDescription.trim() || loading}
-        className="min-h-[10-rem]"
-      >
-        <Sparkles className="w-5 h-5" />
-        {loading ? "Generating Resources..." : "Find Resources"}
-      </Button>
-      {displayResourcesFromResult(result)}
     </>
   )
 }
@@ -69,38 +73,45 @@ function displayResourcesFromResult(result: Resource[] | null){
   if (result.length === 0) return <div className="margin-top-2">No resources found.</div>;
 
   return (
-    <ul className="margin-top-3">
+    <div className="m-3">
       {result.map((r, i) => (
-        <li key={i} className="margin-bottom-2">
-          <strong className="display-block">{r.name}</strong>
+        <Card key={i} className="bg-white shadow-sm mb-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
+                                  {i+1}
+              </span>
+              {r.name} -
+              <Link href={r.website} rel="noopener noreferrer" className="text-base text-gray-500 flex items-center gap-2">{r.website}</Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="ml-4 mr-4 ">
+            {r.description && (
+              <div className="text-bold mb-2">{r.description}</div>
+            )}
 
-          {r.description && (
-            <div className="text-base">{r.description}</div>
-          )}
+            {r.addresses?.length > 0 && (
+              <div className="mt-1">
+                <span className="font-semibold">Address{r.addresses.length > 1 ? 'es' : ''}:</span> {/*TODO plural translations*/}
+                  {r.addresses.join( ' | ')}
+              </div>
+            )}
 
-          {r.justification && (
-            <div className="font-mono text-sm margin-top-1">
-              <span className="text-semibold">Why:</span> {r.justification}
-            </div>
-          )}
-
-          {r.addresses?.length > 0 && (
-            <div className="margin-top-1">
-              <span className="text-semibold">Address{r.addresses.length > 1 ? 'es' : ''}:</span>
-              <ul className="usa-list usa-list--unstyled margin-top-05">
-                {r.addresses.map((a, j) => <li key={j}>{a}</li>)}
-              </ul>
-            </div>
-          )}
-
-          {r.phones?.length > 0 && (
-            <div className="margin-top-05">
-              <span className="text-semibold">Phone{r.phones.length > 1 ? 's' : ''}:</span>{' '}
-              {r.phones.join(', ')}
-            </div>
-          )}
-        </li>
+            {r.phones?.length > 0 && (
+              <div className="mt-1">
+                <span className="font-semibold">Phone:</span>{' '} {/*TODO  translation*/}
+                {r.phones.join(' | ')}
+              </div>
+            )}
+            {r.emails?.length > 0 && (
+              <div className="mt-1">
+                <span className="font-semibold">Email:</span>{' '} {/*TODO translation*/}
+                {r.emails.join(' | ')}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ))}
-    </ul>
+    </div>
   );
 }

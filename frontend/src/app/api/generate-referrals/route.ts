@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {Resource} from "@/src/types/resources";
 
+// TODO update the logic above to be ready for when we deploy to a PROD env
 const generateReferralsURL = "https://referral-pilot-dev.navateam.com/generate_referrals/run" // process.env.ENVIRONMENT == "dev" ? "https://referral-pilot-dev.navateam.com/generate_referrals/run" : "http://localhost:3000/generate_referrals/run"
-console.log(generateReferralsURL) // TODO update the logic above to be ready for when we deploy to a PROD env
 
 export const runtime = 'nodejs'; // (optional) stick to Node for widest compat
 
@@ -90,9 +90,11 @@ function parseResources(input: unknown): Resource[] {
 
   // 3) Normalize fields for easy rendering
   return resources.map((r) => ({
-    name: String(r?.resource_name ?? ''),
-    addresses: Array.isArray(r?.resource_addresses) ? r.resource_addresses : [],
-    phones: Array.isArray(r?.resource_phones) ? r.resource_phones : [],
+    name: String(r?.name ?? 'error'),
+    website: String(r?.website ?? 'error'),
+    addresses: Array.isArray(r?.addresses) ? r.addresses : [],
+    emails: Array.isArray(r?.emails) ? r.emails : [],
+    phones: Array.isArray(r?.phones) ? r.phones : [],
     description: typeof r?.description === 'string' ? r.description : '',
     justification: typeof r?.justification === 'string' ? r.justification : undefined,
   })) as Resource[];
