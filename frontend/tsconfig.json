@@ -28,7 +28,6 @@
   },
   "include": [
     "next-env.d.ts",
-    "scripts/**/*",
     "src/**/*",
     "stories/**/*",
     "tests/**/*",
