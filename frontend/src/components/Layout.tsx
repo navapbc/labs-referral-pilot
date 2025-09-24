@@ -9,11 +9,10 @@ const Layout = ({ children, locale }: Props) => {
   return (
     // Stick the footer to the bottom of the page
     <div>
-      <NextIntlClientProvider locale={locale}>
-        {children}
-      </NextIntlClientProvider>
       <main id="main-content">
-        <div>{children}</div>
+        <NextIntlClientProvider locale={locale}>
+          <div>{children}</div>
+        </NextIntlClientProvider>
       </main>
     </div>
   );
