@@ -18,10 +18,7 @@ export const GlobalStyles: StoryObj = {
       <p>Intro text</p>
       <p>Paragraph text</p>
       <p>
-        <a href="#">Link</a> and{" "}
-        <a href="#">
-          External link
-        </a>
+        <a href="#">Link</a> and <a href="#">External link</a>
       </p>
       <ul>
         <li>Unordered list item: A</li>
