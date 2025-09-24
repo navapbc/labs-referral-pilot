@@ -7,7 +7,6 @@ WORKDIR /app
 # Install dependencies
 COPY package.json package-lock.json ./
 COPY public ./public
-COPY scripts ./scripts
 RUN npm ci --no-audit
 
 # =============================================================================
