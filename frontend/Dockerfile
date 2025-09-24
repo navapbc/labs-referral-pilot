@@ -17,10 +17,12 @@ FROM base AS dev
 WORKDIR /app
 
 COPY tsconfig.json .
+COPY postcss.config.* .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
 COPY stories ./stories
+COPY components ./components
 COPY .storybook ./.storybook
 
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -40,6 +42,8 @@ COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
+COPY components ./components
+COPY postcss.config.* .
 
 # Environment variables must be present at build time
 # https://github.com/vercel/next.js/discussions/14030
