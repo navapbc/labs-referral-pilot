@@ -43,21 +43,22 @@ export default function Page() {
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 pl-20 pr-20 mt-8 mb-8">
         <div className="m-3">
+          <Label className="font-medium text-gray-900 text-lg mb-1" htmlFor="">Tell us about your client</Label>
           <Textarea
             placeholder="Add details about the client's specific situation, needs, and circumstances here..."
-            name="clientDescriptionInput"
+            id="clientDescriptionInput"
             value={clientDescription}
             onChange={(e) => setClientDescription(e.target.value)}
-            className="min-h-[8rem] min-w-[16rem] text-base border-gray-300 focus:ring-blue-500 "
+            className="min-h-[8rem] min-w-[16rem] text-base border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <Button
           type="button"
           onClick={() => handleClick()}
           disabled={!clientDescription.trim() || loading}
-          className="min-w-[16rem] ml-3 mr-3 generate-referrals-button"
+          className="min-w-[16rem] ml-3 mr-3 generate-referrals-button text-lg pt-6 pb-6"
         >
           <Sparkles className="w-5 h-5" />
           {loading ? "Generating Resources..." : "Find Resources"}
@@ -75,17 +76,17 @@ function displayResourcesFromResult(result: Resource[] | null){
   return (
     <div className="m-3">
       {result.map((r, i) => (
-        <Card key={i} className="bg-white shadow-sm mb-2 min-w-[16rem]">
-          <CardHeader className="pb-4">
+        <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
+          <CardHeader>
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
                                   {i+1}
               </span>
-              {r.name} -
+              {r.name}
               <Link href={r.website} rel="noopener noreferrer" className="text-base text-gray-500 flex items-center gap-2">{r.website}</Link>
             </CardTitle>
           </CardHeader>
-          <CardContent className="ml-4 mr-4 ">
+          <CardContent className="ml-4 mr-4">
             {r.description && (
               <div className="text-bold mb-2">{r.description}</div>
             )}

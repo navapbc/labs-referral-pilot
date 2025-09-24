@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Suspense } from "react"
 import "@/app/globals.css"
-import Layout from "src/components/Layout";
+import {NextIntlClientProvider, useMessages} from "next-intl";
+import {pick} from "lodash";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -29,14 +30,16 @@ export const metadata: Metadata = {
 }
 
 
-export default async function RootLayout({
-                                           children, params }: LayoutProps) {
+export default async function RootLayout({children, params }: LayoutProps) {
   const {locale} = await params;
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
     <body className="font-sans">
-    {/*<Layout locale={locale}>{children}</Layout>*/}
-    <Suspense fallback={null}>{children}</Suspense>
+    <Suspense fallback={null}>
+      <NextIntlClientProvider locale={locale}>
+        {children}
+      </NextIntlClientProvider>
+    </Suspense>
     </body>
     </html>
   )

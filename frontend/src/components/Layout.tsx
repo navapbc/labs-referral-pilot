@@ -1,9 +1,5 @@
-import { pick } from "lodash";
-
 import {
   NextIntlClientProvider,
-  useMessages,
-  useTranslations,
 } from "next-intl";
 
 
@@ -13,12 +9,9 @@ type Props = {
 };
 
 const Layout = ({ children, locale }: Props) => {
-  const t = useTranslations("components.Layout");
-  const messages = useMessages();
 
   return (
-    // Stick the footer to the bottom of the page
-    <div className="">
+    <div>
       <NextIntlClientProvider
         locale={locale}
         children={children}
