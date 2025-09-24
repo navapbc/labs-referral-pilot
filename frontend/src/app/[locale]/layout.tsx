@@ -2,28 +2,43 @@
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
  */
-import { Metadata } from "next";
-
+import type React from "react";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import Layout from "src/components/Layout";
+import "@/app/globals.css";
 
-import "src/styles/styles.scss";
+const geistSans = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-sans",
+});
 
-export const metadata: Metadata = {
-  icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`],
-};
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
+});
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }
 
+export const metadata: Metadata = {
+  title: "Goodwill Central Texas - GenAI Referral Tool",
+  description: "AI-powered referral tool for Goodwill Central Texas",
+  generator: "v0.app",
+};
+
 export default async function RootLayout({ children, params }: LayoutProps) {
   const { locale } = await params;
   return (
-    <html lang={locale}>
-      <body>
-        {/* Separate layout component for the inner-body UI elements since Storybook
-            and tests trip over the fact that this file renders an <html> tag */}
+    <html
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
+      <body className="font-sans">
         <Layout locale={locale}>{children}</Layout>
       </body>
     </html>

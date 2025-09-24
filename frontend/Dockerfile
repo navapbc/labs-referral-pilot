@@ -1,13 +1,12 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:20.18.1-bullseye-slim AS base
+FROM node:20.19.5-bullseye-slim AS base
 WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json ./
 COPY public ./public
-COPY scripts ./scripts
 RUN npm ci --no-audit
 
 # =============================================================================
@@ -22,6 +21,8 @@ COPY *.d.ts .
 COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
+COPY components ./components
+COPY postcss.config.* .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -40,6 +41,8 @@ COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
+COPY components ./components
+COPY postcss.config.* .
 
 # Environment variables must be present at build time
 # https://github.com/vercel/next.js/discussions/14030
@@ -56,7 +59,7 @@ RUN npm run build -- --no-lint
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:20.18.1-bullseye-slim AS release
+FROM node:20.19.5-bullseye-slim AS release
 WORKDIR /app
 
 RUN apt-get update \

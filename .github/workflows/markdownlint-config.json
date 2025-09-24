@@ -29,6 +29,9 @@
     },
     {
       "pattern": "https://18f.gsa.gov/"
+    },
+    {
+      "pattern": "https://www.npmjs.com/package/jest-axe"
     }
   ],
   "replacementPatterns": [

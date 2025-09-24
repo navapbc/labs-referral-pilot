@@ -17,7 +17,6 @@ module.exports = {
     "", // blank line
     "^next[/-](.*)$",
     "^react$",
-    "uswds",
     "", // blank line
     "^(src/)?components/(.*)$",
     "^[./]",
