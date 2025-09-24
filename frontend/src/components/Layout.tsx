@@ -1,10 +1,4 @@
-import { pick } from "lodash";
-
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
+import { NextIntlClientProvider } from "next-intl";
 
 type Props = {
   children: React.ReactNode;
@@ -12,16 +6,12 @@ type Props = {
 };
 
 const Layout = ({ children, locale }: Props) => {
-  const t = useTranslations("components.Layout");
-  const messages = useMessages();
-
   return (
     // Stick the footer to the bottom of the page
     <div className="">
-      <NextIntlClientProvider
-        locale={locale}
-        children={children}
-      ></NextIntlClientProvider>
+      <NextIntlClientProvider locale={locale}>
+        {children}
+      </NextIntlClientProvider>
       <main id="main-content" className="">
         <div>{children}</div>
       </main>

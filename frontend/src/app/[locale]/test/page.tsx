@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,10 +13,6 @@ import {
   FileText,
   Upload,
   Sparkles,
-  Printer,
-  CheckCircle,
-  Copy,
-  MessageCircle,
   Heart,
   Briefcase,
   Home,
@@ -39,13 +35,8 @@ import {
   ClipboardList,
   ArrowLeft,
   MoreHorizontal,
-  Plus,
-  RotateCcw,
   Building,
   Users,
-  Filter,
-  Eye,
-  RefreshCw,
 } from "lucide-react";
 
 const resourceCategories = [
