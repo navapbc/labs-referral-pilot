@@ -1,3 +1,7 @@
+/**
+ * Root layout component, wraps all pages.
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
+ */
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";

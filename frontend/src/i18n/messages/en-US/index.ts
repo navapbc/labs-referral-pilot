@@ -3,9 +3,8 @@ export const messages = {
     Header: {
       nav_link_home: "Home",
       nav_link_health: "Health",
-      nav_link_generate_referrals: "Generate Referrals",
       nav_menu_toggle: "Menu",
-      title: "NavaLabs/Goodwill Central Texas Referral Prototype",
+      title: "Site title",
     },
     Footer: {
       agency_name: "Agency name",

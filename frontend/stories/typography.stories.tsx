@@ -15,11 +15,11 @@ export const GlobalStyles: StoryObj = {
       <h4>Heading 4</h4>
       <h5>Heading 5</h5>
       <h6>Heading 6</h6>
-      <p className="">Intro text</p>
+      <p>Intro text</p>
       <p>Paragraph text</p>
       <p>
         <a href="#">Link</a> and{" "}
-        <a href="#" className="">
+        <a href="#">
           External link
         </a>
       </p>
