@@ -1,7 +1,7 @@
 import { getRequestConfig } from "next-intl/server";
 import { formats, timeZone } from "./config";
 import { getMessagesWithFallbacks } from "./getMessagesWithFallbacks";
-import {routing} from "./routing";
+import { routing } from "./routing";
 
 /**
  * Make locale messages available to all server components.
@@ -12,9 +12,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
 
   // Ensure that the incoming locale is valid
-    if (!locale || !routing.locales.includes(locale as any)) {
-        locale = routing.defaultLocale;
-      }
+  if (!locale || !routing.locales.includes(locale as any)) {
+    locale = routing.defaultLocale;
+  }
   return {
     formats,
     locale,

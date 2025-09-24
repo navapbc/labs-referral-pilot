@@ -6,7 +6,6 @@ import {
   useTranslations,
 } from "next-intl";
 
-
 type Props = {
   children: React.ReactNode;
   locale?: string;
@@ -22,10 +21,9 @@ const Layout = ({ children, locale }: Props) => {
       <NextIntlClientProvider
         locale={locale}
         children={children}
-      >
-      </NextIntlClientProvider>
+      ></NextIntlClientProvider>
       <main id="main-content" className="">
-        <div >{children}</div>
+        <div>{children}</div>
       </main>
     </div>
   );
