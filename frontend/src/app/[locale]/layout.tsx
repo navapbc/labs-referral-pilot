@@ -5,7 +5,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Suspense } from "react";
+import Layout from "src/components/Layout";
 import "@/app/globals.css";
 
 const geistSans = Geist({
@@ -39,8 +39,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body className="font-sans">
-        {/*<Layout locale={locale}>{children}</Layout>*/}
-        <Suspense fallback={null}>{children}</Suspense>
+        <Layout locale={locale}>{children}</Layout>
       </body>
     </html>
   );
