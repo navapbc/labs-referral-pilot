@@ -7,7 +7,6 @@ WORKDIR /app
 # Install dependencies
 COPY package.json package-lock.json ./
 COPY public ./public
-# COPY scripts ./scripts
 RUN npm ci --no-audit
 
 # =============================================================================
@@ -17,13 +16,13 @@ FROM base AS dev
 WORKDIR /app
 
 COPY tsconfig.json .
-COPY postcss.config.* .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
 COPY stories ./stories
-COPY components ./components
 COPY .storybook ./.storybook
+COPY components ./components
+COPY postcss.config.* .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
