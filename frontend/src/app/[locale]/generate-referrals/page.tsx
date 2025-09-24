@@ -1,6 +1,5 @@
 'use client';
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {Resource} from "@/types/resources";
 
@@ -10,6 +9,7 @@ import {Sparkles} from "lucide-react";
 import "@/app/globals.css"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import Link from "next/link";
+import {Label} from "@/components/ui/label";
 
 
 export default function Page() {
