@@ -11,7 +11,7 @@
     "dev": "next dev",
     "format": "prettier --write '**/*.{js,json,md,mdx,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,mdx,ts,tsx,scss,yaml,yml}'",
-    "lint": "next lint --dir src --dir stories --dir .storybook --dir tests --dir scripts --dir app --dir src/lib --dir types",
+    "lint": "next lint --dir src --dir stories --dir .storybook --dir tests --dir scripts --dir app --dir lib --dir types",
     "lint-fix": "npm run lint -- --fix",
     "start": "next start",
     "storybook": "storybook dev -p 6007 --no-open",

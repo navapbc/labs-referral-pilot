@@ -1,22 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Search,
   MapPin,
   FileText,
   Upload,
   Sparkles,
-  Printer,
-  CheckCircle,
-  Copy,
-  MessageCircle,
   Heart,
   Briefcase,
   Home,
@@ -39,54 +35,115 @@ import {
   ClipboardList,
   ArrowLeft,
   MoreHorizontal,
-  Plus,
-  RotateCcw,
   Building,
   Users,
-  Filter,
-  Eye,
-  RefreshCw,
-} from "lucide-react"
+} from "lucide-react";
 
 const resourceCategories = [
-  { id: "employment", label: "Employment & Job Training", icon: Briefcase, color: "bg-blue-100 text-blue-800" },
-  { id: "housing", label: "Housing & Shelter", icon: Home, color: "bg-green-100 text-green-800" },
-  { id: "food", label: "Food Assistance", icon: Utensils, color: "bg-orange-100 text-orange-800" },
-  { id: "transportation", label: "Transportation", icon: Car, color: "bg-purple-100 text-purple-800" },
-  { id: "healthcare", label: "Healthcare & Mental Health", icon: Stethoscope, color: "bg-red-100 text-red-800" },
-  { id: "childcare", label: "Childcare", icon: Baby, color: "bg-pink-100 text-pink-800" },
-  { id: "financial", label: "Financial Assistance", icon: DollarSign, color: "bg-yellow-100 text-yellow-800" },
-  { id: "education", label: "Education & GED", icon: GraduationCap, color: "bg-indigo-100 text-indigo-800" },
-  { id: "legal", label: "Legal Services", icon: Scale, color: "bg-gray-100 text-gray-800" },
-  { id: "substance", label: "Substance Abuse Treatment", icon: Shield, color: "bg-teal-100 text-teal-800" },
-  { id: "disability", label: "Disability Services", icon: Accessibility, color: "bg-cyan-100 text-cyan-800" },
-  { id: "veterans", label: "Veterans Services", icon: Flag, color: "bg-emerald-100 text-emerald-800" },
-]
+  {
+    id: "employment",
+    label: "Employment & Job Training",
+    icon: Briefcase,
+    color: "bg-blue-100 text-blue-800",
+  },
+  {
+    id: "housing",
+    label: "Housing & Shelter",
+    icon: Home,
+    color: "bg-green-100 text-green-800",
+  },
+  {
+    id: "food",
+    label: "Food Assistance",
+    icon: Utensils,
+    color: "bg-orange-100 text-orange-800",
+  },
+  {
+    id: "transportation",
+    label: "Transportation",
+    icon: Car,
+    color: "bg-purple-100 text-purple-800",
+  },
+  {
+    id: "healthcare",
+    label: "Healthcare & Mental Health",
+    icon: Stethoscope,
+    color: "bg-red-100 text-red-800",
+  },
+  {
+    id: "childcare",
+    label: "Childcare",
+    icon: Baby,
+    color: "bg-pink-100 text-pink-800",
+  },
+  {
+    id: "financial",
+    label: "Financial Assistance",
+    icon: DollarSign,
+    color: "bg-yellow-100 text-yellow-800",
+  },
+  {
+    id: "education",
+    label: "Education & GED",
+    icon: GraduationCap,
+    color: "bg-indigo-100 text-indigo-800",
+  },
+  {
+    id: "legal",
+    label: "Legal Services",
+    icon: Scale,
+    color: "bg-gray-100 text-gray-800",
+  },
+  {
+    id: "substance",
+    label: "Substance Abuse Treatment",
+    icon: Shield,
+    color: "bg-teal-100 text-teal-800",
+  },
+  {
+    id: "disability",
+    label: "Disability Services",
+    icon: Accessibility,
+    color: "bg-cyan-100 text-cyan-800",
+  },
+  {
+    id: "veterans",
+    label: "Veterans Services",
+    icon: Flag,
+    color: "bg-emerald-100 text-emerald-800",
+  },
+];
 
 export default function TestPage() {
-  const [clientDescription, setClientDescription] = useState("")
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [zipCode, setZipCode] = useState("")
-  const [locationText, setLocationText] = useState("")
-  const [activeTab, setActiveTab] = useState("text-summary")
-  const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>([])
+  const [clientDescription, setClientDescription] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [zipCode, setZipCode] = useState("");
+  const [locationText, setLocationText] = useState("");
+  const [activeTab, setActiveTab] = useState("text-summary");
+  const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
+    [],
+  );
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
-  }
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId],
+    );
+  };
 
   const clearAllFilters = () => {
-    setSelectedCategories([])
-    setZipCode("")
-    setLocationText("")
-    setSelectedResourceTypes([])
-  }
+    setSelectedCategories([]);
+    setZipCode("");
+    setLocationText("");
+    setSelectedResourceTypes([]);
+  };
 
   const toggleResourceType = (type: string) => {
-    setSelectedResourceTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]))
-  }
+    setSelectedResourceTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -94,7 +151,11 @@ export default function TestPage() {
       <div className="bg-blue-600 text-white">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-blue-700">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-blue-700"
+            >
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2">
@@ -103,15 +164,23 @@ export default function TestPage() {
               </div>
               <span className="font-semibold text-lg">CaseWorthy</span>
             </div>
-            <div className="bg-blue-700 px-3 py-1 rounded text-sm font-medium">CASE MANAGEMENT</div>
+            <div className="bg-blue-700 px-3 py-1 rounded text-sm font-medium">
+              CASE MANAGEMENT
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-blue-700">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-blue-700"
+            >
               <Grid3X3 className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-white text-blue-600 text-sm font-semibold">RH</AvatarFallback>
+                <AvatarFallback className="bg-white text-blue-600 text-sm font-semibold">
+                  RH
+                </AvatarFallback>
               </Avatar>
               <div className="text-sm">
                 <div className="font-medium">Ryan Hansz</div>
@@ -130,7 +199,9 @@ export default function TestPage() {
           <div className="p-4 border-b border-gray-700">
             <div className="flex items-center gap-3 mb-3">
               <Avatar className="w-12 h-12">
-                <AvatarFallback className="bg-blue-600 text-white">TC</AvatarFallback>
+                <AvatarFallback className="bg-blue-600 text-white">
+                  TC
+                </AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="font-semibold">Test Client </h3>
@@ -149,23 +220,38 @@ export default function TestPage() {
           {/* Navigation */}
           <nav className="flex-1 p-4">
             <div className="space-y-2">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-700 gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-gray-700 gap-3"
+              >
                 <Star className="w-4 h-4" />
                 Favorites
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-700 gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-gray-700 gap-3"
+              >
                 <Search className="w-4 h-4" />
                 Find Client
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-700 gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-gray-700 gap-3"
+              >
                 <UserPlus className="w-4 h-4" />
                 Add Client
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-700 gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-gray-700 gap-3"
+              >
                 <Settings className="w-4 h-4" />
                 Case Management
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-700 gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-gray-700 gap-3"
+              >
                 <ClipboardList className="w-4 h-4" />
                 Assessments
               </Button>
@@ -177,7 +263,9 @@ export default function TestPage() {
             <div className="bg-white text-black px-3 py-2 rounded text-xs font-bold text-center">
               <div>TRAINING</div>
               <div>ENVIRONMENT</div>
-              <div className="text-gray-600 font-normal mt-1">Version: 8.0.143.1</div>
+              <div className="text-gray-600 font-normal mt-1">
+                Version: 8.0.143.1
+              </div>
             </div>
           </div>
         </div>
@@ -188,13 +276,22 @@ export default function TestPage() {
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:bg-gray-100"
+                >
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div className="text-gray-400">...</div>
-                <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Dashboard
+                </h1>
               </div>
-              <Button variant="outline" className="text-orange-600 border-orange-600 hover:bg-orange-50 bg-transparent">
+              <Button
+                variant="outline"
+                className="text-orange-600 border-orange-600 hover:bg-orange-50 bg-transparent"
+              >
                 <MoreHorizontal className="w-4 h-4 mr-2" />
                 PAGE OPTIONS
               </Button>
@@ -214,8 +311,12 @@ export default function TestPage() {
                         <Heart className="w-6 h-6" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
-                        <p className="text-blue-600 font-medium">GenAI Referral Tool</p>
+                        <h2 className="text-2xl font-bold text-gray-900">
+                          Find Resources{" "}
+                        </h2>
+                        <p className="text-blue-600 font-medium">
+                          GenAI Referral Tool
+                        </p>
                       </div>
                     </div>
                     <Button
@@ -229,7 +330,11 @@ export default function TestPage() {
                 </div>
 
                 {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="mb-6"
+                >
                   <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                     <TabsTrigger
                       value="text-summary"
@@ -260,8 +365,10 @@ export default function TestPage() {
                         </h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                           {resourceCategories.map((category) => {
-                            const Icon = category.icon
-                            const isSelected = selectedCategories.includes(category.id)
+                            const Icon = category.icon;
+                            const isSelected = selectedCategories.includes(
+                              category.id,
+                            );
                             return (
                               <Button
                                 key={category.id}
@@ -277,7 +384,7 @@ export default function TestPage() {
                                 <Icon className="mr-2 size-2.5 w-6 h-6" />
                                 {category.label}
                               </Button>
-                            )
+                            );
                           })}
                         </div>
                       </div>
@@ -289,7 +396,11 @@ export default function TestPage() {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <Button
-                            variant={selectedResourceTypes.includes("goodwill") ? "default" : "outline"}
+                            variant={
+                              selectedResourceTypes.includes("goodwill")
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
                             className={`h-12 ${
                               selectedResourceTypes.includes("goodwill")
@@ -302,7 +413,11 @@ export default function TestPage() {
                             Goodwill Internal
                           </Button>
                           <Button
-                            variant={selectedResourceTypes.includes("government") ? "default" : "outline"}
+                            variant={
+                              selectedResourceTypes.includes("government")
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
                             className={`h-12 ${
                               selectedResourceTypes.includes("government")
@@ -315,7 +430,11 @@ export default function TestPage() {
                             Government
                           </Button>
                           <Button
-                            variant={selectedResourceTypes.includes("community") ? "default" : "outline"}
+                            variant={
+                              selectedResourceTypes.includes("community")
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
                             className={`h-12 ${
                               selectedResourceTypes.includes("community")
@@ -397,9 +516,10 @@ export default function TestPage() {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "8px",
-                      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                      boxShadow:
+                        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                       transition: "all 0.2s ease-in-out",
-                      opacity: !clientDescription.trim() ? 0.5 : 1
+                      opacity: !clientDescription.trim() ? 0.5 : 1,
                     }}
                   >
                     <Sparkles className="w-5 h-5" />
@@ -419,5 +539,5 @@ export default function TestPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

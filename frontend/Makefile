@@ -48,7 +48,7 @@ container-npm-install: # Install NPM packages from within Docker
 	fi
 
 dev: # Run the Next.js local dev server in Docker
-	docker compose up --build --detach $(APP_NAME)
+	docker compose up --detach $(APP_NAME)
 	docker compose logs --follow $(APP_NAME)
 
 storybook: # Run the Storybook local dev server in Docker
