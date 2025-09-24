@@ -39,8 +39,5 @@ npm-debug.log*
 # compiled css
 /public/css
 
-# uswds assets
-/public/uswds
-
 # Developer-specific IDE settings
 .vscode
