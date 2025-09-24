@@ -3,6 +3,7 @@ from haystack import component
 from haystack.dataclasses import ChatMessage, Document
 
 from src.adapters import db
+from src.common import haystack_utils
 from src.db.models.support_listing import SupportListing
 from src.ingestion import extract_supports
 
@@ -139,6 +140,14 @@ class MockLLM:
 
 def test_extract_support_entries(monkeypatch, document: Document) -> None:
     monkeypatch.setattr(extract_supports, "create_llm", lambda: MockLLM())
+    monkeypatch.setattr(
+        haystack_utils,
+        "get_phoenix_prompt",
+        lambda _prompt_name: [
+            ChatMessage.from_system("{{schema}}"),
+            ChatMessage.from_user("{{doc}}"),
+        ],
+    )
 
     supports = extract_supports.extract_support_entries("Test Support Listing", document)
     assert len(supports) == 4

@@ -227,3 +227,6 @@ help: ## Prints the help documentation and info about each command
 # Usage: make extract-supports NAME="SupportName" FILE="path/to/file"
 extract-supports:
 	$(PY_RUN_CMD) extract-supports "$(NAME)" "$(FILE)"
+
+copy-prompts:
+	$(PY_RUN_CMD) copy-prompts

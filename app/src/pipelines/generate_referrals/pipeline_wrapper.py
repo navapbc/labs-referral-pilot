@@ -1,6 +1,7 @@
 import json
 import logging
 from pprint import pformat
+from uuid import UUID
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
@@ -9,55 +10,26 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
-from sqlalchemy.inspection import inspect
 
 from src.app_config import config
+from src.common import haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
 
 
 class Resource(BaseModel):
-    resource_name: str
-    resource_addresses: list[str]
-    resource_phones: list[str]
+    name: str
+    addresses: list[str]
+    phones: list[str]
+    emails: list[str]
+    website: str
     description: str
     justification: str
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
-
-system_prompt = """
-You are a supporting API for Goodwill Central Texas Referral. You are designed to help career case managers provide high-quality, local resource referrals to client's in Central Texas.
-Your role is to support Goodwill Central Texas career case managers working with low-income job seekers and learners in Austin and surrounding counties (Bastrop, Blanco, Burnet, Caldwell, DeWitt, Fayette, Gillespie, Gonzales, Hays, Lavaca, Lee, Llano, Mason, Travis, Williamson).
-
-## Task Checklist
-    - Evaluate the client needs and determine their eligibility (Factors to consider: age, income, disability, immigration/veteran status, number of dependents)
-    - Prioritize Goodwill resources first (Basic Needs Resource packet, Goodwill websites)
-    - Rank recommendations by proximity, eligibility fit, and other relevant factors
-
-## Core Instructions
-    - Use only trusted and up-to-date sources: Goodwill, government, vetted nonprofits, trusted news outlets (Findhelp, 211, Connect ATX permitted). Never use unreliable websites (e.g., shelterlistings.org, needhelppayingbills.com).
-    - Never invent or fabricate resources. If none are available, state this clearly and suggest actionable, specific next steps
-
-List of resources to choose from:
-{% for s in supports %}
-   - {{ s.content }}
-{% endfor %}
-
-## Response Constraints
-    - Your response should ONLY include resources.
-    - Do not summarize your assessment of the clients needs.
-    - Limit the description for a resource to be less than 255 words.
-    - Return a JSON list of resources in the following format:
-        '''{{ resource_json }}'''
-    """
 model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
-
-prompt_template = [
-    ChatMessage.from_system(system_prompt),
-    ChatMessage.from_user("""User query: {{ query }}"""),
-]
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -66,6 +38,8 @@ class PipelineWrapper(BasePipelineWrapper):
     def setup(self) -> None:
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
             instance=ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
@@ -78,12 +52,12 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str) -> dict:
-        supports_from_db = retrieve_supports_from_db()
+        supports_from_db = format_support_strings()
         response = self.pipeline.run(
             {
                 "prompt_builder": {
                     "query": query,
-                    "supports": supports_from_db,
+                    "supports": supports_from_db.values(),
                     "resource_json": resource_as_json,
                 },
             }
@@ -108,15 +82,16 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
-def retrieve_supports_from_db() -> list[str]:
-    all_supports: list[str] = []
+def format_support_strings() -> dict[UUID, str]:
     with config.db_session() as db_session, db_session.begin():
-        all_db_supports = db_session.query(Support).all()
-
-        for support in all_db_supports:
-            support_dict = {
-                c.key: getattr(support, c.key) for c in inspect(Support).mapper.column_attrs
-            }
-            support_as_str = json.dumps(support_dict, default=str)
-            all_supports.append(support_as_str)
-    return all_supports
+        return {
+            support.id: (
+                f"Name: {support.name}\n"
+                f"- Description: {support.description}\n"
+                f"- Addresses: {', '.join(support.addresses)}\n"
+                f"- Phones: {', '.join(support.phone_numbers)}\n"
+                f"- Website: {support.website}\n"
+                f"- Email Addresses: {', '.join(support.email_addresses)}\n"
+            )
+            for support in db_session.query(Support).all()
+        }

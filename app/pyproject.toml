@@ -63,6 +63,7 @@ db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
 extract-supports= "src.ingestion.extract_supports:main"
+copy-prompts= "src.common.phoenix_utils:copy_deployed_prompts"
 
 [tool.black]
 line-length = 100
