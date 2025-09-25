@@ -1,33 +1,30 @@
-'use client';
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import {Resource} from "@/types/resources";
+"use client";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Resource } from "@/types/resources";
 
-import {useState} from 'react';
-import {Sparkles} from "lucide-react";
+import { useState } from "react";
+import { Sparkles } from "lucide-react";
 
-import "@/app/globals.css"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import "@/app/globals.css";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import {Label} from "@/components/ui/label";
-
+import { Label } from "@/components/ui/label";
 
 export default function Page() {
-  const [clientDescription, setClientDescription] = useState("")
+  const [clientDescription, setClientDescription] = useState("");
   const [result, setResult] = useState<Resource[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
     setLoading(true);
-    setError(null);
     setResult(null);
 
     try {
-      const base = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+      const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
       const res = await fetch(`${base}/api/generate-referrals`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ clientDescription }),
       });
 
@@ -35,7 +32,7 @@ export default function Page() {
       const data = await res.json();
       setResult(data.result ?? JSON.stringify(data));
     } catch (e: any) {
-      setError(e.message ?? 'Unknown error');
+      console.log(e.message ?? "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -45,7 +42,9 @@ export default function Page() {
     <>
       <div className="flex flex-col gap-2 pl-20 pr-20 mt-8 mb-8">
         <div className="m-3">
-          <Label className="font-medium text-gray-900 text-lg mb-1" htmlFor="">Tell us about your client</Label>
+          <Label className="font-medium text-gray-900 text-lg mb-1" htmlFor="">
+            Tell us about your client
+          </Label>
           <Textarea
             placeholder="Add details about the client's specific situation, needs, and circumstances here..."
             id="clientDescriptionInput"
@@ -66,12 +65,13 @@ export default function Page() {
         {displayResourcesFromResult(result)}
       </div>
     </>
-  )
+  );
 }
 
-function displayResourcesFromResult(result: Resource[] | null){
+function displayResourcesFromResult(result: Resource[] | null) {
   if (result == null) return null;
-  if (result.length === 0) return <div className="margin-top-2">No resources found.</div>;
+  if (result.length === 0)
+    return <div className="margin-top-2">No resources found.</div>;
 
   return (
     <div className="m-3">
@@ -80,10 +80,16 @@ function displayResourcesFromResult(result: Resource[] | null){
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
-                                  {i+1}
+                {i + 1}
               </span>
               {r.name}
-              <Link href={r.website} rel="noopener noreferrer" className="text-base text-gray-500 flex items-center gap-2">{r.website}</Link>
+              <Link
+                href={r.website}
+                rel="noopener noreferrer"
+                className="text-base text-gray-500 flex items-center gap-2"
+              >
+                {r.website}
+              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent className="ml-4 mr-4">
@@ -93,21 +99,23 @@ function displayResourcesFromResult(result: Resource[] | null){
 
             {r.addresses?.length > 0 && (
               <div className="mt-1">
-                <span className="font-semibold">Address{r.addresses.length > 1 ? 'es' : ''}:</span> {/*TODO plural translations*/}
-                  {r.addresses.join( ' | ')}
+                <span className="font-semibold">
+                  Address{r.addresses.length > 1 ? "es" : ""}:
+                </span>{" "}
+                {r.addresses.join(" | ")}
               </div>
             )}
 
             {r.phones?.length > 0 && (
               <div className="mt-1">
-                <span className="font-semibold">Phone:</span>{' '} {/*TODO  translation*/}
-                {r.phones.join(' | ')}
+                <span className="font-semibold">Phone:</span>{" "}
+                {r.phones.join(" | ")}
               </div>
             )}
             {r.emails?.length > 0 && (
               <div className="mt-1">
-                <span className="font-semibold">Email:</span>{' '} {/*TODO translation*/}
-                {r.emails.join(' | ')}
+                <span className="font-semibold">Email:</span>{" "}
+                {r.emails.join(" | ")}
               </div>
             )}
           </CardContent>
