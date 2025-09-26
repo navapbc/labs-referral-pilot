@@ -16,10 +16,6 @@ export default function Page() {
   const [result, setResult] = useState<Resource[] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (result === null) return;
-  }, [result]);
-
   async function handleClick() {
     setLoading(true);
     setResult(null);
