@@ -42,11 +42,13 @@ export async function fetchResources(clientDescription: string) {
 
     clearTimeout(timer);
 
-    const responseData = await upstream.text();
+    /* eslint-disable */
+    const responseData = await upstream.json(); // bypassing type enforcement due to heavy nesting within the API response
     const resourcesJson = JSON.parse(
       responseData.result.llm.replies[0]._content[0].text,
     );
     const resources = ResourcesSchema.parse(resourcesJson);
+    /* eslint-enable */
 
     return resources;
   } catch {
