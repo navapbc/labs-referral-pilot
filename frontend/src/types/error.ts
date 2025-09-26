@@ -1,4 +1,4 @@
-export type Error ={
+export type Error = {
   name: string;
   message: string;
-}
+};

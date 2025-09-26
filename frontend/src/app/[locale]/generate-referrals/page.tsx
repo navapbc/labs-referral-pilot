@@ -1,39 +1,37 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Resource } from "@/types/resources";
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import "@/app/globals.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
-import {fetchResources} from "@/util/fetchResources";
+import { fetchResources, Resource } from "@/util/fetchResources";
 
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
   const [result, setResult] = useState<Resource[] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     if (result === null) return;
-  },[result])
+  }, [result]);
 
   async function handleClick() {
     setLoading(true);
     setResult(null);
 
     try {
-      const res = await fetchResources(clientDescription) //Promise<Resource[]>
-
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-      const data = await res.json();
-      setResult(data.result ?? JSON.stringify(data));
-    } catch (e) {
-      const error = e as Error
-      console.log(error.message ?? "Unknown error");
+      const resources = await fetchResources(clientDescription);
+      // @ts-expect-error we can trust this will be a list of Resources coming from our API endpoint
+      setResult(resources);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      console.error(message);
+      setResult([]); // or keep `null` if you prefer to hide the results area
     } finally {
       setLoading(false);
     }
