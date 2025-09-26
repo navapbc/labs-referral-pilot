@@ -19,9 +19,9 @@ export type Resources = z.infer<typeof ResourcesSchema>;
 
 // TODO update the logic above to be ready for when we deploy to a PROD env
 const generateReferralsURL =
-  process.env.ENVIRONMENT == "dev"
-    ? "https://referral-pilot-dev.navateam.com/generate_referrals/run"
-    : "http://0.0.0.0:3000/generate_referrals/run";
+  process.env.ENVIRONMENT == "local"
+    ? "http://0.0.0.0:3000/generate_referrals/run"
+    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";
 
 export async function fetchResources(clientDescription: string) {
   const url = generateReferralsURL;
