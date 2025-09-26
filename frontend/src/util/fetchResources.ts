@@ -53,7 +53,8 @@ export async function fetchResources(clientDescription: string) {
     /* eslint-enable */
 
     return resources;
-  } catch {
+  } catch (error) {
+    console.error("Error in fetchResources:", error);
     return [];
   }
 }
