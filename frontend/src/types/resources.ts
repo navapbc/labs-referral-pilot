@@ -4,6 +4,6 @@ export type Resource = {
   addresses: string[];
   phones: string[];
   emails: string[];
-  description: string;
+  description?: string;
   justification?: string;
 };
