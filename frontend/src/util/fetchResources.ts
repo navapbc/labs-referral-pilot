@@ -2,6 +2,16 @@ import { Resource } from "@/types/resources";
 import {NextResponse} from "next/server";
 import { z } from "zod";
 
+const ResourcesSchema = z.object({
+  name: z.string(),
+  website: z.string().url().optional().default(""),
+  addresses: z.array(z.any()).optional().default([]),
+  emails: z.array(z.any()).optional().default([]),
+  phones: z.array(z.any()).optional().default([]),
+  description: z.string().optional(),
+  justification: z.string().optional(),
+});
+
 // TODO update the logic above to be ready for when we deploy to a PROD env
 const generateReferralsURL = process.env.ENVIRONMENT = "https://referral-pilot-dev.navateam.com/generate_referrals/run";//"dev" ? "https://referral-pilot-dev.navateam.com/generate_referrals/run" : "http://0.0.0.0:3000/generate_referrals/run";
 
@@ -78,8 +88,19 @@ function parseResources(input: string): Resource[] {
   const resources: any[] = inner?.resources ?? [];
   if (!Array.isArray(resources)) return [];
 
-  //TODO Use zod to validate the API response
+  // ------------- Here's the Zod parsing that is not working -------------------
+/*
+  const parsed = ResourcesSchema.safeParse(resources);
+  if (!parsed.success) {
+    // Optionally log parsed.error.format() for diagnostics
+    return [];
+  }
+  // @ts-ignore
+  return parsed.data as Resource[];
 
+*/
+
+  //---------------- Here's what works -----------------------------
   return resources.map((r: Resource) => ({
     name: String(r?.name ?? "error"),
     website: String(r?.website ?? "error"),
@@ -91,13 +112,3 @@ function parseResources(input: string): Resource[] {
       typeof r?.justification === "string" ? r.justification : undefined,
   })) as Resource[];
 }
-/*
-const Resource = z.object({
-  name: z.string(),
-  website: z.string().url().optional().default(""),
-  addresses: z.array(z.string()).optional().default([]),
-  emails: z.array(z.string()).optional().default([]),
-  phones: z.array(z.string()).optional().default([]),
-  description: z.string().optional(),
-  justification: z.string().optional(),
-});*/
