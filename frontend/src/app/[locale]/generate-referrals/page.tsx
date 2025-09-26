@@ -41,7 +41,7 @@ export default function Page() {
     <>
       <div className="flex flex-col gap-2 pl-20 pr-20 mt-8 mb-8">
         <div className="m-3">
-          <Label className="font-medium text-gray-900 text-lg mb-1" htmlFor="">
+          <Label className="font-medium text-gray-900 text-lg mb-1" htmlFor="clientDescriptionInput">
             Tell us about your client
           </Label>
           <Textarea
