@@ -26,7 +26,6 @@ export default function Page() {
 
     try {
       const resources = await fetchResources(clientDescription);
-      // @ts-expect-error we can trust this will be a list of Resources coming from our API endpoint
       setResult(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
