@@ -27,7 +27,6 @@ export async function fetchResources(clientDescription: string) {
   const url = generateReferralsURL;
   const headers = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.EXTERNAL_API_KEY}`, // no NEXT_PUBLIC here   ---
   };
 
   const ac = new AbortController();
