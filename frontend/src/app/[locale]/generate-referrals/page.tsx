@@ -117,7 +117,9 @@ export default function Page() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="ml-4 mr-4">
-                    {r.description && <div className="font-medium mb-2">{r.description}</div>}
+                    {r.description && (
+                      <div className="font-medium mb-2">{r.description}</div>
+                    )}
                     {r.addresses?.length > 0 && (
                       <div className="mt-1">
                         <span className="font-semibold">
@@ -128,12 +130,14 @@ export default function Page() {
                     )}
                     {r.phones?.length > 0 && (
                       <div className="mt-1">
-                        <span className="font-semibold">Phone:</span> {r.phones.join(" | ")}
+                        <span className="font-semibold">Phone:</span>{" "}
+                        {r.phones.join(" | ")}
                       </div>
                     )}
                     {r.emails?.length > 0 && (
                       <div className="mt-1">
-                        <span className="font-semibold">Email:</span> {r.emails.join(" | ")}
+                        <span className="font-semibold">Email:</span>{" "}
+                        {r.emails.join(" | ")}
                       </div>
                     )}
                   </CardContent>
@@ -158,10 +162,13 @@ function PrintableReport({ resources }: { resources: Resource[] }) {
   return (
     <div className="mx-auto max-w-[800px] p-5 text-[14px] leading-relaxed text-slate-800">
       <div className="text-center border-b-2 border-blue-600 pb-4 mb-5">
-        <h1 className="text-[24px] font-bold text-blue-600 m-0">Goodwill Central Texas</h1>
+        <h1 className="text-[24px] font-bold text-blue-600 m-0">
+          Goodwill Central Texas
+        </h1>
         <p className="m-0">GenAI Referral Tool - Client Referral Report</p>
         <p className="m-0">
-          Generated on {date.toLocaleDateString()} at {date.toLocaleTimeString()}
+          Generated on {date.toLocaleDateString()} at{" "}
+          {date.toLocaleTimeString()}
         </p>
       </div>
 
@@ -183,22 +190,28 @@ function PrintableReport({ resources }: { resources: Resource[] }) {
                 <div className="font-bold text-slate-900">{r.name}</div>
               </div>
 
-              {r.description && <div className="mb-2 text-slate-700">{r.description}</div>}
+              {r.description && (
+                <div className="mb-2 text-slate-700">{r.description}</div>
+              )}
 
               {r.addresses?.length > 0 && (
                 <div className="text-slate-700">
-                  <span className="font-semibold">Address{r.addresses.length > 1 ? "es" : ""}:</span>{" "}
+                  <span className="font-semibold">
+                    Address{r.addresses.length > 1 ? "es" : ""}:
+                  </span>{" "}
                   {r.addresses.join(" | ")}
                 </div>
               )}
               {r.phones?.length > 0 && (
                 <div className="text-slate-700">
-                  <span className="font-semibold">Phone:</span> {r.phones.join(" | ")}
+                  <span className="font-semibold">Phone:</span>{" "}
+                  {r.phones.join(" | ")}
                 </div>
               )}
               {r.emails?.length > 0 && (
                 <div className="text-slate-700">
-                  <span className="font-semibold">Email:</span> {r.emails.join(" | ")}
+                  <span className="font-semibold">Email:</span>{" "}
+                  {r.emails.join(" | ")}
                 </div>
               )}
               {!!r.website && (
