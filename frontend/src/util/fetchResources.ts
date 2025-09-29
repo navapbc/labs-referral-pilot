@@ -50,11 +50,11 @@ export async function fetchResources(clientDescription: string) {
       responseData.result.llm.replies[0]._content[0].text,
     );
     const resources = ResourcesSchema.parse(resourcesJson);
+    const resourcesAsArray: Resource[] = resources.resources;
     /* eslint-enable */
 
-    return resources;
-  } catch (error) {
-    console.error("Error in fetchResources:", error);
+    return resourcesAsArray;
+  } catch {
     return [];
   }
 }
