@@ -28,8 +28,15 @@ logger = logging.getLogger(__name__)
 
 
 def extract_from_pdf(pdf_filepath: str) -> Document:  # pragma: no cover
-    if not os.path.exists(pdf_filepath):
-        raise FileNotFoundError(f"File not found: {pdf_filepath}")
+    # Check if file exists locally or can be opened via smart_open
+    file_exists = os.path.exists(pdf_filepath)
+    if not file_exists:
+        try:
+            with smart_open(pdf_filepath, "rb"):
+                # Just attempt to open, don't read anything
+                pass
+        except Exception as err:
+            raise FileNotFoundError(f"File not found: {pdf_filepath}") from err
 
     # There's also PDFMinerToDocument (for a different pdf extractor) and
     # MultiFileConverter (for variety of file types but requires more dependencies)
