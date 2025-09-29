@@ -9,7 +9,8 @@ import "@/app/globals.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
-import { fetchResources, Resource } from "@/util/fetchResources";
+import { fetchResources } from "@/util/fetchResources";
+import {Resource} from "@/types/resources";
 
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
