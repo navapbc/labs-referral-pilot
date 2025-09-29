@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_from_pdf(pdf_filepath: str) -> Document:  # pragma: no cover
-    if not os.path.exists(pdf_filepath):
+    if not (os.path.exists(pdf_filepath) or smart_open(pdf_filepath, "rb")):
         raise FileNotFoundError(f"File not found: {pdf_filepath}")
 
     # There's also PDFMinerToDocument (for a different pdf extractor) and

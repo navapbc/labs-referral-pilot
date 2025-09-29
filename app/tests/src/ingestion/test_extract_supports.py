@@ -1,4 +1,6 @@
 import pytest
+import boto3
+from moto import mock_s3
 from haystack import component
 from haystack.dataclasses import ChatMessage, Document
 
@@ -229,3 +231,32 @@ def test_save_to_db(db_session: db.Session):
     supports = {support.name: support for support in listing_record.supports}
     assert len(supports) == 1
     assert supports["Replacement"].description == "Replacement description"
+
+
+@mock_s3
+def test_extract_from_pdf_with_s3_file():
+    # Create mock S3 bucket and upload the sample PDF
+    bucket_name = "test-bucket"
+    key = "test-files/SampleBasicNeedsGuide.pdf"
+    s3_uri = f"s3://{bucket_name}/{key}"
+
+    # Set up mock S3
+    s3_client = boto3.client("s3", region_name="us-east-1")
+    s3_client.create_bucket(Bucket=bucket_name)
+
+    # Read the sample PDF and upload to mock S3
+    with open("tests/sample_data/SampleBasicNeedsGuide.pdf", "rb") as f:
+        pdf_content = f.read()
+
+    s3_client.put_object(Bucket=bucket_name, Key=key, Body=pdf_content)
+
+    # Test extracting from S3 URI
+    document = extract_supports.extract_from_pdf(s3_uri)
+
+    # Verify the document was extracted successfully
+    assert document is not None
+    assert document.content is not None
+    assert len(document.content) > 0
+
+    # Verify it contains expected content from the PDF
+    assert "Hope" in document.content and "Harbor" in document.content
