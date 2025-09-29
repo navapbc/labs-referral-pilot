@@ -1,8 +1,8 @@
-import pytest
 import boto3
-from moto import mock_s3
+import pytest
 from haystack import component
 from haystack.dataclasses import ChatMessage, Document
+from moto import mock_s3
 
 from src.adapters import db
 from src.common import haystack_utils
