@@ -233,6 +233,25 @@ def test_save_to_db(db_session: db.Session):
     assert supports["Replacement"].description == "Replacement description"
 
 
+def test_extract_from_pdf_file_not_found():
+    """Test that FileNotFoundError is raised when file doesn't exist locally and smart_open fails."""
+    nonexistent_path = "/path/to/nonexistent/file.pdf"
+
+    with pytest.raises(FileNotFoundError, match="File not found: /path/to/nonexistent/file.pdf"):
+        extract_supports.extract_from_pdf(nonexistent_path)
+
+
+def test_extract_from_pdf_smart_open_exception():
+    """Test that FileNotFoundError is raised when smart_open throws an exception."""
+    # Test with an invalid S3 URI that will cause smart_open to fail
+    invalid_s3_uri = "s3://nonexistent-bucket/nonexistent-file.pdf"
+
+    with pytest.raises(
+        FileNotFoundError, match="File not found: s3://nonexistent-bucket/nonexistent-file.pdf"
+    ):
+        extract_supports.extract_from_pdf(invalid_s3_uri)
+
+
 @mock_s3
 def test_extract_from_pdf_with_s3_file():
     # Create mock S3 bucket and upload the sample PDF
