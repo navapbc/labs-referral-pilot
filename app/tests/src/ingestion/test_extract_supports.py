@@ -1,6 +1,8 @@
+import boto3
 import pytest
 from haystack import component
 from haystack.dataclasses import ChatMessage, Document
+from moto import mock_s3
 
 from src.adapters import db
 from src.common import haystack_utils
@@ -229,3 +231,51 @@ def test_save_to_db(db_session: db.Session):
     supports = {support.name: support for support in listing_record.supports}
     assert len(supports) == 1
     assert supports["Replacement"].description == "Replacement description"
+
+
+def test_extract_from_pdf_file_not_found():
+    """Test that FileNotFoundError is raised when file doesn't exist locally and smart_open fails."""
+    nonexistent_path = "/path/to/nonexistent/file.pdf"
+
+    with pytest.raises(FileNotFoundError, match="File not found: /path/to/nonexistent/file.pdf"):
+        extract_supports.extract_from_pdf(nonexistent_path)
+
+
+def test_extract_from_pdf_smart_open_exception():
+    """Test that FileNotFoundError is raised when smart_open throws an exception."""
+    # Test with an invalid S3 URI that will cause smart_open to fail
+    invalid_s3_uri = "s3://nonexistent-bucket/nonexistent-file.pdf"
+
+    with pytest.raises(
+        FileNotFoundError, match="File not found: s3://nonexistent-bucket/nonexistent-file.pdf"
+    ):
+        extract_supports.extract_from_pdf(invalid_s3_uri)
+
+
+@mock_s3
+def test_extract_from_pdf_with_s3_file():
+    # Create mock S3 bucket and upload the sample PDF
+    bucket_name = "test-bucket"
+    key = "test-files/SampleBasicNeedsGuide.pdf"
+    s3_uri = f"s3://{bucket_name}/{key}"
+
+    # Set up mock S3
+    s3_client = boto3.client("s3", region_name="us-east-1")
+    s3_client.create_bucket(Bucket=bucket_name)
+
+    # Read the sample PDF and upload to mock S3
+    with open("tests/sample_data/SampleBasicNeedsGuide.pdf", "rb") as f:
+        pdf_content = f.read()
+
+    s3_client.put_object(Bucket=bucket_name, Key=key, Body=pdf_content)
+
+    # Test extracting from S3 URI
+    document = extract_supports.extract_from_pdf(s3_uri)
+
+    # Verify the document was extracted successfully
+    assert document is not None
+    assert document.content is not None
+    assert len(document.content) > 0
+
+    # Verify it contains expected content from the PDF
+    assert "Hope" in document.content and "Harbor" in document.content
