@@ -87,7 +87,6 @@ describe("ResourceSchema", () => {
     expect(result?.data?.emails?.[0]).toBe("info@capmetro.org");
 
   });
-
   it("fails when name is missing", () => {
     const resourceWithNoName = {
       addresses: ["Austin, Texas"],
