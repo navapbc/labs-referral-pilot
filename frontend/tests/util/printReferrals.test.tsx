@@ -54,6 +54,7 @@ describe("PrintableReferralsReport", () => {
     render(<PrintableReferralsReport resources={mockResources} />);
 
     mockResources.forEach((resource) => {
+      // @ts-expect-error resources will be populated in this test
       expect(screen.getByText(resource.description)).toBeInTheDocument();
     });
   });
@@ -62,7 +63,8 @@ describe("PrintableReferralsReport", () => {
     render(<PrintableReferralsReport resources={mockResources} />);
 
     mockResources.forEach((resource) => {
-      resource.addresses.forEach((address) => {
+      resource.addresses?.forEach((address) => {
+        // @ts-expect-error addresses will be populated in this test
         expect(screen.getByText(new RegExp(address))).toBeInTheDocument();
       });
     });
@@ -72,7 +74,8 @@ describe("PrintableReferralsReport", () => {
     render(<PrintableReferralsReport resources={mockResources} />);
 
     mockResources.forEach((resource) => {
-      resource.emails.forEach((email) => {
+      resource.emails?.forEach((email) => {
+        // @ts-expect-error emails will be populated in this test
         expect(screen.getByText(new RegExp(email))).toBeInTheDocument();
       });
     });
@@ -83,6 +86,7 @@ describe("PrintableReferralsReport", () => {
 
     mockResources.forEach((resource) => {
       expect(
+        // @ts-expect-error website will be populated in this test
         screen.getByText(new RegExp(resource.website)),
       ).toBeInTheDocument();
     });
