@@ -85,13 +85,15 @@ function displayResourcesFromResult(result: Resource[] | null) {
                 {i + 1}
               </span>
               {r.name}
-              <Link
-                href={r.website}
-                rel="noopener noreferrer"
-                className="text-base text-gray-500 flex items-center gap-2"
-              >
-                {r.website}
-              </Link>
+              {r.website && (
+                <Link
+                  href={r.website}
+                  rel="noopener noreferrer"
+                  className="text-base text-gray-500 flex items-center gap-2"
+                >
+                  {r.website}
+                </Link>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="ml-4 mr-4">
@@ -99,7 +101,7 @@ function displayResourcesFromResult(result: Resource[] | null) {
               <div className="text-bold mb-2">{r.description}</div>
             )}
 
-            {r.addresses?.length > 0 && (
+            {r.addresses && r.addresses.length > 0 && (
               <div className="mt-1">
                 <span className="font-semibold">
                   Address{r.addresses.length > 1 ? "es" : ""}:
@@ -108,13 +110,13 @@ function displayResourcesFromResult(result: Resource[] | null) {
               </div>
             )}
 
-            {r.phones?.length > 0 && (
+            {r.phones && r.phones.length > 0 && (
               <div className="mt-1">
                 <span className="font-semibold">Phone:</span>{" "}
                 {r.phones.join(" | ")}
               </div>
             )}
-            {r.emails?.length > 0 && (
+            {r.emails && r.emails.length > 0 && (
               <div className="mt-1">
                 <span className="font-semibold">Email:</span>{" "}
                 {r.emails.join(" | ")}
