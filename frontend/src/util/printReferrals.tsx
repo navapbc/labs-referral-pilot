@@ -41,7 +41,7 @@ export function PrintableReferralsReport({
                 <div className="mb-2 text-slate-700">{r.description}</div>
               )}
 
-              {r.addresses?.length > 0 && (
+              {r.addresses && r.addresses?.length > 0 && (
                 <div className="text-slate-700">
                   <span className="font-semibold">
                     Address{r.addresses.length > 1 ? "es" : ""}:
@@ -49,13 +49,13 @@ export function PrintableReferralsReport({
                   {r.addresses.join(" | ")}
                 </div>
               )}
-              {r.phones?.length > 0 && (
+              {r.phones && r.phones?.length > 0 && (
                 <div className="text-slate-700">
                   <span className="font-semibold">Phone:</span>{" "}
                   {r.phones.join(" | ")}
                 </div>
               )}
-              {r.emails?.length > 0 && (
+              {r.emails && r.emails?.length > 0 && (
                 <div className="text-slate-700">
                   <span className="font-semibold">Email:</span>{" "}
                   {r.emails.join(" | ")}
