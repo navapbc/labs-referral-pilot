@@ -127,7 +127,7 @@ export default function Page() {
                     {r.description && (
                       <div className="font-medium mb-2">{r.description}</div>
                     )}
-                    {r.addresses?.length > 0 && (
+                    {r.addresses && r.addresses?.length > 0 && (
                       <div className="mt-1">
                         <span className="font-semibold">
                           Address{r.addresses.length > 1 ? "es" : ""}:
@@ -135,13 +135,13 @@ export default function Page() {
                         {r.addresses.join(" | ")}
                       </div>
                     )}
-                    {r.phones?.length > 0 && (
+                    {r.phones && r.phones?.length > 0 && (
                       <div className="mt-1">
                         <span className="font-semibold">Phone:</span>{" "}
                         {r.phones.join(" | ")}
                       </div>
                     )}
-                    {r.emails?.length > 0 && (
+                    {r.emails && r.emails?.length > 0 && (
                       <div className="mt-1">
                         <span className="font-semibold">Email:</span>{" "}
                         {r.emails.join(" | ")}
