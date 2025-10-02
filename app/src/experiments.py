@@ -1,9 +1,11 @@
 import argparse
 import json
 import logging
+import os
 from pprint import pformat
 from typing import Any, Dict
 
+import requests
 from phoenix.client import Client
 from phoenix.client.experiments import run_experiment
 from phoenix.client.resources.datasets import Dataset
@@ -16,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_sets(output: TaskOutput, expected: Dict[str, Any]) -> tuple[set[str], set[str]]:
-    assert isinstance(output, dict), f"Expected dict, but got {type(output)}: {pformat(output)}"
-    assert len(output["content"]) == 1, pformat(output["content"])
-    output_obj = json.loads(output["content"][0]["text"])
+    assert isinstance(output, list), f"Expected list of content, but got {type(output)}"
+    assert len(output) == 1, f"Expected exactly one output, but got {len(output)}"
+    output_obj = json.loads(output[0]["text"])
     # Extract only the names of the resources from the output
     output_set = set([resource["name"] for resource in output_obj["resources"]])
 
@@ -43,25 +45,57 @@ def accuracy(output: TaskOutput, expected: Dict[str, Any]) -> float:
     return len(output_set.intersection(expectation_set)) / len(output_set)
 
 
-pipeline_wrapper = PipelineWrapper()
-pipeline_wrapper.setup()
+url_base = os.environ.get("DEPLOYED_API_URL")
+if url_base:
+    logger.info("Using deployed API at %s", url_base)
+else:
+    logger.info("Using local Haystack pipeline")
+    pipeline_wrapper = PipelineWrapper()
+    pipeline_wrapper.setup()
 
 
-def get_answer(example: dict) -> TaskOutput:
+def get_question(example):
     question_json_str = example["input"][INPUT_COLUMN_NAME]
     question_obj = json.loads(question_json_str)
     question = question_obj["caseworker_input"]
+    return question
 
+
+def query_pipeline(example: dict) -> TaskOutput:
+    question = get_question(example)
     logger.info("Getting answer for: %r", question)
     response = pipeline_wrapper.run_api(query=question)
-    assert len(response["llm"]["replies"]) == 1, pformat(response)
-    return response["llm"]["replies"][0].to_dict()
+    replies = response["llm"]["replies"]
+    assert len(replies) == 1, f"Expected exactly one reply but got {len(replies)}"
+    return replies[0].to_dict()["content"]
+
+
+def query_api(example: dict) -> TaskOutput:
+    question = get_question(example)
+    logger.info("Getting answer for: %r", question)
+    assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
+
+    response = requests.post(
+        f"{url_base}/generate_referrals/run",
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        json={"query": question},
+        timeout=60,
+    )
+    resp_obj = response.json()
+    logger.info("Response: %s", pformat(resp_obj, width=160))
+    assert len(resp_obj["result"]["llm"]["replies"]) == 1, "Expected exactly one reply"
+    return resp_obj["result"]["llm"]["replies"][0]["_content"]
 
 
 def run(dataset: Dataset, client: Client) -> None:
+    task = query_api if url_base else query_pipeline
+    logger.info("Running experiment using %r", task.__name__)
     run_experiment(
         dataset=dataset,
-        task=get_answer,
+        task=task,
         evaluators=[precision, accuracy],
         client=client,
     )
@@ -151,7 +185,7 @@ def main() -> None:
         # Get the dataset, run the experiment, and post the results
         dataset = client.datasets.get_dataset(dataset=args.dataset)
         run(dataset, client)
-        print("Experiment complete. Check results in the Phoenix UI.")
+        logger.info("Check results in the Phoenix UI.")
     except ValueError as e:
         logger.error("Error retrieving dataset: %s", e)
         print_datasets(client)
