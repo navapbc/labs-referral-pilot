@@ -40,73 +40,61 @@ const resourceCategories = [
     id: "employment",
     label: "Employment & Job Training",
     icon: Briefcase,
-    color: "bg-blue-100 text-blue-800",
   },
   {
     id: "housing",
     label: "Housing & Shelter",
     icon: Home,
-    color: "bg-green-100 text-green-800",
   },
   {
     id: "food",
     label: "Food Assistance",
     icon: Utensils,
-    color: "bg-orange-100 text-orange-800",
   },
   {
     id: "transportation",
     label: "Transportation",
     icon: Car,
-    color: "bg-purple-100 text-purple-800",
   },
   {
     id: "healthcare",
     label: "Healthcare & Mental Health",
     icon: Stethoscope,
-    color: "bg-red-100 text-red-800",
   },
   {
     id: "childcare",
     label: "Childcare",
     icon: Baby,
-    color: "bg-pink-100 text-pink-800",
   },
   {
     id: "financial",
     label: "Financial Assistance",
     icon: DollarSign,
-    color: "bg-yellow-100 text-yellow-800",
   },
   {
     id: "education",
     label: "Education & GED",
     icon: GraduationCap,
-    color: "bg-indigo-100 text-indigo-800",
   },
   {
     id: "legal",
     label: "Legal Services",
     icon: Scale,
-    color: "bg-gray-100 text-gray-800",
   },
   {
     id: "substance",
     label: "Substance Abuse Treatment",
     icon: Shield,
-    color: "bg-teal-100 text-teal-800",
   },
   {
     id: "disability",
     label: "Disability Services",
     icon: Accessibility,
-    color: "bg-cyan-100 text-cyan-800",
   },
   {
     id: "veterans",
     label: "Veterans Services",
     icon: Flag,
-    color: "bg-emerald-100 text-emerald-800",
   },
 ];
 
