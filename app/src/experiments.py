@@ -32,7 +32,7 @@ def get_sets(output: TaskOutput, expected: Dict[str, Any]) -> tuple[set[str], se
 def precision(output: TaskOutput, expected: Dict[str, Any]) -> float:
     output_set, expectation_set = get_sets(output, expected)
     if len(expectation_set) == 0:
-        return 0.0
+        raise ValueError("No expected referrals to compute precision.")
     return len(output_set.intersection(expectation_set)) / len(expectation_set)
 
 def accuracy(output: TaskOutput, expected: Dict[str, Any]) -> float:
