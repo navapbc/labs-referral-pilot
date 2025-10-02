@@ -21,8 +21,10 @@ def get_sets(output: TaskOutput, expected: Dict[str, Any]) -> tuple[set[str], se
     assert isinstance(output, list), f"Expected list of content, but got {type(output)}"
     assert len(output) == 1, f"Expected exactly one output, but got {len(output)}"
     output_obj = json.loads(output[0]["text"])
+    # Usually the output is {"resources": [...]}, sometimes it's just [...]
+    resources = output_obj["resources"] if "resources" in output_obj else output_obj
     # Extract only the names of the resources from the output
-    output_set = set([resource["name"] for resource in output_obj["resources"]])
+    output_set = set([resource["name"] for resource in resources])
 
     expected_json_str = expected[OUTPUT_COLUMN_NAME]
     expected_obj = json.loads(expected_json_str)
@@ -178,7 +180,7 @@ def main() -> None:
         return
 
     if action == "run_on_deployed":
-        logger.info("Running experiment on deployed Phoenix")
+        logger.info("Running experiment on dataset in deployed Phoenix")
         client = phoenix_utils.client_to_deployed_phoenix()
 
     try:
