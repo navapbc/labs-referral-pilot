@@ -47,20 +47,8 @@ def get_answer(example: dict) -> TaskOutput:
     question_json_str = example["input"][INPUT_COLUMN_NAME]
     question_obj = json.loads(question_json_str)
     question = question_obj["caseworker_input"]
+
     logger.info("Getting answer for: %r", question)
-
-    # if not True:
-    #     import random
-    #     answers = [
-    #         "All Saints Episcopal Church",
-    #         "Travis County Family Support Services",
-    #         "First Baptist Church of Austin",
-    #         "Central Presbyterian Church",
-    #     ]
-    #     rand_answers = random.sample(answers, k=random.randint(1, len(answers)))
-    #     # print(f"Random answers: {rand_answers}")
-    #     return ", ".join(rand_answers)
-
     response = pipeline_wrapper.run_api(query=question)
     assert len(response["llm"]["replies"]) == 1, pformat(response)
     return response["llm"]["replies"][0].to_dict()
@@ -117,7 +105,8 @@ def import_dataset(client: Client, filename: str, dataset_name: str) -> Any:
         input_keys=[INPUT_COLUMN_NAME],
         output_keys=[OUTPUT_COLUMN_NAME],
         # Caution: Note that the metadata column is different than on the deployed Phoenix
-        # In the Phoenix UI, click on each example to compare -- don't compare in the table view
+        # In the Phoenix UI, click on each example to compare -- don't compare in the table view,
+        # which shows multiple examples and hides the "Input" and "Output" keys
         metadata_keys=["metadata"],
     )
 
@@ -141,11 +130,13 @@ def main() -> None:
     if action == "export":
         client_to_deployed_phx = phoenix_utils.client_to_deployed_phoenix()
         export_dataset(args.dataset, "dataset.csv", client_to_deployed_phx)
+        logger.info("Export complete. Check dataset.csv file.")
         return
 
     client = phoenix_utils._create_client()
     if action == "import":
         import_dataset(client, "dataset.csv", args.dataset)
+        logger.info("Import complete. Check Phoenix UI.")
         return
 
     if action == "run_on_deployed":
