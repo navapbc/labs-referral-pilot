@@ -116,7 +116,6 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [readyToPrint, setReadyToPrint] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [zipCode, setZipCode] = useState("");
   const [locationText, setLocationText] = useState("");
   const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
     [],
@@ -128,14 +127,10 @@ export default function Page() {
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId],
     );
-    setTimeout(() => {
-      console.log("selected categories:", selectedCategories);
-    }, 8000);
   };
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
-    setZipCode("");
     setLocationText("");
     setSelectedResourceTypes([]);
   };
@@ -192,19 +187,17 @@ export default function Page() {
     const providerTypeFilters = selectedResourceTypes.join(", ");
 
     const locationFilterPrefix =
-      "\nFocus on resources close to the following location: "; // TODO establish proximity radius
-    const locationParts = [zipCode, locationText].filter(Boolean);
-    const locationFilter = locationParts.join(", ");
+      "\nFocus on resources close to the following location: ";
 
-    const collatedFilters =
-      (resourceTypeFilters
+    return (
+      (resourceTypeFilters.length > 0
         ? resourceTypeFiltersPrefix + resourceTypeFilters
         : "") +
       (providerTypeFilters
         ? providerTypeFiltersPrefix + providerTypeFilters
         : "") +
-      (locationFilter ? locationFilterPrefix + locationFilter : "");
-    return collatedFilters;
+      (locationText.length > 0 ? locationFilterPrefix + locationText : "")
+    );
   };
 
   return (
@@ -328,16 +321,9 @@ export default function Page() {
                   <MapPin className="w-4 h-4 text-blue-600" />
                   Location Preferences
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <Input
-                    placeholder="Enter ZIP Code"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
-                  />{" "}
-                  {/*TODO validation for zip code*/}
-                  <Input
-                    placeholder="Enter location (city, area, etc.)"
+                    placeholder="Enter location (city, area, zip code, etc.)"
                     value={locationText}
                     onChange={(e) => setLocationText(e.target.value)}
                     className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
@@ -348,7 +334,6 @@ export default function Page() {
               {/* Clear All Button */}
               {(selectedCategories.length > 0 ||
                 selectedResourceTypes.length > 0 ||
-                zipCode ||
                 locationText) && (
                 <div className="flex justify-end">
                   <Button
@@ -356,6 +341,7 @@ export default function Page() {
                     size="sm"
                     onClick={clearAllFilters}
                     className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    data-testid="clearFiltersButton"
                   >
                     Clear All Filters
                   </Button>
@@ -365,7 +351,7 @@ export default function Page() {
           </Card>
           <div className="mt-4 mb-2">
             <Label
-              className="font-medium text-gray-900 text-lg mb-[1.5]"
+              className="font-medium text-gray-900 text-lg mb-2"
               htmlFor="clientDescriptionInput"
             >
               Tell us about your client
