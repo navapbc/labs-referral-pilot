@@ -71,7 +71,7 @@ OUTPUT_COLUMN_NAME = "Output"
 
 
 def export_dataset(dataset_name: str, filename: str, client: Client) -> None:
-    "Retrieve a dataset by name and save it as a CSV file. Useful for exporting a dataset from the deployed Phoenix."
+    """Retrieve a dataset by name and save it as a CSV file. Useful for exporting a dataset from the deployed Phoenix."""
     try:
         dataset = client.datasets.get_dataset(dataset=dataset_name)
         # Convert the dataset to a pandas DataFrame to save as CSV
