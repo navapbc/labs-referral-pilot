@@ -54,7 +54,7 @@ else:
     pipeline_wrapper.setup()
 
 
-def get_question(example):
+def get_question(example: dict) -> str:
     question_json_str = example["input"][INPUT_COLUMN_NAME]
     question_obj = json.loads(question_json_str)
     question = question_obj["caseworker_input"]
