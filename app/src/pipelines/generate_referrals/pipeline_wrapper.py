@@ -62,7 +62,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
             }
         )
-        logger.info("Results: %s", pformat(response))
+        logger.info("Results: %s", pformat(response, width=160))
         return response
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
