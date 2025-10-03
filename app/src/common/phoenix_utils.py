@@ -82,7 +82,10 @@ def get_prompt_template(prompt_name: str) -> PromptVersion:
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(
-        "Retrieved prompt with %r: id='%s'\n%s", prompt_params, prompt.id, pformat(prompt._dumps())
+        "Retrieved prompt with %r: id='%s'\n%s",
+        prompt_params,
+        prompt.id,
+        pformat(prompt._dumps(), width=160),
     )
     return prompt
 
@@ -96,16 +99,19 @@ def which_prompt_version(prompt_name: str) -> dict:
     return {"prompt_version_id": config.PROMPT_VERSIONS[prompt_name]}
 
 
+def client_to_deployed_phoenix() -> Client:
+    url = os.environ.get("DEPLOYED_PHOENIX_URL")
+    api_key = os.environ.get("DEPLOYED_PHOENIX_API_KEY")
+    logger.info("Creating client to deployed Phoenix at %s with API key: %r", url, api_key)
+    assert url, "DEPLOYED_PHOENIX_URL is not set -- add it to override.env"
+    assert api_key, "DEPLOYED_PHOENIX_API_KEY is not set -- add it to override.env"
+    return _create_client(url, api_key=api_key)
+
+
 def copy_deployed_prompts() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
-    url = os.environ.get("DEPLOYED_PHOENIX_URL")
-    api_key = os.environ.get("DEPLOYED_PHOENIX_API_KEY")
-    logger.info("Copying prompts from %s with API key: %r", url, api_key)
-    assert url, "DEPLOYED_PHOENIX_URL is not set -- add it to override.env"
-    assert api_key, "DEPLOYED_PHOENIX_API_KEY is not set -- add it to override.env"
-
-    src_client = _create_client(url, api_key=api_key)
+    src_client = client_to_deployed_phoenix()
     local_client = _create_client()
     for prompt in list_prompts(src_client):
         # The prompt id is base64 encoding of 'Prompt:N' where N is simply a counter
@@ -126,7 +132,9 @@ def copy_prompt(src_client: Client, local_client: Client, prompt_name: str) -> N
         return
 
     prompt_ver = src_client.prompts.get(prompt_version_id=config.PROMPT_VERSIONS[prompt_name])
-    logger.info("Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps()))
+    logger.info(
+        "Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps(), width=160)
+    )
 
     logger.info("Creating prompt %r in %r", prompt_name, local_client._client.base_url)
     # If prompt_name already exists, a new prompt version will be created
