@@ -159,27 +159,26 @@ def main() -> None:
     parser.add_argument(
         "action",
         type=str,
-        choices=["export", "import", "run", "run_on_deployed", ""],
+        choices=["export", "import", "run", "run_on_deployed"],
         default="run",
     )
     args = parser.parse_args()
 
-    action = args.action if args.action else "run"
-    logger.info("Action=%s Dataset=%r", action, args.dataset)
+    logger.info("Action=%s Dataset=%r", args.action, args.dataset)
 
-    if action == "export":
+    if args.action == "export":
         client_to_deployed_phx = phoenix_utils.client_to_deployed_phoenix()
         export_dataset(args.dataset, "dataset.csv", client_to_deployed_phx)
         logger.info("Export complete. Check dataset.csv file.")
         return
 
     client = phoenix_utils._create_client()
-    if action == "import":
+    if args.action == "import":
         import_dataset(client, "dataset.csv", args.dataset)
         logger.info("Import complete. Check Phoenix UI.")
         return
 
-    if action == "run_on_deployed":
+    if args.action == "run_on_deployed":
         logger.info("Running experiment on dataset in deployed Phoenix")
         client = phoenix_utils.client_to_deployed_phoenix()
 
