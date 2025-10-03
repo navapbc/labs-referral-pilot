@@ -234,6 +234,9 @@ export default function Page() {
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                         onClick={() => toggleCategory(category.id)}
+                        data-testid={"resourceCategoryToggle-" + category.id}
+                        aria-pressed={isSelected}
+                        role="button"
                       >
                         <Icon className="mr-2 size-2.5 w-6 h-6" />
                         {category.label}
@@ -262,6 +265,9 @@ export default function Page() {
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                     onClick={() => toggleResourceType("goodwill")}
+                    data-testid={"resourceCategoryToggle-goodwill"}
+                    aria-pressed={selectedResourceTypes.includes("goodwill")}
+                    role="button"
                   >
                     <Heart className="w-4 h-4 mr-2" />
                     Goodwill Internal
@@ -279,6 +285,9 @@ export default function Page() {
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                     onClick={() => toggleResourceType("government")}
+                    data-testid={"resourceCategoryToggle-government"}
+                    aria-pressed={selectedResourceTypes.includes("government")}
+                    role="button"
                   >
                     <Building className="w-4 h-4 mr-2" />
                     Government
@@ -296,6 +305,9 @@ export default function Page() {
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                     onClick={() => toggleResourceType("community")}
+                    data-testid={"resourceCategoryToggle-community"}
+                    aria-pressed={selectedResourceTypes.includes("community")}
+                    role="button"
                   >
                     <Users className="w-4 h-4 mr-2" />
                     Community

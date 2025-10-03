@@ -71,40 +71,48 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const employmentButton = screen.getByText("Employment & Job Training");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
       await user.click(employmentButton);
 
-      // Button should have the selected styling
-      expect(employmentButton).toHaveClass("bg-blue-600");
+      // Button should be selected
+      expect(employmentButton).toHaveAttribute("aria-pressed", "true");
     });
 
     it("deselects a category when clicked twice", async () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const employmentButton = screen.getByText("Employment & Job Training");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
 
       // Select
       await user.click(employmentButton);
-      expect(employmentButton).toHaveClass("bg-blue-600");
+      expect(employmentButton).toHaveAttribute("aria-pressed", "true");
 
       // Deselect
       await user.click(employmentButton);
-      expect(employmentButton).not.toHaveClass("bg-blue-600");
+      expect(employmentButton).not.toHaveAttribute("aria-pressed", "true");
     });
 
     it("allows multiple categories to be selected", async () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const employmentButton = screen.getByText("Employment & Job Training");
-      const housingButton = screen.getByText("Housing & Shelter");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
 
       await user.click(employmentButton);
       await user.click(housingButton);
 
-      expect(employmentButton).toHaveClass("bg-blue-600");
-      expect(housingButton).toHaveClass("bg-blue-600");
+      expect(employmentButton).toHaveAttribute("aria-pressed", "true");
+      expect(housingButton).toHaveAttribute("aria-pressed", "true");
     });
   });
 
@@ -113,39 +121,47 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const goodwillButton = screen.getByText("Goodwill Internal");
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
       await user.click(goodwillButton);
 
-      expect(goodwillButton).toHaveClass("bg-blue-600");
+      expect(goodwillButton).toHaveAttribute("aria-pressed", "true");
     });
 
     it("deselects a resource type when clicked twice", async () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const goodwillButton = screen.getByText("Goodwill Internal");
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
 
       // Select
       await user.click(goodwillButton);
-      expect(goodwillButton).toHaveClass("bg-blue-600");
+      expect(goodwillButton).toHaveAttribute("aria-pressed", "true");
 
       // Deselect
       await user.click(goodwillButton);
-      expect(goodwillButton).not.toHaveClass("bg-blue-600");
+      expect(goodwillButton).not.toHaveAttribute("aria-pressed", "true");
     });
 
     it("allows multiple resource types to be selected", async () => {
       const user = userEvent.setup();
       render(<Page />);
 
-      const goodwillButton = screen.getByText("Goodwill Internal");
-      const governmentButton = screen.getByText("Government");
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      const governmentButton = screen.getByTestId(
+        "resourceCategoryToggle-government",
+      );
 
       await user.click(goodwillButton);
       await user.click(governmentButton);
 
-      expect(goodwillButton).toHaveClass("bg-blue-600");
-      expect(governmentButton).toHaveClass("bg-blue-600");
+      expect(goodwillButton).toHaveAttribute("aria-pressed", "true");
+      expect(governmentButton).toHaveAttribute("aria-pressed", "true");
     });
   });
 
@@ -155,14 +171,22 @@ describe("Generate Referrals Page", () => {
       render(<Page />);
 
       // Select categories
-      const employmentButton = screen.getByText("Employment & Job Training");
-      const housingButton = screen.getByText("Housing & Shelter");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
       await user.click(employmentButton);
       await user.click(housingButton);
 
       // Select resource types
-      const goodwillButton = screen.getByText("Goodwill Internal");
-      const governmentButton = screen.getByText("Government");
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      const governmentButton = screen.getByTestId(
+        "resourceCategoryToggle-government",
+      );
       await user.click(goodwillButton);
       await user.click(governmentButton);
 
@@ -173,10 +197,10 @@ describe("Generate Referrals Page", () => {
       await user.type(locationInput, "Austin, TX");
 
       // Verify filters are set
-      expect(employmentButton).toHaveClass("bg-blue-600");
-      expect(housingButton).toHaveClass("bg-blue-600");
-      expect(goodwillButton).toHaveClass("bg-blue-600");
-      expect(governmentButton).toHaveClass("bg-blue-600");
+      expect(employmentButton).toHaveAttribute("aria-pressed", "true");
+      expect(housingButton).toHaveAttribute("aria-pressed", "true");
+      expect(goodwillButton).toHaveAttribute("aria-pressed", "true");
+      expect(governmentButton).toHaveAttribute("aria-pressed", "true");
       expect(locationInput).toHaveValue("Austin, TX");
 
       // Click clear filters button
@@ -184,10 +208,10 @@ describe("Generate Referrals Page", () => {
       await user.click(clearButton);
 
       // Verify all filters are cleared
-      expect(employmentButton).not.toHaveClass("bg-blue-600");
-      expect(housingButton).not.toHaveClass("bg-blue-600");
-      expect(goodwillButton).not.toHaveClass("bg-blue-600");
-      expect(governmentButton).not.toHaveClass("bg-blue-600");
+      expect(employmentButton).not.toHaveAttribute("aria-pressed", "true");
+      expect(housingButton).not.toHaveAttribute("aria-pressed", "true");
+      expect(goodwillButton).not.toHaveAttribute("aria-pressed", "true");
+      expect(governmentButton).not.toHaveAttribute("aria-pressed", "true");
       expect(locationInput).toHaveValue("");
     });
 
@@ -201,7 +225,9 @@ describe("Generate Referrals Page", () => {
       ).not.toBeInTheDocument();
 
       // Select a category
-      const employmentButton = screen.getByText("Employment & Job Training");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
       await user.click(employmentButton);
 
       // Clear button should now be present
@@ -232,7 +258,9 @@ describe("Generate Referrals Page", () => {
       await user.type(textarea, "Client needs help getting to work");
 
       // Select a category
-      const employmentButton = screen.getByText("Employment & Job Training");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
       await user.click(employmentButton);
 
       // Click find resources
@@ -343,8 +371,12 @@ describe("Generate Referrals Page", () => {
       render(<Page />);
 
       // Select categories
-      const employmentButton = screen.getByText("Employment & Job Training");
-      const housingButton = screen.getByText("Housing & Shelter");
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
       await user.click(employmentButton);
       await user.click(housingButton);
 
@@ -372,7 +404,9 @@ describe("Generate Referrals Page", () => {
 
       render(<Page />);
 
-      const goodwillButton = screen.getByText("Goodwill Internal");
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
       await user.click(goodwillButton);
 
       const textarea = screen.getByTestId("clientDescriptionInput");
