@@ -82,7 +82,10 @@ def get_prompt_template(prompt_name: str) -> PromptVersion:
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(
-        "Retrieved prompt with %r: id='%s'\n%s", prompt_params, prompt.id, pformat(prompt._dumps())
+        "Retrieved prompt with %r: id='%s'\n%s",
+        prompt_params,
+        prompt.id,
+        pformat(prompt._dumps(), width=160),
     )
     return prompt
 
@@ -129,7 +132,9 @@ def copy_prompt(src_client: Client, local_client: Client, prompt_name: str) -> N
         return
 
     prompt_ver = src_client.prompts.get(prompt_version_id=config.PROMPT_VERSIONS[prompt_name])
-    logger.info("Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps()))
+    logger.info(
+        "Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps(), width=160)
+    )
 
     logger.info("Creating prompt %r in %r", prompt_name, local_client._client.base_url)
     # If prompt_name already exists, a new prompt version will be created

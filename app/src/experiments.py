@@ -1,4 +1,5 @@
 import argparse
+import functools
 import json
 import logging
 import os
@@ -50,10 +51,14 @@ def precision(output: TaskOutput, expected: Dict[str, Any]) -> float:
 url_base = os.environ.get("DEPLOYED_API_URL")
 if url_base:
     logger.info("Using deployed API at %s", url_base)
-else:
-    logger.info("Using local Haystack pipeline")
+
+
+@functools.lru_cache
+def create_pipeline() -> PipelineWrapper:
+    logger.info("Creating local Haystack pipeline")
     pipeline_wrapper = PipelineWrapper()
     pipeline_wrapper.setup()
+    return pipeline_wrapper
 
 
 def get_question(example: dict) -> str:
@@ -66,7 +71,7 @@ def get_question(example: dict) -> str:
 def query_pipeline(example: dict) -> TaskOutput:
     question = get_question(example)
     logger.info("Getting answer for: %r", question)
-    response = pipeline_wrapper.run_api(query=question)
+    response = create_pipeline().run_api(query=question)
     replies = response["llm"]["replies"]
     assert len(replies) == 1, f"Expected exactly one reply but got {len(replies)}"
     return replies[0].to_dict()["content"]
@@ -75,8 +80,8 @@ def query_pipeline(example: dict) -> TaskOutput:
 def query_api(example: dict) -> TaskOutput:
     question = get_question(example)
     logger.info("Getting answer for: %r", question)
-    assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
 
+    assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
     response = requests.post(
         f"{url_base}/generate_referrals/run",
         headers={
