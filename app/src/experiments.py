@@ -69,6 +69,7 @@ pipeline_name = "generate-referrals"
 def create_pipeline() -> BasePipelineWrapper:
     logger.info("Creating local Haystack pipeline %r", pipeline_name)
     pipeline_class = PIPELINES[pipeline_name]["pipeline_class"]
+    assert isinstance(pipeline_class, type), f"Expected a class but got {type(pipeline_class)}"
     pipeline_wrapper = pipeline_class()
     pipeline_wrapper.setup()
     return pipeline_wrapper
