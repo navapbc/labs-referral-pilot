@@ -7,13 +7,16 @@ from pprint import pformat
 from typing import Any, Dict
 
 import requests
+from hayhooks import BasePipelineWrapper
 from phoenix.client import Client
 from phoenix.client.experiments import run_experiment
 from phoenix.client.resources.datasets import Dataset
 from phoenix.client.resources.experiments.types import TaskOutput
 
 from src.common import phoenix_utils
-from src.pipelines.generate_referrals.pipeline_wrapper import PipelineWrapper
+from src.pipelines.generate_referrals.pipeline_wrapper import (
+    PipelineWrapper as GenerateReferralsPipeline,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +56,20 @@ if url_base:
     logger.info("Using deployed API at %s", url_base)
 
 
+PIPELINES = {
+    "generate-referrals": {
+        "pipeline_class": GenerateReferralsPipeline,
+        "url_path": "generate_referrals/run",
+    },
+}
+pipeline_name = "generate-referrals"
+
+
 @functools.lru_cache
-def create_pipeline() -> PipelineWrapper:
-    logger.info("Creating local Haystack pipeline")
-    pipeline_wrapper = PipelineWrapper()
+def create_pipeline() -> BasePipelineWrapper:
+    logger.info("Creating local Haystack pipeline %r", pipeline_name)
+    pipeline_class = PIPELINES[pipeline_name]["pipeline_class"]
+    pipeline_wrapper = pipeline_class()
     pipeline_wrapper.setup()
     return pipeline_wrapper
 
@@ -83,7 +96,7 @@ def query_api(example: dict) -> TaskOutput:
 
     assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
     response = requests.post(
-        f"{url_base}/generate_referrals/run",
+        f"{url_base}/{PIPELINES[pipeline_name]['url_path']}",
         headers={
             "accept": "application/json",
             "Content-Type": "application/json",
@@ -160,7 +173,8 @@ def main() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str, default="brandon2")
+    parser.add_argument("dataset", type=str)
+    parser.add_argument("pipeline", type=str, default="generate_referrals")
     parser.add_argument(
         "action",
         type=str,
@@ -169,7 +183,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    logger.info("Action=%s Dataset=%r", args.action, args.dataset)
+    logger.info("Action=%s Pipeline=%r Dataset=%r", args.action, args.pipeline, args.dataset)
+    assert (
+        args.pipeline in PIPELINES
+    ), f"Unknown pipeline {args.pipeline}. Available: {list(PIPELINES.keys())}"
+    global pipeline_name
+    pipeline_name = args.pipeline
 
     if args.action == "export":
         client_to_deployed_phx = phoenix_utils.client_to_deployed_phoenix()
