@@ -33,14 +33,14 @@ def get_sets(output: TaskOutput, expected: Dict[str, Any]) -> tuple[set[str], se
     return output_set, expectation_set
 
 
-def precision(output: TaskOutput, expected: Dict[str, Any]) -> float:
+def recall(output: TaskOutput, expected: Dict[str, Any]) -> float:
     output_set, expectation_set = get_sets(output, expected)
     if len(expectation_set) == 0:
-        raise ValueError("No expected referrals to compute precision.")
+        raise ValueError("No expected referrals to compute recall.")
     return len(output_set.intersection(expectation_set)) / len(expectation_set)
 
 
-def accuracy(output: TaskOutput, expected: Dict[str, Any]) -> float:
+def precision(output: TaskOutput, expected: Dict[str, Any]) -> float:
     output_set, expectation_set = get_sets(output, expected)
     if len(output_set) == 0:
         return 0.0
@@ -98,7 +98,7 @@ def run(dataset: Dataset, client: Client) -> None:
     run_experiment(
         dataset=dataset,
         task=task,
-        evaluators=[precision, accuracy],
+        evaluators=[recall, precision],
         client=client,
     )
 
