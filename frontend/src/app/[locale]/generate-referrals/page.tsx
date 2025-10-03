@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Accessibility,
@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building,
   Car,
+  ChevronLeft,
   DollarSign,
   FileText,
   Flag,
@@ -151,6 +152,10 @@ export default function Page() {
     window.print();
   }
 
+  function handleReturnToSearch() {
+    setReadyToPrint(false);
+  }
+
   const normalizeUrl = (url: string) => {
     const trimmed = url.trim();
     if (/^(https?:)?\/\//i.test(trimmed) || /^(mailto:|tel:)/i.test(trimmed)) {
@@ -192,196 +197,218 @@ export default function Page() {
     <>
       {/* ----- App chrome (hidden when printing) ----- */}
       <div className="print:hidden">
-        {readyToPrint && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-end pt-3 pr-24">
-              <Button
-                onClick={handlePrint}
-                variant="outline"
-                className="hover:bg-gray-100 hover:text-gray-900"
-              >
-                <Printer
-                  data-testid="printReferralsButton"
-                  className="w-4 h-4"
-                />
-                Print Referrals
-              </Button>
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-col gap-2 pl-24 pr-24 mt-8 mb-8">
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-4 space-y-4">
-              {/* Resource Categories */}
-              <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  Focus on Specific Resource Types
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {resourceCategories.map((category) => {
-                    const Icon = category.icon;
-                    const isSelected = selectedCategories.includes(category.id);
-                    return (
+          {!readyToPrint && (
+            <>
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="p-4 space-y-4">
+                  {/* Resource Categories */}
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      Focus on Specific Resource Types
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {resourceCategories.map((category) => {
+                        const Icon = category.icon;
+                        const isSelected = selectedCategories.includes(
+                          category.id,
+                        );
+                        return (
+                          <Button
+                            key={category.id}
+                            variant={isSelected ? "default" : "outline"}
+                            size="sm"
+                            className={`text-sm flex-col justify-center px-1 min-h-20 w-auto whitespace-normal break-words h-auto ${
+                              isSelected
+                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                            }`}
+                            onClick={() => toggleCategory(category.id)}
+                            data-testid={
+                              "resourceCategoryToggle-" + category.id
+                            }
+                            aria-pressed={isSelected}
+                            role="button"
+                          >
+                            <Icon className="mr-2 size-2.5 w-6 h-6" />
+                            {category.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <Building className="w-4 h-4 text-blue-600" />
+                      Resource Provider Types
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <Button
-                        key={category.id}
-                        variant={isSelected ? "default" : "outline"}
+                        variant={
+                          selectedResourceTypes.includes("goodwill")
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
-                        className={`text-sm flex-col justify-center px-0 h-20 ${
-                          isSelected
+                        className={`h-12 ${
+                          selectedResourceTypes.includes("goodwill")
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         }`}
-                        onClick={() => toggleCategory(category.id)}
-                        data-testid={"resourceCategoryToggle-" + category.id}
-                        aria-pressed={isSelected}
+                        onClick={() => toggleResourceType("goodwill")}
+                        data-testid={"resourceCategoryToggle-goodwill"}
+                        aria-pressed={selectedResourceTypes.includes(
+                          "goodwill",
+                        )}
                         role="button"
                       >
-                        <Icon className="mr-2 size-2.5 w-6 h-6" />
-                        {category.label}
+                        <Heart className="w-4 h-4 mr-2" />
+                        Goodwill Internal
                       </Button>
-                    );
-                  })}
-                </div>
+                      <Button
+                        variant={
+                          selectedResourceTypes.includes("government")
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        className={`h-12 ${
+                          selectedResourceTypes.includes("government")
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        }`}
+                        onClick={() => toggleResourceType("government")}
+                        data-testid={"resourceCategoryToggle-government"}
+                        aria-pressed={selectedResourceTypes.includes(
+                          "government",
+                        )}
+                        role="button"
+                      >
+                        <Building className="w-4 h-4 mr-2" />
+                        Government
+                      </Button>
+                      <Button
+                        variant={
+                          selectedResourceTypes.includes("community")
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        className={`h-12 ${
+                          selectedResourceTypes.includes("community")
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        }`}
+                        onClick={() => toggleResourceType("community")}
+                        data-testid={"resourceCategoryToggle-community"}
+                        aria-pressed={selectedResourceTypes.includes(
+                          "community",
+                        )}
+                        role="button"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Community
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Location Filters */}
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-blue-600" />
+                      Location Preferences
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
+                      <Input
+                        placeholder="Enter location (city, area, zip code, etc.)"
+                        value={locationText}
+                        onChange={(e) => setLocationText(e.target.value)}
+                        className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Clear All Button */}
+                  {(selectedCategories.length > 0 ||
+                    selectedResourceTypes.length > 0 ||
+                    locationText) && (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearAllFilters}
+                        className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        data-testid="clearFiltersButton"
+                      >
+                        Clear All Filters
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <div className="mt-4 mb-2">
+                <Label
+                  className="font-medium text-gray-900 text-lg mb-2"
+                  htmlFor="clientDescriptionInput"
+                >
+                  Tell us about your client
+                </Label>
+                <Textarea
+                  placeholder="Add details about the client's specific situation, needs, and circumstances here..."
+                  id="clientDescriptionInput"
+                  value={clientDescription}
+                  onChange={(e) => setClientDescription(e.target.value)}
+                  className="min-h-[8rem] min-w-[16rem] text-base"
+                  data-testid="clientDescriptionInput"
+                />
               </div>
 
-              <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <Building className="w-4 h-4 text-blue-600" />
-                  Resource Provider Types
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <Button
-                    variant={
-                      selectedResourceTypes.includes("goodwill")
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    className={`h-12 ${
-                      selectedResourceTypes.includes("goodwill")
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    }`}
-                    onClick={() => toggleResourceType("goodwill")}
-                    data-testid={"resourceCategoryToggle-goodwill"}
-                    aria-pressed={selectedResourceTypes.includes("goodwill")}
-                    role="button"
-                  >
-                    <Heart className="w-4 h-4 mr-2" />
-                    Goodwill Internal
-                  </Button>
-                  <Button
-                    variant={
-                      selectedResourceTypes.includes("government")
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    className={`h-12 ${
-                      selectedResourceTypes.includes("government")
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    }`}
-                    onClick={() => toggleResourceType("government")}
-                    data-testid={"resourceCategoryToggle-government"}
-                    aria-pressed={selectedResourceTypes.includes("government")}
-                    role="button"
-                  >
-                    <Building className="w-4 h-4 mr-2" />
-                    Government
-                  </Button>
-                  <Button
-                    variant={
-                      selectedResourceTypes.includes("community")
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    className={`h-12 ${
-                      selectedResourceTypes.includes("community")
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    }`}
-                    onClick={() => toggleResourceType("community")}
-                    data-testid={"resourceCategoryToggle-community"}
-                    aria-pressed={selectedResourceTypes.includes("community")}
-                    role="button"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Community
-                  </Button>
-                </div>
-              </div>
+              <Button
+                type="button"
+                onClick={() => void handleClick()}
+                disabled={!clientDescription.trim() || loading}
+                className="min-w-[16rem] generate-referrals-button text-lg pt-6 pb-6"
+                data-testid="findResourcesButton"
+              >
+                <Sparkles className="w-5 h-5" />
+                {loading ? "Generating Resources..." : "Find Resources"}
+              </Button>
+            </>
+          )}
 
-              {/* Location Filters */}
-              <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  Location Preferences
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
-                  <Input
-                    placeholder="Enter location (city, area, zip code, etc.)"
-                    value={locationText}
-                    onChange={(e) => setLocationText(e.target.value)}
-                    className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
+          {readyToPrint && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pt-3">
+                <Button
+                  onClick={handleReturnToSearch}
+                  variant="outline"
+                  className="hover:bg-gray-100 hover:text-gray-900"
+                  data-testid="returnToSearchButton"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Return To Search
+                </Button>
+                <Button
+                  onClick={handlePrint}
+                  variant="outline"
+                  className="hover:bg-gray-100 hover:text-gray-900"
+                >
+                  <Printer
+                    data-testid="printReferralsButton"
+                    className="w-4 h-4"
                   />
-                </div>
+                  Print Referrals
+                </Button>
               </div>
+            </div>
+          )}
 
-              {/* Clear All Button */}
-              {(selectedCategories.length > 0 ||
-                selectedResourceTypes.length > 0 ||
-                locationText) && (
-                <div className="flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                    data-testid="clearFiltersButton"
-                  >
-                    Clear All Filters
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <div className="mt-4 mb-2">
-            <Label
-              className="font-medium text-gray-900 text-lg mb-2"
-              htmlFor="clientDescriptionInput"
-            >
-              Tell us about your client
-            </Label>
-            <Textarea
-              placeholder="Add details about the client's specific situation, needs, and circumstances here..."
-              id="clientDescriptionInput"
-              value={clientDescription}
-              onChange={(e) => setClientDescription(e.target.value)}
-              className="min-h-[8rem] min-w-[16rem] text-base"
-              data-testid="clientDescriptionInput"
-            />
-          </div>
-
-          <Button
-            type="button"
-            onClick={() => void handleClick()}
-            disabled={!clientDescription.trim() || loading}
-            className="min-w-[16rem] generate-referrals-button text-lg pt-6 pb-6"
-            data-testid="findResourcesButton"
-          >
-            <Sparkles className="w-5 h-5" />
-            {loading ? "Generating Resources..." : "Find Resources"}
-          </Button>
-
-          {/* On-screen results (normal cards) */}
-          {result && result.length === 0 && (
+          {readyToPrint && result && result.length === 0 && (
             <div className="m-3">No resources found.</div>
           )}
-          {result && result.length > 0 && (
+          {readyToPrint && result && result.length > 0 && (
             <div className="mt-2">
               {result.map((r, i) => (
                 <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
