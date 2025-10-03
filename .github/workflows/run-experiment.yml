@@ -28,4 +28,4 @@ jobs:
         DEPLOYED_PHOENIX_API_KEY: ${{ secrets.DEPLOYED_PHOENIX_API_KEY }}
         DEPLOYED_API_URL: ${{ secrets.DEPLOYED_API_URL }}
       run: |
-        echo make run-experiment DATASET="${{ github.event.inputs.dataset_name }}" ACTION="run_on_deployed"
+        make run-experiment DATASET="${{ github.event.inputs.dataset_name }}" ACTION="run_on_deployed"
