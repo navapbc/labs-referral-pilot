@@ -35,6 +35,7 @@ import "@/app/globals.css";
 
 import { PrintableReferralsReport } from "@/util/printReferrals";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 const resourceCategories = [
   {
@@ -154,6 +155,11 @@ export default function Page() {
 
   function handleReturnToSearch() {
     setReadyToPrint(false);
+    setResult([]);
+    setLocationText("");
+    setSelectedCategories([]);
+    setSelectedResourceTypes([]);
+    setClientDescription("");
   }
 
   const normalizeUrl = (url: string) => {
@@ -197,10 +203,13 @@ export default function Page() {
     <>
       {/* ----- App chrome (hidden when printing) ----- */}
       <div className="print:hidden">
-        <div className="flex flex-col gap-2 pl-24 pr-24 mt-8 mb-8">
+        <div className="flex flex-col gap-2 pl-12 pr-12 mt-8 mb-8">
           {!readyToPrint && (
             <>
-              <Card className="bg-gray-50 border-gray-200">
+              <Card
+                className="bg-gray-50 border-gray-200"
+                data-testid="referralFiltersSection"
+              >
                 <CardContent className="p-4 space-y-4">
                   {/* Resource Categories */}
                   <div>
@@ -252,7 +261,7 @@ export default function Page() {
                             : "outline"
                         }
                         size="sm"
-                        className={`h-12 ${
+                        className={`h-12 text-sm ${
                           selectedResourceTypes.includes("goodwill")
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -274,7 +283,7 @@ export default function Page() {
                             : "outline"
                         }
                         size="sm"
-                        className={`h-12 ${
+                        className={`h-12 text-sm ${
                           selectedResourceTypes.includes("government")
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -296,7 +305,7 @@ export default function Page() {
                             : "outline"
                         }
                         size="sm"
-                        className={`h-12 ${
+                        className={`h-12 text-sm ${
                           selectedResourceTypes.includes("community")
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -326,6 +335,7 @@ export default function Page() {
                         value={locationText}
                         onChange={(e) => setLocationText(e.target.value)}
                         className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="locationFilterInput"
                       />
                     </div>
                   </div>
@@ -348,7 +358,10 @@ export default function Page() {
                   )}
                 </CardContent>
               </Card>
-              <div className="mt-4 mb-2">
+              <div
+                className="mt-4 mb-2"
+                data-testid={"clientDescriptionInputSection"}
+              >
                 <Label
                   className="font-medium text-gray-900 text-lg mb-2"
                   htmlFor="clientDescriptionInput"
@@ -372,14 +385,23 @@ export default function Page() {
                 className="min-w-[16rem] generate-referrals-button text-lg pt-6 pb-6"
                 data-testid="findResourcesButton"
               >
-                <Sparkles className="w-5 h-5" />
-                {loading ? "Generating Resources..." : "Find Resources"}
+                {!loading && (
+                  <>
+                    <Sparkles className="w-5 h-5" /> Find Resources
+                  </>
+                )}
+                {loading && (
+                  <>
+                    <Spinner className="" />
+                    Generating Resources...
+                  </>
+                )}
               </Button>
             </>
           )}
 
           {readyToPrint && (
-            <div className="space-y-4">
+            <div className="space-y-4" data-testid="readyToPrintSection">
               <div className="flex items-center justify-between pt-3">
                 <Button
                   onClick={handleReturnToSearch}

@@ -191,9 +191,7 @@ describe("Generate Referrals Page", () => {
       await user.click(governmentButton);
 
       // Enter location
-      const locationInput = screen.getByPlaceholderText(
-        "Enter location (city, area, zip code, etc.)",
-      );
+      const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "Austin, TX");
 
       // Verify filters are set
@@ -361,6 +359,121 @@ describe("Generate Referrals Page", () => {
     });
   });
 
+  describe("conditional section rendering based on readyToPrint state", () => {
+    it("shows clientDescriptionInputSection and referralFiltersSection when readyToPrint is false", () => {
+      render(<Page />);
+
+      // Both sections should be visible initially (readyToPrint is false)
+      expect(
+        screen.getByTestId("clientDescriptionInputSection"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("referralFiltersSection")).toBeInTheDocument();
+
+      // readyToPrintSection should not be visible
+      expect(
+        screen.queryByTestId("readyToPrintSection"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows readyToPrintSection and hides other sections when readyToPrint is true", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockResources);
+
+      render(<Page />);
+
+      // Enter client description and generate resources
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs assistance");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for readyToPrintSection to appear (readyToPrint becomes true)
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // clientDescriptionInputSection and referralFiltersSection should not be visible
+      expect(
+        screen.queryByTestId("clientDescriptionInputSection"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("referralFiltersSection"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("clears all filters and inputs when returnToSearchButton is clicked", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockResources);
+
+      render(<Page />);
+
+      // Set up filters and client description
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing assistance");
+
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      await user.click(employmentButton);
+
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      await user.click(goodwillButton);
+
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "Austin, TX");
+
+      // Generate resources
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for readyToPrintSection to appear
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Click return to search button
+      const returnButton = screen.getByTestId("returnToSearchButton");
+      await user.click(returnButton);
+
+      // Verify we're back to the search view
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("clientDescriptionInputSection") &&
+            screen.getByTestId("referralFiltersSection"),
+        ).toBeInTheDocument();
+      });
+
+      // Verify all inputs and filters are cleared
+      const clearedTextarea = screen.getByTestId("clientDescriptionInput");
+      expect(clearedTextarea).toHaveValue("");
+
+      const clearedEmploymentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      expect(clearedEmploymentButton).not.toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      const clearedGoodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      expect(clearedGoodwillButton).not.toHaveAttribute("aria-pressed", "true");
+
+      const clearedLocationInput = screen.getByTestId("locationFilterInput");
+      expect(clearedLocationInput).toHaveValue("");
+    });
+  });
+
   describe("getCollatedReferralOptions", () => {
     it("includes selected categories in the prompt", async () => {
       const user = userEvent.setup();
@@ -430,10 +543,8 @@ describe("Generate Referrals Page", () => {
 
       render(<Page />);
 
-      const locationInput = screen.getByPlaceholderText(
-        "Enter location (city, area, zip code, etc.)",
-      );
-      await user.type(locationInput, "Portland, OR");
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "Austin, TX");
 
       const textarea = screen.getByTestId("clientDescriptionInput");
       await user.type(textarea, "Client description");
@@ -447,7 +558,7 @@ describe("Generate Referrals Page", () => {
       expect(arg).toContain(
         "Focus on resources close to the following location:",
       );
-      expect(arg).toContain("Portland, OR");
+      expect(arg).toContain("Austin, TX");
     });
 
     it("does not include filter prefixes when no filters are selected", async () => {
