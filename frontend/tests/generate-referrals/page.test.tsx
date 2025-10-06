@@ -445,12 +445,10 @@ describe("Generate Referrals Page", () => {
       await user.click(returnButton);
 
       // Verify we're back to the search view
-      await waitFor(() => {
-        expect(
-          screen.getByTestId("clientDescriptionInputSection") &&
-            screen.getByTestId("referralFiltersSection"),
-        ).toBeInTheDocument();
-      });
+      expect(
+        screen.getByTestId("clientDescriptionInputSection"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("referralFiltersSection")).toBeInTheDocument();
 
       // Verify all inputs and filters are cleared
       const clearedTextarea = screen.getByTestId("clientDescriptionInput");

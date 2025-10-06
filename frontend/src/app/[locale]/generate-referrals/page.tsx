@@ -238,7 +238,6 @@ export default function Page() {
                               "resourceCategoryToggle-" + category.id
                             }
                             aria-pressed={isSelected}
-                            role="button"
                           >
                             <Icon className="mr-2 size-2.5 w-6 h-6" />
                             {category.label}
@@ -271,7 +270,6 @@ export default function Page() {
                         aria-pressed={selectedResourceTypes.includes(
                           "goodwill",
                         )}
-                        role="button"
                       >
                         <Heart className="w-4 h-4 mr-2" />
                         Goodwill Internal
@@ -293,7 +291,6 @@ export default function Page() {
                         aria-pressed={selectedResourceTypes.includes(
                           "government",
                         )}
-                        role="button"
                       >
                         <Building className="w-4 h-4 mr-2" />
                         Government
@@ -315,7 +312,6 @@ export default function Page() {
                         aria-pressed={selectedResourceTypes.includes(
                           "community",
                         )}
-                        role="button"
                       >
                         <Users className="w-4 h-4 mr-2" />
                         Community
