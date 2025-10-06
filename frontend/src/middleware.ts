@@ -5,7 +5,7 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import createIntlMiddleware from "next-intl/middleware";
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from "next/server";
 
 import { defaultLocale, locales } from "./i18n/config";
 
@@ -26,7 +26,7 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval';
@@ -38,25 +38,25 @@ export default function middleware(request: NextRequest) {
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
-`
+`;
   // Replace newline characters and spaces
   const contentSecurityPolicyHeaderValue = cspHeader
-    .replace(/\s{2,}/g, ' ')
-    .trim()
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   const response = i18nMiddleware(request);
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-nonce', nonce)
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
 
   requestHeaders.set(
-    'Content-Security-Policy',
-    contentSecurityPolicyHeaderValue
-  )
+    "Content-Security-Policy",
+    contentSecurityPolicyHeaderValue,
+  );
 
   response.headers.set(
-    'Content-Security-Policy',
-    contentSecurityPolicyHeaderValue
-  )
+    "Content-Security-Policy",
+    contentSecurityPolicyHeaderValue,
+  );
 
-  return response
+  return response;
 }
