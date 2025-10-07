@@ -45,7 +45,8 @@ export default function middleware(request: NextRequest) {
     .trim();
 
   const response = i18nMiddleware(request);
-  const requestHeaders = new Headers(request.headers);
+  //TODO MRH remove?
+  /*const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 
   requestHeaders.set(
@@ -56,7 +57,7 @@ export default function middleware(request: NextRequest) {
   response.headers.set(
     "Content-Security-Policy",
     contentSecurityPolicyHeaderValue,
-  );
+  );*/
 
   return response;
 }

@@ -1,24 +1,53 @@
-// @ts-check
-const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
+import createNextIntlPlugin from "next-intl/plugin";
 
-/**
- * Configure the base path for the app. Useful if you're deploying to a subdirectory (like GitHub Pages).
- * If this is defined, you'll need to set the base path anywhere you use relative paths, like in
- * `<a>`, `<img>`, or `<Image>` tags. Next.js handles this for you automatically in `<Link>` tags.
- * @see https://nextjs.org/docs/api-reference/next.config.js/basepath
- * @example "/test" results in "localhost:3000/test" as the index page for the app
- */
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+// Space-separated list of origins that are allowed to embed your app in an <iframe>
+const ALLOWED_FRAME_ANCESTORS = "*"; // TODO change to only allowing predetermined hosts e.g. "https://train.caseworthy.com/Goodwill_CentralTexas_Train.caseworthy"
+// Comma-separated list of extra connect-src origins/protocols
+const ALLOWED_CONNECT_SOURCES = "*" // TODO backend, localhost
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const withNextIntl = createNextIntlPlugin("./src/i18n/server.ts");
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const isProd = process.env.NODE_ENV === "production";
+
+
+const FRAME_ANCESTORS =
+    ALLOWED_FRAME_ANCESTORS.trim() || "'self'";
+
+const CONNECT_EXTRA = (ALLOWED_CONNECT_SOURCES || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(" ");
+
+const csp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' blob: data:",
+  "font-src 'self'",
+  `connect-src 'self' ${CONNECT_EXTRA} ${isProd ? "" : "ws:"}`.trim(),
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  `frame-ancestors ${FRAME_ANCESTORS}`,
+].join("; ");
+
+const nextConfig: import("next").NextConfig = {
   basePath,
   reactStrictMode: true,
-  // Output only the necessary files for a deployment, excluding irrelevant node_modules
-  // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
-  // Continue to support older browsers (ES5)
-  transpilePackages: [],
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          // IMPORTANT: Ensure no other layer injects X-Frame-Options (remove it at the proxy/CDN).
+          { key: "Content-Security-Policy", value: csp },
+        ],
+      },
+    ];
+  },
 };
 
-module.exports = withNextIntl(nextConfig);
+export default withNextIntl(nextConfig);
