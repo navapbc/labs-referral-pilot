@@ -3,7 +3,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 // Space-separated list of origins that are allowed to embed your app in an <iframe>
 const ALLOWED_FRAME_ANCESTORS = "*"; // TODO change to only allowing predetermined hosts e.g. "https://train.caseworthy.com/Goodwill_CentralTexas_Train.caseworthy"
 // Comma-separated list of extra connect-src origins/protocols
-const ALLOWED_CONNECT_SOURCES = "*"; // TODO backend, localhost
+const ALLOWED_CONNECT_SOURCES =
+  "https://referral-pilot-dev.navateam.com/, http://localhost:3001/"; // TODO add prod backend when ready
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/server.ts");
 

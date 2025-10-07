@@ -26,38 +26,6 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest) {
-  /*const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval';
-    style-src 'self' 'unsafe-inline' 'nonce-${nonce}';
-    img-src 'self' blob: data:;
-    font-src 'self';
-    connect-src 'self' 'unsafe-inline';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors '*';
-`;
-  // Replace newline characters and spaces
-  const contentSecurityPolicyHeaderValue = cspHeader
-    .replace(/\s{2,}/g, " ")
-    .trim();*/
-
   const response = i18nMiddleware(request);
-  //TODO MRH remove?
-  /*const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
-
-  requestHeaders.set(
-    "Content-Security-Policy",
-    contentSecurityPolicyHeaderValue,
-  );
-
-  response.headers.set(
-    "Content-Security-Policy",
-    contentSecurityPolicyHeaderValue,
-  );*/
-
   return response;
 }
