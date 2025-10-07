@@ -13,7 +13,7 @@ export function PrintableReferralsReport({
           Goodwill Central Texas
         </h1>
         <p className="m-0">GenAI Referral Tool - Client Referral Report</p>
-        <p className="m-0">
+        <p className="m-0" suppressHydrationWarning>
           Generated on {date.toLocaleDateString()} at{" "}
           {date.toLocaleTimeString()}
         </p>
