@@ -36,7 +36,9 @@ export async function fetchResources(clientDescription: string) {
     /* eslint-enable */
 
     return resourcesAsArray;
-  } catch {
-    return [];
+  } catch (error) {
+    console.error("Error fetching resources:", error);
+    console.error("URL used:", url);
+    throw error;
   }
 }
