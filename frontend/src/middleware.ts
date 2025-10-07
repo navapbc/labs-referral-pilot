@@ -26,7 +26,7 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  /*const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval';
@@ -42,7 +42,7 @@ export default function middleware(request: NextRequest) {
   // Replace newline characters and spaces
   const contentSecurityPolicyHeaderValue = cspHeader
     .replace(/\s{2,}/g, " ")
-    .trim();
+    .trim();*/
 
   const response = i18nMiddleware(request);
   //TODO MRH remove?
