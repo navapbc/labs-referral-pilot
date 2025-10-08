@@ -1,0 +1,102 @@
+import json
+import logging
+from pprint import pformat
+
+import hayhooks
+from hayhooks import BasePipelineWrapper
+from haystack import Pipeline
+from haystack.components.builders import ChatPromptBuilder
+from haystack.dataclasses.chat_message import ChatMessage
+from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from pydantic import BaseModel
+
+from src.common import haystack_utils
+from src.pipelines.generate_referrals.pipeline_wrapper import Resource
+
+logger = logging.getLogger(__name__)
+
+
+class ActionPlan(BaseModel):
+    title: str
+    summary: str
+    content: str
+
+
+action_plan_as_json = json.dumps(ActionPlan.model_json_schema(), indent=2)
+model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+
+class PipelineWrapper(BasePipelineWrapper):
+    name = "generate_action_plan"
+
+    def setup(self) -> None:
+        pipeline = Pipeline()
+        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
+        pipeline.add_component(
+            instance=ChatPromptBuilder(
+                template=prompt_template, required_variables=["resources", "action_plan_json"]
+            ),
+            name="prompt_builder",
+        )
+        pipeline.connect("prompt_builder", "llm.messages")
+
+        self.pipeline = pipeline
+
+    # Called for the `generate-action-plan/run` endpoint
+    def run_api(self, resources: list[Resource] | list[dict]) -> dict:
+        # Convert dicts to Resource objects if needed (hayhooks deserializes JSON to dicts)
+        resource_objects: list[Resource] = []
+        if resources and isinstance(resources[0], dict):
+            resource_objects = [Resource(**r) for r in resources]  # type: ignore[arg-type]
+        else:
+            resource_objects = resources  # type: ignore[assignment]
+
+        response = self.pipeline.run(
+            {
+                "prompt_builder": {
+                    "resources": format_resources(resource_objects),
+                    "action_plan_json": action_plan_as_json,
+                },
+            }
+        )
+        logger.info("Results: %s", pformat(response, width=160))
+        return response
+
+    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
+    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
+        logger.info("Running chat completion with model: %s, messages: %s", model, messages)
+        question = hayhooks.get_last_user_message(messages)
+        logger.info("Question: %s", question)
+        return hayhooks.streaming_generator(
+            pipeline=self.pipeline,
+            pipeline_run_args={
+                "echo_component": {
+                    "prompt": [ChatMessage.from_user(question)],
+                    "history": messages[:-1],
+                }
+            },
+        )
+
+
+def format_resources(resources: list[Resource]) -> str:
+    """Format a list of Resource objects into a readable string."""
+    formatted_resources = []
+    for resource in resources:
+        resource_str = f"Name: {resource.name}\n"
+        if resource.description:
+            resource_str += f"- Description: {resource.description}\n"
+        if resource.justification:
+            resource_str += f"- Justification: {resource.justification}\n"
+        if resource.addresses:
+            resource_str += f"- Addresses: {', '.join(resource.addresses)}\n"
+        if resource.phones:
+            resource_str += f"- Phones: {', '.join(resource.phones)}\n"
+        if resource.emails:
+            resource_str += f"- Emails: {', '.join(resource.emails)}\n"
+        if resource.website:
+            resource_str += f"- Website: {resource.website}\n"
+        formatted_resources.append(resource_str)
+    return "\n".join(formatted_resources)
