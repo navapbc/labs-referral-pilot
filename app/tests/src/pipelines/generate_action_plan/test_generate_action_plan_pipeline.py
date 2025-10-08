@@ -62,7 +62,7 @@ def test_format_resources(sample_resources):
     # Verify empty fields are handled (should not appear in output)
     assert "Name: Resource Without Website" in formatted
     # Empty website should still appear but be empty
-    assert "Website:" in formatted or "Website: " in formatted
+    assert "Website:" in formatted
 
 
 def test_format_resources_empty_list():
@@ -89,4 +89,3 @@ def test_format_resources_with_missing_fields():
     assert "Name: Minimal Resource" in formatted
     # Should include addresses even if only one
     assert "Addresses: 100 Test St" in formatted
-    # Empty description and justification might not be in output or will be empty
