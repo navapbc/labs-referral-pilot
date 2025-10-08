@@ -44,12 +44,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-action-plan/run` endpoint
     def run_api(self, resources: list[Resource] | list[dict]) -> dict:
-        # Convert dicts to Resource objects if needed (hayhooks deserializes JSON to dicts)
-        resource_objects: list[Resource] = []
-        if resources and isinstance(resources[0], dict):
-            resource_objects = [Resource(**r) for r in resources]  # type: ignore[arg-type]
-        else:
-            resource_objects = resources  # type: ignore[assignment]
+        resource_objects = get_resources(resources)
 
         response = self.pipeline.run(
             {
@@ -61,6 +56,15 @@ class PipelineWrapper(BasePipelineWrapper):
         )
         logger.info("Results: %s", pformat(response, width=160))
         return response
+
+
+def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
+    """Ensure we have a list of Resource objects."""
+    if not resources:
+        return []
+    if isinstance(resources[0], Resource):
+        return resources  # type: ignore[return-value]
+    return [Resource(**res) for res in resources]  # type: ignore[arg-type]
 
 
 def format_resources(resources: list[Resource]) -> str:
