@@ -36,10 +36,25 @@ echo "Wait for service ${service_name} to become stable"
 aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
 
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
+
+# Determine display name
+if [[ "${app_name}" == "app" ]]; then
+  display_name="API"
+else
+  display_name="${app_name}"
+fi
+
+# Determine URL suffix
+if [[ "${app_name}" == "frontend" ]]; then
+  url_suffix="/generate-referrals"
+else
+  url_suffix="/docs"
+fi
+
 pr_info=$(cat <<EOF
 <!-- ${app_name} - begin PR environment info -->
-## Preview environment for ${app_name}
-- Service endpoint: ${service_endpoint}
+## Preview environment for ${display_name}
+- Service endpoint: ${service_endpoint}${url_suffix}
 - Deployed commit: ${image_tag}
 <!-- ${app_name} - end PR environment info -->
 EOF
