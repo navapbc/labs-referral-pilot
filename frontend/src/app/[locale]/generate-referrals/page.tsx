@@ -228,7 +228,7 @@ export default function Page() {
         );
       }
       default: {
-        return (<></>)
+        return <></>;
       }
     }
   };
