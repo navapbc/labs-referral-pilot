@@ -2,6 +2,7 @@ import json
 import logging
 from enum import Enum
 from pprint import pformat
+from typing import Optional
 from uuid import UUID
 
 import hayhooks
@@ -31,7 +32,7 @@ class Resource(BaseModel):
     website: str
     description: str
     justification: str
-    referral_type: ReferralType
+    referral_type: Optional[ReferralType]
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
