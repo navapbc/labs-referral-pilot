@@ -36,6 +36,8 @@ import "@/app/globals.css";
 import { PrintableReferralsReport } from "@/util/printReferrals";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
+import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 const resourceCategories = [
   {
@@ -110,6 +112,9 @@ export default function Page() {
   const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
     [],
   );
+  const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
+  const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
+  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -160,6 +165,43 @@ export default function Page() {
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
     setClientDescription("");
+    setSelectedResources([]);
+    setActionPlan(null);
+  }
+
+  function handleResourceSelection(resource: Resource, checked: boolean) {
+    if (checked) {
+      setSelectedResources((prev) => [...prev, resource]);
+    } else {
+      setSelectedResources((prev) =>
+        prev.filter((r) => r.name !== resource.name),
+      );
+    }
+  }
+
+  function handleSelectAllResources() {
+    if (!result) return;
+    if (selectedResources.length === result.length) {
+      setSelectedResources([]);
+    } else {
+      setSelectedResources(result);
+    }
+  }
+
+  async function generateActionPlan() {
+    if (selectedResources.length === 0) return;
+
+    setIsGeneratingActionPlan(true);
+    setActionPlan(null);
+
+    try {
+      const plan = await fetchActionPlan(selectedResources);
+      setActionPlan(plan);
+    } catch (error) {
+      console.error("Error generating action plan:", error);
+    } finally {
+      setIsGeneratingActionPlan(false);
+    }
   }
 
   const normalizeUrl = (url: string) => {
@@ -475,6 +517,16 @@ export default function Page() {
                   </CardContent>
                 </Card>
               ))}
+
+              <ActionPlanSection
+                resources={result}
+                selectedResources={selectedResources}
+                actionPlan={actionPlan}
+                isGeneratingActionPlan={isGeneratingActionPlan}
+                onResourceSelection={handleResourceSelection}
+                onSelectAllResources={handleSelectAllResources}
+                onGenerateActionPlan={() => void generateActionPlan()}
+              />
             </div>
           )}
         </div>
