@@ -1,5 +1,6 @@
 import json
 import logging
+from enum import Enum
 from pprint import pformat
 from uuid import UUID
 
@@ -26,7 +27,7 @@ class Resource(BaseModel):
     website: str
     description: str
     justification: str
-    referral_type: str
+    referral_type: Enum(["external", "goodwill", "government"])
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
