@@ -219,11 +219,16 @@ export default function Page() {
           </>
         );
       }
-      case "external":
-      default: {
+      case "external": {
         return (
-          <></>
+          <>
+            <HouseHeart className="h-4 w-4 shrink-0" />
+            <span className="truncate">External Referral</span>
+          </>
         );
+      }
+      default: {
+        return (<></>)
       }
     }
   };
