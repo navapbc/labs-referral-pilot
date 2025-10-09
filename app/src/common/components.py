@@ -48,7 +48,7 @@ class UploadFilesToByteStreams:
 
 @component
 class LoadSupports:
-    """Converts list of UploadFile to list of ByteStream"""
+    """Loads support listings from the database and returns them as formatted strings."""
 
     @component.output_types(supports=list[str])
     def run(self) -> dict:
