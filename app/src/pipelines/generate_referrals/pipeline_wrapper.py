@@ -34,6 +34,7 @@ class Resource(BaseModel):
     website: str
     description: str
     justification: str
+    referral_type: Optional[ReferralType] = None
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)

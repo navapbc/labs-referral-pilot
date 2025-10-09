@@ -8,7 +8,10 @@ const referralTypeIndicator = (referralType: string | undefined) => {
   switch (referralType) {
     case "goodwill": {
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-blue-800 bg-transparent text-blue-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold">
+        <span
+          data-testid="goodwill_referral"
+          className="inline-flex items-center gap-1.5 rounded-md border border-blue-800 bg-transparent text-blue-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+        >
           <img
             src="/img/Goodwill_Industries_Logo.svg"
             alt="Goodwill"
@@ -20,7 +23,10 @@ const referralTypeIndicator = (referralType: string | undefined) => {
     }
     case "government": {
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-800 bg-transparent text-gray-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold">
+        <span
+          data-testid="government_referral"
+          className="inline-flex items-center gap-1.5 rounded-md border border-gray-800 bg-transparent text-gray-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+        >
           <Landmark className="h-4 w-4 shrink-0" />
           <span className="truncate">Government</span>
         </span>
@@ -28,7 +34,10 @@ const referralTypeIndicator = (referralType: string | undefined) => {
     }
     case "external": {
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-green-800 bg-transparent text-green-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold">
+        <span
+          data-testid="external_referral"
+          className="inline-flex items-center gap-1.5 rounded-md border border-green-800 bg-transparent text-green-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+        >
           <HandHeart className="h-4 w-4 shrink-0" />
           <span className="truncate">External</span>
         </span>

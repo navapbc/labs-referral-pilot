@@ -52,9 +52,7 @@ describe("ResourcesList", () => {
 
     render(<ResourcesList resources={[resource]} />);
 
-    expect(
-      screen.getByText("Goodwill Resources & Programs"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("goodwill_referral")).toBeInTheDocument();
   });
 
   it("displays government referral type indicator", () => {
@@ -65,7 +63,7 @@ describe("ResourcesList", () => {
 
     render(<ResourcesList resources={[resource]} />);
 
-    expect(screen.getByText("Government Program")).toBeInTheDocument();
+    expect(screen.getByTestId("government_referral")).toBeInTheDocument();
   });
 
   it("displays external referral type indicator", () => {
@@ -76,7 +74,7 @@ describe("ResourcesList", () => {
 
     render(<ResourcesList resources={[resource]} />);
 
-    expect(screen.getByText("Local Community Resources")).toBeInTheDocument();
+    expect(screen.getByTestId("external_referral")).toBeInTheDocument();
   });
 
   it("does not display referral type indicator when undefined", () => {
@@ -87,13 +85,9 @@ describe("ResourcesList", () => {
 
     render(<ResourcesList resources={[resource]} />);
 
-    expect(
-      screen.queryByText("Goodwill Resources & Programs"),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText("Government Program")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Local Community Resources"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Goodwill")).not.toBeInTheDocument();
+    expect(screen.queryByText("Government")).not.toBeInTheDocument();
+    expect(screen.queryByText("Local")).not.toBeInTheDocument();
   });
 
   it("renders website link with proper attributes", () => {
