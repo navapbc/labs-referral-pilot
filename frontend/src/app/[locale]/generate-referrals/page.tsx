@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   Accessibility,
   Baby,
@@ -457,15 +456,17 @@ export default function Page() {
                 </Button>
               </div>
               <ResourcesList resources={result ?? []} />
-              <ActionPlanSection
-                resources={result}
-                selectedResources={selectedResources}
-                actionPlan={actionPlan}
-                isGeneratingActionPlan={isGeneratingActionPlan}
-                onResourceSelection={handleResourceSelection}
-                onSelectAllResources={handleSelectAllResources}
-                onGenerateActionPlan={() => void generateActionPlan()}
-              />
+              {result && result.length > 0 && (
+                <ActionPlanSection
+                  resources={result}
+                  selectedResources={selectedResources}
+                  actionPlan={actionPlan}
+                  isGeneratingActionPlan={isGeneratingActionPlan}
+                  onResourceSelection={handleResourceSelection}
+                  onSelectAllResources={handleSelectAllResources}
+                  onGenerateActionPlan={() => void generateActionPlan()}
+                />
+              )}
             </div>
           )}
         </div>
