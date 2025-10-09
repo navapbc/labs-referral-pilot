@@ -18,6 +18,10 @@ from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
 
+class ReferralType(str, Enum):
+    EXTERNAL = "external"
+    GOODWILL = "goodwill"
+    GOVERNMENT = "government"
 
 class Resource(BaseModel):
     name: str
@@ -27,7 +31,7 @@ class Resource(BaseModel):
     website: str
     description: str
     justification: str
-    referral_type: Enum(["external", "goodwill", "government"])
+    referral_type: ReferralType
 
 
 resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
