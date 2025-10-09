@@ -26,8 +26,8 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component(
             "output_adapter",
             # https://docs.haystack.deepset.ai/docs/outputadapter
-            # Use Jinja template to extract content field from documents and return as list of strings
-            # The output list[str] is used as the "supports" input to the prompt builder
+            # Use Jinja template to extract content field from documents and return as a string,
+            # which is used as input to the prompt builder
             OutputAdapter(
                 template="{{ documents | map(attribute='content') | list | join('\n') }}",
                 output_type=str,
