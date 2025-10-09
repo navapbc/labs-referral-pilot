@@ -37,7 +37,7 @@ import { PrintableReferralsReport } from "@/util/printReferrals";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
-import ReactMarkdown from "react-markdown";
+import { parseMarkdownToHTML } from "@/util/markdown";
 
 const resourceCategories = [
   {
@@ -608,9 +608,12 @@ export default function Page() {
                     <div className="mb-3 text-black text-base">
                       {actionPlan.summary}
                     </div>
-                    <div className="prose prose-sm max-w-none text-gray-800">
-                      <ReactMarkdown>{actionPlan.content}</ReactMarkdown>
-                    </div>
+                    <div
+                      className="prose prose-sm max-w-none text-gray-800"
+                      dangerouslySetInnerHTML={{
+                        __html: parseMarkdownToHTML(actionPlan.content),
+                      }}
+                    />
                   </CardContent>
                 </Card>
               )}

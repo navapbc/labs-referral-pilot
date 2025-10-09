@@ -2,10 +2,12 @@ import { render, screen, waitFor } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
 import Page from "src/app/[locale]/generate-referrals/page";
 import * as fetchResourcesModule from "src/util/fetchResources";
+import * as fetchActionPlanModule from "src/util/fetchActionPlan";
 import { Resource } from "src/types/resources";
 
-// Mock the fetchResources module
+// Mock the modules
 jest.mock("src/util/fetchResources");
+jest.mock("src/util/fetchActionPlan");
 
 describe("Generate Referrals Page", () => {
   const mockResources: Resource[] = [
@@ -583,6 +585,317 @@ describe("Generate Referrals Page", () => {
       expect(arg).not.toContain(
         "Focus on resources close to the following location:",
       );
+    });
+  });
+
+  describe("Action Plan functionality", () => {
+    const mockMultipleResources: Resource[] = [
+      {
+        name: "Resource 1",
+        description: "First resource",
+      },
+      {
+        name: "Resource 2",
+        description: "Second resource",
+      },
+    ];
+
+    const mockActionPlan = {
+      title: "Test Action Plan",
+      summary: "This is a test action plan summary",
+      content: "## Step 1\n\nDo this first\n\n## Step 2\n\nDo this second",
+    };
+
+    it("shows action plan section after resources are loaded", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Select Resources for Action Plan"),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("allows selecting and deselecting resources via checkboxes", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      const checkbox2 = screen.getByLabelText(/Resource 2/i);
+
+      // Initially unchecked
+      expect(checkbox1).not.toBeChecked();
+      expect(checkbox2).not.toBeChecked();
+
+      // Select first resource
+      await user.click(checkbox1);
+      expect(checkbox1).toBeChecked();
+
+      // Deselect first resource
+      await user.click(checkbox1);
+      expect(checkbox1).not.toBeChecked();
+    });
+
+    it("shows Generate Action Plan button only when resources are selected", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      // Button should not be visible initially
+      expect(
+        screen.queryByText(/Generate Action Plan/),
+      ).not.toBeInTheDocument();
+
+      // Select a resource
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      await user.click(checkbox1);
+
+      // Button should now be visible
+      expect(
+        screen.getByText(/Generate Action Plan \(1 selected\)/),
+      ).toBeInTheDocument();
+    });
+
+    it("calls fetchActionPlan with selected resources when Generate Action Plan is clicked", async () => {
+      const user = userEvent.setup();
+      const fetchActionPlanSpy = jest
+        .spyOn(fetchActionPlanModule, "fetchActionPlan")
+        .mockResolvedValue(mockActionPlan);
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      // Select resources
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      const checkbox2 = screen.getByLabelText(/Resource 2/i);
+      await user.click(checkbox1);
+      await user.click(checkbox2);
+
+      // Click Generate Action Plan
+      const generateButton = screen.getByText(
+        /Generate Action Plan \(2 selected\)/,
+      );
+      await user.click(generateButton);
+
+      expect(fetchActionPlanSpy).toHaveBeenCalledWith(mockMultipleResources);
+    });
+
+    it("displays action plan after it is generated", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchActionPlanModule, "fetchActionPlan")
+        .mockResolvedValue(mockActionPlan);
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      // Select a resource
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      await user.click(checkbox1);
+
+      // Generate action plan
+      const generateButton = screen.getByText(
+        /Generate Action Plan \(1 selected\)/,
+      );
+      await user.click(generateButton);
+
+      // Wait for action plan to be displayed
+      await waitFor(() => {
+        expect(screen.getByText("Test Action Plan")).toBeInTheDocument();
+        expect(
+          screen.getByText("This is a test action plan summary"),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("shows loading state while generating action plan", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchActionPlanModule, "fetchActionPlan")
+        .mockImplementation(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve(mockActionPlan), 100),
+            ),
+        );
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      await user.click(checkbox1);
+
+      const generateButton = screen.getByText(
+        /Generate Action Plan \(1 selected\)/,
+      );
+      await user.click(generateButton);
+
+      expect(screen.getByText("Generating Action Plan...")).toBeInTheDocument();
+    });
+
+    it("handles Select All / Deselect All toggle", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      const checkbox2 = screen.getByLabelText(/Resource 2/i);
+
+      // Click Select All
+      const selectAllButton = screen.getByText("Select All");
+      await user.click(selectAllButton);
+
+      expect(checkbox1).toBeChecked();
+      expect(checkbox2).toBeChecked();
+      expect(screen.getByText("Deselect All")).toBeInTheDocument();
+
+      // Click Deselect All
+      const deselectAllButton = screen.getByText("Deselect All");
+      await user.click(deselectAllButton);
+
+      expect(checkbox1).not.toBeChecked();
+      expect(checkbox2).not.toBeChecked();
+      expect(screen.getByText("Select All")).toBeInTheDocument();
+    });
+
+    it("clears action plan when returning to search", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchActionPlanModule, "fetchActionPlan")
+        .mockResolvedValue(mockActionPlan);
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockMultipleResources);
+
+      render(<Page />);
+
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Resource 1")).toBeInTheDocument();
+      });
+
+      // Generate action plan
+      const checkbox1 = screen.getByLabelText(/Resource 1/i);
+      await user.click(checkbox1);
+
+      const generateButton = screen.getByText(
+        /Generate Action Plan \(1 selected\)/,
+      );
+      await user.click(generateButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Test Action Plan")).toBeInTheDocument();
+      });
+
+      // Return to search
+      const returnButton = screen.getByTestId("returnToSearchButton");
+      await user.click(returnButton);
+
+      // Action plan should be cleared
+      expect(screen.queryByText("Test Action Plan")).not.toBeInTheDocument();
     });
   });
 });
