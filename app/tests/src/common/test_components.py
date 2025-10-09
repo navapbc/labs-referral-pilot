@@ -1,9 +1,11 @@
 from io import BytesIO
 
+import pytest
 from fastapi import UploadFile
 
 from src.adapters import db
 from src.common.components import LoadSupports, UploadFilesToByteStreams
+from src.db.models.support_listing import Support
 from tests.src.db.models.factories import SupportFactory
 
 
@@ -25,10 +27,20 @@ def test_UploadFilesToByteStreams():
     assert byte_streams[1].data == b"Another file."
 
 
-def test_LoadSupports(enable_factory_create, db_session: db.Session):
-    SupportFactory.create(name="Support A", description="Desc A", website="http://a.com")
-    SupportFactory.create(name="Support B", description="Desc B", website="http://b.com")
+@pytest.fixture
+def support_records(enable_factory_create, db_session: db.Session):
+    db_session.query(Support).delete()
+    records = [
+        SupportFactory.create(name="Support A", description="Desc A", website="http://a.com"),
+        SupportFactory.create(name="Support B", description="Desc B", website="http://b.com"),
+    ]
+    yield records
 
+    for record in records:
+        db_session.delete(record)
+
+
+def test_LoadSupports(support_records, db_session: db.Session):
     component = LoadSupports()
     output = component.run()
     supports = output["supports"]
@@ -36,3 +48,5 @@ def test_LoadSupports(enable_factory_create, db_session: db.Session):
     assert len(supports) >= 2
     assert any("Name: Support A\n- Description: Desc A" in s for s in supports)
     assert any("Name: Support B\n- Description: Desc B" in s for s in supports)
+    assert any("- Website: http://a.com" in s for s in supports)
+    assert any("- Website: http://b.com" in s for s in supports)
