@@ -14,6 +14,8 @@ import {
   GraduationCap,
   Heart,
   Home,
+  HouseHeart,
+  Landmark,
   MapPin,
   Printer,
   Scale,
@@ -197,6 +199,33 @@ export default function Page() {
         : "") +
       (locationText.length > 0 ? locationFilterPrefix + locationText : "")
     );
+  };
+
+  const referralTypeIndicator = (referralType: string | undefined) => {
+    switch (referralType) {
+      case "goodwill": {
+        return (
+          <>
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">Goodwill Referral</span>
+          </>
+        );
+      }
+      case "government": {
+        return (
+          <>
+            <Landmark className="h-4 w-4 shrink-0" />
+            <span className="truncate">Government Referral</span>
+          </>
+        );
+      }
+      case "external":
+      default: {
+        return (
+          <></>
+        );
+      }
+    }
   };
 
   return (
@@ -430,12 +459,15 @@ export default function Page() {
             <div className="mt-2">
               {result.map((r, i) => (
                 <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-gray-200 text-gray-900 ml-5 mt-3 px-3 py-1 max-w-[15rem] text-sm font-medium">
+                    {referralTypeIndicator(r.referral_type)}
+                  </span>
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                       <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
                         {i + 1}
                       </span>
-                      {r.name}
+                      <div>{r.name}</div>
                       {!!r.website && (
                         <Link
                           href={normalizeUrl(r.website)}

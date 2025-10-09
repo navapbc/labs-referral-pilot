@@ -8,6 +8,7 @@ export const ResourceSchema = z.object({
   name: z.string(),
   phones: z.array(z.string().optional()).optional(),
   website: z.string().optional().or(z.literal("")),
+  referral_type: z.string().optional(),
 });
 
 export const ResourcesSchema = z.object({
