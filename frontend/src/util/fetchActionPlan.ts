@@ -49,7 +49,7 @@ function fixJsonControlCharacters(jsonString: string): string {
 }
 
 const generateActionPlanURL =
-  process.env.ENVIRONMENT == "local"
+  process.env.ENVIRONMENT === "local"
     ? "http://0.0.0.0:3000/generate_action_plan/run"
     : "https://referral-pilot-dev.navateam.com/generate_action_plan/run";
 
