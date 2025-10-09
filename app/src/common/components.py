@@ -9,6 +9,9 @@ from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 
+from src.app_config import config
+from src.db.models.support_listing import Support
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,6 +47,27 @@ class UploadFilesToByteStreams:
 
 
 @component
+class LoadSupports:
+    """Converts list of UploadFile to list of ByteStream"""
+
+    @component.output_types(supports=list[str])
+    def run(self) -> dict:
+        with config.db_session() as db_session, db_session.begin():
+            supports = [
+                (
+                    f"Name: {support.name}\n"
+                    f"- Description: {support.description}\n"
+                    f"- Addresses: {', '.join(support.addresses)}\n"
+                    f"- Phones: {', '.join(support.phone_numbers)}\n"
+                    f"- Website: {support.website}\n"
+                    f"- Email Addresses: {', '.join(support.email_addresses)}\n"
+                )
+                for support in db_session.query(Support).all()
+            ]
+            return {"supports": supports}
+
+
+@component
 class DummyChatGenerator:
     """
     A dummy chat generator that echoes back the messages used only for development.
@@ -54,4 +78,5 @@ class DummyChatGenerator:
     def run(self, messages: List[ChatMessage]) -> dict:
         replies = messages
         logger.info("replies: %s", pformat(replies))
-        return {"replies": replies}
+        reply = [f"## {msg.role} said: {msg.text[:200] if msg.text else " "}..." for msg in replies]
+        return {"replies": [ChatMessage.from_assistant("\n\n".join(reply))]}
