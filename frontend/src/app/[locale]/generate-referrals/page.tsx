@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   Accessibility,
   Baby,
@@ -14,8 +13,6 @@ import {
   GraduationCap,
   Heart,
   Home,
-  HouseHeart,
-  Landmark,
   MapPin,
   Printer,
   Scale,
@@ -28,7 +25,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { fetchResources } from "@/util/fetchResources";
@@ -38,6 +35,8 @@ import "@/app/globals.css";
 import { PrintableReferralsReport } from "@/util/printReferrals";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+
+import ResourcesList from "@/src/components/ResourcesList";
 
 const resourceCategories = [
   {
@@ -164,14 +163,6 @@ export default function Page() {
     setClientDescription("");
   }
 
-  const normalizeUrl = (url: string) => {
-    const trimmed = url.trim();
-    if (/^(https?:)?\/\//i.test(trimmed) || /^(mailto:|tel:)/i.test(trimmed)) {
-      return trimmed.startsWith("//") ? `https:${trimmed}` : trimmed;
-    }
-    return `https://${trimmed}`;
-  };
-
   const getCollatedReferralOptions = (): string => {
     const resourceTypeFiltersPrefix =
       "\nInclude resources that support the following categories: ";
@@ -199,38 +190,6 @@ export default function Page() {
         : "") +
       (locationText.length > 0 ? locationFilterPrefix + locationText : "")
     );
-  };
-
-  const referralTypeIndicator = (referralType: string | undefined) => {
-    switch (referralType) {
-      case "goodwill": {
-        return (
-          <>
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">Goodwill Referral</span>
-          </>
-        );
-      }
-      case "government": {
-        return (
-          <>
-            <Landmark className="h-4 w-4 shrink-0" />
-            <span className="truncate">Government Referral</span>
-          </>
-        );
-      }
-      case "external": {
-        return (
-          <>
-            <HouseHeart className="h-4 w-4 shrink-0" />
-            <span className="truncate">External Referral</span>
-          </>
-        );
-      }
-      default: {
-        return <></>;
-      }
-    }
   };
 
   return (
@@ -454,64 +413,7 @@ export default function Page() {
                   Print Referrals
                 </Button>
               </div>
-            </div>
-          )}
-
-          {readyToPrint && result && result.length === 0 && (
-            <div className="m-3">No resources found.</div>
-          )}
-          {readyToPrint && result && result.length > 0 && (
-            <div className="mt-2">
-              {result.map((r, i) => (
-                <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gray-200 text-gray-900 ml-5 mt-3 px-3 py-1 max-w-[15rem] text-sm font-medium">
-                    {referralTypeIndicator(r.referral_type)}
-                  </span>
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                      <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
-                        {i + 1}
-                      </span>
-                      <div>{r.name}</div>
-                      {!!r.website && (
-                        <Link
-                          href={normalizeUrl(r.website)}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          className="text-base text-gray-500 flex items-center gap-2"
-                        >
-                          {r.website}
-                        </Link>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="ml-4 mr-4">
-                    {r.description && (
-                      <div className="font-medium mb-2">{r.description}</div>
-                    )}
-                    {r.addresses && r.addresses?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">
-                          Address{r.addresses.length > 1 ? "es" : ""}:
-                        </span>{" "}
-                        {r.addresses.join(" | ")}
-                      </div>
-                    )}
-                    {r.phones && r.phones?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">Phone:</span>{" "}
-                        {r.phones.join(" | ")}
-                      </div>
-                    )}
-                    {r.emails && r.emails?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">Email:</span>{" "}
-                        {r.emails.join(" | ")}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+              <ResourcesList resources={result ?? []} />
             </div>
           )}
         </div>
