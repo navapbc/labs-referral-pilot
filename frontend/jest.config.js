@@ -20,10 +20,6 @@ const customJestConfig = {
     // https://github.com/aws/aws-sdk-js-v3/issues/3964
     uuid: require.resolve("uuid"),
   },
-  // Transform ESM modules for markdown processing
-  transformIgnorePatterns: [
-    "node_modules/(?!(unified|remark-parse|remark-gfm|remark-rehype|rehype-sanitize|rehype-stringify|micromark|mdast-util-from-markdown|mdast-util-to-hast|hast-util-sanitize|hast-util-to-html)/)",
-  ],
 };
 
 module.exports = createJestConfig(customJestConfig);
