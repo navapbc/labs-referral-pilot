@@ -83,7 +83,7 @@ def test_format_resources_with_missing_fields():
             website="",
             description="",
             justification="",
-            referral_type="",
+            referral_type=None,
         )
     ]
 
