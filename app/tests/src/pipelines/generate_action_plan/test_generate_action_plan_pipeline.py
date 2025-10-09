@@ -15,6 +15,7 @@ def sample_resources():
             website="https://austinresource.org",
             description="Provides housing assistance and job training",
             justification="Matches client needs for housing support",
+            referral_type="external",
         ),
         Resource(
             name="Central Texas Food Bank",
@@ -24,6 +25,7 @@ def sample_resources():
             website="https://centraltexasfoodbank.org",
             description="Emergency food assistance for families in need",
             justification="Client has immediate food insecurity needs",
+            referral_type="external",
         ),
         Resource(
             name="Resource Without Website",
@@ -33,6 +35,7 @@ def sample_resources():
             website="",
             description="Minimal resource for testing",
             justification="Test resource with minimal data",
+            referral_type="external",
         ),
     ]
 
