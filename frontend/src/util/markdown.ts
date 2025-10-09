@@ -23,21 +23,42 @@ export function parseMarkdownToHTML(content: string): string {
   let html = String(file);
 
   // Apply Tailwind CSS classes to the generated HTML elements
-  html = html.replace(/<h1>/g, '<h1 class="text-2xl font-bold mb-4 text-slate-900">');
-  html = html.replace(/<h2>/g, '<h2 class="text-xl font-semibold mb-3 text-slate-800">');
-  html = html.replace(/<h3>/g, '<h3 class="text-lg font-semibold mb-2 text-slate-800">');
-  html = html.replace(/<h4>/g, '<h4 class="text-base font-semibold mb-2 text-slate-800">');
-  html = html.replace(/<h5>/g, '<h5 class="text-sm font-semibold mb-2 text-slate-800">');
-  html = html.replace(/<h6>/g, '<h6 class="text-xs font-semibold mb-2 text-slate-800">');
+  html = html.replace(
+    /<h1>/g,
+    '<h1 class="text-2xl font-bold mb-4 text-slate-900">',
+  );
+  html = html.replace(
+    /<h2>/g,
+    '<h2 class="text-xl font-semibold mb-3 text-slate-800">',
+  );
+  html = html.replace(
+    /<h3>/g,
+    '<h3 class="text-lg font-semibold mb-2 text-slate-800">',
+  );
+  html = html.replace(
+    /<h4>/g,
+    '<h4 class="text-base font-semibold mb-2 text-slate-800">',
+  );
+  html = html.replace(
+    /<h5>/g,
+    '<h5 class="text-sm font-semibold mb-2 text-slate-800">',
+  );
+  html = html.replace(
+    /<h6>/g,
+    '<h6 class="text-xs font-semibold mb-2 text-slate-800">',
+  );
 
   html = html.replace(/<p>/g, '<p class="mb-3 leading-relaxed">');
 
-  html = html.replace(/<strong>/g, '<strong class="font-semibold text-slate-900">');
+  html = html.replace(
+    /<strong>/g,
+    '<strong class="font-semibold text-slate-900">',
+  );
   html = html.replace(/<em>/g, '<em class="italic">');
 
   html = html.replace(
     /<a href="/g,
-    '<a target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline" href="'
+    '<a target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline" href="',
   );
 
   html = html.replace(/<ul>/g, '<ul class="list-disc ml-6 mb-4 space-y-1">');
@@ -46,15 +67,15 @@ export function parseMarkdownToHTML(content: string): string {
 
   html = html.replace(
     /<blockquote>/g,
-    '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-4">'
+    '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-4">',
   );
   html = html.replace(
     /<code>/g,
-    '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">'
+    '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">',
   );
   html = html.replace(
     /<pre>/g,
-    '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">'
+    '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">',
   );
 
   return html;
