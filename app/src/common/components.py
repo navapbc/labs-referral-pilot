@@ -17,7 +17,10 @@ logger = logging.getLogger(__name__)
 
 @component
 class EchoNode:
-    "A component that echoes the input"
+    """
+    A custom node/component that simply echoes the input messages.
+    Useful for testing, debugging, or as a placeholder in pipelines.
+    """
 
     @component.output_types(full_prompt=List[ChatMessage])
     def run(self, prompt: List[ChatMessage], history: List[ChatMessage]) -> dict:
