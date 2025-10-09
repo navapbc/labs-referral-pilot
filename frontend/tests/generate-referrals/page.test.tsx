@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
 import Page from "src/app/[locale]/generate-referrals/page";
 import * as fetchResourcesModule from "src/util/fetchResources";
-import * as fetchActionPlanModule from "src/util/fetchActionPlan";
 import { Resource } from "src/types/resources";
 
 // Mock the modules

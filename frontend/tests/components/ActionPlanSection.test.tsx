@@ -37,7 +37,9 @@ describe("ActionPlanSection", () => {
   it("renders resource selection UI", () => {
     render(<ActionPlanSection {...defaultProps} />);
 
-    expect(screen.getByText("Select Resources for Action Plan")).toBeInTheDocument();
+    expect(
+      screen.getByText("Select Resources for Action Plan"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Resource 1")).toBeInTheDocument();
     expect(screen.getByText("Resource 2")).toBeInTheDocument();
   });
