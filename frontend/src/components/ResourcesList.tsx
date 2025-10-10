@@ -10,7 +10,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
       return (
         <span
           data-testid="goodwill_referral"
-          className="inline-flex items-center gap-1.5 rounded-md border border-blue-800 bg-transparent text-blue-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+          className="inline-flex items-center gap-1.5 bg-transparent text-blue-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
           <img
             src="/img/Goodwill_Industries_Logo.svg"
@@ -25,7 +25,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
       return (
         <span
           data-testid="government_referral"
-          className="inline-flex items-center gap-1.5 rounded-md border border-gray-800 bg-transparent text-gray-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+          className="inline-flex items-center gap-1.5 bg-transparent text-gray-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
           <Landmark className="h-4 w-4 shrink-0" />
           <span className="truncate">Government</span>
@@ -36,7 +36,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
       return (
         <span
           data-testid="external_referral"
-          className="inline-flex items-center gap-1.5 rounded-md border border-green-800 bg-transparent text-green-800 ml-6 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+          className="inline-flex items-center gap-1.5 bg-transparent text-green-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
           <HandHeart className="h-4 w-4 shrink-0" />
           <span className="truncate">External</span>
@@ -65,7 +65,7 @@ const ResourcesList = ({ resources }: { resources: Resource[] }) => {
       {resources.map((r, i) => (
         <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
           {referralTypeIndicator(r.referral_type)}
-          <CardHeader>
+          <CardHeader className="p-3 ml-3">
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
                 {i + 1}
@@ -83,7 +83,7 @@ const ResourcesList = ({ resources }: { resources: Resource[] }) => {
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="ml-4 mr-4">
+          <CardContent className="ml-9 mr-4">
             {r.description && (
               <div className="font-medium mb-2">{r.description}</div>
             )}

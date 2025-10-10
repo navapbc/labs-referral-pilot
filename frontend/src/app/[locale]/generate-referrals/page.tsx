@@ -238,7 +238,7 @@ export default function Page() {
     <>
       {/* ----- App chrome (hidden when printing) ----- */}
       <div className="print:hidden">
-        <div className="flex flex-col gap-2 pl-12 pr-12 mt-8 mb-8">
+        <div className="flex flex-col gap-2 m-4">
           {!readyToPrint && (
             <>
               <Card
