@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   Accessibility,
   Baby,
@@ -26,7 +25,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { fetchResources } from "@/util/fetchResources";
@@ -38,6 +37,8 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
+
+import ResourcesList from "@/components/ResourcesList";
 
 const resourceCategories = [
   {
@@ -204,14 +205,6 @@ export default function Page() {
     }
   }
 
-  const normalizeUrl = (url: string) => {
-    const trimmed = url.trim();
-    if (/^(https?:)?\/\//i.test(trimmed) || /^(mailto:|tel:)/i.test(trimmed)) {
-      return trimmed.startsWith("//") ? `https:${trimmed}` : trimmed;
-    }
-    return `https://${trimmed}`;
-  };
-
   const getCollatedReferralOptions = (): string => {
     const resourceTypeFiltersPrefix =
       "\nInclude resources that support the following categories: ";
@@ -245,7 +238,7 @@ export default function Page() {
     <>
       {/* ----- App chrome (hidden when printing) ----- */}
       <div className="print:hidden">
-        <div className="flex flex-col gap-2 pl-12 pr-12 mt-8 mb-8">
+        <div className="flex flex-col gap-2 m-4">
           {!readyToPrint && (
             <>
               <Card
@@ -462,71 +455,18 @@ export default function Page() {
                   Print Referrals
                 </Button>
               </div>
-            </div>
-          )}
-
-          {readyToPrint && result && result.length === 0 && (
-            <div className="m-3">No resources found.</div>
-          )}
-          {readyToPrint && result && result.length > 0 && (
-            <div className="mt-2">
-              {result.map((r, i) => (
-                <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                      <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
-                        {i + 1}
-                      </span>
-                      {r.name}
-                      {!!r.website && (
-                        <Link
-                          href={normalizeUrl(r.website)}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          className="text-base text-gray-500 flex items-center gap-2"
-                        >
-                          {r.website}
-                        </Link>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="ml-4 mr-4">
-                    {r.description && (
-                      <div className="font-medium mb-2">{r.description}</div>
-                    )}
-                    {r.addresses && r.addresses?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">
-                          Address{r.addresses.length > 1 ? "es" : ""}:
-                        </span>{" "}
-                        {r.addresses.join(" | ")}
-                      </div>
-                    )}
-                    {r.phones && r.phones?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">Phone:</span>{" "}
-                        {r.phones.join(" | ")}
-                      </div>
-                    )}
-                    {r.emails && r.emails?.length > 0 && (
-                      <div className="mt-1">
-                        <span className="font-semibold">Email:</span>{" "}
-                        {r.emails.join(" | ")}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-
-              <ActionPlanSection
-                resources={result}
-                selectedResources={selectedResources}
-                actionPlan={actionPlan}
-                isGeneratingActionPlan={isGeneratingActionPlan}
-                onResourceSelection={handleResourceSelection}
-                onSelectAllResources={handleSelectAllResources}
-                onGenerateActionPlan={() => void generateActionPlan()}
-              />
+              <ResourcesList resources={result ?? []} />
+              {result && result.length > 0 && (
+                <ActionPlanSection
+                  resources={result}
+                  selectedResources={selectedResources}
+                  actionPlan={actionPlan}
+                  isGeneratingActionPlan={isGeneratingActionPlan}
+                  onResourceSelection={handleResourceSelection}
+                  onSelectAllResources={handleSelectAllResources}
+                  onGenerateActionPlan={() => void generateActionPlan()}
+                />
+              )}
             </div>
           )}
         </div>
