@@ -87,7 +87,7 @@ describe("ResourcesList", () => {
 
     expect(screen.queryByText("Goodwill")).not.toBeInTheDocument();
     expect(screen.queryByText("Government")).not.toBeInTheDocument();
-    expect(screen.queryByText("Local")).not.toBeInTheDocument();
+    expect(screen.queryByText("External")).not.toBeInTheDocument();
   });
 
   it("renders website link with proper attributes", () => {
