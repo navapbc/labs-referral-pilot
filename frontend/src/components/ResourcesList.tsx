@@ -62,12 +62,10 @@ const ResourcesList = ({ resources }: { resources: Resource[] }) => {
     <div className="m-3">No resources found.</div>
   ) : (
     <div className="mt-2">
-      {resources.map((r, i) => {
-        const referralIndicator = referralTypeIndicator(r.referral_type);
-        return (
-          <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
-            {referralIndicator && <>{referralIndicator}</>}
-            <CardHeader>
+      {resources.map((r, i) => (
+        <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
+          {referralTypeIndicator(r.referral_type)}
+          <CardHeader>
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
                 {i + 1}
