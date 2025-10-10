@@ -38,7 +38,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
-import ResourcesList from "@/src/components/ResourcesList";
+import ResourcesList from "@/components/ResourcesList";
 
 const resourceCategories = [
   {
