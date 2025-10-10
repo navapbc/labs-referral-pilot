@@ -91,6 +91,7 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
 
+# TODO: Use the LoadSupports component so the input and output can be logged to Phoenix
 def format_support_strings() -> dict[UUID, str]:
     with config.db_session() as db_session, db_session.begin():
         return {
