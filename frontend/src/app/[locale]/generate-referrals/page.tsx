@@ -242,21 +242,22 @@ export default function Page() {
   };
 
   const handleFileUploadSingle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File input changed", event.target.files);
     const file = event.target.files?.[0]
     if (file) {
-      const supportedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"]
+      const supportedTypes = ["application/pdf"]
 
       if (supportedTypes.includes(file.type)) {
         setUploadedFile(file)
         setPdfAnalysisResult("")
       } else {
-        alert("Please upload a PDF or image file (PNG, JPEG, WEBP, GIF).")
+        alert("Please upload a PDF file.")
       }
     }
   }
 
   const triggerFileInput = () => {
-    // fileInputRef.current?.click();
+    fileInputRef.current?.click();
 
   }
 
@@ -525,6 +526,7 @@ export default function Page() {
             {!uploadedFile ? (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".pdf"
                   onChange={handleFileUploadSingle}
@@ -548,12 +550,12 @@ export default function Page() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-8 h-8 text-blue-600" />
-                    {/* <div>
+                    <div>
                       <p className="font-medium text-gray-900">{uploadedFile.name}</p>
                       <p className="text-sm text-gray-500">
                         {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
-                    </div> */}
+                    </div>
                   </div>
                 </div>
               </div>
