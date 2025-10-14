@@ -29,6 +29,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { fetchResources } from "@/util/fetchResources";
+import { uploadPdfDocument } from "@/util/uploadPdfDocument";
 import { Resource } from "@/types/resources";
 import "@/app/globals.css";
 
@@ -122,7 +123,8 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("text-summary");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [pdfAnalysisResult, setPdfAnalysisResult] = useState<string>("");
+  const [isPdfProcessing, setIsPdfProcessing] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -175,6 +177,8 @@ export default function Page() {
     setClientDescription("");
     setSelectedResources([]);
     setActionPlan(null);
+    setUploadedFile(null);
+    setPdfError(null);
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -241,7 +245,7 @@ export default function Page() {
     );
   };
 
-  const handleFileUploadSingle = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUploadSingle = async (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("File input changed", event.target.files);
     const file = event.target.files?.[0]
     if (file) {
@@ -249,7 +253,19 @@ export default function Page() {
 
       if (supportedTypes.includes(file.type)) {
         setUploadedFile(file)
-        setPdfAnalysisResult("")
+        setPdfError(null)
+        setIsPdfProcessing(true)
+
+        try {
+          const resources = await uploadPdfDocument(file);
+          setResult(resources);
+          setReadyToPrint(true);
+        } catch (error) {
+          console.error("Error processing PDF:", error);
+          setPdfError(error instanceof Error ? error.message : "Failed to process PDF");
+        } finally {
+          setIsPdfProcessing(false);
+        }
       } else {
         alert("Please upload a PDF file.")
       }
@@ -523,41 +539,109 @@ export default function Page() {
           </TabsContent>
 
           <TabsContent value="upload-forms">
-            {!uploadedFile ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileUploadSingle}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <div className="flex flex-col items-center">
-                  <FileText className="w-12 h-12 text-gray-400 mb-4" />
-                  <span className="text-lg font-medium text-gray-900 mb-2">Choose a PDF file to upload</span>
-                  <Button
-                    type="button"
-                    onClick={triggerFileInput}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Select a PDF file
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-blue-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">{uploadedFile.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+            {!readyToPrint ? (
+              <>
+                {!uploadedFile ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUploadSingle}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <div className="flex flex-col items-center">
+                      <FileText className="w-12 h-12 text-gray-400 mb-4" />
+                      <span className="text-lg font-medium text-gray-900 mb-2">Choose a PDF file to upload</span>
+                      <Button
+                        type="button"
+                        onClick={triggerFileInput}
+                        className="bg-blue-600 hover:bg-blue-700"
+                        disabled={isPdfProcessing}
+                      >
+                        Select a PDF file
+                      </Button>
                     </div>
                   </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-8 h-8 text-blue-600" />
+                          <div>
+                            <p className="font-medium text-gray-900">{uploadedFile.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {isPdfProcessing && (
+                      <div className="flex items-center justify-center p-8 bg-blue-50 border border-blue-200 rounded-lg">
+                        <Spinner className="mr-3" />
+                        <span className="text-blue-700 font-medium">Processing PDF and generating referrals...</span>
+                      </div>
+                    )}
+
+                    {pdfError && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-700 font-medium">Error: {pdfError}</p>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setUploadedFile(null);
+                            setPdfError(null);
+                          }}
+                          variant="outline"
+                          className="mt-3"
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="space-y-4" data-testid="readyToPrintSection">
+                <div className="flex items-center justify-between pt-3">
+                  <Button
+                    onClick={handleReturnToSearch}
+                    variant="outline"
+                    className="hover:bg-gray-100 hover:text-gray-900"
+                    data-testid="returnToSearchButton"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Return To Search
+                  </Button>
+                  <Button
+                    onClick={handlePrint}
+                    variant="outline"
+                    className="hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <Printer
+                      data-testid="printReferralsButton"
+                      className="w-4 h-4"
+                    />
+                    Print Referrals
+                  </Button>
                 </div>
+                <ResourcesList resources={result ?? []} />
+                {result && result.length > 0 && (
+                  <ActionPlanSection
+                    resources={result}
+                    selectedResources={selectedResources}
+                    actionPlan={actionPlan}
+                    isGeneratingActionPlan={isGeneratingActionPlan}
+                    onResourceSelection={handleResourceSelection}
+                    onSelectAllResources={handleSelectAllResources}
+                    onGenerateActionPlan={() => void generateActionPlan()}
+                  />
+                )}
               </div>
             )}
           </TabsContent>
