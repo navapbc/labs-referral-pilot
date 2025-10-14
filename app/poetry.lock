@@ -888,7 +888,7 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
-markers = {main = "platform_system == \"Windows\" or sys_platform == \"win32\""}
+markers = {main = "sys_platform == \"win32\" or platform_system == \"Windows\""}
 
 [[package]]
 name = "confection"
@@ -1704,14 +1704,14 @@ files = [
 
 [[package]]
 name = "hayhooks"
-version = "0.10.1"
+version = "1.0.1"
 description = "Grab and deploy Haystack pipelines"
 optional = false
 python-versions = "<3.13,>=3.9"
 groups = ["main"]
 files = [
-    {file = "hayhooks-0.10.1-py3-none-any.whl", hash = "sha256:751b11d63299e24abf35ff45f19f76f02e08e19f03d1a226d32d9393b4e7f2d8"},
-    {file = "hayhooks-0.10.1.tar.gz", hash = "sha256:b44b79bad7b8bd9a7a5b99fc1740051a622799d59ce56dbef8bf7c2069137f31"},
+    {file = "hayhooks-1.0.1-py3-none-any.whl", hash = "sha256:b2b8d9e56170d4e122eab3b06ce7d156d322fcf8f503dc5025059da6b7ff65b5"},
+    {file = "hayhooks-1.0.1.tar.gz", hash = "sha256:e2792a38530dfb009361abf418c527a33edf1233e96ad3e141c0f316ca7646d8"},
 ]
 
 [package.dependencies]
@@ -6365,4 +6365,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12"
-content-hash = "9d95ce92a323642f5e58c7ab5462083448b72c2e2ae7227ef308c4565671c2d9"
+content-hash = "85ddd31c7485b94bb5dd9b577cc53a32681fe670ce6095a76b22a1be072b56ef"

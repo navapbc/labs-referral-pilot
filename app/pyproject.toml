@@ -22,7 +22,7 @@ gunicorn = "^23.0.0"
 psycopg = {extras = ["binary"], version = "^3.1.10"}
 pydantic-settings = "^2.0.3"
 haystack-ai = "^2.16.1"
-hayhooks = "^0.10.0"
+hayhooks = "1.0.1"
 openai = "^1.99.8"
 openinference-instrumentation-haystack = "^0.1.24"
 arize-phoenix-client = "^1.15.3"
