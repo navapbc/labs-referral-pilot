@@ -9,7 +9,7 @@ services:
       # Add your non-secret environment variables to this file:
       - ./.env.development
       # If you have secrets, add them to this file and uncomment this line:
-      # - ./.env.local
+      - ./.env.local
     volumes:
       - ./src:/app/src
       - ./public:/app/public
