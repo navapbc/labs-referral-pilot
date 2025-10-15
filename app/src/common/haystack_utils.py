@@ -1,3 +1,4 @@
+import uuid
 from typing import Sequence
 
 from haystack.dataclasses.chat_message import ChatMessage
@@ -6,8 +7,8 @@ from phoenix.client.__generated__ import v1
 from src.common import phoenix_utils
 
 
-def get_phoenix_prompt(prompt_name: str) -> list[ChatMessage]:
-    prompt_ver = phoenix_utils.get_prompt_template(prompt_name)
+def get_phoenix_prompt(prompt_name: str, prompt_version_id: str = "default") -> list[ChatMessage]:
+    prompt_ver = phoenix_utils.get_prompt_template(prompt_name, prompt_version_id)
     return to_chat_messages(prompt_ver._template["messages"])
 
 

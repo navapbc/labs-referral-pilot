@@ -14,7 +14,7 @@ from haystack_integrations.components.generators.amazon_bedrock import AmazonBed
 from pydantic import BaseModel
 
 from src.app_config import config
-from src.common import haystack_utils
+from src.common import components, haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
@@ -43,30 +43,52 @@ model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
+    input_mapping = {"generate_referrals": "prompt_version_id"}  # get the prompt version id from the request url
 
     def setup(self) -> None:
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
+        # set up the pipeline with the default prompt_version_id: latest if local, configuration value if docker/deployed
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")  #TODO MRH replace with component
         pipeline.add_component(
             instance=ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
             ),
             name="prompt_builder",
         )
+        pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.connect("prompt_builder", "llm.messages")
-
+        pipeline.connect("load_supports.supports", "prompt_builder.supports")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str) -> dict:
-        supports_from_db = format_support_strings()
+    def run_api(self, query: str, prompt_version_id: str = "default") -> dict:
+        if prompt_version_id != "default":
+            logger.info("Overriding the prompt_version with %s", prompt_version_id)
+            prompt_template_override = haystack_utils.get_phoenix_prompt("generate_referrals", prompt_version_id)   #TODO MRH replace with component
+
+            # Check to confirm the requested prompt_version_id exists and the prompt was returned
+            if prompt_template_override:
+                response = self.pipeline.run(
+                    {
+                        "prompt_builder": {
+                            "template": prompt_template_override,
+                            "query": query,
+                            "resource_json": resource_as_json,
+                        },
+                    }
+                )
+                return response
+            else:
+                logger.error("The requested prompt version could not be retrieved")
+                return []  # TODO create an error with a 400 code
+
+        logger.info("Specific prompt version was not set, using the default")
         response = self.pipeline.run(
             {
                 "prompt_builder": {
                     "query": query,
-                    "supports": supports_from_db.values(),
                     "resource_json": resource_as_json,
                 },
             }
