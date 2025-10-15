@@ -55,10 +55,9 @@ class UploadFilesToByteStreams:
 class GetPhoenixPrompt:
 
     @component.output_types(prompt=list[ChatMessage])
-    def run(self, pipeline_name: str, prompt_version_id="default") -> list[ChatMessage]:
+    def run(self, pipeline_name: str, prompt_version_id: str) -> list[ChatMessage]:
         prompt = haystack_utils.get_phoenix_prompt(pipeline_name, prompt_version_id)
         return prompt
-
 
 @component
 class LoadSupports:
