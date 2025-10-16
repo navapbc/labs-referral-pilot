@@ -142,14 +142,18 @@ export default function Page() {
     );
   };
 
+  const onResources = (resources: Resource[]) => {
+    setResult(resources);
+    setReadyToPrint(true);
+  };
+
   async function handleClick() {
     setLoading(true);
     setResult(null);
     try {
       const request = clientDescription + getCollatedReferralOptions();
       const resources = await fetchResources(request); // returns Resource[]
-      setResult(resources);
-      setReadyToPrint(true);
+      onResources(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
       console.error(message);
@@ -459,10 +463,7 @@ export default function Page() {
 
             <TabsContent value="upload-forms">
               {!readyToPrint && (
-                <UploadIntakeTab
-                  onResultChange={setResult}
-                  onReadyToPrintChange={setReadyToPrint}
-                />
+                <UploadIntakeTab onResources={onResources} />
               )}
             </TabsContent>
           </Tabs>

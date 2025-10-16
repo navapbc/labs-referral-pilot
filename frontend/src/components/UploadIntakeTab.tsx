@@ -8,13 +8,11 @@ import { uploadPdfDocument } from "@/util/uploadPdfDocument";
 import { Resource } from "@/types/resources";
 
 interface UploadIntakeTabProps {
-  onResultChange: (resources: Resource[]) => void;
-  onReadyToPrintChange: (ready: boolean) => void;
+  onResources: (resources: Resource[]) => void;
 }
 
 export function UploadIntakeTab({
-  onResultChange,
-  onReadyToPrintChange,
+  onResources,
 }: UploadIntakeTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -36,8 +34,7 @@ export function UploadIntakeTab({
 
         try {
           const resources = await uploadPdfDocument(file);
-          onResultChange(resources);
-          onReadyToPrintChange(true);
+          onResources(resources);
         } catch (error) {
           console.error("Error processing PDF:", error);
           setPdfError(
