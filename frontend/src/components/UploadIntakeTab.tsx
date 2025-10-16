@@ -1,24 +1,21 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Upload, FileText, ChevronLeft, Printer } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { uploadPdfDocument } from "@/util/uploadPdfDocument";
 import { Resource } from "@/types/resources";
-import ResourcesList from "@/components/ResourcesList";
-import { ActionPlanSection } from "@/components/ActionPlanSection";
-import { ActionPlan } from "@/util/fetchActionPlan";
 
-interface UploadFormsTabProps {
+interface UploadIntakeTabProps {
   onResultChange: (resources: Resource[]) => void;
   onReadyToPrintChange: (ready: boolean) => void;
 }
 
-export function UploadFormsTab({
+export function UploadIntakeTab({
   onResultChange,
   onReadyToPrintChange,
-}: UploadFormsTabProps) {
+}: UploadIntakeTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isPdfProcessing, setIsPdfProcessing] = useState(false);
@@ -73,9 +70,9 @@ export function UploadFormsTab({
           />
           <div className="flex flex-col items-center">
             <Upload className="w-12 h-12 mb-4" />
-            <span className="text-lg font-medium text-gray-900 mb-2">
-              Upload a PDF of a handwritten or completed intake form. Our
-              AI will automatically extract client information and generate
+            <span className="text-lg font-medium text-gray-600 mb-2">
+              Upload a PDF of a handwritten or completed intake form. Our AI
+              will automatically extract client information and generate
               relevant referrals.
             </span>
             <Button
