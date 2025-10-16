@@ -18,8 +18,6 @@ from src.app_config import config
 from src.common import components, haystack_utils
 from src.db.models.support_listing import Support
 
-from src.common.phoenix_utils import which_prompt_version
-
 logger = logging.getLogger(__name__)
 
 
@@ -51,11 +49,12 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
-        instance=ChatPromptBuilder(
-        required_variables=["template", "query", "supports", "resource_json"]
-        ),
-        name="prompt_builder",
+            instance=ChatPromptBuilder(
+                template=prompt_template, required_variables=["query", "supports", "resource_json"]
+            ),
+            name="prompt_builder",
         )
         pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.connect("prompt_builder", "llm.messages")
@@ -64,6 +63,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, prompt_version_id: str = "") -> dict:
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         if prompt_version_id:
             # Retrieve the requested prompt_version_id or error if not found
             try:
@@ -78,7 +78,11 @@ class PipelineWrapper(BasePipelineWrapper):
                     detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
                 ) from e
 
-        prompt_template = prompt_template_override or which_prompt_version("generate_referrals")
+            # override the prompt with the requested version
+            if prompt_template_override:
+                logger.info("Overriding the prompt_version with %s", prompt_version_id)
+                prompt_template = prompt_template_override
+
         response = self.pipeline.run(
             {
                 "prompt_builder": {
