@@ -62,6 +62,11 @@ resource "aws_ecs_service" "app" {
   desired_count          = var.desired_instance_count
   enable_execute_command = var.enable_command_execution ? true : null
 
+
+  # Our application can take some time to boot up, so don't let ECS shut it down prematurely
+  # for failing health checks
+  health_check_grace_period_seconds = 300
+
   # Allow changes to the desired_count without differences in terraform plan.
   # This allows autoscaling to manage the desired count for us.
   lifecycle {
