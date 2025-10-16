@@ -39,6 +39,7 @@ import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
+import { useSearchParams } from "next/navigation";
 
 const resourceCategories = [
   {
@@ -117,6 +118,10 @@ export default function Page() {
   const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
 
+  const searchParams = useSearchParams();
+
+  const prompt_version_id = searchParams.get("prompt_version_id");
+
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
@@ -142,7 +147,7 @@ export default function Page() {
     setResult(null);
     try {
       const request = clientDescription + getCollatedReferralOptions();
-      const resources = await fetchResources(request); // returns Resource[]
+      const resources = await fetchResources(request, prompt_version_id); // returns Resource[]
       setResult(resources);
       setReadyToPrint(true);
     } catch (e: unknown) {

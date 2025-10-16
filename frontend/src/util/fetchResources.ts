@@ -1,12 +1,15 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 
 // TODO update the logic above to be ready for when we deploy to a PROD env
-const generateReferralsURL =
-  process.env.ENVIRONMENT == "local"
+const generateReferralsURL = "http://0.0.0.0:3000/generate_referrals/run";
+/*process.env.ENVIRONMENT == "local"
     ? "http://0.0.0.0:3000/generate_referrals/run?prompt_version_id=UHJvbXB0VmVyc2lvbjoxMA=="
-    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";
+    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";*/
 
-export async function fetchResources(clientDescription: string) {
+export async function fetchResources(
+  clientDescription: string,
+  prompt_version_id: string | null,
+) {
   const url = generateReferralsURL;
   const headers = {
     "Content-Type": "application/json",
@@ -14,12 +17,18 @@ export async function fetchResources(clientDescription: string) {
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 30_000); // TODO make configurable
+  const requestBody = prompt_version_id
+    ? JSON.stringify({
+        query: clientDescription,
+        prompt_version_id: prompt_version_id,
+      })
+    : JSON.stringify({ query: clientDescription });
 
   try {
     const upstream = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ query: clientDescription }),
+      body: requestBody,
       cache: "no-store",
       signal: ac.signal,
     });

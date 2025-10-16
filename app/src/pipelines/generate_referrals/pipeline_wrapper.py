@@ -18,6 +18,8 @@ from src.app_config import config
 from src.common import components, haystack_utils
 from src.db.models.support_listing import Support
 
+from src.common.phoenix_utils import which_prompt_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,12 +51,12 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
-pipeline.add_component(
-instance=ChatPromptBuilder(
-required_variables=["template", "query", "supports", "resource_json"]
-),
-name="prompt_builder",
-)
+        pipeline.add_component(
+        instance=ChatPromptBuilder(
+        required_variables=["template", "query", "supports", "resource_json"]
+        ),
+        name="prompt_builder",
+        )
         pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.connect("prompt_builder", "llm.messages")
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
@@ -68,6 +70,7 @@ name="prompt_builder",
                 prompt_template_override = haystack_utils.get_phoenix_prompt(
                     "generate_referrals", prompt_version_id
                 )  # TODO MRH replace with component
+                logger.info("Prompt version '{prompt_version_id}' was retrieved")
             except Exception as e:
                 logger.error("The requested prompt version could not be retrieved")
                 raise HTTPException(
@@ -75,23 +78,11 @@ name="prompt_builder",
                     detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
                 ) from e
 
-            if prompt_template_override:
-                logger.info("Overriding the prompt_version with %s", prompt_version_id)
-                response = self.pipeline.run(
-                    {
-                        "prompt_builder": {
-                            "template": prompt_template_override,
-                            "query": query,
-                            "resource_json": resource_as_json,
-                        },
-                    }
-                )
-                return response
-
-        logger.info("Specific prompt version was not set, using the default")
+        prompt_template = prompt_template_override or which_prompt_version("generate_referrals")
         response = self.pipeline.run(
             {
                 "prompt_builder": {
+                    "template": prompt_template,
                     "query": query,
                     "resource_json": resource_as_json,
                 },
