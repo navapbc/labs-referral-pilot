@@ -6,6 +6,8 @@ from typing import Optional
 from uuid import UUID
 
 import hayhooks
+import requests
+from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -64,19 +66,22 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "", request=None) -> dict:
-        # Get prompt_version_id from query params if available
-        if request and hasattr(request, "query_params"):
-            prompt_version_id = request.query_params.get("prompt_version_id", "")
-
+    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
         if prompt_version_id:
-            logger.info("Overriding the prompt_version with %s", prompt_version_id)
-            prompt_template_override = haystack_utils.get_phoenix_prompt(
-                "generate_referrals", prompt_version_id
-            )  # TODO MRH replace with component
+            # Retrieve the requested prompt_version_id or error if not found
+            try:
+                prompt_template_override = haystack_utils.get_phoenix_prompt(
+                    "generate_referrals", prompt_version_id
+                )  # TODO MRH replace with component
+            except requests.exceptions.HTTPError:
+                logger.error("The requested prompt version could not be retrieved")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+                )
 
-            # Check to confirm the requested prompt_version_id exists and the prompt was returned
             if prompt_template_override:
+                logger.info("Overriding the prompt_version with %s", prompt_version_id)
                 response = self.pipeline.run(
                     {
                         "prompt_builder": {
@@ -87,9 +92,6 @@ class PipelineWrapper(BasePipelineWrapper):
                     }
                 )
                 return response
-            else:
-                logger.error("The requested prompt version could not be retrieved")
-                return []  # TODO create an error with a 400 code
 
         logger.info("Specific prompt version was not set, using the default")
         response = self.pipeline.run(
