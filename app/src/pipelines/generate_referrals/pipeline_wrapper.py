@@ -49,7 +49,9 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
         # set up the pipeline with the default prompt_version_id: latest if local, configuration value if docker/deployed
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")  #TODO MRH replace with component
+        prompt_template = haystack_utils.get_phoenix_prompt(
+            "generate_referrals"
+        )  # TODO MRH replace with component
         pipeline.add_component(
             instance=ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
@@ -64,12 +66,14 @@ class PipelineWrapper(BasePipelineWrapper):
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, prompt_version_id: str = "", request=None) -> dict:
         # Get prompt_version_id from query params if available
-        if request and hasattr(request, 'query_params'):
-            prompt_version_id = request.query_params.get('prompt_version_id', '')
+        if request and hasattr(request, "query_params"):
+            prompt_version_id = request.query_params.get("prompt_version_id", "")
 
         if prompt_version_id:
             logger.info("Overriding the prompt_version with %s", prompt_version_id)
-            prompt_template_override = haystack_utils.get_phoenix_prompt("generate_referrals", prompt_version_id)   #TODO MRH replace with component
+            prompt_template_override = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id
+            )  # TODO MRH replace with component
 
             # Check to confirm the requested prompt_version_id exists and the prompt was returned
             if prompt_template_override:
