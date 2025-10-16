@@ -462,9 +462,7 @@ export default function Page() {
             </TabsContent>
 
             <TabsContent value="upload-forms">
-              {!readyToPrint && (
-                <UploadIntakeTab onResources={onResources} />
-              )}
+              {!readyToPrint && <UploadIntakeTab onResources={onResources} />}
             </TabsContent>
           </Tabs>
 
