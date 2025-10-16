@@ -64,7 +64,7 @@ export function UploadIntakeTab({
             ref={fileInputRef}
             type="file"
             accept=".pdf"
-            onChange={handleFileUploadSingle}
+            onChange={(e) => void handleFileUploadSingle(e)}
             className="hidden"
             id="file-upload"
           />
