@@ -55,12 +55,12 @@ locals {
 #-------------------
 
 resource "aws_ecs_service" "app" {
-  name                              = var.service_name
-  cluster                           = aws_ecs_cluster.cluster.arn
-  launch_type                       = "FARGATE"
-  task_definition                   = aws_ecs_task_definition.app.arn
-  desired_count                     = var.desired_instance_count
-  enable_execute_command            = var.enable_command_execution ? true : null
+  name                   = var.service_name
+  cluster                = aws_ecs_cluster.cluster.arn
+  launch_type            = "FARGATE"
+  task_definition        = aws_ecs_task_definition.app.arn
+  desired_count          = var.desired_instance_count
+  enable_execute_command = var.enable_command_execution ? true : null
 
 
   # Our application can take some time to boot up, so don't let ECS shut it down prematurely
