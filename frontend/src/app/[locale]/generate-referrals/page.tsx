@@ -120,8 +120,6 @@ export default function Page() {
 
   const searchParams = useSearchParams();
 
-  const prompt_version_id = searchParams.get("prompt_version_id");
-
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
@@ -143,6 +141,7 @@ export default function Page() {
   };
 
   async function handleClick() {
+    const prompt_version_id = searchParams.get("prompt_version_id");
     setLoading(true);
     setResult(null);
     try {
