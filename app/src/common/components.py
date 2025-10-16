@@ -10,7 +10,6 @@ from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 
 from src.app_config import config
-from src.common import haystack_utils
 from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
@@ -50,12 +49,14 @@ class UploadFilesToByteStreams:
         }
 
 
+"""
 @component
 class GetPhoenixPrompt:
     @component.output_types(prompt=list[ChatMessage])
     def run(self, pipeline_name: str, prompt_version_id: str) -> list[ChatMessage]:
         prompt = haystack_utils.get_phoenix_prompt(pipeline_name, prompt_version_id)
         return prompt
+"""
 
 
 @component

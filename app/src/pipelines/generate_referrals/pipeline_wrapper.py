@@ -6,7 +6,6 @@ from typing import Optional
 from uuid import UUID
 
 import hayhooks
-import requests
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
@@ -73,12 +72,12 @@ class PipelineWrapper(BasePipelineWrapper):
                 prompt_template_override = haystack_utils.get_phoenix_prompt(
                     "generate_referrals", prompt_version_id
                 )  # TODO MRH replace with component
-            except requests.exceptions.HTTPError:
+            except Exception as e:
                 logger.error("The requested prompt version could not be retrieved")
                 raise HTTPException(
                     status_code=400,
                     detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
-                )
+                ) from e
 
             if prompt_template_override:
                 logger.info("Overriding the prompt_version with %s", prompt_version_id)
