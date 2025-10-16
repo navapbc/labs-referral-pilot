@@ -64,11 +64,7 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "", request=None) -> dict:
-        # Get prompt_version_id from query params if available
-        if request and hasattr(request, "query_params"):
-            prompt_version_id = request.query_params.get("prompt_version_id", "")
-
+    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
         if prompt_version_id:
             logger.info("Overriding the prompt_version with %s", prompt_version_id)
             prompt_template_override = haystack_utils.get_phoenix_prompt(

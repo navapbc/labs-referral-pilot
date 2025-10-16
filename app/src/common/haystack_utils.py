@@ -1,4 +1,3 @@
-import uuid
 from typing import Sequence
 
 from haystack.dataclasses.chat_message import ChatMessage
