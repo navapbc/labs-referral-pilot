@@ -78,10 +78,7 @@ def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> Prompt
     """Retrieve a prompt template from Phoenix by name.
     https://arize.com/docs/phoenix/sdk-api-reference/python/overview#prompt-management
     """
-    if prompt_version_id:
-        prompt_params = {"prompt_version_id": prompt_version_id}
-    else:
-        prompt_params = which_prompt_version(prompt_name)
+    prompt_params = which_prompt_version(prompt_name, prompt_version_id)
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(
@@ -93,7 +90,10 @@ def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> Prompt
     return prompt
 
 
-def which_prompt_version(prompt_name: str) -> dict:
+def which_prompt_version(prompt_name: str, prompt_version_id: str = "") -> dict:
+    if prompt_version_id:
+        return {"prompt_version_id": prompt_version_id}
+
     if config.environment == "local":
         # Get the latest version regardless of tags
         return {"prompt_identifier": prompt_name}
