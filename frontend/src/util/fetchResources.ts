@@ -1,10 +1,10 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 
 // TODO update the logic above to be ready for when we deploy to a PROD env
-const generateReferralsURL = "http://0.0.0.0:3000/generate_referrals/run";
-/*process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/generate_referrals/run?prompt_version_id=UHJvbXB0VmVyc2lvbjoxMA=="
-    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";*/
+const generateReferralsURL =
+  process.env.ENVIRONMENT == "local"
+    ? "http://0.0.0.0:3000/generate_referrals/run"
+    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";
 
 export async function fetchResources(
   clientDescription: string,
