@@ -42,7 +42,7 @@ export function UploadIntakeTab({ onResources }: UploadIntakeTabProps) {
           setIsPdfProcessing(false);
         }
       } else {
-        alert("Please upload a PDF file.");
+        setPdfError("Please upload a PDF file.");
       }
     }
   };
