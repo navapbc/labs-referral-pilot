@@ -9,7 +9,7 @@ locals {
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"
 
-  engine_version       = "16.2"
+  engine_version       = "16"
   engine_major_version = regex("^\\d+", local.engine_version)
 }
 
@@ -62,6 +62,11 @@ resource "aws_rds_cluster" "db" {
   vpc_security_group_ids = [aws_security_group.db.id]
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  # Many DB modifications are by default queued up for the next maintenance
+  # window, but when you want changes to happen now, set this.
+  #
+  # apply_immediately = true
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -73,6 +78,11 @@ resource "aws_rds_cluster_instance" "primary" {
   auto_minor_version_upgrade = true
   monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
   monitoring_interval        = 30
+
+  # Many DB modifications are by default queued up for the next maintenance
+  # window, but when you want changes to happen now, set this.
+  #
+  # apply_immediately = true
 }
 
 resource "aws_kms_key" "db" {
@@ -98,5 +108,10 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
     name = "log_min_duration_statement"
     # Logs all statements that run 100ms or longer
     value = "100"
+  }
+
+  lifecycle {
+    # To support major version updates.
+    create_before_destroy = true
   }
 }
