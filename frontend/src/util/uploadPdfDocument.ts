@@ -5,6 +5,39 @@ const generateReferralsFromDocURL =
     ? "http://0.0.0.0:3000/generate_referrals_from_doc/run"
     : "https://referral-pilot-dev.navateam.com/generate_referrals_from_doc/run";
 
+/**
+ * Extracts JSON from text that may contain a prefix or suffix
+ * Finds the first { and matching } to extract the JSON object
+ */
+function extractJSON(text: string): string {
+  const firstBrace = text.indexOf("{");
+  if (firstBrace === -1) {
+    throw new Error("No JSON object found in response");
+  }
+
+  // Find the matching closing brace by counting braces
+  let braceCount = 0;
+  let endIndex = firstBrace;
+
+  for (let i = firstBrace; i < text.length; i++) {
+    if (text[i] === "{") {
+      braceCount++;
+    } else if (text[i] === "}") {
+      braceCount--;
+      if (braceCount === 0) {
+        endIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (braceCount !== 0) {
+    throw new Error("Malformed JSON in response");
+  }
+
+  return text.substring(firstBrace, endIndex + 1);
+}
+
 export async function uploadPdfDocument(file: File): Promise<Resource[]> {
   const url = generateReferralsFromDocURL;
 
@@ -30,9 +63,10 @@ export async function uploadPdfDocument(file: File): Promise<Resource[]> {
 
     /* eslint-disable */
     const responseData = await upstream.json();
-    const resourcesJson = JSON.parse(
-      responseData.result.llm.replies[0]._content[0].text,
-    );
+    const responseText = responseData.result.llm.replies[0]._content[0].text;
+    console.log("Response text:", responseText);
+    const jsonString = extractJSON(responseText);
+    const resourcesJson = JSON.parse(jsonString);
     console.log("Parsed resources JSON:", resourcesJson);
     const resources = ResourcesSchema.parse(resourcesJson);
     const resourcesAsArray: Resource[] = resources.resources;
