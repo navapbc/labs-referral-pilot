@@ -49,16 +49,12 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline = Pipeline()
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
 
-        # set up the pipeline with the default prompt_version_id: latest if local, configuration value if docker/deployed
-        prompt_template = haystack_utils.get_phoenix_prompt(
-            "generate_referrals"
-        )  # TODO MRH replace with component
-        pipeline.add_component(
-            instance=ChatPromptBuilder(
-                template=prompt_template, required_variables=["query", "supports", "resource_json"]
-            ),
-            name="prompt_builder",
-        )
+pipeline.add_component(
+instance=ChatPromptBuilder(
+required_variables=["template", "query", "supports", "resource_json"]
+),
+name="prompt_builder",
+)
         pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.connect("prompt_builder", "llm.messages")
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
