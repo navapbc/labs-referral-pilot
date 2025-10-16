@@ -43,7 +43,6 @@ model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
-    input_mapping = {"generate_referrals": "prompt_version_id"}  # get the prompt version id from the request url
 
     def setup(self) -> None:
         pipeline = Pipeline()
@@ -63,8 +62,12 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "default") -> dict:
-        if prompt_version_id != "default":
+    def run_api(self, query: str, prompt_version_id: str = "", request=None) -> dict:
+        # Get prompt_version_id from query params if available
+        if request and hasattr(request, 'query_params'):
+            prompt_version_id = request.query_params.get('prompt_version_id', '')
+
+        if prompt_version_id:
             logger.info("Overriding the prompt_version with %s", prompt_version_id)
             prompt_template_override = haystack_utils.get_phoenix_prompt("generate_referrals", prompt_version_id)   #TODO MRH replace with component
 
