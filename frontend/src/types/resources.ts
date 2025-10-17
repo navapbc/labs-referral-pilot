@@ -7,7 +7,7 @@ export const ResourceSchema = z.object({
   justification: z.string().optional(),
   name: z.string(),
   phones: z.array(z.string().optional()).optional(),
-  website: z.string().optional().or(z.literal("")),
+  website: z.string().nullish().or(z.literal("")),
   referral_type: z.enum(["external", "goodwill", "government"]).optional(),
 });
 
