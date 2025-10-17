@@ -4,12 +4,10 @@ from enum import Enum
 from pprint import pformat
 from typing import Optional
 
-import hayhooks
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 
