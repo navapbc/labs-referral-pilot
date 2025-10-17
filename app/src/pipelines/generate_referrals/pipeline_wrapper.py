@@ -44,18 +44,22 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("load_supports", components.LoadSupports())
 
         prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
-            instance=ChatPromptBuilder(
+            "prompt_builder",
+            ChatPromptBuilder(
                 template=prompt_template, required_variables=["query", "supports", "resource_json"]
             ),
-            name="prompt_builder",
         )
-        pipeline.add_component("load_supports", components.LoadSupports())
-        pipeline.connect("prompt_builder", "llm.messages")
+        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("save_result", components.SaveResult())
+
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
+        pipeline.connect("prompt_builder", "llm.messages")
+        pipeline.connect("llm.replies", "save_result.replies")
+        pipeline.draw(path="generate_referrals_pipeline.png")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
@@ -65,8 +69,6 @@ class PipelineWrapper(BasePipelineWrapper):
             prompt_template = haystack_utils.get_phoenix_prompt(
                 "generate_referrals", prompt_version_id
             )
-            logger.info("Overriding the prompt_version with %s", prompt_version_id)
-            # NOTE: the supports are loaded in by the LoadSupports component in setup()
             response = self.pipeline.run(
                 {
                     "prompt_builder": {
@@ -74,7 +76,8 @@ class PipelineWrapper(BasePipelineWrapper):
                         "query": query,
                         "resource_json": resource_as_json,
                     },
-                }
+                },
+                include_outputs_from=["llm", "save_result"],
             )
             logger.info("Results: %s", pformat(response, width=160))
             return response
@@ -84,19 +87,3 @@ class PipelineWrapper(BasePipelineWrapper):
                 status_code=400,
                 detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
             ) from e
-
-    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
-    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
-    def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
-        logger.info("Running chat completion with model: %s, messages: %s", model, messages)
-        question = hayhooks.get_last_user_message(messages)
-        logger.info("Question: %s", question)
-        return hayhooks.streaming_generator(
-            pipeline=self.pipeline,
-            pipeline_run_args={
-                "echo_component": {
-                    "prompt": [ChatMessage.from_user(question)],
-                    "history": messages[:-1],
-                }
-            },
-        )
