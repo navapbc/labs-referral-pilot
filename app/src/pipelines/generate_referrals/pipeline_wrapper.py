@@ -64,43 +64,29 @@ class PipelineWrapper(BasePipelineWrapper):
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, prompt_version_id: str = "") -> dict:
         # Retrieve the requested prompt_version_id and error if requested prompt version is not found
-        if prompt_version_id:
-            try:
-                prompt_template = haystack_utils.get_phoenix_prompt(
-                    "generate_referrals", prompt_version_id
-                )
-                logger.info("Overriding the prompt_version with %s", prompt_version_id)
-                # NOTE: the supports are loaded in by the LoadSupports component in setup()
-                response = self.pipeline.run(
-                    {
-                        "prompt_builder": {
-                            "template": prompt_template,
-                            "query": query,
-                            "resource_json": resource_as_json,
-                        },
-                    }
-                )
-                logger.info("Results: %s", pformat(response, width=160))
-                return response
-            except Exception as e:
-                logger.error("The requested prompt version could not be retrieved")
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
-                ) from e
-
-        # No Prompt Version was specified, respond with default
-        # NOTE: the supports are loaded in by the LoadSupports component in setup()
-        response = self.pipeline.run(
-            {
-                "prompt_builder": {
-                    "query": query,
-                    "resource_json": resource_as_json,
-                },
-            }
-        )
-        logger.info("Results: %s", pformat(response, width=160))
-        return response
+        try:
+            prompt_template = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id
+            )
+            logger.info("Overriding the prompt_version with %s", prompt_version_id)
+            # NOTE: the supports are loaded in by the LoadSupports component in setup()
+            response = self.pipeline.run(
+                {
+                    "prompt_builder": {
+                        "template": prompt_template,
+                        "query": query,
+                        "resource_json": resource_as_json,
+                    },
+                }
+            )
+            logger.info("Results: %s", pformat(response, width=160))
+            return response
+        except Exception as e:
+            logger.error("The requested prompt version could not be retrieved")
+            raise HTTPException(
+                status_code=400,
+                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+            ) from e
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
