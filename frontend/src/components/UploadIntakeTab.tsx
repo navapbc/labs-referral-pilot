@@ -66,7 +66,7 @@ export function UploadIntakeTab({ onResources }: UploadIntakeTabProps) {
           <div className="flex flex-col items-center">
             <Upload className="w-12 h-12 mb-4" />
             <span className="text-lg font-medium text-gray-600 mb-2">
-              Upload a PDF of a handwritten or completed intake form. Our AI
+              Upload a PDF of typed client information. Our AI
               will automatically extract client information and generate
               relevant referrals.
             </span>
