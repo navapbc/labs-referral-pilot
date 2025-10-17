@@ -39,6 +39,7 @@ import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
+import { useSearchParams } from "next/navigation";
 import { UploadIntakeTab } from "@/components/UploadIntakeTab";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -122,6 +123,8 @@ export default function Page() {
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
   const [activeTab, setActiveTab] = useState("find-referrals");
 
+  const searchParams = useSearchParams();
+
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
@@ -148,11 +151,13 @@ export default function Page() {
   };
 
   async function handleClick() {
+    const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
+
     setLoading(true);
     setResult(null);
     try {
       const request = clientDescription + getCollatedReferralOptions();
-      const resources = await fetchResources(request); // returns Resource[]
+      const resources = await fetchResources(request, prompt_version_id); // returns Resource[]
       onResources(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
