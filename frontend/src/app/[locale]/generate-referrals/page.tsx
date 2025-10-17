@@ -141,7 +141,8 @@ export default function Page() {
   };
 
   async function handleClick() {
-    const prompt_version_id = searchParams.get("prompt_version_id");
+    const prompt_version_id = searchParams?.get("prompt_version_id") ?? "";
+
     setLoading(true);
     setResult(null);
     try {
