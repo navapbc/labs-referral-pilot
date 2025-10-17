@@ -23,7 +23,7 @@ def upgrade():
             "raw_text",
             sa.Text(),
             nullable=False,
-            comment="The raw string of the LLM query; may contain JSON string",
+            comment="The raw string of the LLM response; may contain JSON string",
         ),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column(
