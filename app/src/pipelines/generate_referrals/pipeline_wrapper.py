@@ -3,7 +3,6 @@ import logging
 from enum import Enum
 from pprint import pformat
 from typing import Optional
-from uuid import UUID
 
 import hayhooks
 from fastapi import HTTPException
@@ -14,9 +13,7 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 
-from src.app_config import config
 from src.common import components, haystack_utils
-from src.db.models.support_listing import Support
 
 logger = logging.getLogger(__name__)
 
@@ -103,19 +100,3 @@ class PipelineWrapper(BasePipelineWrapper):
                 }
             },
         )
-
-
-# TODO: Use the LoadSupports component so the input and output can be logged to Phoenix
-def format_support_strings() -> dict[UUID, str]:
-    with config.db_session() as db_session, db_session.begin():
-        return {
-            support.id: (
-                f"Name: {support.name}\n"
-                f"- Description: {support.description}\n"
-                f"- Addresses: {', '.join(support.addresses)}\n"
-                f"- Phones: {', '.join(support.phone_numbers)}\n"
-                f"- Website: {support.website}\n"
-                f"- Email Addresses: {', '.join(support.email_addresses)}\n"
-            )
-            for support in db_session.query(Support).all()
-        }
