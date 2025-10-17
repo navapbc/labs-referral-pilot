@@ -3,9 +3,10 @@ from datetime import date, datetime
 import pytest
 
 import src.adapters.db as db
-from src.db.models.support_listing import Support, SupportListing
+from src.db.models.support_listing import LlmResponse, Support, SupportListing
 from src.db.models.user_models import User
 from tests.src.db.models.factories import (
+    LlmResponseFactory,
     RoleFactory,
     SupportFactory,
     SupportListingFactory,
@@ -133,3 +134,16 @@ def test_support_factory_create(enable_factory_create, db_session: db.Session):
     assert db_record.description == support.description
     assert db_record.website == support.website
     assert db_record.email_addresses == support.email_addresses
+
+
+def test_llm_response_factory_create(enable_factory_create, db_session: db.Session):
+    db_session.query(LlmResponse).delete()
+
+    llm_response = LlmResponseFactory.create()
+
+    db_record = (
+        db_session.query(LlmResponse).filter(LlmResponse.id == llm_response.id).one_or_none()
+    )
+
+    assert llm_response.id is not None
+    assert db_record.raw_text == llm_response.raw_text
