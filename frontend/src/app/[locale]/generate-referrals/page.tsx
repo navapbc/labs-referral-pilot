@@ -158,8 +158,7 @@ export default function Page() {
     try {
       const request = clientDescription + getCollatedReferralOptions();
       const resources = await fetchResources(request, prompt_version_id); // returns Resource[]
-      setResult(resources);
-      setReadyToPrint(true);
+      onResources(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
       console.error(message);
