@@ -63,6 +63,7 @@ PIPELINES = {
     },
 }
 pipeline_name = "generate-referrals"
+prompt_version = None
 
 
 @functools.lru_cache
@@ -85,7 +86,10 @@ def get_question(example: dict) -> str:
 def query_pipeline(example: dict) -> TaskOutput:
     question = get_question(example)
     logger.info("Getting answer for: %r", question)
-    response = create_pipeline().run_api(query=question)
+    kwargs = {"query": question}
+    if prompt_version:
+        kwargs["prompt_version_id"] = prompt_version
+    response = create_pipeline().run_api(**kwargs)
     replies = response["llm"]["replies"]
     assert len(replies) == 1, f"Expected exactly one reply but got {len(replies)}"
     return replies[0].to_dict()["content"]
@@ -96,13 +100,16 @@ def query_api(example: dict) -> TaskOutput:
     logger.info("Getting answer for: %r", question)
 
     assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
+    json_data = {"query": question}
+    if prompt_version:
+        json_data["prompt_version_id"] = prompt_version
     response = requests.post(
         f"{url_base}/{PIPELINES[pipeline_name]['url_path']}",
         headers={
             "accept": "application/json",
             "Content-Type": "application/json",
         },
-        json={"query": question},
+        json=json_data,
         timeout=60,
     )
     resp_obj = response.json()
@@ -182,14 +189,16 @@ def main() -> None:
         choices=["export", "import", "run", "run_on_deployed"],
         default="run",
     )
+    parser.add_argument("--prompt_version", type=str, default=None)
     args = parser.parse_args()
 
     logger.info("Action=%s Pipeline=%r Dataset=%r", args.action, args.pipeline, args.dataset)
     assert (
         args.pipeline in PIPELINES
     ), f"Unknown pipeline {args.pipeline}. Available: {list(PIPELINES.keys())}"
-    global pipeline_name
+    global pipeline_name, prompt_version
     pipeline_name = args.pipeline
+    prompt_version = args.prompt_version
 
     if args.action == "export":
         client_to_deployed_phx = phoenix_utils.client_to_deployed_phoenix()
