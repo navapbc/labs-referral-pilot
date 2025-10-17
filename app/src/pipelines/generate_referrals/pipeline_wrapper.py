@@ -3,9 +3,9 @@ import logging
 from enum import Enum
 from pprint import pformat
 from typing import Optional
-from uuid import UUID
 
 import hayhooks
+from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -13,9 +13,7 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 
-from src.app_config import config
-from src.common import haystack_utils
-from src.db.models.support_listing import Support
+from src.common import components, haystack_utils
 
 logger = logging.getLogger(__name__)
 
@@ -55,24 +53,37 @@ class PipelineWrapper(BasePipelineWrapper):
             ),
             name="prompt_builder",
         )
+        pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.connect("prompt_builder", "llm.messages")
-
+        pipeline.connect("load_supports.supports", "prompt_builder.supports")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str) -> dict:
-        supports_from_db = format_support_strings()
-        response = self.pipeline.run(
-            {
-                "prompt_builder": {
-                    "query": query,
-                    "supports": supports_from_db.values(),
-                    "resource_json": resource_as_json,
-                },
-            }
-        )
-        logger.info("Results: %s", pformat(response, width=160))
-        return response
+    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
+        # Retrieve the requested prompt_version_id and error if requested prompt version is not found
+        try:
+            prompt_template = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id
+            )
+            logger.info("Overriding the prompt_version with %s", prompt_version_id)
+            # NOTE: the supports are loaded in by the LoadSupports component in setup()
+            response = self.pipeline.run(
+                {
+                    "prompt_builder": {
+                        "template": prompt_template,
+                        "query": query,
+                        "resource_json": resource_as_json,
+                    },
+                }
+            )
+            logger.info("Results: %s", pformat(response, width=160))
+            return response
+        except Exception as e:
+            logger.error("The requested prompt version could not be retrieved")
+            raise HTTPException(
+                status_code=400,
+                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+            ) from e
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
@@ -89,19 +100,3 @@ class PipelineWrapper(BasePipelineWrapper):
                 }
             },
         )
-
-
-# TODO: Use the LoadSupports component so the input and output can be logged to Phoenix
-def format_support_strings() -> dict[UUID, str]:
-    with config.db_session() as db_session, db_session.begin():
-        return {
-            support.id: (
-                f"Name: {support.name}\n"
-                f"- Description: {support.description}\n"
-                f"- Addresses: {', '.join(support.addresses)}\n"
-                f"- Phones: {', '.join(support.phone_numbers)}\n"
-                f"- Website: {support.website}\n"
-                f"- Email Addresses: {', '.join(support.email_addresses)}\n"
-            )
-            for support in db_session.query(Support).all()
-        }
