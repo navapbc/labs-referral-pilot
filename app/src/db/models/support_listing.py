@@ -70,5 +70,5 @@ class LlmResponse(Base, IdMixin, TimestampMixin):
     __tablename__ = "llm_response"
 
     raw_text: Mapped[str] = mapped_column(
-        nullable=False, comment="The raw string of the LLM query; may contain JSON string"
+        nullable=False, comment="The raw string of the LLM response; may contain JSON string"
     )
