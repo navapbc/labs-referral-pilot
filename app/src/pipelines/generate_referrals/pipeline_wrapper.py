@@ -57,7 +57,7 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
         pipeline.connect("prompt_builder", "llm.messages")
         pipeline.connect("llm.replies", "save_result.replies")
-        pipeline.draw(path="generate_referrals_pipeline.png")
+        # pipeline.draw(path="generate_referrals_pipeline.png")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
@@ -75,7 +75,7 @@ class PipelineWrapper(BasePipelineWrapper):
                         "resource_json": resource_as_json,
                     },
                 },
-                include_outputs_from=["llm", "save_result"],
+                include_outputs_from={"llm", "save_result"},
             )
             logger.info("Results: %s", pformat(response, width=160))
             return response
