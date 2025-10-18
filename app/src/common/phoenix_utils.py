@@ -79,6 +79,7 @@ def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> Prompt
     https://arize.com/docs/phoenix/sdk-api-reference/python/overview#prompt-management
     """
     prompt_params = which_prompt_version(prompt_name, prompt_version_id)
+    logger.info("Using the prompt having %s", prompt_params)
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(

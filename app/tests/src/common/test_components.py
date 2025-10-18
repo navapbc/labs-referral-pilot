@@ -2,10 +2,11 @@ from io import BytesIO
 
 import pytest
 from fastapi import UploadFile
+from haystack.dataclasses.chat_message import ChatMessage
 
 from src.adapters import db
-from src.common.components import LoadSupports, UploadFilesToByteStreams
-from src.db.models.support_listing import Support
+from src.common.components import LoadSupports, SaveResult, UploadFilesToByteStreams
+from src.db.models.support_listing import LlmResponse, Support
 from tests.src.db.models.factories import SupportFactory
 
 
@@ -50,3 +51,17 @@ def test_LoadSupports(support_records, db_session: db.Session):
     assert any("Name: Support B\n- Description: Desc B" in s for s in supports)
     assert any("- Website: http://a.com" in s for s in supports)
     assert any("- Website: http://b.com" in s for s in supports)
+
+
+def test_SaveResult(enable_factory_create, db_session: db.Session):
+    db_session.query(LlmResponse).delete()
+
+    replies = [ChatMessage.from_assistant("This is a test response.")]
+    component = SaveResult()
+    output = component.run(replies=replies)
+
+    result_id = output["result_id"]
+    db_record = db_session.query(LlmResponse).filter(LlmResponse.id == result_id).one_or_none()
+
+    assert db_record is not None
+    assert db_record.raw_text == "This is a test response."
