@@ -118,16 +118,16 @@ class LoadResult:
             )
 
             if not db_record:
-                raise ValueError(f"No LlmResponse found with id={result_id}")
+                raise ValueError(f"No result found with id={result_id}")
 
-            logger.info("Loaded LLM Response:\n%s", db_record.raw_text)
+            logger.info("Loaded LlmResponse:\n%s", db_record.raw_text)
             text = db_record.raw_text
 
         # Extract JSON object from raw_text string by searching for the first '{' and last '}'
         start = text.find("{")
         end = text.rfind("}")
         if start == -1 or end == -1:
-            raise ValueError(f"Invalid JSON format in LlmResponse with id={result_id}: {text!r}")
+            raise ValueError(f"Invalid JSON format in result with id={result_id}: {text!r}")
 
         json_dict = json.loads(text[start : end + 1])
         return {"result_json": json_dict}

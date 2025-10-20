@@ -1,8 +1,10 @@
 import logging
 from pprint import pformat
 
+from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
+from haystack.core.errors import PipelineRuntimeError
 
 from src.common import components
 
@@ -21,15 +23,27 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     def run_api(self, result_id: str, email: str) -> dict:
-        response = self.pipeline.run(
-            {
-                "load_result": {
-                    "result_id": result_id,
+        try:
+            response = self.pipeline.run(
+                {
+                    "load_result": {
+                        "result_id": result_id,
+                    },
+                    "email_result": {
+                        "email": email,
+                    },
                 },
-                "email_result": {
-                    "email": email,
-                },
-            },
-        )
-        logger.info("Results: %s", pformat(response, width=160))
-        return response
+            )
+            logger.info("Results: %s", pformat(response, width=160))
+            return response
+        except PipelineRuntimeError as re:
+            error_msg = str(re)
+            if "No result found with id=" in error_msg:
+                status_code = 400  # User error
+            else:
+                status_code = 500  # Internal error
+
+            raise HTTPException(
+                status_code=status_code,
+                detail=f"Error occurred: {error_msg}",
+            ) from re
