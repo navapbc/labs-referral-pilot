@@ -6,13 +6,13 @@ locals {
 
     # Configure the name that users see in the "From" section of their inbox,
     # so that it's clearer who the email is from.
-    sender_display_name = null
+    sender_display_name = "Referral Generation Service"
 
     # Set to the email address to be used when sending emails.
     # If enable_notifications is true, this is required.
     sender_email = "notifications@${var.domain_name}"
 
     # Configure the REPLY-TO email address if it should be different from the sender.
-    reply_to_email = "notifications@${var.domain_name}"
+    reply_to_email = "no-reply@${var.domain_name}"
   } : null
 }
