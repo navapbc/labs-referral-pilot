@@ -232,4 +232,4 @@ copy-prompts:
 	$(PY_RUN_CMD) copy-prompts
 
 run-experiment:
-	$(PY_RUN_CMD) run-experiment "$(DATASET)" "$(PIPELINE)" "$(ACTION)" "$(PROMPT_VERSION)"
+	$(PY_RUN_CMD) run-experiment "$(DATASET)" "$(PIPELINE)" "$(ACTION)" $(if $(PROMPT_VERSION),--prompt_version "$(PROMPT_VERSION)")
