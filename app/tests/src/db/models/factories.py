@@ -109,3 +109,11 @@ class SupportFactory(BaseFactory):
 
     description = factory.LazyFunction(lambda: fake.sentence())
     website = factory.LazyFunction(lambda: fake.url())
+
+
+class LlmResponseFactory(BaseFactory):
+    class Meta:
+        model = support_listing.LlmResponse
+
+    id = Generators.UuidObj
+    raw_text = factory.LazyFunction(lambda: fake.text(max_nb_chars=200))
