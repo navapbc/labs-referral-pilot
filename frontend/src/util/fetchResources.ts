@@ -37,6 +37,7 @@ export async function fetchResources(
 
     /* eslint-disable */
     const responseData = await upstream.json(); // bypassing type enforcement due to heavy nesting within the API response
+    const resultUuid = responseData.result.save_result.result_id
     const resourcesJson = JSON.parse(
       responseData.result.llm.replies[0]._content[0].text,
     );
@@ -44,8 +45,8 @@ export async function fetchResources(
     const resourcesAsArray: Resource[] = resources.resources;
     /* eslint-enable */
 
-    return resourcesAsArray;
+    return {resultId: resultUuid, resources: resourcesAsArray || []};
   } catch {
-    return [];
+    return {resultId: "", resources: []};
   }
 }
