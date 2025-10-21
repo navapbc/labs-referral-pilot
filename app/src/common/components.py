@@ -139,26 +139,28 @@ class EmailResult:
     Formats JSON object (representing a list of resources) and sends it to email address.
     """
 
-    @component.output_types(status=str)
+    @component.output_types(status=str, email=str, message=str)
     def run(self, email: str, json_dict: dict) -> dict:
         logger.info("Emailing result to %s", email)
         logger.info("Email content:\n%s", json.dumps(json_dict, indent=2))
-        message = self.format_resources(json_dict.get("resources", []))
+        formatted_resources = self.format_resources(json_dict.get("resources", []))
+        message = f"Here are the resources you requested:\n\n{formatted_resources}"
         # TODO: call email service to send email
         return {"status": "success", "email": email, "message": message}
 
-    def format_resources(self, resources):
+    def format_resources(self, resources: list[dict]) -> str:
         return "\n\n".join([self.format_resource(resource) for resource in resources])
 
-    def format_resource(self, resource):
+    def format_resource(self, resource: dict) -> str:
         return "\n".join(
             [
                 f"{resource.get('name', 'N/A')}",
                 f"- Referral Type: {resource.get('referral_type', 'None')}",
                 f"- Description: {resource.get('description', 'None')}",
                 f"- Website: {resource.get('website', 'None')}",
-                f"- Phone: {', '.join(resource.get('phones', []))}",
-                f"- Email: {', '.join(resource.get('emails', []))}",
+                f"- Phone: {', '.join(resource.get('phones', ['None']))}",
+                f"- Email: {', '.join(resource.get('emails', ['None']))}",
+                f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
                 f"- Justification: {resource.get('justification', 'None')}",
             ]
         )
