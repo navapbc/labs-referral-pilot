@@ -38,8 +38,11 @@ class PipelineWrapper(BasePipelineWrapper):
             return response
         except PipelineRuntimeError as re:
             error_msg = str(re)
-            if "No result found with id=" in error_msg:
-                status_code = 400  # User error
+            if re.component_type == components.LoadResult:
+                if "Invalid JSON format in result" in error_msg:
+                    status_code = 500  # Internal error
+                else:
+                    status_code = 400  # User error
             else:
                 status_code = 500  # Internal error
 
