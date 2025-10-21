@@ -86,10 +86,7 @@ def get_question(example: dict) -> str:
 def query_pipeline(example: dict) -> TaskOutput:
     question = get_question(example)
     logger.info("Getting answer for: %r", question)
-    kwargs = {"query": question}
-    if prompt_version:
-        kwargs["prompt_version_id"] = prompt_version  # type: ignore[unreachable]
-    response = create_pipeline().run_api(**kwargs)
+    response = create_pipeline().run_api(query=question, prompt_version_id=prompt_version or "")
     replies = response["llm"]["replies"]
     assert len(replies) == 1, f"Expected exactly one reply but got {len(replies)}"
     return replies[0].to_dict()["content"]
@@ -100,9 +97,7 @@ def query_api(example: dict) -> TaskOutput:
     logger.info("Getting answer for: %r", question)
 
     assert url_base, "DEPLOYED_API_URL is not set -- add it to override.env"
-    json_data = {"query": question}
-    if prompt_version:
-        json_data["prompt_version_id"] = prompt_version  # type: ignore[unreachable]
+    json_data = {"query": question, "prompt_version_id": prompt_version or ""}
     response = requests.post(
         f"{url_base}/{PIPELINES[pipeline_name]['url_path']}",
         headers={
