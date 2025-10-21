@@ -77,6 +77,7 @@ class SaveResult:
     @component.output_types(result_id=str)
     def run(self, replies: List[ChatMessage]) -> dict:
         logger.info("Saving LLM result to database: %r", pformat(replies, width=160))
+        assert replies, "Expected at least one reply"
         text_result = replies[0].text
         with config.db_session() as db_session, db_session.begin():
             llm_result = LlmResponse(raw_text=text_result)

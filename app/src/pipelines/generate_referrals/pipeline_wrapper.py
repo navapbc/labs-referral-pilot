@@ -57,7 +57,6 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
         pipeline.connect("prompt_builder", "llm.messages")
         pipeline.connect("llm.replies", "save_result.replies")
-        # pipeline.draw(path="generate_referrals_pipeline.png")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
