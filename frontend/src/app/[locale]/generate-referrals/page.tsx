@@ -13,7 +13,6 @@ import {
   GraduationCap,
   Heart,
   Home,
-  Mail,
   MapPin,
   Printer,
   Scale,
@@ -113,7 +112,7 @@ const resourceCategories = [
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
   const [result, setResult] = useState<Resource[] | null>(null);
-  const [resultId, setResultId] = useState("")
+  const [resultId, setResultId] = useState("");
   const [loading, setLoading] = useState(false);
   const [readyToPrint, setReadyToPrint] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -160,7 +159,10 @@ export default function Page() {
     setResult(null);
     try {
       const request = clientDescription + getCollatedReferralOptions();
-      const {resultId, resources} = await fetchResources(request, prompt_version_id); // returns Resource[]
+      const { resultId, resources } = await fetchResources(
+        request,
+        prompt_version_id,
+      );
       setResultId(resultId);
       onResources(resources);
       console.log("Fetched resources:", resultId, resources);

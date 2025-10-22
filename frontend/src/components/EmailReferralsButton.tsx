@@ -33,7 +33,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
     setStatusMessage("");
 
     try {
-      const { emailAddr, emailMessage } = await emailResult(resultId, email);
+      const { emailAddr } = await emailResult(resultId, email);
 
       setEmailSent(true);
       setStatusMessage(`Email sent successfully to ${emailAddr}`);
@@ -47,7 +47,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
     }
   };
 
-  const handleClose = async () => {
+  const handleClose = () => {
     console.log("Closing");
     setEmailSent(false);
     setStatusMessage("");

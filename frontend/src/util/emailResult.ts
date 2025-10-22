@@ -30,6 +30,7 @@ export async function emailResult(resultId: string, email: string) {
       let errorMessage = response.statusText || "Unknown error";
 
       try {
+        /* eslint-disable */
         const errorData = await response.json();
         // Try multiple possible error message fields
         errorMessage =
@@ -39,17 +40,20 @@ export async function emailResult(resultId: string, email: string) {
           errorData.result?.error ||
           errorData.result?.message ||
           `HTTP ${response.status}: ${response.statusText}`;
+        /* eslint-enable */
       } catch (e) {
         // If JSON parsing fails, use status text
-        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        errorMessage = `HTTP ${response.status}: ${response.statusText} (${JSON.stringify(e)})`;
       }
 
       throw new Error(JSON.stringify(errorMessage));
     }
 
+    /* eslint-disable */
     const responseData = await response.json();
-    const emailResultResponse = responseData.result.email_result;
-    return { emailAddr: emailResultResponse.email, emailMessage: emailResultResponse.message };
+    const emailAddress: string = responseData.result.email_result.email;
+    /* eslint-enable */
+    return { emailAddr: emailAddress };
   } catch (error) {
     if (error instanceof Error) {
       throw error;
