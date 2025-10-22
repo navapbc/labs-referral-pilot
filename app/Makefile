@@ -228,6 +228,15 @@ help: ## Prints the help documentation and info about each command
 extract-supports:
 	$(PY_RUN_CMD) extract-supports "$(NAME)" "$(FILE)"
 
+# Usage: make manage-crawl-job ACTION="upsert" PROMPT_NAME="my_prompt" DOMAIN="example.com" INTERVAL=24
+# Usage: make manage-crawl-job ACTION="delete" DOMAIN="example.com"
+manage-crawl-job:
+ifeq ($(ACTION),delete)
+	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(DOMAIN)"
+else
+	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(PROMPT_NAME)" "$(DOMAIN)" "$(INTERVAL)"
+endif
+
 copy-prompts:
 	$(PY_RUN_CMD) copy-prompts
 

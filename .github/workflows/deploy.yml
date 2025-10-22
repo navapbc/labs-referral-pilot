@@ -70,7 +70,8 @@ jobs:
 
     # By default, don't run e2e tests on production to avoid generating
     # junk data that may interfere with production metrics and business operations
-    if: inputs.environment != 'prod'
+    # Also don't run it on the API: it doesn't have a frontend so accessibility tests don't apply
+    if: inputs.environment != 'prod' && inputs.app_name != 'app'
     needs: deploy
     uses: ./.github/workflows/e2e-tests.yml
     with:
