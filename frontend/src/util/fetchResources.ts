@@ -42,10 +42,10 @@ export async function fetchResources(
       responseData.result.llm.replies[0]._content[0].text,
     );
     const resources = ResourcesSchema.parse(resourcesJson);
-    const resourcesAsArray: Resource[] = resources.resources;
+    const resourcesAsArray: Resource[] = resources.resources || [];
     /* eslint-enable */
 
-    return { resultId: resultUuid, resources: resourcesAsArray || [] };
+    return { resultId: resultUuid, resources: resourcesAsArray};
   } catch {
     return { resultId: "", resources: [] };
   }
