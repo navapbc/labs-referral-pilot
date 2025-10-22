@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { emailResult } from "@/util/emailResult";
 
 interface EmailReferralsProps {
@@ -25,6 +26,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSendEmail = async () => {
     setIsLoading(true);
@@ -33,10 +35,12 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
     try {
       const { emailAddr, message } = await emailResult(resultId, email);
 
+      setEmailSent(true);
       setStatusMessage(`Referrals sent to ${emailAddr}`);
       setTimeout(() => {
         setIsOpen(false);
         setStatusMessage("");
+        setEmailSent(false);
       }, 10000);
     } catch (error) {
       console.error("Error sending email:", error);
@@ -49,8 +53,8 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
         <Button
           variant="outline"
           className="hover:bg-gray-100 hover:text-gray-900"
@@ -59,14 +63,14 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
           <Mail className="w-4 h-4" />
           Email Referrals
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Email Referrals</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Email Referrals</DialogTitle>
+          <DialogDescription>
             Enter your email address to receive the referrals.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email Address</Label>
@@ -80,19 +84,30 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
             />
           </div>
         </div>
-        <SheetFooter>
-          <div>
-            <Button
-              type="submit"
-              onClick={handleSendEmail}
-              disabled={!email.trim() || isLoading}
-              data-testid="sendEmailButton"
-            >
-              {isLoading ? "Sending..." : "Send Email"}
-            </Button>
+        <DialogFooter>
+          <div className="w-full space-y-2">
+            <div className="flex gap-2 justify-end">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="cancelEmailButton"
+                >
+                  {emailSent ? "Close" : "Cancel"}
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                onClick={handleSendEmail}
+                disabled={!email.trim() || isLoading || emailSent}
+                data-testid="sendEmailButton"
+              >
+                {isLoading ? "Sending..." : "Send Email"}
+              </Button>
+            </div>
             {statusMessage && (
               <p
-                className={`mt-2 text-sm ${
+                className={`text-sm ${
                   statusMessage.includes("Failed")
                     ? "text-red-500"
                     : "text-black-600"
@@ -102,8 +117,8 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
               </p>
             )}
           </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
