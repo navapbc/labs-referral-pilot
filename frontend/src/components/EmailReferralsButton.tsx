@@ -28,6 +28,11 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSendEmail = async () => {
     setIsLoading(true);
     setStatusMessage("");
@@ -81,7 +86,17 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               data-testid="emailInput"
+              className={
+                email && !isValidEmail(email)
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : ""
+              }
             />
+            {email && !isValidEmail(email) && (
+              <p className="text-sm text-red-500">
+                Please enter a valid email address
+              </p>
+            )}
           </div>
         </div>
         <DialogFooter>
@@ -101,7 +116,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
               <Button
                 type="submit"
                 onClick={() => void handleSendEmail()}
-                disabled={!email.trim() || isLoading || emailSent}
+                disabled={isLoading || !email.trim() || !isValidEmail(email)}
                 data-testid="sendEmailButton"
               >
                 {isLoading ? "Sending..." : "Send Email"}
