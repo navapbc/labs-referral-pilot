@@ -67,6 +67,7 @@ db-migrate-down-all = "src.db.migrations.run:downall"
 extract-supports= "src.ingestion.extract_supports:main"
 copy-prompts= "src.common.phoenix_utils:copy_deployed_prompts"
 run-experiment= "src.experiments:main"
+manage-crawl-job= "src.db.manage_crawl_job:main"
 
 [tool.black]
 line-length = 100
