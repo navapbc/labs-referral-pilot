@@ -30,7 +30,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("llm", OpenAIChatGenerator(model=model))
+        pipeline.add_component("llm", OpenAIChatGenerator(model=model, timeout=120))
 
         prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(

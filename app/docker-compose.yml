@@ -8,7 +8,6 @@ services:
       # This is also needed for the initial migration that alters defaut privileges to grant
       # table privileges to the app user (see src/db/migrations/versions/2023_08_10_default_table_privileges.py)
       POSTGRES_USER: app
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "5432:5432"
     volumes:

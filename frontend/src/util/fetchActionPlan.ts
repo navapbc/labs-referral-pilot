@@ -48,10 +48,10 @@ function fixJsonControlCharacters(jsonString: string): string {
   return result;
 }
 
-const generateActionPlanURL = "http://0.0.0.0:3000/generate_action_plan/run";  // TODO MRH revert
-  /*process.env.ENVIRONMENT === "local"
+const generateActionPlanURL =
+  process.env.ENVIRONMENT === "local"
     ? "http://0.0.0.0:3000/generate_action_plan/run"
-    : "https://referral-pilot-dev.navateam.com/generate_action_plan/run";*/
+    : "https://referral-pilot-dev.navateam.com/generate_action_plan/run";
 
 export async function fetchActionPlan(
   resources: Resource[],
@@ -62,7 +62,7 @@ export async function fetchActionPlan(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 240_000); // TODO MRH update or reomve
+  const timer = setTimeout(() => ac.abort(), 120_000);
 
   try {
     const upstream = await fetch(url, {
