@@ -45,7 +45,7 @@ export async function fetchResources(
     const resourcesAsArray: Resource[] = resources.resources || [];
     /* eslint-enable */
 
-    return { resultId: resultUuid, resources: resourcesAsArray};
+    return { resultId: resultUuid, resources: resourcesAsArray };
   } catch {
     return { resultId: "", resources: [] };
   }

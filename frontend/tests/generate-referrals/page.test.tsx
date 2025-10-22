@@ -25,6 +25,10 @@ describe("Generate Referrals Page", () => {
       justification: "Test justification",
     },
   ];
+  const mockFetchResourcesResult = {
+    resultId: "test-result-id",
+    resources: mockResources,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,7 +48,7 @@ describe("Generate Referrals Page", () => {
     // Mock successful fetchResources call
     jest
       .spyOn(fetchResourcesModule, "fetchResources")
-      .mockResolvedValue(mockResources);
+      .mockResolvedValue(mockFetchResourcesResult);
 
     render(<Page />);
 
@@ -253,7 +257,7 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -295,7 +299,7 @@ describe("Generate Referrals Page", () => {
         .mockImplementation(
           () =>
             new Promise((resolve) =>
-              setTimeout(() => resolve(mockResources), 100),
+              setTimeout(() => resolve(mockFetchResourcesResult), 100),
             ),
         );
 
@@ -340,7 +344,7 @@ describe("Generate Referrals Page", () => {
 
       jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -386,7 +390,7 @@ describe("Generate Referrals Page", () => {
 
       jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -416,7 +420,7 @@ describe("Generate Referrals Page", () => {
 
       jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -483,7 +487,7 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -517,7 +521,7 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -543,7 +547,7 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
@@ -569,7 +573,7 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
         .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockResources);
+        .mockResolvedValue(mockFetchResourcesResult);
 
       render(<Page />);
 
