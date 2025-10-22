@@ -41,6 +41,7 @@ import { ActionPlanSection } from "@/components/ActionPlanSection";
 import ResourcesList from "@/components/ResourcesList";
 import { useSearchParams } from "next/navigation";
 import { UploadIntakeTab } from "@/components/UploadIntakeTab";
+import { EmailReferralsButton } from "@/components/EmailReferralsButton";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload } from "lucide-react";
@@ -111,6 +112,7 @@ const resourceCategories = [
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
   const [result, setResult] = useState<Resource[] | null>(null);
+  const [resultId, setResultId] = useState("");
   const [loading, setLoading] = useState(false);
   const [readyToPrint, setReadyToPrint] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -157,7 +159,11 @@ export default function Page() {
     setResult(null);
     try {
       const request = clientDescription + getCollatedReferralOptions();
-      const resources = await fetchResources(request, prompt_version_id); // returns Resource[]
+      const { resultId, resources } = await fetchResources(
+        request,
+        prompt_version_id,
+      );
+      setResultId(resultId);
       onResources(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -176,6 +182,7 @@ export default function Page() {
   function handleReturnToSearch() {
     setReadyToPrint(false);
     setResult([]);
+    setResultId("");
     setLocationText("");
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
@@ -483,17 +490,20 @@ export default function Page() {
                   <ChevronLeft className="w-4 h-4" />
                   Return To Search
                 </Button>
-                <Button
-                  onClick={handlePrint}
-                  variant="outline"
-                  className="hover:bg-gray-100 hover:text-gray-900"
-                >
-                  <Printer
-                    data-testid="printReferralsButton"
-                    className="w-4 h-4"
-                  />
-                  Print Referrals
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handlePrint}
+                    variant="outline"
+                    className="hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <Printer
+                      data-testid="printReferralsButton"
+                      className="w-4 h-4"
+                    />
+                    Print Referrals
+                  </Button>
+                  {resultId && <EmailReferralsButton resultId={resultId} />}
+                </div>
               </div>
               <ResourcesList resources={result ?? []} />
               {result && result.length > 0 && (
