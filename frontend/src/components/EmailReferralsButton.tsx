@@ -101,7 +101,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
               </DialogClose>
               <Button
                 type="submit"
-                onClick={handleSendEmail}
+                onClick={() => void handleSendEmail()}
                 disabled={!email.trim() || isLoading || emailSent}
                 data-testid="sendEmailButton"
               >
