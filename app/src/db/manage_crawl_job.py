@@ -38,7 +38,6 @@ def upsert_crawl_job(
         logger.info("Updating existing CrawlJob for domain: %s", domain)
         existing_job.prompt_name = prompt_name
         existing_job.crawling_interval = crawling_interval
-        db_session.flush()
         logger.info(
             "Updated CrawlJob (id=%s): prompt_name=%s, domain=%s, crawling_interval=%d",
             existing_job.id,
@@ -81,7 +80,6 @@ def delete_crawl_job(db_session: Session, domain: str) -> bool:
     if existing_job:
         logger.info("Deleting CrawlJob (id=%s) for domain: %s", existing_job.id, domain)
         db_session.delete(existing_job)
-        db_session.flush()
         logger.info("Deleted CrawlJob for domain: %s", domain)
         return True
     else:
