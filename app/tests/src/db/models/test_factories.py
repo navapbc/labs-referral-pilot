@@ -3,9 +3,11 @@ from datetime import date, datetime
 import pytest
 
 import src.adapters.db as db
+from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import LlmResponse, Support, SupportListing
 from src.db.models.user_models import User
 from tests.src.db.models.factories import (
+    CrawlJobFactory,
     LlmResponseFactory,
     RoleFactory,
     SupportFactory,
@@ -147,3 +149,16 @@ def test_llm_response_factory_create(enable_factory_create, db_session: db.Sessi
 
     assert llm_response.id is not None
     assert db_record.raw_text == llm_response.raw_text
+
+
+def test_crawl_job_factory_create(enable_factory_create, db_session: db.Session):
+    db_session.query(CrawlJob).delete()
+
+    crawl_job = CrawlJobFactory.create()
+
+    db_record = db_session.query(CrawlJob).filter(CrawlJob.id == crawl_job.id).one_or_none()
+
+    assert crawl_job.id is not None
+    assert db_record.prompt_name == crawl_job.prompt_name
+    assert db_record.domain == crawl_job.domain
+    assert db_record.crawling_interval == crawl_job.crawling_interval
