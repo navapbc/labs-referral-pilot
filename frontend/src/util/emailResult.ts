@@ -27,8 +27,24 @@ export async function emailResult(resultId: string, email: string) {
     clearTimeout(timer);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || response.statusText);
+      let errorMessage = response.statusText || "Unknown error";
+
+      try {
+        const errorData = await response.json();
+        // Try multiple possible error message fields
+        errorMessage =
+          errorData.message ||
+          errorData.error ||
+          errorData.detail ||
+          errorData.result?.error ||
+          errorData.result?.message ||
+          `HTTP ${response.status}: ${response.statusText}`;
+      } catch (e) {
+        // If JSON parsing fails, use status text
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+
+      throw new Error(JSON.stringify(errorMessage));
     }
 
     const responseData = await response.json();
