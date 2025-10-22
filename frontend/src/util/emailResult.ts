@@ -34,7 +34,7 @@ export async function emailResult(resultId: string, email: string) {
 
     const responseData = await response.json();
     const emailResultResponse = responseData.result.email_result;
-    return { emailAddr: emailResultResponse.email, message: emailResultResponse.message };
+    return { emailAddr: emailResultResponse.email, emailMessage: emailResultResponse.message };
   } catch (error) {
     if (error instanceof Error) {
       throw error;

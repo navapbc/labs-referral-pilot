@@ -33,23 +33,24 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
     setStatusMessage("");
 
     try {
-      const { emailAddr, message } = await emailResult(resultId, email);
+      const { emailAddr, emailMessage } = await emailResult(resultId, email);
 
       setEmailSent(true);
-      setStatusMessage(`Referrals sent to ${emailAddr}`);
-      setTimeout(() => {
-        setIsOpen(false);
-        setStatusMessage("");
-        setEmailSent(false);
-      }, 10000);
+      setStatusMessage(`Email sent successfully to ${emailAddr}`);
     } catch (error) {
       console.error("Error sending email:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      setStatusMessage(`Failed to send referrals: ${errorMessage}`);
+      setStatusMessage(`Failed to send email: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleClose = async () => {
+    console.log("Closing");
+    setEmailSent(false);
+    setStatusMessage("");
   };
 
   return (
@@ -90,6 +91,8 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
               <DialogClose asChild>
                 <Button
                   type="button"
+                  onClick={handleClose}
+                  disabled={isLoading}
                   variant="outline"
                   data-testid="cancelEmailButton"
                 >
@@ -110,7 +113,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
                 className={`text-sm ${
                   statusMessage.includes("Failed")
                     ? "text-red-500"
-                    : "text-black-600"
+                    : "text-green-900"
                 }`}
               >
                 {statusMessage}
