@@ -17,6 +17,7 @@ class CrawlJob(Base, IdMixin, TimestampMixin):
 
     domain: Mapped[str] = mapped_column(
         nullable=False,
+        unique=True,
         comment="Domain to crawl",
     )
 

@@ -25,7 +25,7 @@ def upgrade():
             nullable=False,
             comment="Name of the prompt to use for this crawl job",
         ),
-        sa.Column("domain", sa.Text(), nullable=False, comment="Domain to crawl"),
+        sa.Column("domain", sa.Text(), nullable=False, unique=True, comment="Domain to crawl"),
         sa.Column(
             "crawling_interval",
             sa.Integer(),
