@@ -165,7 +165,6 @@ export default function Page() {
       );
       setResultId(resultId);
       onResources(resources);
-      console.log("Fetched resources:", resultId, resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
       console.error(message);

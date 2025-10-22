@@ -39,14 +39,15 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
       setStatusMessage(`Email sent successfully to ${emailAddr}`);
     } catch (error) {
       console.error("Error sending email:", error);
-      setStatusMessage("There was an error sending the email, please try again later.");
+      setStatusMessage(
+        "There was an error sending the email, please try again later.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    console.log("Closing");
     setEmailSent(false);
     setStatusMessage("");
   };
@@ -109,7 +110,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
             {statusMessage && (
               <p
                 className={`text-sm ${
-                  statusMessage.includes("Failed")
+                  statusMessage.includes("error sending the email")
                     ? "text-red-500"
                     : "text-green-900"
                 }`}

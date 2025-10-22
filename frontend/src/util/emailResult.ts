@@ -43,10 +43,11 @@ export async function emailResult(resultId: string, email: string) {
         /* eslint-enable */
       } catch (e) {
         // If JSON parsing fails, use status text
-        errorMessage = `HTTP ${response.status}: ${response.statusText} (${JSON.stringify(e)})`;
+        const errorStr = e instanceof Error ? e.message : String(e);
+        errorMessage = `HTTP ${response.status}: ${response.statusText} (${errorStr})`;
       }
 
-      throw new Error(JSON.stringify(errorMessage));
+      throw new Error(errorMessage);
     }
 
     /* eslint-disable */
