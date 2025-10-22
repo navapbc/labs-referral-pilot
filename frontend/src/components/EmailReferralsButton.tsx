@@ -39,9 +39,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
       setStatusMessage(`Email sent successfully to ${emailAddr}`);
     } catch (error) {
       console.error("Error sending email:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      setStatusMessage(`Failed to send email: ${errorMessage}`);
+      setStatusMessage("There was an error sending the email, please try again later.");
     } finally {
       setIsLoading(false);
     }
