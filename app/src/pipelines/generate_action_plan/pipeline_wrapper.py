@@ -5,11 +5,12 @@ from pprint import pformat
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 
 from src.common import haystack_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
+
+from haystack.components.generators.chat import OpenAIChatGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class ActionPlan(BaseModel):
 
 
 action_plan_as_json = json.dumps(ActionPlan.model_json_schema(), indent=2)
-model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+model = "gpt-5"
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -29,7 +30,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("llm", OpenAIChatGenerator(model=model))
 
         prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(
