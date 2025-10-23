@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,4 +25,10 @@ class CrawlJob(Base, IdMixin, TimestampMixin):
     crawling_interval: Mapped[int] = mapped_column(
         nullable=False,
         comment="Crawling interval in hours (positive integer)",
+    )
+
+    last_crawled_at: Mapped[datetime | None] = mapped_column(
+        nullable=True,
+        default=None,
+        comment="Timestamp of the last successful crawl",
     )
