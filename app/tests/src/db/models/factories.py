@@ -18,7 +18,7 @@ from sqlalchemy.orm import scoped_session
 import src.adapters.db as db
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.db.models import support_listing
+from src.db.models import crawl_job, support_listing
 
 _db_session: Optional[db.Session] = None
 
@@ -117,3 +117,13 @@ class LlmResponseFactory(BaseFactory):
 
     id = Generators.UuidObj
     raw_text = factory.LazyFunction(lambda: fake.text(max_nb_chars=200))
+
+
+class CrawlJobFactory(BaseFactory):
+    class Meta:
+        model = crawl_job.CrawlJob
+
+    id = Generators.UuidObj
+    prompt_name = factory.Faker("word")
+    domain = factory.Faker("domain_name")
+    crawling_interval = factory.Faker("random_int", min=1, max=168)
