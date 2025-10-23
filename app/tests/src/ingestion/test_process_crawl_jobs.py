@@ -6,6 +6,7 @@ from haystack import component
 from haystack.dataclasses import ChatMessage
 
 from src.adapters import db
+from src.common import haystack_utils
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
 from src.ingestion import process_crawl_jobs
@@ -114,6 +115,11 @@ def test_process_crawl_jobs(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(process_crawl_jobs, "create_websearch", lambda: MockOpenAIGenerator())
+    monkeypatch.setattr(
+        haystack_utils,
+        "get_phoenix_prompt",
+        lambda _prompt_name: [ChatMessage.from_system("Find support resources")],
+    )
 
     # Process the jobs
     results = process_crawl_jobs.process_crawl_jobs([job1, job2])
@@ -210,7 +216,7 @@ def test_save_job_results_existing_listing(db_session: db.Session) -> None:
 
     # Create existing listing with old supports
     listing_name = f"Crawl Job: {job.domain}"
-    existing_listing = SupportListing(name=listing_name)
+    existing_listing = SupportListing(name=listing_name, uri="example.com")
     db_session.add(existing_listing)
     db_session.flush()
 

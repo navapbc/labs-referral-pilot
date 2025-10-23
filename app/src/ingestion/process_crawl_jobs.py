@@ -32,8 +32,10 @@ class SupportEntry(BaseModel):
 
 OUTPUT_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
 
+
 def create_websearch() -> OpenAIWebSearchGenerator:
     return OpenAIWebSearchGenerator()
+
 
 def build_pipeline() -> AsyncPipeline:
     """
@@ -46,10 +48,8 @@ def build_pipeline() -> AsyncPipeline:
         Configured AsyncPipeline
     """
     pipe = AsyncPipeline()
-    pipe.add_component(
-        "prompt_builder", ChatPromptBuilder(required_variables="*")
-    )
-    pipe.add_component("llm", create_websearch())
+    pipe.add_component("prompt_builder", ChatPromptBuilder(required_variables="*"))
+    pipe.add_component("llm", create_websearch())  # type: ignore[arg-type]
     pipe.connect("prompt_builder", "llm")
     return pipe
 
@@ -67,10 +67,12 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
     """
     logger.info("Running pipeline for job: domain=%s, prompt=%s", job.domain, job.prompt_name)
 
-    _result = await pipeline.run_async({
-        "prompt_builder": {"template": haystack_utils.get_phoenix_prompt(job.prompt_name)},
-        "llm": {"domain": job.domain}
-    })
+    _result = await pipeline.run_async(
+        {
+            "prompt_builder": {"template": haystack_utils.get_phoenix_prompt(job.prompt_name)},
+            "llm": {"domain": job.domain},
+        }
+    )
 
     assert len(_result["llm"]["replies"]) == 1
     reply = _result["llm"]["replies"][0]
@@ -184,7 +186,9 @@ def save_job_results(
     )
 
     if support_listing:
-        logger.info("Deleting Support records associated with existing SupportListing: %r", listing_name)
+        logger.info(
+            "Deleting Support records associated with existing SupportListing: %r", listing_name
+        )
         db_session.query(Support).where(Support.support_listing_id == support_listing.id).delete()
     else:
         logger.info("Creating new SupportListing: %r", listing_name)

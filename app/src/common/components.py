@@ -10,6 +10,7 @@ from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from openai import AsyncOpenAI
+
 from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
 
@@ -134,10 +135,17 @@ class LoadResult:
 
 
 @component
-class OpenAIWebSearchGenerator:
+class OpenAIWebSearchGenerator:  # type: ignore[type-var]
     """Searches the web using OpenAI's web search capabilities and generates a response."""
+
     @component.output_types(replies=List[ChatMessage])
-    async def run(self, messages: List[ChatMessage], domain: str, model: str = "gpt-5o", reasoning_effort: str = "high") -> dict:
+    async def run(
+        self,
+        messages: List[ChatMessage],
+        domain: str,
+        model: str = "gpt-5o",
+        reasoning_effort: str = "high",
+    ) -> dict:
         """
         Run the OpenAI web search generator.
 
@@ -167,12 +175,12 @@ class OpenAIWebSearchGenerator:
         api_params: dict = {
             "model": model,
             "messages": openai_messages,
-            "reasoning_effort": self.reasoning_effort,
-            "web_search_options": {"filters": {"domains": [domain]}}
+            "reasoning_effort": reasoning_effort,
+            "web_search_options": {"filters": {"domains": [domain]}},
         }
 
         client = AsyncOpenAI()
-        response = await client.chat.completions.create(**api_params)  # type: ignore[call-overload]
+        response = await client.chat.completions.create(**api_params)
 
         # Extract the response
         assert len(response.choices) == 1
