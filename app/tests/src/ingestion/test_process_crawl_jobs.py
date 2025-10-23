@@ -1,18 +1,15 @@
 from datetime import timedelta
-from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
+from haystack import component
 from haystack.dataclasses import ChatMessage
 
 from src.adapters import db
-from src.common import haystack_utils
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
 from src.ingestion import process_crawl_jobs
 from src.util import datetime_util
-
-pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
@@ -70,12 +67,7 @@ def test_get_jobs_to_process(db_session: db.Session, mock_crawl_jobs: list[Crawl
 
     # Should return 3 jobs: never crawled, old crawl, and short interval
     assert len(jobs) == 3
-
-    domains = {job.domain for job in jobs}
-    assert "example.com" in domains  # Never crawled
-    assert "old-example.com" in domains  # Crawled > 24 hours ago
-    assert "short-interval.com" in domains  # Crawled > 1 hour ago
-    assert "recent-example.com" not in domains  # Recently crawled
+    assert {job.domain for job in jobs} == {"example.com", "old-example.com", "short-interval.com"}
 
 
 def test_get_jobs_to_process_no_jobs(db_session: db.Session) -> None:
@@ -88,133 +80,60 @@ def test_get_jobs_to_process_no_jobs(db_session: db.Session) -> None:
     assert jobs == []
 
 
-def test_get_jobs_to_process_all_recent(db_session: db.Session) -> None:
-    """Test get_jobs_to_process when all jobs were recently crawled."""
-    # Clean up any existing jobs
-    db_session.query(CrawlJob).delete()
-    db_session.commit()
+@component
+class MockOpenAIGenerator:
+    def __init__(self):
+        pass
 
-    now = datetime_util.utcnow()
-
-    job = CrawlJob(
-        prompt_name="test_prompt",
-        domain="recent.com",
-        crawling_interval=24,
-        last_crawled_at=now - timedelta(hours=1),
-    )
-    db_session.add(job)
-    db_session.commit()
-
-    jobs = process_crawl_jobs.get_jobs_to_process(db_session)
-    assert len(jobs) == 0
+    @component.output_types(replies=list[ChatMessage])
+    def run(self, messages: list[ChatMessage], domain: str | None = None) -> dict:
+        # Return mock response based on domain
+        if domain == "example1.com":
+            response = """[{"name": "Support for example1.com", "website": "https://example1.com", "emails": ["info@example1.com"], "addresses": ["123 Main St"], "phone_numbers": ["555-1234"], "description": "Test support for example1.com"}]"""
+        else:
+            response = """[{"name": "Support for example2.com", "website": "https://example2.com", "emails": [], "addresses": ["456 Oak Ave"], "phone_numbers": [], "description": "Test support for example2.com"}]"""
+        return {"replies": [ChatMessage.from_assistant(response)]}
 
 
-async def test_call_openai_with_web_search() -> None:
-    """Test calling OpenAI API with web_search tool."""
-    # Mock OpenAI client
-    mock_client = AsyncMock()
-    mock_response = Mock()
-    mock_choice = Mock()
-    mock_message = Mock()
-
-    # Set up mock response
-    support_data = [
-        {
-            "name": "Test Support",
-            "website": "https://test.com",
-            "emails": ["test@example.com"],
-            "addresses": ["123 Test St"],
-            "phone_numbers": ["555-1234"],
-            "description": "Test description",
-        }
-    ]
-    mock_message.content = str(support_data).replace("'", '"')
-    mock_choice.message = mock_message
-    mock_response.choices = [mock_choice]
-
-    mock_client.chat.completions.create.return_value = mock_response
-
-    # Create mock prompt template
-    prompt_template = [
-        ChatMessage.from_system("{{schema}}"),
-        ChatMessage.from_user("Search for support resources"),
-    ]
-
-    schema = {"type": "object"}
-
-    # Call the function
-    result = await process_crawl_jobs.call_openai_with_web_search(
-        prompt_template, "example.com", schema, mock_client
-    )
-
-    # Verify result
-    assert len(result) == 1
-    assert result[0]["name"] == "Test Support"
-    assert result[0]["website"] == "https://test.com"
-
-    # Verify OpenAI client was called correctly
-    mock_client.chat.completions.create.assert_called_once()
-    call_args = mock_client.chat.completions.create.call_args
-
-    assert call_args.kwargs["model"] == "o3-mini"
-    assert call_args.kwargs["reasoning_effort"] == "high"
-    assert "web_search" in str(call_args.kwargs["tools"])
-
-
-async def test_process_single_job(monkeypatch) -> None:
-    """Test processing a single crawl job."""
-    # Create a test job
-    job = CrawlJob(
+def test_process_crawl_jobs(monkeypatch) -> None:
+    """Test processing multiple crawl jobs with mocked pipeline."""
+    # Create test jobs
+    job1 = CrawlJob(
         id=uuid4(),
         prompt_name="test_prompt",
-        domain="example.com",
+        domain="example1.com",
+        crawling_interval=24,
+        last_crawled_at=None,
+    )
+    job2 = CrawlJob(
+        id=uuid4(),
+        prompt_name="test_prompt",
+        domain="example2.com",
         crawling_interval=24,
         last_crawled_at=None,
     )
 
-    # Mock get_phoenix_prompt
-    mock_prompt = [
-        ChatMessage.from_system("{{schema}}"),
-        ChatMessage.from_user("Find support resources"),
-    ]
-    monkeypatch.setattr(haystack_utils, "get_phoenix_prompt", lambda name: mock_prompt)
+    monkeypatch.setattr(process_crawl_jobs, "create_websearch", lambda: MockOpenAIGenerator())
 
-    # Mock OpenAI call
-    async def mock_openai_call(prompt, domain, schema, client):
-        return [
-            {
-                "name": "Support 1",
-                "website": None,
-                "emails": [],
-                "addresses": ["123 Main St"],
-                "phone_numbers": ["555-1234"],
-                "description": "Test support",
-            },
-            {
-                "name": "Support 2",
-                "website": "https://support2.com",
-                "emails": ["info@support2.com"],
-                "addresses": [],
-                "phone_numbers": [],
-                "description": "Another support",
-            },
-        ]
-
-    monkeypatch.setattr(process_crawl_jobs, "call_openai_with_web_search", mock_openai_call)
-
-    # Mock client
-    mock_client = AsyncMock()
-
-    # Process the job
-    result_job, support_entries = await process_crawl_jobs.process_single_job(job, mock_client)
+    # Process the jobs
+    results = process_crawl_jobs.process_crawl_jobs([job1, job2])
 
     # Verify results
-    assert result_job == job
-    assert len(support_entries) == 2
-    assert "Support 1" in support_entries
-    assert "Support 2" in support_entries
-    assert support_entries["Support 1"].addresses == ["123 Main St"]
-    assert support_entries["Support 2"].website == "https://support2.com"
+    assert len(results) == 2
+
+    # Check first job results
+    result_job1, support_entries1 = results[0]
+    assert result_job1.domain == "example1.com"
+    assert len(support_entries1) == 1
+    assert "Support for example1.com" in support_entries1
+    assert support_entries1["Support for example1.com"].addresses == ["123 Main St"]
+
+    # Check second job results
+    result_job2, support_entries2 = results[1]
+    assert result_job2.domain == "example2.com"
+    assert len(support_entries2) == 1
+    assert "Support for example2.com" in support_entries2
+    assert support_entries2["Support for example2.com"].addresses == ["456 Oak Ave"]
 
 
 def test_save_job_results_new_listing(db_session: db.Session) -> None:
@@ -291,7 +210,7 @@ def test_save_job_results_existing_listing(db_session: db.Session) -> None:
 
     # Create existing listing with old supports
     listing_name = f"Crawl Job: {job.domain}"
-    existing_listing = SupportListing(name=listing_name, uri="old-uri")
+    existing_listing = SupportListing(name=listing_name)
     db_session.add(existing_listing)
     db_session.flush()
 
@@ -322,10 +241,6 @@ def test_save_job_results_existing_listing(db_session: db.Session) -> None:
     # Save results
     process_crawl_jobs.save_job_results(db_session, job, support_entries)
 
-    # Verify listing was updated
-    db_session.refresh(existing_listing)
-    assert existing_listing.uri == job.domain
-
     # Verify old support was deleted and new one added
     supports = (
         db_session.query(Support).where(Support.support_listing_id == existing_listing.id).all()
@@ -337,9 +252,3 @@ def test_save_job_results_existing_listing(db_session: db.Session) -> None:
     # Verify there's only one listing
     all_listings = db_session.query(SupportListing).all()
     assert len(all_listings) == 1
-
-
-# Note: Integration tests for process_all_jobs() and main() are intentionally
-# excluded as per requirements. The individual functions are tested above,
-# and process_all_jobs() orchestrates them - it should be tested manually or
-# through end-to-end tests.

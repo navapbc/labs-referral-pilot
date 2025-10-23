@@ -3,14 +3,17 @@
 import asyncio
 import json
 import logging
+from pprint import pformat
 from typing import Iterable
 
-from openai import AsyncOpenAI
+from haystack import AsyncPipeline
+from haystack.components.builders import ChatPromptBuilder
 from pydantic import BaseModel, Field
 
 from src.adapters import db
 from src.app_config import config
 from src.common import haystack_utils
+from src.common.components import OpenAIWebSearchGenerator
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
 from src.util import datetime_util
@@ -25,6 +28,87 @@ class SupportEntry(BaseModel):
     addresses: list[str]
     phone_numbers: list[str]
     description: str | None = Field(description="2-sentence summary, including offerings")
+
+
+OUTPUT_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
+
+def create_websearch() -> OpenAIWebSearchGenerator:
+    return OpenAIWebSearchGenerator()
+
+def build_pipeline() -> AsyncPipeline:
+    """
+    Build a Haystack pipeline for processing crawl jobs.
+
+    Args:
+        prompt_name: Name of the Phoenix prompt to use
+
+    Returns:
+        Configured AsyncPipeline
+    """
+    pipe = AsyncPipeline()
+    pipe.add_component(
+        "prompt_builder", ChatPromptBuilder(required_variables="*")
+    )
+    pipe.add_component("llm", create_websearch())
+    pipe.connect("prompt_builder", "llm")
+    return pipe
+
+
+async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
+    """
+    Run the pipeline for a single crawl job.
+
+    Args:
+        pipeline: The Haystack AsyncPipeline to run
+        job: The CrawlJob to process
+
+    Returns:
+        List of support entry dictionaries
+    """
+    logger.info("Running pipeline for job: domain=%s, prompt=%s", job.domain, job.prompt_name)
+
+    _result = await pipeline.run_async({
+        "prompt_builder": {"template": haystack_utils.get_phoenix_prompt(job.prompt_name)},
+        "llm": {"domain": job.domain}
+    })
+
+    assert len(_result["llm"]["replies"]) == 1
+    reply = _result["llm"]["replies"][0]
+
+    logger.info("Finished pipeline for domain: %s", job.domain)
+    logger.debug("Reply metadata: %s", pformat(reply.meta, width=160))
+
+    support_entries = json.loads(reply.text)
+    logger.info("Number of support entries for %s: %d", job.domain, len(support_entries))
+    logger.debug("Support entry names: %s", [entry["name"] for entry in support_entries])
+
+    return support_entries
+
+
+async def run_pipeline_and_join_results(
+    pipeline: AsyncPipeline, jobs: list[CrawlJob]
+) -> list[tuple[CrawlJob, dict[str, SupportEntry]]]:
+    """
+    Run the pipeline for each job in parallel and join the results.
+
+    Args:
+        pipeline: The Haystack AsyncPipeline to run
+        jobs: List of CrawlJob instances to process
+
+    Returns:
+        List of tuples (job, support_entries_dict)
+    """
+    tasks = [run_pipeline(pipeline, job) for job in jobs]
+    results = await asyncio.gather(*tasks)
+
+    # Combine jobs with their results and convert to SupportEntry objects
+    job_results = []
+    for job, support_entries_list in zip(jobs, results):
+        # Deduplicate by name
+        support_entries = {entry["name"]: SupportEntry(**entry) for entry in support_entries_list}
+        job_results.append((job, support_entries))
+
+    return job_results
 
 
 def get_jobs_to_process(db_session: db.Session) -> list[CrawlJob]:
@@ -73,118 +157,6 @@ def get_jobs_to_process(db_session: db.Session) -> list[CrawlJob]:
     return jobs_to_process
 
 
-async def call_openai_with_web_search(
-    prompt_template: list,
-    domain: str,
-    schema: dict,
-    client: AsyncOpenAI,
-) -> list[dict]:
-    """
-    Call OpenAI API with web_search tool limited to the specified domain.
-
-    Args:
-        prompt_template: Phoenix prompt template as list of chat messages
-        domain: Domain to restrict web search to
-        schema: JSON schema for structured output
-        client: AsyncOpenAI client instance
-
-    Returns:
-        List of support entries as dictionaries
-    """
-    # Convert haystack ChatMessage objects to OpenAI format
-    messages = []
-    for msg in prompt_template:
-        role = msg.role.value if hasattr(msg.role, "value") else str(msg.role)
-        # Replace template variables with actual values
-        content = msg.content
-        if "{{schema}}" in content:
-            content = content.replace("{{schema}}", json.dumps(schema, indent=2))
-
-        messages.append({"role": role, "content": content})
-
-    logger.info("Calling OpenAI API with web_search for domain: %s", domain)
-    logger.debug("Messages: %s", messages)
-
-    # Call OpenAI with web_search and o3-mini with high reasoning effort
-    # Note: The web_search_options parameter is used to configure web search
-    # Type ignore due to evolving OpenAI SDK types for web_search_options
-    response = await client.chat.completions.create(  # type: ignore[call-overload]
-        model="o3-mini",
-        messages=messages,
-        web_search_options={"filters": {"domains": [domain]}},
-        reasoning_effort="high",
-    )
-
-    # Extract the response
-    assert len(response.choices) == 1
-    message = response.choices[0].message
-
-    logger.info("Received response from OpenAI")
-    logger.debug("Response message: %s", message.content)
-
-    # Parse the JSON response
-    support_entries = json.loads(message.content)
-    logger.info("Parsed %d support entries from response", len(support_entries))
-
-    return support_entries
-
-
-async def process_single_job(
-    job: CrawlJob,
-    client: AsyncOpenAI,
-) -> tuple[CrawlJob, dict[str, SupportEntry]]:
-    """
-    Process a single crawl job.
-
-    Args:
-        job: CrawlJob instance to process
-        client: AsyncOpenAI client instance
-
-    Returns:
-        Tuple of (job, dict of support entries keyed by name)
-    """
-    logger.info("Processing job for domain: %s with prompt: %s", job.domain, job.prompt_name)
-
-    # Get the Phoenix prompt
-    prompt_template = haystack_utils.get_phoenix_prompt(job.prompt_name)
-
-    # Define the schema
-    schema = SupportEntry.model_json_schema()
-
-    # Call OpenAI API
-    support_entries_list = await call_openai_with_web_search(
-        prompt_template, job.domain, schema, client
-    )
-
-    # Convert to SupportEntry objects and deduplicate by name
-    support_entries = {entry["name"]: SupportEntry(**entry) for entry in support_entries_list}
-
-    logger.info(
-        "Processed %d unique support entries for domain: %s", len(support_entries), job.domain
-    )
-
-    return job, support_entries
-
-
-async def process_jobs_in_parallel(
-    jobs: list[CrawlJob],
-    client: AsyncOpenAI,
-) -> list[tuple[CrawlJob, dict[str, SupportEntry]]]:
-    """
-    Process multiple crawl jobs in parallel.
-
-    Args:
-        jobs: List of CrawlJob instances to process
-        client: AsyncOpenAI client instance
-
-    Returns:
-        List of tuples (job, support entries dict)
-    """
-    tasks = [process_single_job(job, client) for job in jobs]
-    results = await asyncio.gather(*tasks)
-    return results
-
-
 def save_job_results(
     db_session: db.Session,
     job: CrawlJob,
@@ -207,30 +179,23 @@ def save_job_results(
     listing_name = f"Crawl Job: {job.domain}"
 
     # Find or create the SupportListing
-    existing_listing = (
+    support_listing = (
         db_session.query(SupportListing).where(SupportListing.name == listing_name).one_or_none()
     )
 
-    if existing_listing:
-        logger.info("Updating existing SupportListing: %r", listing_name)
-        existing_listing.uri = job.domain
-
-        logger.info("Deleting Support records associated with: %r", listing_name)
-        db_session.query(Support).where(Support.support_listing_id == existing_listing.id).delete()
-        support_listing_id = existing_listing.id
+    if support_listing:
+        logger.info("Deleting Support records associated with existing SupportListing: %r", listing_name)
+        db_session.query(Support).where(Support.support_listing_id == support_listing.id).delete()
     else:
         logger.info("Creating new SupportListing: %r", listing_name)
-        new_listing = SupportListing(name=listing_name, uri=job.domain)
-        db_session.add(new_listing)
-        # Flush to get the ID
-        db_session.flush()
-        support_listing_id = new_listing.id
+        support_listing = SupportListing(name=listing_name, uri=job.domain)
+        db_session.add(support_listing)
 
     # Add new Support records
     for support in support_entries:
         logger.info("Adding Support record: %r", support.name)
         support_record = Support(
-            support_listing_id=support_listing_id,
+            support_listing=support_listing,
             name=support.name,
             addresses=support.addresses,
             phone_numbers=support.phone_numbers,
@@ -245,17 +210,42 @@ def save_job_results(
     logger.info("Updated last_crawled_at for domain: %s", job.domain)
 
 
+def process_crawl_jobs(jobs: list[CrawlJob]) -> list[tuple[CrawlJob, dict[str, SupportEntry]]]:
+    """
+    Process crawl jobs in parallel using Haystack pipelines.
+
+    Args:
+        jobs: List of CrawlJob instances to process
+
+    Returns:
+        List of tuples (job, support_entries_dict)
+    """
+    if not jobs:
+        return []
+
+    logger.info(
+        "Building pipeline  for %d jobs",
+        len(jobs),
+    )
+
+    pipeline = build_pipeline()
+
+    # Run pipeline for all jobs in parallel
+    logger.info("Processing %d jobs in parallel", len(jobs))
+    results = asyncio.run(run_pipeline_and_join_results(pipeline, jobs))
+
+    logger.info("Successfully processed %d jobs", len(results))
+    return results
+
+
 def process_all_jobs(db_session: db.Session) -> None:
     """
     Main processing function that orchestrates the entire crawl job workflow.
 
     This function:
     1. Fetches all jobs that need processing
-    2. Processes them in parallel using OpenAI
+    2. Processes them in parallel using Haystack pipelines
     3. Saves results to the database
-
-    Args:
-        client: Optional AsyncOpenAI client. If not provided, one will be created.
     """
     jobs = get_jobs_to_process(db_session)
 
@@ -263,16 +253,15 @@ def process_all_jobs(db_session: db.Session) -> None:
         logger.info("No jobs to process")
         return
 
-    # Process jobs in parallel
-    logger.info("Processing %d jobs in parallel", len(jobs))
-    results = asyncio.run(process_jobs_in_parallel(jobs, client))
+    # Process jobs in parallel using Haystack pipelines
+    results = process_crawl_jobs(jobs)
 
     # Save results
     for job, support_entries in results:
         logger.info("Saving results for domain: %s", job.domain)
         save_job_results(db_session, job, support_entries.values())
 
-    logger.info("Successfully processed %d jobs", len(jobs))
+    logger.info("Successfully processed and saved %d jobs", len(jobs))
 
 
 def main() -> None:  # pragma: no cover
