@@ -8,9 +8,8 @@ from haystack.components.builders import ChatPromptBuilder
 from pydantic import BaseModel
 
 from src.common import haystack_utils
+from src.common.components import OpenAIWebSearchGeneratorLightweight
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
-
-from haystack.components.generators.chat import OpenAIChatGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,10 @@ class ActionPlan(BaseModel):
 
 
 action_plan_as_json = json.dumps(ActionPlan.model_json_schema(), indent=2)
-model = "gpt-5"
+
+
+def create_websearch() -> OpenAIWebSearchGeneratorLightweight:
+    return OpenAIWebSearchGeneratorLightweight()
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -30,7 +32,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("llm", OpenAIChatGenerator(model=model, timeout=120))
+        pipeline.add_component("llm", create_websearch())
 
         prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(
