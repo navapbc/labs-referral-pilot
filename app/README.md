@@ -89,3 +89,13 @@ To do so, add the `DEPLOYED_PHOENIX_URL` and `DEPLOYED_PHOENIX_API_KEY` environm
 Create a system API key at `$DEPLOYED_PHOENIX_URL/settings/general`.
 Then run `make copy-prompts`. This will copy the prompt versions specified in `app_config.py`, which are the ones used in the deployed app.
 Remember to do this every time the prompt version is updated in `app_config.py`. When running locally, the latest version of the prompt is used.
+
+
+### Enabling OpenAI - aka ChatGPT - for generate action plan
+
+Go to 1Password and retrieve "OpenAI API Key"
+
+* Add OPENAI_API_KEY environment variable in `override.env` to allow the app to connect to OpenAI:
+```
+      - OPENAI_API_KEY=<paste API key>
+```

@@ -9,6 +9,7 @@ from fastapi import UploadFile
 from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
+from openai import OpenAI
 
 from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
@@ -69,6 +70,63 @@ class LoadSupports:
                 for support in db_session.query(Support).all()
             ]
             return {"supports": supports}
+
+
+@component
+class OpenAIWebSearchGeneratorLightweight:
+
+    """Searches the web using OpenAI's web search capabilities and generates a response."""
+
+    @component.output_types(replies=List[ChatMessage])
+    def run(
+        self,
+        messages: List[ChatMessage],
+        model: str = "gpt-5",  # TODO MRH update to mini?
+        reasoning_effort: str = "low",
+    ) -> dict:
+        """
+        Run the OpenAI web search generator.
+
+        Args:
+            messages: List of ChatMessage objects to send to the API
+
+        Returns:
+            Dictionary with 'replies' key containing list of ChatMessage responses
+        """
+
+        # Convert Haystack ChatMessage objects to OpenAI format
+        openai_messages = []
+        for msg in messages:
+            role = msg.role.value if hasattr(msg.role, "value") else str(msg.role)
+            openai_messages.append({"role": role, "content": msg.text})
+
+        logger.info(
+            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s",
+            model,
+            reasoning_effort,
+        )
+        logger.debug("Messages: %s", pformat(openai_messages, width=160))
+
+        # Build the API call parameters
+        api_params: dict = {
+            "model": model,
+            "messages": openai_messages,
+            "reasoning_effort": reasoning_effort,
+        }
+
+        client = OpenAI()
+        response = client.chat.completions.create(**api_params)
+
+        # Extract the response
+        assert len(response.choices) == 1
+        message = response.choices[0].message
+
+        logger.info("Received response from OpenAI")
+        logger.debug("Response: %s", pformat(message.content, width=160))
+
+        # Return as Haystack ChatMessage
+        reply = ChatMessage.from_assistant(message.content)
+        return {"replies": [reply]}
 
 
 @component

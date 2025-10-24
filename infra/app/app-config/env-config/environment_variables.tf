@@ -31,6 +31,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}-${var.environment}/phoenix-api-key"
     }
+    OPENAI_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}-${var.environment}/openai-api-key"
+    }
 
     # Example generated secret
     # RANDOM_SECRET = {

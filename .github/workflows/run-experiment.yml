@@ -15,7 +15,7 @@ on:
         default: 'generate-referrals'
         required: true
       prompt_version_id:
-        description: 'Phoenix Prompt Version to use for your experiment'
+        description: 'Phoenix Prompt Version ID to use for your experiment (generate-referrals only)'
         type: string
         required: false
 
