@@ -3,12 +3,13 @@
 import json
 import logging
 from pprint import pformat
-from typing import List
+from typing import List, Optional
 
 from fastapi import UploadFile
 from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
+from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
@@ -164,3 +165,37 @@ class EmailResult:
                 f"- Justification: {resource.get('justification', 'None')}",
             ]
         )
+
+
+@component
+class LlmOutputValidator:
+    def __init__(self, pydantic_model: BaseModel):
+        self.pydantic_model = pydantic_model
+        self.attempt_count = 0
+
+    @component.output_types(
+        valid_replies=List[ChatMessage],
+        invalid_replies=Optional[List[ChatMessage]],
+        error_message=Optional[str],
+    )
+    def run(self, replies: List[ChatMessage]):
+        self.attempt_count += 1
+        reply = replies[0]
+
+        try:
+            output_dict = json.loads(reply.text)
+            self.pydantic_model.model_validate(output_dict)
+            return {"valid_replies": replies}
+
+        except (ValueError, ValidationError) as e:
+            logger.error(
+                (
+                    "LlmOutputValidator at attempt {%i}: Invalid JSON from LLM - trying again...\n"
+                    "Output from LLM:\n %s \n"
+                    "Error from LlmOutputValidator: %s"
+                ),
+                self.attempt_count,
+                reply,
+                e,
+            )
+            return {"invalid_replies": reply.text, "error_message": str(e)}

@@ -4,10 +4,12 @@ from enum import Enum
 from pprint import pformat
 from typing import Optional
 
+import httpx
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
+from haystack.core.errors import PipelineRuntimeError
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from pydantic import BaseModel
 
@@ -33,7 +35,11 @@ class Resource(BaseModel):
     referral_type: Optional[ReferralType] = None
 
 
-resource_as_json = json.dumps(Resource.model_json_schema(), indent=2)
+class ResourceList(BaseModel):
+    resources: list[Resource]
+
+
+response_schema = json.dumps(ResourceList.model_json_schema(), indent=2)
 model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
@@ -41,22 +47,36 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
 
     def setup(self) -> None:
-        pipeline = Pipeline()
+        pipeline = Pipeline(max_runs_per_component=3)
         pipeline.add_component("load_supports", components.LoadSupports())
-
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals")
         pipeline.add_component(
             "prompt_builder",
             ChatPromptBuilder(
-                template=prompt_template, required_variables=["query", "supports", "resource_json"]
+                # Curious: exception is raised unless "supports" is included as an "optional" variable here
+                # Don't include "template" as it is implicitly required by ChatPromptBuilder
+                variables=[
+                    "query",
+                    "supports",
+                    "response_json",
+                    "error_message",
+                    "invalid_replies",
+                ],
             ),
         )
         pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("output_validator", components.LlmOutputValidator(ResourceList))
         pipeline.add_component("save_result", components.SaveResult())
 
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
         pipeline.connect("prompt_builder", "llm.messages")
-        pipeline.connect("llm.replies", "save_result.replies")
+        pipeline.connect("llm.replies", "output_validator")
+        pipeline.connect("output_validator.valid_replies", "save_result.replies")
+
+        # Re-trigger the prompt builder with error_message and invalid_replies
+        pipeline.connect("output_validator.error_message", "prompt_builder.error_message")
+        pipeline.connect("output_validator.invalid_replies", "prompt_builder.invalid_replies")
+
+        pipeline.draw(path="generate_referrals.png")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
@@ -66,21 +86,30 @@ class PipelineWrapper(BasePipelineWrapper):
             prompt_template = haystack_utils.get_phoenix_prompt(
                 "generate_referrals", prompt_version_id
             )
+        except httpx.HTTPStatusError as he:
+            raise HTTPException(
+                status_code=422,
+                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+            ) from he
+
+        try:
+            # Reset attempt counter
+            self.pipeline.get_component("output_validator").attempt_count = 0
             response = self.pipeline.run(
                 {
                     "prompt_builder": {
                         "template": prompt_template,
                         "query": query,
-                        "resource_json": resource_as_json,
+                        "response_json": response_schema,
                     },
                 },
                 include_outputs_from={"llm", "save_result"},
             )
             logger.info("Results: %s", pformat(response, width=160))
             return response
+        except PipelineRuntimeError as re:
+            logger.error("PipelineRuntimeError: %s", re, exc_info=True)
+            raise HTTPException(status_code=500, detail=str(re)) from re
         except Exception as e:
-            logger.error("The requested prompt version could not be retrieved")
-            raise HTTPException(
-                status_code=400,
-                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
-            ) from e
+            logger.error("Error %s: %s", type(e), e, exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
