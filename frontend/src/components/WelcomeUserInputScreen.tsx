@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 
 type WelcomeUserInputScreenType = {
-  setUserName: () => void; //function
-  setUserEmail: () => void; //function
+  setUserName: (name: string) => void; //function
+  setUserEmail: (email: string) => void; //function
 };
 
 const WelcomeUserInputScreen = ({
