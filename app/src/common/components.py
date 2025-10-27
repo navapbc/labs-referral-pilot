@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from pprint import pformat
 from typing import List
 
@@ -15,6 +16,8 @@ from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
 
 logger = logging.getLogger(__name__)
+
+openai_api_key = os.environ["OPENAI_API_KEY"]
 
 
 @component
@@ -81,7 +84,7 @@ class OpenAIWebSearchGeneratorLightweight:
     def run(
         self,
         messages: List[ChatMessage],
-        model: str = "gpt-5",  # TODO MRH update to mini?
+        model: str = "gpt-5-mini",
         reasoning_effort: str = "low",
     ) -> dict:
         """
@@ -101,7 +104,7 @@ class OpenAIWebSearchGeneratorLightweight:
             openai_messages.append({"role": role, "content": msg.text})
 
         logger.info(
-            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s",
+            "Calling OpenAI API with web_search, model=%s, reasoning_effort=%s",
             model,
             reasoning_effort,
         )
@@ -114,11 +117,12 @@ class OpenAIWebSearchGeneratorLightweight:
             "reasoning_effort": reasoning_effort,
         }
 
-        client = OpenAI()
+        client = OpenAI(api_key=openai_api_key)
         response = client.chat.completions.create(**api_params)
 
         # Extract the response
-        assert len(response.choices) == 1
+        if len(response.choices) != 1:
+            raise ValueError(f"Expected 1 choice, got {len(response.choices)}")
         message = response.choices[0].message
 
         logger.info("Received response from OpenAI")
