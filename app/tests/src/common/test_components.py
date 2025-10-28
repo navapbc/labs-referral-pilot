@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 from textwrap import dedent
 
@@ -8,12 +9,14 @@ from haystack.dataclasses.chat_message import ChatMessage
 from src.adapters import db
 from src.common.components import (
     EmailResult,
+    LlmOutputValidator,
     LoadResult,
     LoadSupports,
     SaveResult,
     UploadFilesToByteStreams,
 )
 from src.db.models.support_listing import LlmResponse, Support
+from src.pipelines.generate_referrals.pipeline_wrapper import ResourceList
 from tests.src.db.models.factories import SupportFactory
 
 
@@ -128,3 +131,35 @@ def test_EmailResult(enable_factory_create, db_session: db.Session):
         - Addresses: None
         - Justification: None"""
     )
+
+
+def test_LlmOutputValidator():
+    valid_json = {
+        "resources": [
+            {
+                "name": "Resource 1",
+                "addresses": ["123 Main St"],
+                "phones": ["555-1234"],
+                "emails": ["resource1@example.com"],
+                "website": "http://resource1.com",
+                "description": "Description for Resource 1",
+                "justification": "Justification for Resource 1",
+            },
+        ]
+    }
+    valid_json_str = json.dumps(valid_json)
+
+    component = LlmOutputValidator(pydantic_model=ResourceList)
+    valid_replies_output = component.run(replies=[ChatMessage.from_assistant(text=valid_json_str)])
+    assert "valid_replies" in valid_replies_output
+    assert valid_replies_output["valid_replies"][0].text == valid_json_str
+    assert "invalid_replies" not in valid_replies_output
+    assert "error_message" not in valid_replies_output
+
+    invalid_json_str = f"Based on your query, the resources are:\n{valid_json_str}"
+    invalid_replies_output = component.run(
+        replies=[ChatMessage.from_assistant(text=invalid_json_str)]
+    )
+    assert "valid_replies" not in invalid_replies_output
+    assert "invalid_replies" in invalid_replies_output
+    assert "error_message" in invalid_replies_output

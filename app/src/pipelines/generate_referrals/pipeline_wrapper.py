@@ -76,7 +76,6 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("output_validator.error_message", "prompt_builder.error_message")
         pipeline.connect("output_validator.invalid_replies", "prompt_builder.invalid_replies")
 
-        pipeline.draw(path="generate_referrals.png")
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
@@ -93,8 +92,11 @@ class PipelineWrapper(BasePipelineWrapper):
             ) from he
 
         try:
+            output_validator = self.pipeline.get_component("output_validator")
+            assert isinstance(output_validator, components.LlmOutputValidator)
             # Reset attempt counter
-            self.pipeline.get_component("output_validator").attempt_count = 0
+            output_validator.attempt_count = 0
+
             response = self.pipeline.run(
                 {
                     "prompt_builder": {

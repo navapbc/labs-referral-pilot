@@ -3,7 +3,7 @@
 import json
 import logging
 from pprint import pformat
-from typing import List, Optional
+from typing import List, Optional, TypeVar
 
 from fastapi import UploadFile
 from haystack import component
@@ -167,9 +167,12 @@ class EmailResult:
         )
 
 
+BaseModelT = TypeVar('BaseModelT', bound=BaseModel)
+
+
 @component
 class LlmOutputValidator:
-    def __init__(self, pydantic_model: BaseModel):
+    def __init__(self, pydantic_model: type[BaseModelT]):
         self.pydantic_model = pydantic_model
         self.attempt_count = 0
 
@@ -178,11 +181,12 @@ class LlmOutputValidator:
         invalid_replies=Optional[List[ChatMessage]],
         error_message=Optional[str],
     )
-    def run(self, replies: List[ChatMessage]):
+    def run(self, replies: List[ChatMessage]) -> dict:
         self.attempt_count += 1
         reply = replies[0]
 
         try:
+            assert reply.text is not None, "Reply text is None"
             output_dict = json.loads(reply.text)
             self.pydantic_model.model_validate(output_dict)
             return {"valid_replies": replies}
