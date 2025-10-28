@@ -6,10 +6,11 @@ import logging
 from typing import Iterable
 
 from haystack import AsyncPipeline
+from haystack.components.builders import ChatPromptBuilder
 
 from src.adapters import db
 from src.app_config import config
-from src.common import phoenix_utils
+from src.common import haystack_utils
 from src.common.components import OpenAIWebSearchGenerator
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
@@ -34,7 +35,9 @@ def build_pipeline() -> AsyncPipeline:
         Configured AsyncPipeline
     """
     pipe = AsyncPipeline()
+    pipe.add_component("prompt_builder", ChatPromptBuilder(variables=["schema"]))
     pipe.add_component("llm", create_websearch())
+    pipe.connect("prompt_builder", "llm.messages")
     return pipe
 
 
@@ -51,18 +54,18 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
     """
     logger.info("Running pipeline for job: domain=%s, prompt=%s", job.domain, job.prompt_name)
 
-    # We are setting the prompt at runtime, so can't use ChatPromptBuilder here
-    prompt_version = phoenix_utils.get_prompt_template(job.prompt_name)
-    prompt_template = prompt_version._template["messages"][0]["content"][0]["text"]  # type: ignore
-    prompt = prompt_template.replace("{{schema}}", SUPPORT_ENTRY_SCHEMA)
+    prompt_template = haystack_utils.get_phoenix_prompt(job.prompt_name)
 
     _result = await pipeline.run_async(
         {
+            "prompt_builder": {
+                "template": prompt_template,
+                "schema": SUPPORT_ENTRY_SCHEMA,
+            },
             "llm": {
                 "domain": job.domain,
-                "model": "gpt-5",
-                "reasoning_effort": "high",
-                "prompt": prompt,
+                "model": "gpt-5-mini",
+                "reasoning_effort": "medium",
             },
         }
     )

@@ -141,7 +141,7 @@ class OpenAIWebSearchGenerator:
     @component.output_types(response=str)
     def run(
         self,
-        prompt: str,
+        messages: list[ChatMessage],
         domain: str,
         model: str = "gpt-5",
         reasoning_effort: str = "high",
@@ -163,6 +163,9 @@ class OpenAIWebSearchGenerator:
             domain,
             reasoning_effort,
         )
+
+        assert len(messages) == 1
+        prompt = messages[0].text
         logger.debug("Prompt: %s", pformat(prompt, width=160))
 
         api_params: dict = {
