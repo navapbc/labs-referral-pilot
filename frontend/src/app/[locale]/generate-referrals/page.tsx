@@ -111,21 +111,6 @@ const resourceCategories = [
 ];
 
 export default function Page() {
-  // User info state
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-
-  // Check if user has provided info on first load
-  useEffect(() => {
-    const storedUserName = localStorage.getItem("userName");
-    const storedUserEmail = localStorage.getItem("userEmail");
-
-    if (storedUserName && storedUserEmail) {
-      setUserName(storedUserName);
-      setUserEmail(storedUserEmail);
-    }
-  }, []);
-
   const [clientDescription, setClientDescription] = useState("");
   const [result, setResult] = useState<Resource[] | null>(null);
   const [resultId, setResultId] = useState("");
@@ -142,6 +127,23 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("find-referrals");
 
   const searchParams = useSearchParams();
+
+  // User info state
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isCheckingUser, setIsCheckingUser] = useState(true);
+
+  // Check if user has provided info on first load
+  useEffect(() => {
+    const storedUserName = localStorage.getItem("userName");
+    const storedUserEmail = localStorage.getItem("userEmail");
+
+    if (storedUserName && storedUserEmail) {
+      setUserName(storedUserName);
+      setUserEmail(storedUserEmail);
+    }
+    setIsCheckingUser(false)
+  }, []);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -271,6 +273,11 @@ export default function Page() {
     );
   };
 
+  // Show nothing while checking localStorage to prevent flash
+  if (isCheckingUser) {
+    return null
+  }
+
   return (
     <>
       {!userName || !userEmail ? (
@@ -286,6 +293,7 @@ export default function Page() {
               onValueChange={setActiveTab}
               className="mb-6"
             >
+              { !readyToPrint && (
               <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                 <TabsTrigger
                   value="find-referrals"
@@ -302,6 +310,8 @@ export default function Page() {
                   Upload Intake Form
                 </TabsTrigger>
               </TabsList>
+              )
+              }
 
               <TabsContent value="find-referrals">
                 {!readyToPrint && (
