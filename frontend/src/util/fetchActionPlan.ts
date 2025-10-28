@@ -55,6 +55,8 @@ const generateActionPlanURL =
 
 export async function fetchActionPlan(
   resources: Resource[],
+  userName: string,
+  userEmail: string,
 ): Promise<ActionPlan | null> {
   const url = generateActionPlanURL;
   const headers = {
@@ -68,7 +70,11 @@ export async function fetchActionPlan(
     const upstream = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ resources }),
+      body: JSON.stringify({
+        resource: resources,
+        user_name: userName,
+        user_email: userEmail,
+      }),
       cache: "no-store",
       signal: ac.signal,
     });
