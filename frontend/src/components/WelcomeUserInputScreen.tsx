@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 
 type WelcomeUserInputScreenType = {
-  setUserName: (name: string) => void; //function
-  setUserEmail: (email: string) => void; //function
+  setUserName: (name: string) => void;
+  setUserEmail: (email: string) => void;
 };
 
 const WelcomeUserInputScreen = ({
@@ -74,7 +74,7 @@ const WelcomeUserInputScreen = ({
               <img
                 src="/img/Goodwill_Industries_Logo.svg"
                 alt="Goodwill Logo"
-                className="h-35 w-35 shrink-0 mx-auto"
+                className="h-36 w-36 shrink-0 mx-auto"
               />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
