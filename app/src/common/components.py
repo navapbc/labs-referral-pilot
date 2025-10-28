@@ -183,6 +183,8 @@ class LlmOutputValidator:
     )
     def run(self, replies: List[ChatMessage]) -> dict:
         self.attempt_count += 1
+
+        assert len(replies) == 1, "Expected exactly one reply"
         reply = replies[0]
 
         try:
@@ -202,4 +204,4 @@ class LlmOutputValidator:
                 reply,
                 e,
             )
-            return {"invalid_replies": reply.text, "error_message": str(e)}
+            return {"invalid_replies": replies, "error_message": str(e)}

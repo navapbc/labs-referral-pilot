@@ -52,7 +52,7 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component(
             "prompt_builder",
             ChatPromptBuilder(
-                # Curious: exception is raised unless "supports" is included as an "optional" variable here
+                # List all variables (required and optional) that could be used in the prompt template.
                 # Don't include "template" as it is implicitly required by ChatPromptBuilder
                 variables=[
                     "query",
@@ -88,7 +88,7 @@ class PipelineWrapper(BasePipelineWrapper):
         except httpx.HTTPStatusError as he:
             raise HTTPException(
                 status_code=422,
-                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
             ) from he
 
         try:
