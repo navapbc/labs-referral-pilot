@@ -237,6 +237,9 @@ else
 	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(PROMPT_NAME)" "$(DOMAIN)" "$(INTERVAL)"
 endif
 
+process-crawl-jobs:
+	$(PY_RUN_CMD) process-crawl-jobs
+
 copy-prompts:
 	$(PY_RUN_CMD) copy-prompts
 
