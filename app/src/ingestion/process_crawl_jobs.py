@@ -7,6 +7,7 @@ from typing import Iterable
 
 from haystack import AsyncPipeline
 from haystack.components.builders import ChatPromptBuilder
+from sqlalchemy import func, or_
 
 from src.adapters import db
 from src.app_config import config
@@ -64,8 +65,8 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
             },
             "llm": {
                 "domain": job.domain,
-                "model": "gpt-5-mini",
-                "reasoning_effort": "medium",
+                "model": "gpt-5",
+                "reasoning_effort": "high",
             },
         }
     )
@@ -88,21 +89,32 @@ async def run_pipeline_and_join_results(
     """
     Run the pipeline for each job in parallel and join the results.
 
+    Individual job failures are logged but do not prevent other jobs from processing.
+
     Args:
         pipeline: The Haystack AsyncPipeline to run
         jobs: List of CrawlJob instances to process
 
     Returns:
-        List of tuples (job, support_entries_dict)
+        List of tuples (job, support_entries_dict) for successfully processed jobs
     """
     tasks = [run_pipeline(pipeline, job) for job in jobs]
-    results = await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Combine jobs with their results and convert to SupportEntry objects
     job_results = []
-    for job, support_entries_list in zip(jobs, results):
+    for job, result in zip(jobs, results):
+        if isinstance(result, BaseException):
+            logger.error(
+                "Failed to process job for domain %s: %s",
+                job.domain,
+                result,
+                exc_info=result,
+            )
+            continue
+
         # Deduplicate by name
-        support_entries = {entry["name"]: SupportEntry(**entry) for entry in support_entries_list}
+        support_entries = {entry["name"]: SupportEntry(**entry) for entry in result}
         job_results.append((job, support_entries))
 
     return job_results
@@ -118,37 +130,20 @@ def get_jobs_to_process(db_session: db.Session) -> list[CrawlJob]:
     """
     now = datetime_util.utcnow()
 
-    jobs = db_session.query(CrawlJob).all()
-
-    jobs_to_process = []
-    for job in jobs:
-        should_process = False
-
-        if job.last_crawled_at is None:
-            logger.info("Job for domain %r has never been crawled", job.domain)
-            should_process = True
-        else:
-            time_since_last_crawl = now - job.last_crawled_at
-            hours_since_last_crawl = time_since_last_crawl.total_seconds() / 3600
-
-            if hours_since_last_crawl >= job.crawling_interval:
-                logger.info(
-                    "Job for domain %r was last crawled %.2f hours ago (interval: %d hours)",
-                    job.domain,
-                    hours_since_last_crawl,
-                    job.crawling_interval,
-                )
-                should_process = True
-            else:
-                logger.debug(
-                    "Skipping domain %r: last crawled %.2f hours ago (interval: %d hours)",
-                    job.domain,
-                    hours_since_last_crawl,
-                    job.crawling_interval,
-                )
-
-        if should_process:
-            jobs_to_process.append(job)
+    # Query for jobs that need processing:
+    # - last_crawled_at is null (never crawled), OR
+    # - last_crawled_at is more than crawling_interval hours ago
+    jobs_to_process = (
+        db_session.query(CrawlJob)
+        .filter(
+            or_(
+                CrawlJob.last_crawled_at.is_(None),
+                CrawlJob.last_crawled_at
+                <= now - func.make_interval(0, 0, 0, 0, CrawlJob.crawling_interval),
+            )
+        )
+        .all()
+    )
 
     logger.info("Found %d jobs to process", len(jobs_to_process))
     return jobs_to_process
@@ -260,7 +255,15 @@ def process_all_jobs(db_session: db.Session) -> None:
         logger.info("Saving results for domain: %s", job.domain)
         save_job_results(db_session, job, support_entries.values())
 
-    logger.info("Successfully processed and saved %d jobs", len(jobs))
+    if len(results) < len(jobs):
+        logger.warning(
+            "Successfully processed and saved %d out of %d jobs (%d failed)",
+            len(results),
+            len(jobs),
+            len(jobs) - len(results),
+        )
+    else:
+        logger.info("Successfully processed and saved %d jobs", len(results))
 
 
 def main() -> None:  # pragma: no cover

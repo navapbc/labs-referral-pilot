@@ -3,9 +3,10 @@ from uuid import uuid4
 
 import pytest
 from haystack import component
+from haystack.dataclasses.chat_message import ChatMessage
 
 from src.adapters import db
-from src.common import phoenix_utils
+from src.common import haystack_utils
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
 from src.ingestion import process_crawl_jobs
@@ -87,7 +88,11 @@ class MockOpenAIGenerator:
 
     @component.output_types(response=str)
     def run(
-        self, prompt: str, model: str, reasoning_effort: str, domain: str | None = None
+        self,
+        messages: list[ChatMessage],
+        model: str,
+        reasoning_effort: str,
+        domain: str | None = None,
     ) -> dict:
         # Return mock response based on domain
         if domain == "example1.com":
@@ -117,11 +122,11 @@ def test_process_crawl_jobs(monkeypatch) -> None:
 
     monkeypatch.setattr(process_crawl_jobs, "create_websearch", lambda: MockOpenAIGenerator())
     monkeypatch.setattr(
-        phoenix_utils,
-        "get_prompt_template",
-        lambda _: type(
-            "Mock", (), {"_template": {"messages": [{"content": [{"text": "hello"}]}]}}
-        )(),
+        haystack_utils,
+        "get_phoenix_prompt",
+        lambda _prompt_name: [
+            ChatMessage.from_system("Hello"),
+        ],
     )
 
     # Process the jobs
