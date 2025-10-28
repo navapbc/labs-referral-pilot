@@ -142,7 +142,7 @@ export default function Page() {
       setUserName(storedUserName);
       setUserEmail(storedUserEmail);
     }
-    setIsCheckingUser(false)
+    setIsCheckingUser(false);
   }, []);
 
   const toggleCategory = (categoryId: string) => {
@@ -275,7 +275,7 @@ export default function Page() {
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
-    return null
+    return null;
   }
 
   return (
@@ -293,25 +293,24 @@ export default function Page() {
               onValueChange={setActiveTab}
               className="mb-6"
             >
-              { !readyToPrint && (
-              <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-                <TabsTrigger
-                  value="find-referrals"
-                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Find Referrals
-                </TabsTrigger>
-                <TabsTrigger
-                  value="upload-forms"
-                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload Intake Form
-                </TabsTrigger>
-              </TabsList>
-              )
-              }
+              {!readyToPrint && (
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+                  <TabsTrigger
+                    value="find-referrals"
+                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Find Referrals
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="upload-forms"
+                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Intake Form
+                  </TabsTrigger>
+                </TabsList>
+              )}
 
               <TabsContent value="find-referrals">
                 {!readyToPrint && (
