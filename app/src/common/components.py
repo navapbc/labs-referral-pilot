@@ -167,7 +167,7 @@ class EmailResult:
         )
 
 
-BaseModelT = TypeVar('BaseModelT', bound=BaseModel)
+BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
 @component
