@@ -3,34 +3,20 @@
 import asyncio
 import json
 import logging
-from pprint import pformat
 from typing import Iterable
 
 from haystack import AsyncPipeline
-from haystack.components.builders import ChatPromptBuilder
-from pydantic import BaseModel, Field
 
 from src.adapters import db
 from src.app_config import config
-from src.common import haystack_utils
+from src.common import phoenix_utils
 from src.common.components import OpenAIWebSearchGenerator
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
+from src.ingestion.support_entry import SUPPORT_ENTRY_SCHEMA, SupportEntry
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
-
-
-class SupportEntry(BaseModel):
-    name: str
-    website: str | None
-    emails: list[str]
-    addresses: list[str]
-    phone_numbers: list[str]
-    description: str | None = Field(description="2-sentence summary, including offerings")
-
-
-OUTPUT_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
 
 
 def create_websearch() -> OpenAIWebSearchGenerator:
@@ -48,9 +34,7 @@ def build_pipeline() -> AsyncPipeline:
         Configured AsyncPipeline
     """
     pipe = AsyncPipeline()
-    pipe.add_component("prompt_builder", ChatPromptBuilder(required_variables="*"))
-    pipe.add_component("llm", create_websearch())  # type: ignore[arg-type]
-    pipe.connect("prompt_builder", "llm")
+    pipe.add_component("llm", create_websearch())
     return pipe
 
 
@@ -67,20 +51,28 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
     """
     logger.info("Running pipeline for job: domain=%s, prompt=%s", job.domain, job.prompt_name)
 
+    # We are setting the prompt at runtime, so can't use ChatPromptBuilder here
+    prompt_version = phoenix_utils.get_prompt_template(job.prompt_name)
+    prompt_template = prompt_version._template["messages"][0]["content"][0]["text"]  # type: ignore
+    prompt = prompt_template.replace("{{schema}}", SUPPORT_ENTRY_SCHEMA)
+
     _result = await pipeline.run_async(
         {
-            "prompt_builder": {"template": haystack_utils.get_phoenix_prompt(job.prompt_name)},
-            "llm": {"domain": job.domain},
+            "llm": {
+                "domain": job.domain,
+                "model": "gpt-5",
+                "reasoning_effort": "high",
+                "prompt": prompt,
+            },
         }
     )
 
-    assert len(_result["llm"]["replies"]) == 1
-    reply = _result["llm"]["replies"][0]
+    response = _result["llm"]["response"]
 
     logger.info("Finished pipeline for domain: %s", job.domain)
-    logger.debug("Reply metadata: %s", pformat(reply.meta, width=160))
+    logger.info(response)
 
-    support_entries = json.loads(reply.text)
+    support_entries = json.loads(response)
     logger.info("Number of support entries for %s: %d", job.domain, len(support_entries))
     logger.debug("Support entry names: %s", [entry["name"] for entry in support_entries])
 

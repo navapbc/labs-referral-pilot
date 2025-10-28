@@ -32,6 +32,7 @@ class AppConfig(PydanticBaseEnvConfig):
         "extract_supports": "UHJvbXB0VmVyc2lvbjoz",
         "generate_referrals": "UHJvbXB0VmVyc2lvbjoxOQ==",
         "generate_action_plan": "UHJvbXB0VmVyc2lvbjoxMg==",
+        "crawl_gcta": "UHJvbXB0VmVyc2lvbjoyNw==",
     }
 
 

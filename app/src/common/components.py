@@ -9,7 +9,7 @@ from fastapi import UploadFile
 from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
@@ -135,15 +135,15 @@ class LoadResult:
 
 
 @component
-class OpenAIWebSearchGenerator:  # type: ignore[type-var]
+class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
-    @component.output_types(replies=List[ChatMessage])
-    async def run(
+    @component.output_types(response=str)
+    def run(
         self,
-        messages: List[ChatMessage],
+        prompt: str,
         domain: str,
-        model: str = "gpt-5o",
+        model: str = "gpt-5",
         reasoning_effort: str = "high",
     ) -> dict:
         """
@@ -154,14 +154,8 @@ class OpenAIWebSearchGenerator:  # type: ignore[type-var]
             domain: Domain to restrict web search to
 
         Returns:
-            Dictionary with 'replies' key containing list of ChatMessage responses
+            Dictionary with response key containing string of response
         """
-
-        # Convert Haystack ChatMessage objects to OpenAI format
-        openai_messages = []
-        for msg in messages:
-            role = msg.role.value if hasattr(msg.role, "value") else str(msg.role)
-            openai_messages.append({"role": role, "content": msg.text})
 
         logger.info(
             "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s",
@@ -169,29 +163,21 @@ class OpenAIWebSearchGenerator:  # type: ignore[type-var]
             domain,
             reasoning_effort,
         )
-        logger.debug("Messages: %s", pformat(openai_messages, width=160))
+        logger.debug("Prompt: %s", pformat(prompt, width=160))
 
-        # Build the API call parameters
         api_params: dict = {
             "model": model,
-            "messages": openai_messages,
-            "reasoning_effort": reasoning_effort,
-            "web_search_options": {"filters": {"domains": [domain]}},
+            "input": prompt,
+            "reasoning": {"effort": reasoning_effort},
+            "tools": [{"type": "web_search", "filters": {"allowed_domains": [domain]}}],
         }
 
-        client = AsyncOpenAI()
-        response = await client.chat.completions.create(**api_params)
+        client = OpenAI()
+        response = client.responses.create(**api_params)
 
-        # Extract the response
-        assert len(response.choices) == 1
-        message = response.choices[0].message
+        logger.debug("Response: %s", pformat(response.output_text, width=160))
 
-        logger.info("Received response from OpenAI")
-        logger.debug("Response: %s", pformat(message.content, width=160))
-
-        # Return as Haystack ChatMessage
-        reply = ChatMessage.from_assistant(message.content)
-        return {"replies": [reply]}
+        return {"response": response.output_text}
 
 
 @component
