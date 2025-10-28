@@ -9,6 +9,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from openinference.instrumentation import using_attributes
 from pydantic import BaseModel
 
 from src.common import components, haystack_utils
@@ -60,27 +61,34 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
-        # Retrieve the requested prompt_version_id and error if requested prompt version is not found
-        try:
-            prompt_template = haystack_utils.get_phoenix_prompt(
-                "generate_referrals", prompt_version_id
-            )
-            response = self.pipeline.run(
-                {
-                    "prompt_builder": {
-                        "template": prompt_template,
-                        "query": query,
-                        "resource_json": resource_as_json,
+    def run_api(
+        self, query: str, user_name: str, user_email: str, prompt_version_id: str = ""
+    ) -> dict:
+        ctx = {
+            "user_id": user_name + "%^&" + user_email
+        }  # adding %^& in order to prevent MS Presidio from redacting
+
+        with using_attributes(**ctx):
+            # Retrieve the requested prompt_version_id and error if requested prompt version is not found
+            try:
+                prompt_template = haystack_utils.get_phoenix_prompt(
+                    "generate_referrals", prompt_version_id
+                )
+                response = self.pipeline.run(
+                    {
+                        "prompt_builder": {
+                            "template": prompt_template,
+                            "query": query,
+                            "resource_json": resource_as_json,
+                        },
                     },
-                },
-                include_outputs_from={"llm", "save_result"},
-            )
-            logger.info("Results: %s", pformat(response, width=160))
-            return response
-        except Exception as e:
-            logger.error("The requested prompt version could not be retrieved")
-            raise HTTPException(
-                status_code=400,
-                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
-            ) from e
+                    include_outputs_from={"llm", "save_result"},
+                )
+                logger.info("Results: %s", pformat(response, width=160))
+                return response
+            except Exception as e:
+                logger.error("The requested prompt version could not be retrieved")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved",
+                ) from e
