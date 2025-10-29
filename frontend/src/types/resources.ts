@@ -3,7 +3,7 @@ import { z } from "zod";
 export const ResourceSchema = z.object({
   addresses: z.array(z.string().optional()).optional(),
   description: z.string().optional(),
-  emails: z.array(z.string().email().optional()).optional(),
+  emails: z.array(z.string().optional()).optional(),
   justification: z.string().optional(),
   name: z.string(),
   phones: z.array(z.string().optional()).optional(),
