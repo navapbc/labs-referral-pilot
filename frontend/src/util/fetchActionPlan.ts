@@ -72,7 +72,6 @@ export async function fetchActionPlan(
       headers,
       body: JSON.stringify({
         resource: resources,
-        user_name: userName,
         user_email: userEmail,
       }),
       cache: "no-store",
