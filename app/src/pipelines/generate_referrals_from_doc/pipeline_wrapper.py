@@ -2,7 +2,7 @@ import logging
 from pprint import pformat
 from typing import List, Optional
 
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -10,7 +10,7 @@ from haystack.components.converters import OutputAdapter, PyPDFToDocument
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
 from src.common import components, haystack_utils
-from src.pipelines.generate_referrals.pipeline_wrapper import model, resource_as_json
+from src.pipelines.generate_referrals.pipeline_wrapper import model, response_schema
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class PipelineWrapper(BasePipelineWrapper):
             "prompt_builder",
             ChatPromptBuilder(
                 template=haystack_utils.get_phoenix_prompt("generate_referrals"),
-                required_variables=["query", "supports", "resource_json"],
+                required_variables=["query", "supports", "response_json"],
             ),
         )
 
@@ -60,13 +60,13 @@ class PipelineWrapper(BasePipelineWrapper):
     # and https://github.com/deepset-ai/hayhooks/blob/2070f51db4c0d2bb45131b87d736304996e09058/src/hayhooks/server/utils/deploy_utils.py#L287
     def run_api(self, files: Optional[List[UploadFile]] = None) -> dict:
         if not files:
-            raise ValueError("No files provided")
+            raise HTTPException(status_code=400, detail="No files provided for processing.")
 
         response = self.pipeline.run(
             {
                 "files_to_bytestreams": {"files": files},
                 "prompt_builder": {
-                    "resource_json": resource_as_json,
+                    "response_json": response_schema,
                 },
             }
         )
