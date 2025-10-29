@@ -20,10 +20,10 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
     """
 
     def __init__(
-            self,
-            exporter: SpanExporter,
-            entities: Optional[List[str]] = None,
-            language: str = "en",
+        self,
+        exporter: SpanExporter,
+        entities: Optional[List[str]] = None,
+        language: str = "en",
     ):
         """
         Initialize the PII redacting processor with Presidio and an exporter.
@@ -89,9 +89,11 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
             for field in fields_for_redaction:
                 # If it's an email, check if it's from a domain we aren;t redacting
                 if field.entity_type == "EMAIL_ADDRESS":
-                    email_text = value[field.start: field.end]
+                    email_text = value[field.start : field.end]
                     # If email ends with any value not in the list of domains to skip, add to list for redaction
-                    if not any(email_text.endswith("@" + domain) for domain in email_skip_redaction_list):
+                    if not any(
+                        email_text.endswith("@" + domain) for domain in email_skip_redaction_list
+                    ):
                         filtered_results.append(field)
                 else:
                     filtered_results.append(field)
@@ -179,8 +181,9 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
         # Handle events
         redacted_events = []
         for event in span.events:
-            redacted_event_attrs = {k: self._redact_value(v) for k, v in
-                                    event.attributes.items()}  # type: ignore[union-attr]
+            redacted_event_attrs = {
+                k: self._redact_value(v) for k, v in event.attributes.items()  # type: ignore[union-attr]
+            }
             # Create new event with redacted attributes
             redacted_event = Event(
                 name=self._redact_string(event.name),
