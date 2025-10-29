@@ -1,6 +1,7 @@
 import json
 import logging
 from pprint import pformat
+from typing import Any
 
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
@@ -44,13 +45,11 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
-    def run_api(
-        self, resources: list[Resource] | list[dict], user_name: str, user_email: str
-    ) -> dict:
+    def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        ctx = {
-            "user_id": user_name + "%^&" + user_email
+        ctx: dict[str, Any] = {
+            "user_id": user_email
         }  # adding %^& in order to prevent MS Presidio from redacting
 
         with using_attributes(**ctx):

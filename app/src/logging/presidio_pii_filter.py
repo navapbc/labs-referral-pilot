@@ -12,6 +12,9 @@ from presidio_anonymizer.entities import OperatorConfig, RecognizerResult
 logger = logging.getLogger(__name__)
 
 
+email_allow_list = ["gwctx.org", "navapbc.com", "goodwill.org"]
+
+
 class PresidioRedactionSpanProcessor(SpanProcessor):
     """
     OpenTelemetry span processor that redacts PII data using Microsoft Presidio.
@@ -82,6 +85,18 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
                 text=value, entities=self._entities, language="en"
             )
 
+            # Filter out emails from allowed domains
+            filtered_results = []
+            for field in fields_for_redaction:
+                # If it's an email, check if it's from an allowed domain
+                if field.entity_type == "EMAIL_ADDRESS":
+                    email_text = value[field.start : field.end]
+                    # Check if email ends with any allowed domain
+                    if not any(email_text.endswith("@" + domain) for domain in email_allow_list):
+                        filtered_results.append(field)
+                else:
+                    filtered_results.append(field)
+
             # Converting analyzer recognizer result into the anonymizer entity
             # https://github.com/microsoft/presidio/issues/1396
             anonymizer_redaction_list = [
@@ -91,7 +106,7 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
                     end=field_for_redaction.end,
                     score=field_for_redaction.score,
                 )
-                for field_for_redaction in fields_for_redaction
+                for field_for_redaction in filtered_results
             ]
 
             # If PII is found, anonymize it

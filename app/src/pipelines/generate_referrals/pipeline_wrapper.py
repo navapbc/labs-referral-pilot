@@ -2,7 +2,7 @@ import json
 import logging
 from enum import Enum
 from pprint import pformat
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 from fastapi import HTTPException
@@ -80,9 +80,9 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
-        ctx = {
-            "user_id": user_name + "%^&" + user_email
+    def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
+        ctx: dict[str, Any] = {
+            "user_id": user_email
         }  # adding %^& in order to prevent MS Presidio from redacting
 
         with using_attributes(**ctx):
