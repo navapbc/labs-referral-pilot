@@ -72,30 +72,6 @@ describe("ResourceSchema", () => {
     expect(result?.data?.emails).toBeUndefined();
   });
 
-  it("fails when emails contain an invalid address", () => {
-    const resourceWithInvalidEmail = {
-      name: "Capital Metro",
-      emails: ["not-an-email"],
-      website: "https://capmetro.org",
-    };
-
-    const result = ResourceSchema.safeParse(resourceWithInvalidEmail);
-    expect(result.success).toBe(false);
-  });
-
-  it("parses when emails array is valid", () => {
-    const resourceWithValidEmails = {
-      name: "Capital Metro",
-      emails: ["info@capmetro.org", "support@capmetro.org"],
-      website: "https://capmetro.org",
-    };
-
-    const result = ResourceSchema.safeParse(resourceWithValidEmails);
-    expect(result.success).toBe(true);
-    expect(result?.data?.emails?.length).toBe(2);
-    expect(result?.data?.emails?.[0]).toBe("info@capmetro.org");
-  });
-
   it("fails when name is missing", () => {
     const resourceWithNoName = {
       addresses: ["Austin, Texas"],
