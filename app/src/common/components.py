@@ -143,7 +143,7 @@ class OpenAIWebSearchGenerator:
     def run(
         self,
         messages: list[ChatMessage],
-        domain: str,
+        domain: str | None = None,
         model: str = "gpt-5",
         reasoning_effort: str = "high",
     ) -> dict:
@@ -173,8 +173,11 @@ class OpenAIWebSearchGenerator:
             "model": model,
             "input": prompt,
             "reasoning": {"effort": reasoning_effort},
-            "tools": [{"type": "web_search", "filters": {"allowed_domains": [domain]}}],
+            "tools": [{"type": "web_search"}],
         }
+
+        if domain:
+            api_params["tools"][0]["filters"] = {"allowed_domains": [domain]}
 
         client = OpenAI()
         response = client.responses.create(**api_params)
