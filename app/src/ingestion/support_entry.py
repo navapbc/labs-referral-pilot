@@ -1,6 +1,6 @@
 import json
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class SupportEntry(BaseModel):
@@ -9,7 +9,7 @@ class SupportEntry(BaseModel):
     emails: list[str]
     addresses: list[str]
     phone_numbers: list[str]
-    description: str | None = Field(description="2-sentence summary, including offerings")
+    description: str | None
 
 
 SUPPORT_ENTRY_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
