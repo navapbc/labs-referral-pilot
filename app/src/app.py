@@ -26,3 +26,9 @@ logging.info("Hayhooks app started.")
 async def health_check() -> Dict[str, str]:
     logging.info("Health check returning OK.")
     return {"status": "ok", "detail": "Hello World!"}
+
+
+@hayhooks_app.get("/sharepoint-updated")
+async def sharepoint_updated() -> Dict[str, str]:
+    logging.info("Sharepoint updated ping.")
+    return {"status": "ok", "detail": "Sharepoint update received."}
