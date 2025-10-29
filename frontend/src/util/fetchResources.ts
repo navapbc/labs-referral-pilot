@@ -18,7 +18,7 @@ export async function fetchResources(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 30_000); // TODO make configurable
+  const timer = setTimeout(() => ac.abort(), 60_000); // TODO make configurable
   const requestBody = prompt_version_id
     ? JSON.stringify({
         query: clientDescription,
@@ -46,11 +46,20 @@ export async function fetchResources(
     /* eslint-disable */
     const responseData = await upstream.json(); // bypassing type enforcement due to heavy nesting within the API response
     const resultUuid: string = responseData.result.save_result.result_id;
+
+    console.log(responseData);
+
     const resourcesJson = JSON.parse(
       responseData.result.llm.replies[0]._content[0].text,
     );
+
+    console.log(resourcesJson);
+
     const resources = ResourcesSchema.parse(resourcesJson);
     const resourcesAsArray: Resource[] = resources.resources || [];
+
+    console.log(resourcesAsArray);
+
     /* eslint-enable */
 
     return { resultId: resultUuid, resources: resourcesAsArray };

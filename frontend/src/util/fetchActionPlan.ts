@@ -64,7 +64,7 @@ export async function fetchActionPlan(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 30_000);
+  const timer = setTimeout(() => ac.abort(), 120_000);
 
   try {
     const upstream = await fetch(url, {
@@ -89,7 +89,7 @@ export async function fetchActionPlan(
     /* eslint-disable */
     const responseData = await upstream.json();
     // Extract the action plan from the API response
-    const actionPlanText = responseData.result.llm.replies[0]._content[0].text;
+    const actionPlanText = responseData.result.llm.response;
     console.log("Raw action plan text:", actionPlanText);
 
     // The LLM likes to return a multi-line JSON string, so
