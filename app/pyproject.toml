@@ -33,7 +33,7 @@ presidio-analyzer = "^2.2.359"
 presidio-anonymizer = "^2.2.359"
 spacy = "^3.8.7"
 en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"}
-pypdf = "^6.0.0"
+pypdf = "^6.1.3"
 arize-phoenix = "^11.37.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -68,6 +68,7 @@ extract-supports= "src.ingestion.extract_supports:main"
 copy-prompts= "src.common.phoenix_utils:copy_deployed_prompts"
 run-experiment= "src.experiments:main"
 manage-crawl-job= "src.db.manage_crawl_job:main"
+process-crawl-jobs= "src.ingestion.process_crawl_jobs:main"
 
 [tool.black]
 line-length = 100

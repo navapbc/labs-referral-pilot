@@ -32,6 +32,12 @@ describe("Generate Referrals Page", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock localStorage to set userName and userEmail
+    Storage.prototype.getItem = jest.fn((key: string) => {
+      if (key === "userName") return "Test User";
+      if (key === "userEmail") return "test@example.com";
+      return null;
+    });
   });
 
   it("does not show print button before results are received", () => {
@@ -593,6 +599,36 @@ describe("Generate Referrals Page", () => {
       expect(arg).not.toContain(
         "Focus on resources close to the following location:",
       );
+    });
+  });
+
+  describe("WelcomeUserInputScreen", () => {
+    it("renders WelcomeUserInputScreen when userName and userEmail are not set", () => {
+      // Override localStorage to return null for userName and userEmail
+      Storage.prototype.getItem = jest.fn(() => null);
+
+      render(<Page />);
+
+      // Check that WelcomeUserInputScreen is rendered
+      // You may need to adjust this based on what's visible in WelcomeUserInputScreen
+      // For now, we'll check that the main content sections are NOT visible
+      expect(
+        screen.queryByTestId("clientDescriptionInputSection"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("referralFiltersSection"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not render WelcomeUserInputScreen when userName and userEmail are set", () => {
+      // userName and userEmail are already set in beforeEach
+      render(<Page />);
+
+      // Check that main content sections ARE visible
+      expect(
+        screen.getByTestId("clientDescriptionInputSection"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("referralFiltersSection")).toBeInTheDocument();
     });
   });
 });

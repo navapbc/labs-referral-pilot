@@ -237,8 +237,17 @@ else
 	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(PROMPT_NAME)" "$(DOMAIN)" "$(INTERVAL)"
 endif
 
+add-crawl-jobs:
+	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_indeed" DOMAIN="indeed.com" INTERVAL=6
+	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_gcta" DOMAIN="gctatraining.org" INTERVAL=6
+
+process-crawl-jobs:
+	$(PY_RUN_CMD) process-crawl-jobs
+
 copy-prompts:
 	$(PY_RUN_CMD) copy-prompts
+
+
 
 run-experiment:
 	$(PY_RUN_CMD) run-experiment "$(DATASET)" "$(PIPELINE)" "$(ACTION)" $(if $(PROMPT_VERSION),--prompt_version "$(PROMPT_VERSION)")
