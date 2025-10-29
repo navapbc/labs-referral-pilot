@@ -55,7 +55,6 @@ const generateActionPlanURL =
 
 export async function fetchActionPlan(
   resources: Resource[],
-  userName: string,
   userEmail: string,
 ): Promise<ActionPlan | null> {
   const url = generateActionPlanURL;

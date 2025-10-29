@@ -179,7 +179,6 @@ export default function Page() {
       const request = clientDescription + getCollatedReferralOptions();
       const { resultId, resources } = await fetchResources(
         request,
-        userName,
         userEmail,
         prompt_version_id,
       );
@@ -237,11 +236,7 @@ export default function Page() {
     setActionPlan(null);
 
     try {
-      const plan = await fetchActionPlan(
-        selectedResources,
-        userName,
-        userEmail,
-      );
+      const plan = await fetchActionPlan(selectedResources, userEmail);
       setActionPlan(plan);
     } catch (error) {
       console.error("Error generating action plan:", error);
