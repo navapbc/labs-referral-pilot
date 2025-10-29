@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any
 
@@ -56,9 +55,7 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        ctx: dict[str, Any] = {
-            "user_id": user_email
-        }  # adding %^& in order to prevent MS Presidio from redacting
+        ctx: dict[str, Any] = {"user_id": user_email}
 
         with using_attributes(**ctx):
             response = self.pipeline.run(

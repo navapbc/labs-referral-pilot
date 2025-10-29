@@ -81,9 +81,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
-        ctx: dict[str, Any] = {
-            "user_id": user_email
-        }  # adding %^& in order to prevent MS Presidio from redacting
+        ctx: dict[str, Any] = {"user_id": user_email}
 
         with using_attributes(**ctx):
             # Retrieve the requested prompt_version_id and error if requested prompt version is not found
