@@ -3,12 +3,14 @@
 import json
 import logging
 from pprint import pformat
-from typing import List
+from typing import List, Optional, TypeVar
 
 from fastapi import UploadFile
 from haystack import component
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
+from openai import OpenAI
+from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
 from src.db.models.support_listing import LlmResponse, Support
@@ -134,6 +136,55 @@ class LoadResult:
 
 
 @component
+class OpenAIWebSearchGenerator:
+    """Searches the web using OpenAI's web search capabilities and generates a response."""
+
+    @component.output_types(response=str)
+    def run(
+        self,
+        messages: list[ChatMessage],
+        domain: str,
+        model: str = "gpt-5",
+        reasoning_effort: str = "high",
+    ) -> dict:
+        """
+        Run the OpenAI web search generator.
+
+        Args:
+            messages: List of ChatMessage objects to send to the API
+            domain: Domain to restrict web search to
+
+        Returns:
+            Dictionary with response key containing string of response
+        """
+
+        logger.info(
+            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s",
+            model,
+            domain,
+            reasoning_effort,
+        )
+
+        assert len(messages) == 1
+        prompt = messages[0].text
+        logger.debug("Prompt: %s", pformat(prompt, width=160))
+
+        api_params: dict = {
+            "model": model,
+            "input": prompt,
+            "reasoning": {"effort": reasoning_effort},
+            "tools": [{"type": "web_search", "filters": {"allowed_domains": [domain]}}],
+        }
+
+        client = OpenAI()
+        response = client.responses.create(**api_params)
+
+        logger.debug("Response: %s", pformat(response.output_text, width=160))
+
+        return {"response": response.output_text}
+
+
+@component
 class EmailResult:
     """
     Formats JSON object (representing a list of resources) and sends it to email address.
@@ -164,3 +215,43 @@ class EmailResult:
                 f"- Justification: {resource.get('justification', 'None')}",
             ]
         )
+
+
+BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
+
+
+@component
+class LlmOutputValidator:
+    def __init__(self, pydantic_model: type[BaseModelT]):
+        self.pydantic_model = pydantic_model
+        self.attempt_count = 0
+
+    @component.output_types(
+        valid_replies=List[ChatMessage],
+        invalid_replies=Optional[List[ChatMessage]],
+        error_message=Optional[str],
+    )
+    def run(self, replies: List[ChatMessage]) -> dict:
+        self.attempt_count += 1
+
+        assert len(replies) == 1, "Expected exactly one reply"
+        reply = replies[0]
+
+        try:
+            assert reply.text is not None, "Reply text is None"
+            output_dict = json.loads(reply.text)
+            self.pydantic_model.model_validate(output_dict)
+            return {"valid_replies": replies}
+
+        except (ValueError, ValidationError) as e:
+            logger.error(
+                (
+                    "LlmOutputValidator at attempt {%i}: Invalid JSON from LLM - trying again...\n"
+                    "Output from LLM:\n %s \n"
+                    "Error from LlmOutputValidator: %s"
+                ),
+                self.attempt_count,
+                reply,
+                e,
+            )
+            return {"invalid_replies": replies, "error_message": str(e)}
