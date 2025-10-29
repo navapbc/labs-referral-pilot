@@ -91,11 +91,11 @@ Then run `make copy-prompts`. This will copy the prompt versions specified in `a
 Remember to do this every time the prompt version is updated in `app_config.py`. When running locally, the latest version of the prompt is used.
 
 
-### Enabling OpenAI - aka ChatGPT - for generate action plan
+### Enabling OpenAI for generate action plan
 
-Go to 1Password and retrieve "OpenAI API Key"
+1. Go to 1Password and retrieve the OpenAI API Key.
 
-* Add OPENAI_API_KEY environment variable in `override.env` to allow the app to connect to OpenAI:
+1. Add an OPENAI_API_KEY environment variable in `override.env` to allow the app to connect to OpenAI:
 ```
-      - OPENAI_API_KEY=<paste API key>
+OPENAI_API_KEY=<paste API key>
 ```
