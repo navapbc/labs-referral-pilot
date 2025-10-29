@@ -30,7 +30,7 @@ class AppConfig(PydanticBaseEnvConfig):
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "extract_supports": "UHJvbXB0VmVyc2lvbjozMw==",
-        "generate_referrals": "UHJvbXB0VmVyc2lvbjozNw==",
+        "generate_referrals": "UHJvbXB0VmVyc2lvbjo0MA==",
         "generate_action_plan": "UHJvbXB0VmVyc2lvbjozOQ==",
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
