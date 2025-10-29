@@ -3548,6 +3548,18 @@ files = [
 ]
 
 [[package]]
+name = "pip"
+version = "25.3"
+description = "The PyPA recommended tool for installing Python packages."
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "pip-25.3-py3-none-any.whl", hash = "sha256:9655943313a94722b7774661c21049070f6bbb0a1516bf02f7c8d5d9201514cd"},
+    {file = "pip-25.3.tar.gz", hash = "sha256:8d0538dbbd7babbd207f261ed969c65de439f6bc9e5dbd3b3b9a77f25d95f343"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.5.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -6722,4 +6734,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12"
-content-hash = "e957455129c498f9dc2629f877a4109c335877e04d0de9bcedbc3d18d234993e"
+content-hash = "4a7b61eab8cbe2185f3a67588b485efc40cad6b61f04b06cc6da4589c2c68388"
