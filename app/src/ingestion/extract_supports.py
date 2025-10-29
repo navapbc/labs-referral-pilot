@@ -16,13 +16,13 @@ from haystack.components.converters import PyPDFToDocument
 from haystack.components.preprocessors import DocumentSplitter
 from haystack.dataclasses import Document
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
-from pydantic import BaseModel, Field
 from smart_open import open as smart_open
 
 from src.adapters import db
 from src.app_config import config
 from src.common import haystack_utils
 from src.db.models.support_listing import Support, SupportListing
+from src.ingestion.support_entry import SUPPORT_ENTRY_SCHEMA, SupportEntry
 
 logger = logging.getLogger(__name__)
 
@@ -74,18 +74,6 @@ def split_doc(doc: Document, passages_per_doc: int = 11, overlap: int = 1) -> li
     return result["documents"]
 
 
-class SupportEntry(BaseModel):
-    name: str
-    website: str | None
-    emails: list[str]
-    addresses: list[str]
-    phone_numbers: list[str]
-    description: str | None = Field(description="2-sentence summary, including offerings")
-
-
-OUTPUT_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
-
-
 def create_llm() -> AmazonBedrockChatGenerator:  # pragma: no cover
     # The max_tokens set in Haystack cannot exceed the maximum output token limit supported by the specific model configured on Amazon Bedrock.
     # Anthropic's Claude 3 Sonnet: Newer versions support up to 64k output tokens, but the actual usable limit on
@@ -114,7 +102,9 @@ async def run_pipeline(pipeline: AsyncPipeline, doc: Document) -> list[dict]:
     assert doc.content
     logger.info("Running pipeline with subdoc content length: %d", len(doc.content))
 
-    _result = await pipeline.run_async({"prompt_builder": {"schema": OUTPUT_SCHEMA, "doc": doc}})
+    _result = await pipeline.run_async(
+        {"prompt_builder": {"schema": SUPPORT_ENTRY_SCHEMA, "doc": doc}}
+    )
     assert len(_result["llm"]["replies"]) == 1
     reply = _result["llm"]["replies"][0]
     # Useful info for checking if tokens have reached the limit for the LLM
