@@ -9,7 +9,7 @@ class AppConfig(PydanticBaseEnvConfig):
     # Set HOST to 127.0.0.1 by default to avoid other machines on the network
     # from accessing the application. This is especially important if you are
     # running the application locally on a public network. This needs to be
-    # overriden to 0.0.0.0 when running in a container
+    # overridden to 0.0.0.0 when running in a container
     host: str = "127.0.0.1"
     port: int = 3000
 
@@ -31,7 +31,7 @@ class AppConfig(PydanticBaseEnvConfig):
     PROMPT_VERSIONS: dict = {
         "extract_supports": "UHJvbXB0VmVyc2lvbjozMw==",
         "generate_referrals": "UHJvbXB0VmVyc2lvbjozNw==",
-        "generate_action_plan": "UHJvbXB0VmVyc2lvbjoxMg==",
+        "generate_action_plan": "UHJvbXB0VmVyc2lvbjozOQ==",
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
