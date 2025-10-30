@@ -8,6 +8,7 @@ const generateReferralsURL =
 
 export async function fetchResources(
   clientDescription: string,
+  userEmail: string,
   prompt_version_id: string | null,
 ) {
   const url = generateReferralsURL;
@@ -20,9 +21,13 @@ export async function fetchResources(
   const requestBody = prompt_version_id
     ? JSON.stringify({
         query: clientDescription,
+        user_email: userEmail,
         prompt_version_id: prompt_version_id,
       })
-    : JSON.stringify({ query: clientDescription });
+    : JSON.stringify({
+        query: clientDescription,
+        user_email: userEmail,
+      });
 
   try {
     const upstream = await fetch(url, {
