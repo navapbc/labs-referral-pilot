@@ -7,7 +7,7 @@ from typing import Optional
 import httpx
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
-from haystack import Pipeline
+from haystack import AsyncPipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
@@ -48,7 +48,7 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
 
     def setup(self) -> None:
-        pipeline = Pipeline(max_runs_per_component=3)
+        pipeline = AsyncPipeline(max_runs_per_component=3)
         pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.add_component(
             "prompt_builder",
