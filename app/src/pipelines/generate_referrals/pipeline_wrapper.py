@@ -1,4 +1,3 @@
-import json
 import logging
 from enum import Enum
 from pprint import pformat
@@ -40,7 +39,20 @@ class ResourceList(BaseModel):
     resources: list[Resource]
 
 
-response_schema = json.dumps(ResourceList.model_json_schema(), indent=2)
+response_schema = """
+{
+    "resources": {
+        "name": string;
+        "addresses": string[];
+        "phones": string[];
+        "emails": string[];
+        "website": string;
+        "description": string;
+        "justification": string;
+        "referral_type"?: "external" | "goodwill" | "government" | null;
+    }[];
+}
+"""
 model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
