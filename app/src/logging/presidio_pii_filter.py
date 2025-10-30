@@ -85,18 +85,9 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
             )
 
             # Filter out emails from allowed domains
-            filtered_results = []
-            for field in fields_for_redaction:
-                # If it's an email, check if it's from a domain we aren;t redacting
-                if field.entity_type == "EMAIL_ADDRESS":
-                    email_text = value[field.start : field.end]
-                    # If email ends with any value not in the list of domains to skip, add to list for redaction
-                    if not any(
-                        email_text.endswith("@" + domain) for domain in email_skip_redaction_list
-                    ):
-                        filtered_results.append(field)
-                else:
-                    filtered_results.append(field)
+            filtered_results = self.remove_allowed_emails_from_redaction_list(
+                value, fields_for_redaction
+            )
 
             # Converting analyzer recognizer result into the anonymizer entity
             # https://github.com/microsoft/presidio/issues/1396
@@ -123,6 +114,24 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
         except Exception as e:
             logger.error(f"Error redacting string: {str(e)}")
             return "[REDACTION_ERROR]"
+
+    def remove_allowed_emails_from_redaction_list(
+        self, value: str, fields_for_redaction: list[recognizer_result.RecognizerResult]
+    ) -> list[recognizer_result.RecognizerResult]:
+        filtered_results = []
+        for field in fields_for_redaction:
+            # If it's an email, check if it's from a domain we aren't redacting
+            if field.entity_type == "EMAIL_ADDRESS":
+                email_text = value[field.start : field.end]
+                # If email ends with any value not in the list of domains to skip, add to list for redaction
+                if not any(
+                    email_text.endswith("@" + domain) for domain in email_skip_redaction_list
+                ):
+                    filtered_results.append(field)
+            else:
+                filtered_results.append(field)
+
+        return filtered_results
 
     def _redact_value(self, value: Any) -> Any:
         """
