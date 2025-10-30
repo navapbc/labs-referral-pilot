@@ -244,7 +244,6 @@ class LlmOutputValidator:
         error_message=Optional[str],
     )
     def run(self, replies: List[ChatMessage]) -> dict:
-
         assert len(replies) == 1, "Expected exactly one reply"
         reply = replies[0]
 
