@@ -60,6 +60,8 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
 
     def setup(self) -> None:
+        # Do not rely on max_runs_per_component strictly, i.e., a component may run max_runs_per_component+1 times.
+        # The component_visits counter for max_runs_per_component is reset with each call to pipeline.run()
         pipeline = Pipeline(max_runs_per_component=3)
         pipeline.add_component("load_supports", components.LoadSupports())
         pipeline.add_component(
