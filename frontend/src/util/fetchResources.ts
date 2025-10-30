@@ -17,7 +17,7 @@ export async function fetchResources(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 60_000); // TODO make configurable
+  const timer = setTimeout(() => ac.abort(), 600_000); // TODO make configurable
   const requestBody = prompt_version_id
     ? JSON.stringify({
         query: clientDescription,

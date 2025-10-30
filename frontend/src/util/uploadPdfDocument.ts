@@ -45,7 +45,7 @@ export async function uploadPdfDocument(file: File): Promise<Resource[]> {
   formData.append("files", file);
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 60_000); // 60 seconds timeout for file upload
+  const timer = setTimeout(() => ac.abort(), 600_000); // 60 seconds timeout for file upload
 
   try {
     const upstream = await fetch(url, {
