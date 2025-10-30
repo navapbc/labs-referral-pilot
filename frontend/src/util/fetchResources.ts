@@ -47,7 +47,7 @@ export async function fetchResources(
     console.log(responseData);
 
     const resourcesJson = JSON.parse(
-      responseData.result.llm.replies[0]._content[0].text,
+      responseData.result.response,
     );
 
     console.log(resourcesJson);

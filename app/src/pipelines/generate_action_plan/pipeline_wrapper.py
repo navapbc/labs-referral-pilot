@@ -64,8 +64,8 @@ class PipelineWrapper(BasePipelineWrapper):
                     "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
                 }
             )
-            # logger.info("Results: %s", pformat(response["response"], width=160))
-            return response
+            logger.info("Results: %s", pformat(response["response"], width=160))
+            return {"response": response["llm"]["replies"][0]._content[0].text}
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
