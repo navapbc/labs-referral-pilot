@@ -46,6 +46,8 @@ import { EmailReferralsButton } from "@/components/EmailReferralsButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload } from "lucide-react";
 import WelcomeUserInputScreen from "@/components/WelcomeUserInputScreen";
+import { PilotFeedbackBanner } from "@/components/PilotFeedbackBanner";
+import { GoodwillReferralToolHeaderPilot } from "@/components/GoodwillReferralToolHeaderPilot";
 
 const resourceCategories = [
   {
@@ -281,6 +283,8 @@ export default function Page() {
 
   return (
     <>
+      <PilotFeedbackBanner />
+      <GoodwillReferralToolHeaderPilot />
       {!userName || !userEmail ? (
         <WelcomeUserInputScreen
           setUserName={setUserName}
