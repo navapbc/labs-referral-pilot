@@ -11,6 +11,7 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
+from openinference.instrumentation import using_attributes
 from pydantic import BaseModel
 
 from src.common import components, haystack_utils
@@ -79,39 +80,40 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, prompt_version_id: str = "") -> dict:
-        # Retrieve the requested prompt_version_id and error if requested prompt version is not found
-        try:
-            prompt_template = haystack_utils.get_phoenix_prompt(
-                "generate_referrals", prompt_version_id
-            )
-        except httpx.HTTPStatusError as he:
-            raise HTTPException(
-                status_code=422,
-                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
-            ) from he
+    def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
+        with using_attributes(user_id=user_email):
+            # Retrieve the requested prompt_version_id and error if requested prompt version is not found
+            try:
+                prompt_template = haystack_utils.get_phoenix_prompt(
+                    "generate_referrals", prompt_version_id
+                )
+            except httpx.HTTPStatusError as he:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
+                ) from he
 
-        try:
-            output_validator = self.pipeline.get_component("output_validator")
-            assert isinstance(output_validator, components.LlmOutputValidator)
-            # Reset attempt counter
-            output_validator.attempt_count = 0
+            try:
+                output_validator = self.pipeline.get_component("output_validator")
+                assert isinstance(output_validator, components.LlmOutputValidator)
+                # Reset attempt counter
+                output_validator.attempt_count = 0
 
-            response = self.pipeline.run(
-                {
-                    "prompt_builder": {
-                        "template": prompt_template,
-                        "query": query,
-                        "response_json": response_schema,
+                response = self.pipeline.run(
+                    {
+                        "prompt_builder": {
+                            "template": prompt_template,
+                            "query": query,
+                            "response_json": response_schema,
+                        },
                     },
-                },
-                include_outputs_from={"llm", "save_result"},
-            )
-            logger.info("Results: %s", pformat(response, width=160))
-            return response
-        except PipelineRuntimeError as re:
-            logger.error("PipelineRuntimeError: %s", re, exc_info=True)
-            raise HTTPException(status_code=500, detail=str(re)) from re
-        except Exception as e:
-            logger.error("Error %s: %s", type(e), e, exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+                    include_outputs_from={"llm", "save_result"},
+                )
+                logger.info("Results: %s", pformat(response, width=160))
+                return response
+            except PipelineRuntimeError as re:
+                logger.error("PipelineRuntimeError: %s", re, exc_info=True)
+                raise HTTPException(status_code=500, detail=str(re)) from re
+            except Exception as e:
+                logger.error("Error %s: %s", type(e), e, exc_info=True)
+                raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e

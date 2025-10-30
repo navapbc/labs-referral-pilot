@@ -3,6 +3,7 @@ import logging
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
+from openinference.instrumentation import using_attributes
 from pydantic import BaseModel
 
 from src.common import haystack_utils
@@ -50,20 +51,21 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
-    def run_api(self, resources: list[Resource] | list[dict]) -> dict:
+    def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        response = self.pipeline.run(
-            {
-                "prompt_builder": {
-                    "resources": format_resources(resource_objects),
-                    "action_plan_json": action_plan_as_json,
-                },
-                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-            }
-        )
-        # logger.info("Results: %s", pformat(response["response"], width=160))
-        return response
+        with using_attributes(user_id=user_email):
+            response = self.pipeline.run(
+                {
+                    "prompt_builder": {
+                        "resources": format_resources(resource_objects),
+                        "action_plan_json": action_plan_as_json,
+                    },
+                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                }
+            )
+            # logger.info("Results: %s", pformat(response["response"], width=160))
+            return response
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:

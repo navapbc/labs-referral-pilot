@@ -11,6 +11,8 @@ from presidio_anonymizer.entities import OperatorConfig, RecognizerResult
 
 logger = logging.getLogger(__name__)
 
+email_skip_redaction_list = ["gwctx.org", "navapbc.com", "goodwill.org"]
+
 
 class PresidioRedactionSpanProcessor(SpanProcessor):
     """
@@ -82,6 +84,11 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
                 text=value, entities=self._entities, language="en"
             )
 
+            # Filter out emails from allowed domains
+            filtered_results = self.remove_allowed_emails_from_redaction_list(
+                value, fields_for_redaction
+            )
+
             # Converting analyzer recognizer result into the anonymizer entity
             # https://github.com/microsoft/presidio/issues/1396
             anonymizer_redaction_list = [
@@ -91,7 +98,7 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
                     end=field_for_redaction.end,
                     score=field_for_redaction.score,
                 )
-                for field_for_redaction in fields_for_redaction
+                for field_for_redaction in filtered_results
             ]
 
             # If PII is found, anonymize it
@@ -107,6 +114,24 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
         except Exception as e:
             logger.error(f"Error redacting string: {str(e)}")
             return "[REDACTION_ERROR]"
+
+    def remove_allowed_emails_from_redaction_list(
+        self, value: str, fields_for_redaction: list[recognizer_result.RecognizerResult]
+    ) -> list[recognizer_result.RecognizerResult]:
+        filtered_results = []
+        for field in fields_for_redaction:
+            # If it's an email, check if it's from a domain we aren't redacting
+            if field.entity_type == "EMAIL_ADDRESS":
+                email_text = value[field.start : field.end]
+                # If email ends with any value not in the list of domains to skip, add to list for redaction
+                if not any(
+                    email_text.endswith("@" + domain) for domain in email_skip_redaction_list
+                ):
+                    filtered_results.append(field)
+            else:
+                filtered_results.append(field)
+
+        return filtered_results
 
     def _redact_value(self, value: Any) -> Any:
         """
@@ -165,7 +190,9 @@ class PresidioRedactionSpanProcessor(SpanProcessor):
         # Handle events
         redacted_events = []
         for event in span.events:
-            redacted_event_attrs = {k: self._redact_value(v) for k, v in event.attributes.items()}  # type: ignore[union-attr]
+            redacted_event_attrs = {
+                k: self._redact_value(v) for k, v in event.attributes.items()  # type: ignore[union-attr]
+            }
             # Create new event with redacted attributes
             redacted_event = Event(
                 name=self._redact_string(event.name),
