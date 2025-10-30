@@ -258,7 +258,7 @@ class LlmOutputValidator:
             logger.error(
                 (
                     "LlmOutputValidator: Invalid JSON from LLM - will try again...\n"
-                    "Parsing error: %s"
+                    "Parsing error: %s\n"
                     "Output from LLM:\n %s \n"
                 ),
                 e,
