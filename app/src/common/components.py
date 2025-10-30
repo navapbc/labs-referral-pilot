@@ -139,7 +139,7 @@ class LoadResult:
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
-    @component.output_types(response=str)
+    @component.output_types(replies=List[ChatMessage])
     def run(
         self,
         messages: list[ChatMessage],
@@ -184,7 +184,7 @@ class OpenAIWebSearchGenerator:
 
         logger.debug("Response: %s", pformat(response.output_text, width=160))
 
-        return {"response": response.output_text}
+        return {"replies": [ChatMessage.from_assistant(response.output_text)]}
 
 
 @component
