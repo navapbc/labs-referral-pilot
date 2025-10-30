@@ -7,10 +7,9 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
-from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
 from src.common import components, haystack_utils
-from src.pipelines.generate_referrals.pipeline_wrapper import model, response_schema
+from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
         pipeline.add_component("load_supports", components.LoadSupports())
-        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("llm", components.OpenAIWebSearchGenerator())
         # For testing: pipeline.add_component("llm", components.DummyChatGenerator())
 
         pipeline.connect("files_to_bytestreams", "extract_pdf_text.sources")
@@ -68,6 +67,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "prompt_builder": {
                     "response_json": response_schema,
                 },
+                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             }
         )
         logger.info("Pipeline result: %s", pformat(response, width=160))
