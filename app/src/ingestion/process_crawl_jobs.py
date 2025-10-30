@@ -71,7 +71,7 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
         }
     )
 
-    response = _result["llm"]["response"]
+    response = _result["llm"]["replies"][0]._content[0].text
 
     logger.info("Finished pipeline for domain: %s", job.domain)
     logger.info(response)

@@ -99,7 +99,7 @@ class MockOpenAIGenerator:
             response = """[{"name": "Support for example1.com", "website": "https://example1.com", "emails": ["info@example1.com"], "addresses": ["123 Main St"], "phone_numbers": ["555-1234"], "description": "Test support for example1.com"}]"""
         else:
             response = """[{"name": "Support for example2.com", "website": "https://example2.com", "emails": [], "addresses": ["456 Oak Ave"], "phone_numbers": [], "description": "Test support for example2.com"}]"""
-        return {"response": response}
+        return {"replies": [ChatMessage.from_assistant(response)]}
 
 
 def test_process_crawl_jobs(monkeypatch) -> None:

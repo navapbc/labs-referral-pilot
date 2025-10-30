@@ -87,7 +87,7 @@ export async function fetchActionPlan(
     /* eslint-disable */
     const responseData = await upstream.json();
     // Extract the action plan from the API response
-    const actionPlanText = responseData.result.llm.response;
+    const actionPlanText = responseData.result.response;
     console.log("Raw action plan text:", actionPlanText);
 
     // The LLM likes to return a multi-line JSON string, so
