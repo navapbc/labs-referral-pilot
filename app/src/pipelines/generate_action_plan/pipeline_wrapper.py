@@ -55,9 +55,7 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        ctx: dict[str, Any] = {"user_id": user_email}
-
-        with using_attributes(**ctx):
+        with using_attributes("user_id": user_email):
             response = self.pipeline.run(
                 {
                     "prompt_builder": {
