@@ -81,9 +81,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
-        ctx: dict[str, Any] = {"user_id": user_email}
-
-        with using_attributes(**ctx):
+        with using_attributes(user_id": user_email):
             # Retrieve the requested prompt_version_id and error if requested prompt version is not found
             try:
                 prompt_template = haystack_utils.get_phoenix_prompt(
