@@ -1,6 +1,6 @@
 export function GoodwillReferralToolHeaderPilot() {
   return (
-    <div className="">
+    <div>
       <div className="flex items-center gap-4 m-3">
         <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2">
           <img
