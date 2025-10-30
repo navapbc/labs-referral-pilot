@@ -1,7 +1,7 @@
 import logging
 from typing import Dict
 
-from src.logging import config
+from src.app_config import config
 from hayhooks import create_app
 
 from src.common import phoenix_utils
