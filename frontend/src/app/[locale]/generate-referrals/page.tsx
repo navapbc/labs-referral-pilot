@@ -283,8 +283,6 @@ export default function Page() {
 
   return (
     <>
-      <PilotFeedbackBanner />
-      <GoodwillReferralToolHeaderPilot />
       {!userName || !userEmail ? (
         <WelcomeUserInputScreen
           setUserName={setUserName}
@@ -292,6 +290,8 @@ export default function Page() {
         />
       ) : (
         <div className="print:hidden">
+          <PilotFeedbackBanner />
+          <GoodwillReferralToolHeaderPilot />
           <div className="flex flex-col gap-2 m-4">
             <Tabs
               value={activeTab}
