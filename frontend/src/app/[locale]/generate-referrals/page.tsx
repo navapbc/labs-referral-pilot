@@ -46,6 +46,8 @@ import { EmailReferralsButton } from "@/components/EmailReferralsButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload } from "lucide-react";
 import WelcomeUserInputScreen from "@/components/WelcomeUserInputScreen";
+import { PilotFeedbackBanner } from "@/components/PilotFeedbackBanner";
+import { GoodwillReferralToolHeaderPilot } from "@/components/GoodwillReferralToolHeaderPilot";
 
 const resourceCategories = [
   {
@@ -288,6 +290,8 @@ export default function Page() {
         />
       ) : (
         <div className="print:hidden">
+          <PilotFeedbackBanner />
+          <GoodwillReferralToolHeaderPilot />
           <div className="flex flex-col gap-2 m-4">
             <Tabs
               value={activeTab}
