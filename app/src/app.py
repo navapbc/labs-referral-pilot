@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
 
+from src.logging import config
 from hayhooks import create_app
 
 from src.common import phoenix_utils
@@ -25,4 +26,4 @@ logging.info("Hayhooks app started.")
 @hayhooks_app.get("/health")
 async def health_check() -> Dict[str, str]:
     logging.info("Health check returning OK.")
-    return {"status": "ok", "detail": "Hello World!"}
+    return {"status": "ok", "detail": f"Hello World, from {config.environment}!"}
