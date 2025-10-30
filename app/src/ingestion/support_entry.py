@@ -1,5 +1,3 @@
-import json
-
 from pydantic import BaseModel
 
 
@@ -12,4 +10,13 @@ class SupportEntry(BaseModel):
     description: str | None
 
 
-SUPPORT_ENTRY_SCHEMA = json.dumps(SupportEntry.model_json_schema(), indent=2)
+SUPPORT_ENTRY_SCHEMA = """
+{
+    "name": string;
+    "website": string | null;
+    "emails": string[];
+    "addresses": string[];
+    "phone_numbers": string[];
+    "description": string | null;
+}
+"""
