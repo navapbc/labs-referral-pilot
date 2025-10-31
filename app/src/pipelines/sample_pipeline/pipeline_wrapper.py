@@ -24,11 +24,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
-        metadata = {
-            "my-user-email": "value_1@example.com",
-            "key-2": 2,
-        }
-        with using_metadata(metadata):
+        with using_metadata({"user_id": "someone@example.com"}):
             messages = [
                 ChatMessage.from_system(system_msg),
                 ChatMessage.from_user(question),
