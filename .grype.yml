@@ -25,4 +25,5 @@ ignore:
   - vulnerability: CVE-2025-6069
   # We updated our Dockerfile to use a new version of Pip, but Grype
   # doesn't recognize it
+  # TODO: Revisit in future to check if Grype recognizes new version of Pip
   - vulnerability: GHSA-4xh5-x5gv-qwph
