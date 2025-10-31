@@ -108,11 +108,6 @@ class PipelineWrapper(BasePipelineWrapper):
                 ) from he
 
             try:
-                output_validator = self.pipeline.get_component("output_validator")
-                assert isinstance(output_validator, components.LlmOutputValidator)
-                # Reset attempt counter
-                output_validator.attempt_count = 0
-
                 response = self.pipeline.run(
                     {
                         "prompt_builder": {
