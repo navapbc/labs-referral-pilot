@@ -37,7 +37,10 @@ function extractJSON(text: string): string {
   return text.substring(firstBrace, endIndex + 1);
 }
 
-export async function uploadPdfDocument(userEmail: string, file: File): Promise<Resource[]> {
+export async function uploadPdfDocument(
+  userEmail: string,
+  file: File,
+): Promise<Resource[]> {
   const url = generateReferralsFromDocURL;
 
   const formData = new FormData();

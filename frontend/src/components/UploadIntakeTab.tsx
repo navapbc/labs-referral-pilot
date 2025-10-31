@@ -12,7 +12,10 @@ interface UploadIntakeTabProps {
   onResources: (resources: Resource[]) => void;
 }
 
-export function UploadIntakeTab({ userEmail, onResources }: UploadIntakeTabProps) {
+export function UploadIntakeTab({
+  userEmail,
+  onResources,
+}: UploadIntakeTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isPdfProcessing, setIsPdfProcessing] = useState(false);
