@@ -17,6 +17,8 @@ locals {
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
     REDACT_PII = "False"
+
+    SENDER_EMAIL = "no-reply@${var.domain_name}"
   }
 
   # Configuration for secrets

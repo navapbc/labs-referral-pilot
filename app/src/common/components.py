@@ -22,6 +22,7 @@ from openai import OpenAI
 from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
+from src.common.send_email import send_email
 from src.db.models.support_listing import LlmResponse, Support
 
 logger = logging.getLogger(__name__)
@@ -208,8 +209,13 @@ class EmailResult:
         logger.info("JSON content:\n%s", json.dumps(json_dict, indent=2))
         formatted_resources = self.format_resources(json_dict.get("resources", []))
         message = f"Here are the resources you requested:\n\n{formatted_resources}"
-        # TODO: call email service to send email
-        return {"status": "success", "email": email, "message": message}
+
+        # Send email via AWS SES
+        subject = "Your Requested Resources"
+        success = send_email(recipient=email, subject=subject, body=message)
+        status = "success" if success else "failed"
+
+        return {"status": status, "email": email, "message": message}
 
     def format_resources(self, resources: list[dict]) -> str:
         return "\n\n".join([self.format_resource(resource) for resource in resources])
