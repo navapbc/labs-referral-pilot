@@ -4,6 +4,7 @@ from pprint import pformat
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
+from haystack.components.joiners.document_joiner import DocumentJoiner
 from haystack.dataclasses.chat_message import ChatMessage
 
 from src.common import components
@@ -20,6 +21,11 @@ class PipelineWrapper(BasePipelineWrapper):
     def setup(self) -> None:
         self.pipeline = Pipeline()
         self.pipeline.add_component("echo_component", components.EchoNode())
+        self.pipeline.add_component("echo_component2", components.EchoNode())
+        self.pipeline.add_component("logger", components.ReadableLogger())
+
+        self.pipeline.connect("echo_component", "logger")
+        self.pipeline.connect("echo_component2", "logger")
 
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
@@ -29,7 +35,11 @@ class PipelineWrapper(BasePipelineWrapper):
         ]
         response = self.pipeline.run(
             {
+                "logger": {
+                    "messages_list": [{"question": question}],
+                },
                 "echo_component": {"prompt": messages, "history": []},
+                "echo_component2": {"prompt": messages, "history": []},
             }
         )
         logger.info("Results: %s", pformat(response))

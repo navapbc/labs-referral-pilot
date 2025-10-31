@@ -89,6 +89,10 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("output_validator.error_message", "prompt_builder.error_message")
         pipeline.connect("output_validator.invalid_replies", "prompt_builder.invalid_replies")
 
+        pipeline.add_component("logger", components.ReadableLogger())
+        pipeline.connect("prompt_builder", "logger")
+        pipeline.connect("output_validator.valid_replies", "logger")
+
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
@@ -108,6 +112,9 @@ class PipelineWrapper(BasePipelineWrapper):
             try:
                 response = self.pipeline.run(
                     {
+                        "logger": {
+                            "messages_list": [{"query": query, "user_email": user_email}],
+                        },
                         "prompt_builder": {
                             "template": prompt_template,
                             "query": query,

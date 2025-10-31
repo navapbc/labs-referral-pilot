@@ -16,6 +16,7 @@ from typing import List, Optional, TypeVar
 
 from fastapi import UploadFile
 from haystack import component
+from haystack.core.component.types import Variadic
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from openai import OpenAI
@@ -238,6 +239,7 @@ class EmailResult:
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
+# TODO: Replace with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
 @component
 class LlmOutputValidator:
     def __init__(self, pydantic_model: type[BaseModelT]):
@@ -270,3 +272,50 @@ class LlmOutputValidator:
                 reply,
             )
             return {"invalid_replies": replies, "error_message": str(e)}
+
+
+@component
+class ReadableLogger:
+    """Logs input in a human-readable format for debugging purposes."""
+
+    @staticmethod
+    def default_mapper(msg):
+        if isinstance(msg, ChatMessage):
+            if msg.role in ["user", "assistant"]:
+                return msg
+        else:
+            return msg
+        return None
+
+    def __init__(self, mapper: callable = default_mapper):
+        self.mapper = mapper
+
+    @component.output_types(logs=list)
+    # def run(self, log: dict[str, any]) -> dict:
+    # def run(self, messages_list: Variadic[List[ChatMessage]]) -> dict:
+    def run(self, messages_list: Variadic[List]) -> dict:
+        logs = []
+        for messages in messages_list:
+            for item in messages:
+                mapped_item = self.mapper(item)
+                if mapped_item is None:
+                    continue
+
+                if isinstance(mapped_item, ChatMessage):
+                    for content in mapped_item._content:
+                        logs.append(self.parse_json_if_possible(content))
+                else:
+                    logs.append(self.parse_json_if_possible(mapped_item))
+        return {"logs": logs}
+
+    def parse_json_if_possible(self, content):
+        try:
+            # if not isinstance(content, TextContent):
+            #     raise ValueError(f"Expected text content, got {content.type}")
+            json_text = content.text
+            logger.info("ReadableLogger message: %s", json_text)
+            return json.loads(json_text)
+        except Exception:
+            # logger.warning("Could not parse message text as JSON: %s", content, exc_info=True)
+            # raise ValueError("Could not parse message text as JSON")  # TEMPORARY
+            return content
