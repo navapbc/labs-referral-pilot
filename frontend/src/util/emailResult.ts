@@ -1,7 +1,6 @@
-const emailResultURL =
-  process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/email_result/run"
-    : "https://referral-pilot-dev.navateam.com/email_result/run";
+import { getApiDomain } from "./apiDomain";
+
+const emailResultURL = getApiDomain() + "email_result/run";
 
 export async function emailResult(resultId: string, email: string) {
   const url = emailResultURL;
