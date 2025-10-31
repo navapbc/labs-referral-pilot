@@ -1,4 +1,13 @@
-"Components cannot be defined in pipelines themselves, so define them here."
+"""
+Components cannot be defined in pipelines themselves, so define them here.
+
+The following applies to Pipeline, as well as AsyncPipeline.
+
+When a Hayhooks API endpoint is called by a client, different threads are used
+to handle the requests, but the same PipelineWrapper instance is used by the threads!
+This means that pipeline component instances are used by different threads,
+so the components must be thread-safe.
+"""
 
 import json
 import logging
@@ -226,8 +235,8 @@ BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 @component
 class LlmOutputValidator:
     def __init__(self, pydantic_model: type[BaseModelT]):
+        # Note that components must be thread-safe, so do not maintain state across runs
         self.pydantic_model = pydantic_model
-        self.attempt_count = 0
 
     @component.output_types(
         valid_replies=List[ChatMessage],
@@ -235,8 +244,6 @@ class LlmOutputValidator:
         error_message=Optional[str],
     )
     def run(self, replies: List[ChatMessage]) -> dict:
-        self.attempt_count += 1
-
         assert len(replies) == 1, "Expected exactly one reply"
         reply = replies[0]
 
@@ -249,12 +256,11 @@ class LlmOutputValidator:
         except (ValueError, ValidationError) as e:
             logger.error(
                 (
-                    "LlmOutputValidator at attempt {%i}: Invalid JSON from LLM - trying again...\n"
+                    "LlmOutputValidator: Invalid JSON from LLM - will try again...\n"
+                    "Parsing error: %s\n"
                     "Output from LLM:\n %s \n"
-                    "Error from LlmOutputValidator: %s"
                 ),
-                self.attempt_count,
-                reply,
                 e,
+                reply,
             )
             return {"invalid_replies": replies, "error_message": str(e)}
