@@ -37,11 +37,15 @@ function extractJSON(text: string): string {
   return text.substring(firstBrace, endIndex + 1);
 }
 
-export async function uploadPdfDocument(file: File): Promise<Resource[]> {
+export async function uploadPdfDocument(
+  userEmail: string,
+  file: File,
+): Promise<Resource[]> {
   const url = generateReferralsFromDocURL;
 
   const formData = new FormData();
   formData.append("files", file);
+  formData.append("user_email", userEmail);
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 600_000); // 60 seconds timeout for file upload
