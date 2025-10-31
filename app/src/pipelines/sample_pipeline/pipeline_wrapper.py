@@ -4,7 +4,6 @@ from pprint import pformat
 import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
-from haystack.components.joiners.document_joiner import DocumentJoiner
 from haystack.dataclasses.chat_message import ChatMessage
 
 from src.common import components

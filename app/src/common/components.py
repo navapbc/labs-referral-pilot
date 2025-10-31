@@ -13,7 +13,7 @@ import json
 import logging
 from json import JSONDecodeError
 from pprint import pformat
-from typing import List, Optional, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
 from fastapi import UploadFile
 from haystack import component
@@ -280,13 +280,13 @@ class ReadableLogger:
     """Logs input in a human-readable format for debugging purposes."""
 
     @staticmethod
-    def default_mapper(msg):
+    def default_mapper(msg: Any) -> Optional[Any]:
         if isinstance(msg, ChatMessage):
             # Don't log 'system' messages
             return msg if msg.role in ["user", "assistant"] else None
         return msg
 
-    def __init__(self, mapper: callable = default_mapper):
+    def __init__(self, mapper: Callable = default_mapper) -> None:
         self.mapper = mapper
 
     @component.output_types(logs=list)
@@ -305,7 +305,7 @@ class ReadableLogger:
                     logs.append(self.parse_json_if_possible(mapped_item))
         return {"logs": logs}
 
-    def parse_json_if_possible(self, content):
+    def parse_json_if_possible(self, content: Any) -> Any:
         if hasattr(content, "text"):
             try:
                 return json.loads(content.text)
