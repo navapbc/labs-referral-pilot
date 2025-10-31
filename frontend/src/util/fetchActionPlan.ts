@@ -1,4 +1,5 @@
 import { Resource } from "@/types/resources";
+import { getApiDomain } from "./apiDomain";
 
 export interface ActionPlan {
   title: string;
@@ -48,10 +49,7 @@ function fixJsonControlCharacters(jsonString: string): string {
   return result;
 }
 
-const generateActionPlanURL =
-  process.env.ENVIRONMENT === "local"
-    ? "http://0.0.0.0:3000/generate_action_plan/run"
-    : "https://referral-pilot-dev.navateam.com/generate_action_plan/run";
+const generateActionPlanURL = getApiDomain() + "generate_action_plan/run";
 
 export async function fetchActionPlan(
   resources: Resource[],

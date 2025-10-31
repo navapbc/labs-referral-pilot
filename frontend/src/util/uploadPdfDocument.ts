@@ -1,9 +1,7 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
+import { getApiDomain } from "./apiDomain";
 
-const generateReferralsFromDocURL =
-  process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/generate_referrals_from_doc/run"
-    : "https://referral-pilot-dev.navateam.com/generate_referrals_from_doc/run";
+const generateReferralsFromDocURL = getApiDomain() + "generate_referrals_from_doc/run";
 
 /**
  * Extracts JSON from text that may contain a prefix or suffix
