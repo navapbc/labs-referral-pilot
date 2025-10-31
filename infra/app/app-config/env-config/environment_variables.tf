@@ -17,6 +17,9 @@ locals {
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
     REDACT_PII = "False"
+
+    # Domain name is `null` in preview environments, so explicitly set it to the DEV environment domain
+    SENDER_EMAIL = "no-reply@${coalesce(var.domain_name, "referral-pilot-dev.navateam.com")}"
   }
 
   # Configuration for secrets

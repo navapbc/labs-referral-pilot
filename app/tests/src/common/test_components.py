@@ -85,7 +85,7 @@ def test_SaveResult_and_LoadResult(enable_factory_create, db_session: db.Session
     assert result_json == {"somekey": "somevalue"}
 
 
-def test_EmailResult(enable_factory_create, db_session: db.Session):
+def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch):
     resources = {
         "resources": [
             {
@@ -103,6 +103,9 @@ def test_EmailResult(enable_factory_create, db_session: db.Session):
             },
         ]
     }
+
+    # Mock send_email to always return success
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
     component = EmailResult()
     output = component.run(email="test@example.com", json_dict=resources)

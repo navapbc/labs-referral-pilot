@@ -18,6 +18,8 @@ class AppConfig(PydanticBaseEnvConfig):
 
     redact_pii: bool = True
 
+    aws_ses_from_email: str = "no-reply@test.com"
+
     @cached_property
     def db_client(self) -> db.PostgresDBClient:
         return db.PostgresDBClient()
