@@ -310,7 +310,7 @@ class ReadableLogger:
             try:
                 return json.loads(content.text)
             except JSONDecodeError:
-                logger.warning("Content is not valid JSON: %s", content.text, exc_info=True)
+                logger.warning("Failed to parse content as JSON: %s", content.text, exc_info=True)
                 return content.text
 
         return content
