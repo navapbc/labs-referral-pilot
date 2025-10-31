@@ -46,7 +46,7 @@ response_schema = """
         "addresses": string[];
         "phones": string[];
         "emails": string[];
-        "website": string | null;
+        "website"?: string | null;
         "description": string;
         "justification": string;
         "referral_type"?: "external" | "goodwill" | "government" | null;
