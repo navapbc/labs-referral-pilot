@@ -307,6 +307,7 @@ class ReadableLogger:
 
     def parse_json_if_possible(self, content: Any) -> Any:
         if hasattr(content, "text"):
+            # Usually for ChatMessage._content[*] but could be for any object with 'text' attribute
             try:
                 return json.loads(content.text)
             except JSONDecodeError:

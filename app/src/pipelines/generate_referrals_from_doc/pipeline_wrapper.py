@@ -68,9 +68,7 @@ class PipelineWrapper(BasePipelineWrapper):
         response = self.pipeline.run(
             {
                 "logger": {
-                    "messages_list": [
-                        {"filenames": [file.filename for file in files]}
-                    ],
+                    "messages_list": [{"filenames": [file.filename for file in files]}],
                 },
                 "files_to_bytestreams": {"files": files},
                 "prompt_builder": {
