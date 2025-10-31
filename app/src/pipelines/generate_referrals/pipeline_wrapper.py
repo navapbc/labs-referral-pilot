@@ -90,7 +90,6 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("output_validator.invalid_replies", "prompt_builder.invalid_replies")
 
         pipeline.add_component("logger", components.ReadableLogger())
-        pipeline.connect("prompt_builder", "logger")
         pipeline.connect("output_validator.valid_replies", "logger")
 
         self.pipeline = pipeline
