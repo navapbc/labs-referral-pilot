@@ -70,7 +70,7 @@ export async function fetchActionPlan(
       method: "POST",
       headers,
       body: JSON.stringify({
-        resource: resources,
+        resources: resources,
         user_email: userEmail,
       }),
       cache: "no-store",
