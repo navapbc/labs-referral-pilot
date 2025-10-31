@@ -34,7 +34,7 @@ class PipelineWrapper(BasePipelineWrapper):
                     },
                 },
             )
-            logger.info("Results: %s", pformat(response, width=160))
+            logger.debug("Results: %s", pformat(response, width=160))
             return response
         except PipelineRuntimeError as re:
             error_msg = str(re)

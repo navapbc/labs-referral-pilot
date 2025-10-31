@@ -23,6 +23,8 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
     ses_client = boto3.client("ses", region_name="us-east-1")
     sender_email = config.sender_email
 
+    logger.debug("Preparing to send email to %s with subject '%s'", recipient, subject)
+
     try:
         response = ses_client.send_email(
             Source=sender_email,

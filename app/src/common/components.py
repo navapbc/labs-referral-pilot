@@ -206,7 +206,7 @@ class EmailResult:
     @component.output_types(status=str, email=str, message=str)
     def run(self, email: str, json_dict: dict) -> dict:
         logger.info("Emailing result to %s", email)
-        logger.info("JSON content:\n%s", json.dumps(json_dict, indent=2))
+        logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
         formatted_resources = self.format_resources(json_dict.get("resources", []))
         message = f"Here are the resources you requested:\n\n{formatted_resources}"
 
