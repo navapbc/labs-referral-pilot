@@ -45,9 +45,17 @@ locals {
 
       domain_config = {
         manage_dns  = true
-        hosted_zone = "hosted.zone.for.prod.network.com"
+        hosted_zone = "referrals.navateam.com"
 
-        certificate_configs = {}
+        certificate_configs = {
+          "referrals.navateam.com" = {
+            source = "issued"
+          }
+          "api.referral-pilot-dev.navateam.com" = {
+            source = "issued"
+          }
+
+        }
       }
     }
   }
