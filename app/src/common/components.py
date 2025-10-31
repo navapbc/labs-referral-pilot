@@ -11,6 +11,7 @@ so the components must be thread-safe.
 
 import json
 import logging
+from json import JSONDecodeError
 from pprint import pformat
 from typing import List, Optional, TypeVar
 
@@ -281,18 +282,14 @@ class ReadableLogger:
     @staticmethod
     def default_mapper(msg):
         if isinstance(msg, ChatMessage):
-            if msg.role in ["user", "assistant"]:
-                return msg
-        else:
-            return msg
-        return None
+            # Don't log 'system' messages
+            return msg if msg.role in ["user", "assistant"] else None
+        return msg
 
     def __init__(self, mapper: callable = default_mapper):
         self.mapper = mapper
 
     @component.output_types(logs=list)
-    # def run(self, log: dict[str, any]) -> dict:
-    # def run(self, messages_list: Variadic[List[ChatMessage]]) -> dict:
     def run(self, messages_list: Variadic[List]) -> dict:
         logs = []
         for messages in messages_list:
@@ -309,13 +306,11 @@ class ReadableLogger:
         return {"logs": logs}
 
     def parse_json_if_possible(self, content):
-        try:
-            # if not isinstance(content, TextContent):
-            #     raise ValueError(f"Expected text content, got {content.type}")
-            json_text = content.text
-            logger.info("ReadableLogger message: %s", json_text)
-            return json.loads(json_text)
-        except Exception:
-            # logger.warning("Could not parse message text as JSON: %s", content, exc_info=True)
-            # raise ValueError("Could not parse message text as JSON")  # TEMPORARY
-            return content
+        if hasattr(content, "text"):
+            try:
+                return json.loads(content.text)
+            except JSONDecodeError:
+                logger.warning("Content is not valid JSON: %s", content.text, exc_info=True)
+                return content.text
+
+        return content

@@ -12,6 +12,7 @@ from src.common.components import (
     LlmOutputValidator,
     LoadResult,
     LoadSupports,
+    ReadableLogger,
     SaveResult,
     UploadFilesToByteStreams,
 )
@@ -136,22 +137,23 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
     )
 
 
-def test_LlmOutputValidator():
-    valid_json = {
-        "resources": [
-            {
-                "name": "Resource 1",
-                "addresses": ["123 Main St"],
-                "phones": ["555-1234"],
-                "emails": ["resource1@example.com"],
-                "website": "http://resource1.com",
-                "description": "Description for Resource 1",
-                "justification": "Justification for Resource 1",
-            },
-        ]
-    }
-    valid_json_str = json.dumps(valid_json)
+valid_json = {
+    "resources": [
+        {
+            "name": "Resource 1",
+            "addresses": ["123 Main St"],
+            "phones": ["555-1234"],
+            "emails": ["resource1@example.com"],
+            "website": "http://resource1.com",
+            "description": "Description for Resource 1",
+            "justification": "Justification for Resource 1",
+        },
+    ]
+}
+valid_json_str = json.dumps(valid_json)
 
+
+def test_LlmOutputValidator():
     component = LlmOutputValidator(pydantic_model=ResourceList)
     valid_replies_output = component.run(replies=[ChatMessage.from_assistant(text=valid_json_str)])
     assert "valid_replies" in valid_replies_output
@@ -166,3 +168,25 @@ def test_LlmOutputValidator():
     assert "valid_replies" not in invalid_replies_output
     assert "invalid_replies" in invalid_replies_output
     assert "error_message" in invalid_replies_output
+
+
+def test_ReadableLogger():
+    manual_logs = [
+        {"user_question": "What is the capital of France?"},
+    ]
+    messages = [
+        ChatMessage.from_system("System message"),
+        ChatMessage.from_user("User message"),
+        ChatMessage.from_assistant("Not a JSON message"),
+        ChatMessage.from_assistant(valid_json_str),
+    ]
+
+    component = ReadableLogger()
+    output = component.run(messages_list=[manual_logs, messages])
+
+    assert output["logs"] == [
+        {"user_question": "What is the capital of France?"},
+        "User message",
+        "Not a JSON message",
+        valid_json,
+    ]
