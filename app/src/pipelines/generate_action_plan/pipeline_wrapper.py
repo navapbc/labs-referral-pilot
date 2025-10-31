@@ -7,7 +7,7 @@ from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
 from src.common import haystack_utils
-from src.common.components import OpenAIWebSearchGenerator
+from src.common.components import OpenAIWebSearchGenerator, ReadableLogger
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,9 @@ class PipelineWrapper(BasePipelineWrapper):
         )
         pipeline.connect("prompt_builder", "llm.messages")
 
+        pipeline.add_component("logger", ReadableLogger())
+        pipeline.connect("llm", "logger")
+
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
@@ -57,6 +60,11 @@ class PipelineWrapper(BasePipelineWrapper):
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             response = self.pipeline.run(
                 {
+                    "logger": {
+                        "messages_list": [
+                            {"resource_count": len(resource_objects), "user_email": user_email}
+                        ],
+                    },
                     "prompt_builder": {
                         "resources": format_resources(resource_objects),
                         "action_plan_json": action_plan_as_json,

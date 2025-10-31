@@ -51,6 +51,10 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.connect("load_supports.supports", "prompt_builder.supports")
         pipeline.connect("prompt_builder", "llm.messages")
+
+        pipeline.add_component("logger", components.ReadableLogger())
+        pipeline.connect("llm", "logger")
+
         # pipeline.draw(path="generate_referrals_from_document_pipeline.png")
         self.pipeline = pipeline
 
@@ -65,6 +69,9 @@ class PipelineWrapper(BasePipelineWrapper):
         with using_metadata({"user_id": user_email}):
             response = self.pipeline.run(
                 {
+                    "logger": {
+                        "messages_list": [{"filenames": [file.filename for file in files]}],
+                    },
                     "files_to_bytestreams": {"files": files},
                     "prompt_builder": {
                         "response_json": response_schema,

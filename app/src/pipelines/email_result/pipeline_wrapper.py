@@ -21,6 +21,9 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("email_result", components.EmailResult())
 
         pipeline.connect("load_result.result_json", "email_result.json_dict")
+
+        pipeline.add_component("logger", components.ReadableLogger())
+
         self.pipeline = pipeline
 
     def run_api(self, result_id: str, email: str) -> dict:
@@ -28,6 +31,9 @@ class PipelineWrapper(BasePipelineWrapper):
             try:
                 response = self.pipeline.run(
                     {
+                        "logger": {
+                            "messages_list": [{"result_id": result_id, "email": email}],
+                        },
                         "load_result": {
                             "result_id": result_id,
                         },
