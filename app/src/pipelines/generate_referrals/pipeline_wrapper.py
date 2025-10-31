@@ -28,7 +28,7 @@ class Resource(BaseModel):
     addresses: list[str]
     phones: list[str]
     emails: list[str]
-    website: str
+    website: Optional[str] = None
     description: str
     justification: str
     referral_type: Optional[ReferralType] = None
@@ -45,7 +45,7 @@ response_schema = """
         "addresses": string[];
         "phones": string[];
         "emails": string[];
-        "website": string;
+        "website"?: string | null;
         "description": string;
         "justification": string;
         "referral_type"?: "external" | "goodwill" | "government" | null;
