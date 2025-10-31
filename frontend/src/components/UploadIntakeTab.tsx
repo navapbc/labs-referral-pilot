@@ -8,10 +8,11 @@ import { uploadPdfDocument } from "@/util/uploadPdfDocument";
 import { Resource } from "@/types/resources";
 
 interface UploadIntakeTabProps {
+  userEmail: string;
   onResources: (resources: Resource[]) => void;
 }
 
-export function UploadIntakeTab({ onResources }: UploadIntakeTabProps) {
+export function UploadIntakeTab({ userEmail, onResources }: UploadIntakeTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isPdfProcessing, setIsPdfProcessing] = useState(false);
@@ -31,7 +32,7 @@ export function UploadIntakeTab({ onResources }: UploadIntakeTabProps) {
         setIsPdfProcessing(true);
 
         try {
-          const resources = await uploadPdfDocument(file);
+          const resources = await uploadPdfDocument(userEmail, file);
           onResources(resources);
         } catch (error) {
           console.error("Error processing PDF:", error);
