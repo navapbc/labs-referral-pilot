@@ -51,7 +51,7 @@ locals {
           "referrals.navateam.com" = {
             source = "issued"
           }
-          "api.referral-pilot-dev.navateam.com" = {
+          "api.referrals.navateam.com" = {
             source = "issued"
           }
 
