@@ -9,7 +9,6 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
-from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 from openinference.instrumentation import using_attributes
 from pydantic import BaseModel
 
@@ -53,7 +52,6 @@ response_schema = """
     }[];
 }
 """
-model = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -78,7 +76,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 ],
             ),
         )
-        pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
+        pipeline.add_component("llm", components.OpenAIWebSearchGenerator())
         pipeline.add_component("output_validator", components.LlmOutputValidator(ResourceList))
         pipeline.add_component("save_result", components.SaveResult())
 
@@ -115,6 +113,7 @@ class PipelineWrapper(BasePipelineWrapper):
                             "query": query,
                             "response_json": response_schema,
                         },
+                        "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
                     },
                     include_outputs_from={"llm", "save_result"},
                 )
