@@ -14,6 +14,11 @@ logger = logging.getLogger(__name__)
 system_msg = "This is a sample pipeline, it echoes back the system and user messages provided"
 
 
+from openinference.instrumentation import capture_span_context
+from phoenix.client import Client
+
+client = Client()
+
 class PipelineWrapper(BasePipelineWrapper):
     name = "sample_pipeline"
 
@@ -27,13 +32,29 @@ class PipelineWrapper(BasePipelineWrapper):
             ChatMessage.from_system(system_msg),
             ChatMessage.from_user(question),
         ]
-        response = self.pipeline.run(
-            {
-                "echo_component": {"prompt": messages, "history": []},
-            }
-        )
-        logger.info("Results: %s", pformat(response))
-        return response
+        with capture_span_context() as capture:
+            response = self.pipeline.run(
+                {
+                    "echo_component": {"prompt": messages, "history": []},
+                }
+            )
+            logger.info("Results: %s", pformat(response))
+
+            first_span_id = capture.get_first_span_id()
+            if first_span_id:
+                # Apply user feedback to the first span
+                client.spans.add_span_annotation(
+                    span_id=first_span_id,
+                    annotation_name="user_info",
+                    annotator_kind="CODE",
+                    label="my_label",
+                    score=1.0,
+                    explanation="my_explanation",
+                    metadata={"question": question},
+                    identifier="my_identifier",
+                )
+            return response
+
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
