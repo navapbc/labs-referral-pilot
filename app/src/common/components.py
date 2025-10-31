@@ -286,8 +286,8 @@ class ReadableLogger:
             return msg if msg.role in ["user", "assistant"] else None
         return msg
 
-    def __init__(self, mapper: Callable = default_mapper) -> None:
-        self.mapper = mapper
+    def __init__(self, mapper: Optional[Callable] = None) -> None:
+        self.mapper = mapper if mapper is not None else self.default_mapper
 
     @component.output_types(logs=list)
     def run(self, messages_list: Variadic[List]) -> dict:
