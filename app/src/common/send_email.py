@@ -20,18 +20,22 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
     Returns:
         True if email was sent successfully, False otherwise
     """
-    ses_client = boto3.client("ses", region_name="us-east-1")
-    sender_email = config.sender_email
+    ses_client = boto3.client("sesv2", region_name="us-east-1")
 
     logger.debug("Preparing to send email to %s with subject '%s'", recipient, subject)
 
     try:
         response = ses_client.send_email(
-            Source=sender_email,
+            FromEmailAddress=config.aws_ses_from_email,
             Destination={"ToAddresses": [recipient]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
+            Content={
+                "Simple": {
+                    "Subject": {"Data": subject, "Charset": "UTF-8"},
+                    "Body": {
+                        "Html": {"Data": body, "Charset": "UTF-8"},
+                        "Text": {"Data": body, "Charset": "UTF-8"},
+                    },
+                }
             },
         )
         message_id = response["MessageId"]
