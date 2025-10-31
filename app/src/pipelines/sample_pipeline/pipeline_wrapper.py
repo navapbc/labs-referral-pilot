@@ -5,6 +5,7 @@ import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
+from openinference.instrumentation import using_metadata
 
 from src.common import components
 
@@ -28,21 +29,22 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
-        messages = [
-            ChatMessage.from_system(system_msg),
-            ChatMessage.from_user(question),
-        ]
-        response = self.pipeline.run(
-            {
-                "logger": {
-                    "messages_list": [{"question": question}],
-                },
-                "echo_component": {"prompt": messages, "history": []},
-                "echo_component2": {"prompt": messages, "history": []},
-            }
-        )
-        logger.info("Results: %s", pformat(response))
-        return response
+        with using_metadata({"user_id": "someone@example.com"}):
+            messages = [
+                ChatMessage.from_system(system_msg),
+                ChatMessage.from_user(question),
+            ]
+            response = self.pipeline.run(
+                {
+                    "logger": {
+                        "messages_list": [{"question": question}],
+                    },
+                    "echo_component": {"prompt": messages, "history": []},
+                    "echo_component2": {"prompt": messages, "history": []},
+                }
+            )
+            logger.info("Results: %s", pformat(response))
+            return response
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)

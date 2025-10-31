@@ -20,7 +20,6 @@ on:
         type: choice
         options:
           - dev
-          - staging
           - prod
       version:
         required: true

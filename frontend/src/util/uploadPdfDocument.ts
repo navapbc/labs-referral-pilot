@@ -1,9 +1,8 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
+import { getApiDomain } from "./apiDomain";
 
 const generateReferralsFromDocURL =
-  process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/generate_referrals_from_doc/run"
-    : "https://referral-pilot-dev.navateam.com/generate_referrals_from_doc/run";
+  getApiDomain() + "generate_referrals_from_doc/run";
 
 /**
  * Extracts JSON from text that may contain a prefix or suffix
@@ -38,11 +37,15 @@ function extractJSON(text: string): string {
   return text.substring(firstBrace, endIndex + 1);
 }
 
-export async function uploadPdfDocument(file: File): Promise<Resource[]> {
+export async function uploadPdfDocument(
+  userEmail: string,
+  file: File,
+): Promise<Resource[]> {
   const url = generateReferralsFromDocURL;
 
   const formData = new FormData();
   formData.append("files", file);
+  formData.append("user_email", userEmail);
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 600_000); // 60 seconds timeout for file upload

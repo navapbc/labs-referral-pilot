@@ -3,7 +3,7 @@ import logging
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from openinference.instrumentation import using_attributes
+from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
 from src.common import haystack_utils
@@ -57,7 +57,7 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        with using_attributes(user_id=user_email):
+        with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             response = self.pipeline.run(
                 {
                     "logger": {

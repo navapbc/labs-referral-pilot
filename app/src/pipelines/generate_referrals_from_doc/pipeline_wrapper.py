@@ -7,6 +7,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
+from openinference.instrumentation import using_metadata
 
 from src.common import components, haystack_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
@@ -61,21 +62,22 @@ class PipelineWrapper(BasePipelineWrapper):
     # Must use the `files` parameter name for file uploads to work
     # See https://github.com/deepset-ai/hayhooks/blob/2070f51db4c0d2bb45131b87d736304996e09058/docs/concepts/pipeline-wrapper.md#file-upload-support
     # and https://github.com/deepset-ai/hayhooks/blob/2070f51db4c0d2bb45131b87d736304996e09058/src/hayhooks/server/utils/deploy_utils.py#L287
-    def run_api(self, files: Optional[List[UploadFile]] = None) -> dict:
+    def run_api(self, user_email: str, files: Optional[List[UploadFile]] = None) -> dict:
         if not files:
             raise HTTPException(status_code=400, detail="No files provided for processing.")
 
-        response = self.pipeline.run(
-            {
-                "logger": {
-                    "messages_list": [{"filenames": [file.filename for file in files]}],
-                },
-                "files_to_bytestreams": {"files": files},
-                "prompt_builder": {
-                    "response_json": response_schema,
-                },
-                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-            }
-        )
-        logger.info("Pipeline result: %s", pformat(response, width=160))
-        return response
+        with using_metadata({"user_id": user_email}):
+            response = self.pipeline.run(
+                {
+                    "logger": {
+                        "messages_list": [{"filenames": [file.filename for file in files]}],
+                    },
+                    "files_to_bytestreams": {"files": files},
+                    "prompt_builder": {
+                        "response_json": response_schema,
+                    },
+                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                }
+            )
+            logger.info("Pipeline result: %s", pformat(response, width=160))
+            return response
