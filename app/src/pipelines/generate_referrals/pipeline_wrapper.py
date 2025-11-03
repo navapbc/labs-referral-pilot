@@ -123,7 +123,7 @@ class PipelineWrapper(BasePipelineWrapper):
                     },
                     include_outputs_from={"llm", "save_result"},
                 )
-                logger.info("Results: %s", pformat(response, width=160))
+                logger.debug("Results: %s", pformat(response, width=160))
                 return response
             except PipelineRuntimeError as re:
                 logger.error("PipelineRuntimeError: %s", re, exc_info=True)

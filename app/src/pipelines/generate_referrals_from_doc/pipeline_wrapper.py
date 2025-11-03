@@ -77,7 +77,8 @@ class PipelineWrapper(BasePipelineWrapper):
                         "response_json": response_schema,
                     },
                     "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-                }
+                },
+                include_outputs_from={"llm"},
             )
             logger.info("Pipeline result: %s", pformat(response, width=160))
             return response

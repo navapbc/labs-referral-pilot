@@ -41,6 +41,7 @@ class PipelineWrapper(BasePipelineWrapper):
                             "email": email,
                         },
                     },
+                    include_outputs_from={"email_result"},
                 )
                 logger.debug("Results: %s", pformat(response, width=160))
                 return response
