@@ -53,6 +53,11 @@ async def run_pipeline(pipeline: AsyncPipeline, job: CrawlJob) -> list[dict]:
     Returns:
         List of support entry dictionaries
     """
+
+    # TODO: Add scraping functionality in follow up PR
+    if job.prompt_name is None:
+        raise NotImplementedError()
+
     logger.info("Running pipeline for job: domain=%s, prompt=%s", job.domain, job.prompt_name)
 
     prompt_template = haystack_utils.get_phoenix_prompt(job.prompt_name)

@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 class CrawlJob(Base, IdMixin, TimestampMixin):
     __tablename__ = "crawl_job"
 
-    prompt_name: Mapped[str] = mapped_column(
-        nullable=False,
-        comment="Name of the prompt to use for this crawl job",
+    prompt_name: Mapped[str | None] = mapped_column(
+        nullable=True,
+        comment="Name of the prompt to use for this crawl job (optional if using scraper function)",
     )
 
     domain: Mapped[str] = mapped_column(
