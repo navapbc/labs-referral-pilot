@@ -117,7 +117,7 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
         """\
         Here are the resources you requested:
 
-        Resource 1
+        ### Resource 1
         - Referral Type: external
         - Description: Description for Resource 1
         - Website: http://resource1.com
@@ -126,7 +126,7 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
         - Addresses: 123 Main St
         - Justification: Justification for Resource 1
 
-        Resource 2
+        ### Resource 2
         - Referral Type: None
         - Description: None
         - Website: None

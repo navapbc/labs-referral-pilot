@@ -1,6 +1,7 @@
 import logging
 
 import boto3
+import markdown
 from botocore.exceptions import ClientError
 
 from src.app_config import config
@@ -32,7 +33,7 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
                 "Simple": {
                     "Subject": {"Data": subject, "Charset": "UTF-8"},
                     "Body": {
-                        "Html": {"Data": body, "Charset": "UTF-8"},
+                        "Html": {"Data": markdown.markdown(body), "Charset": "UTF-8"},
                         "Text": {"Data": body, "Charset": "UTF-8"},
                     },
                 }

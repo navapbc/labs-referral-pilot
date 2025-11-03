@@ -225,7 +225,7 @@ class EmailResult:
     def format_resource(self, resource: dict) -> str:
         return "\n".join(
             [
-                f"{resource.get('name', 'Unnamed Resource')}",
+                f"### {resource.get('name', 'Unnamed Resource')}",
                 f"- Referral Type: {resource.get('referral_type', 'None')}",
                 f"- Description: {resource.get('description', 'None')}",
                 f"- Website: {resource.get('website', 'None')}",
