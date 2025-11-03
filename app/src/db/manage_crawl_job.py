@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 def upsert_crawl_job(
-    db_session: Session, prompt_name: str, domain: str, crawling_interval: int
+    db_session: Session, prompt_name: str | None, domain: str, crawling_interval: int
 ) -> CrawlJob:
     """Create or update a CrawlJob entry.
 
     Args:
         db_session: Database session
-        prompt_name: Name of the prompt to use for this crawl job
+        prompt_name: Name of the prompt to use for this crawl job (optional if using scraper function)
         domain: Domain to crawl
         crawling_interval: Crawling interval in hours (must be positive)
 
@@ -95,7 +95,11 @@ def main() -> None:  # pragma: no cover
 
     # Upsert command
     upsert_parser = subparsers.add_parser("upsert", help="Create or update a CrawlJob entry")
-    upsert_parser.add_argument("prompt_name", help="Name of the prompt to use for this crawl job")
+    upsert_parser.add_argument(
+        "--prompt-name",
+        default=None,
+        help="Name of the prompt to use for this crawl job (optional if using scraper function)",
+    )
     upsert_parser.add_argument("domain", help="Domain to crawl")
     upsert_parser.add_argument(
         "crawling_interval",
