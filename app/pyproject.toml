@@ -57,6 +57,7 @@ setuptools = "^78.1.1"
 debugpy = "^1.8.1"
 ruff = "^0.4.9"
 types-requests = "^2.32.4.20250913"
+types-markdown = "^3.9.0.20250906"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

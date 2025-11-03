@@ -5958,6 +5958,18 @@ shellingham = ">=1.3.0"
 typing-extensions = ">=3.7.4.3"
 
 [[package]]
+name = "types-markdown"
+version = "3.9.0.20250906"
+description = "Typing stubs for Markdown"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "types_markdown-3.9.0.20250906-py3-none-any.whl", hash = "sha256:afac4297e4e75f00b4043f9b3a989dc5924230d065996a233b9bce894c438cc2"},
+    {file = "types_markdown-3.9.0.20250906.tar.gz", hash = "sha256:f02dc1a2d130b093de4910c64b2d0a811ae7020f03624df41c667818d2fee050"},
+]
+
+[[package]]
 name = "types-pytz"
 version = "2023.4.0.20240130"
 description = "Typing stubs for pytz"
@@ -6750,4 +6762,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12"
-content-hash = "ea8bb287b25a11ec9ac1bd5b4f98b9e885f65053a93ee232ce67abe815f8a611"
+content-hash = "c66c6264a453814e7e83afbadd0281912eb8d5de51e8220dde3cabdad4c4b27b"
