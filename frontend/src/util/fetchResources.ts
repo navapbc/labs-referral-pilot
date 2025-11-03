@@ -59,8 +59,32 @@ export async function fetchResources(
 
     /* eslint-enable */
 
+    // Check if resources array is empty
+    if (resourcesAsArray.length === 0) {
+      return {
+        resultId: resultUuid,
+        resources: [],
+        errorMessage: "The API did not return any resource recommendations.",
+      };
+    }
+
     return { resultId: resultUuid, resources: resourcesAsArray };
-  } catch {
-    return { resultId: "", resources: [] };
+  } catch (error) {
+    // Check if the error is due to timeout
+    if (error instanceof Error && error.name === "AbortError") {
+      return {
+        resultId: "",
+        resources: [],
+        errorMessage: "Request timed out, please try again.",
+      };
+    }
+
+    // Generic error handling
+    return {
+      resultId: "",
+      resources: [],
+      errorMessage:
+        "The server encountered an unexpected error. Please try again later.",
+    };
   }
 }

@@ -57,9 +57,15 @@ const normalizeUrl = (url: string) => {
   return `https://${trimmed}`;
 };
 
-const ResourcesList = ({ resources }: { resources: Resource[] }) => {
+const ResourcesList = ({
+  resources,
+  errorMessage,
+}: {
+  resources: Resource[];
+  errorMessage?: string;
+}) => {
   return resources.length === 0 ? (
-    <div className="m-3">No resources found.</div>
+    <div className="m-3">{errorMessage || "No resources found."}</div>
   ) : (
     <div className="mt-2">
       {resources.map((r, i) => (

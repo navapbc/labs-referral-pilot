@@ -56,7 +56,7 @@ const generateActionPlanURL =
 export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
-): Promise<ActionPlan | null> {
+): Promise<{ actionPlan: ActionPlan | null; errorMessage?: string }> {
   const url = generateActionPlanURL;
   const headers = {
     "Content-Type": "application/json",
@@ -81,7 +81,11 @@ export async function fetchActionPlan(
 
     if (!upstream.ok) {
       console.error("Failed to generate action plan:", upstream.statusText);
-      return null;
+      return {
+        actionPlan: null,
+        errorMessage:
+          "The server encountered an unexpected error. Please try again later.",
+      };
     }
 
     /* eslint-disable */
@@ -96,9 +100,22 @@ export async function fetchActionPlan(
     const actionPlan = JSON.parse(fixedJson);
     /* eslint-enable */
 
-    return actionPlan as ActionPlan;
+    return { actionPlan: actionPlan as ActionPlan };
   } catch (error) {
+    // Check if the error is due to timeout
+    if (error instanceof Error && error.name === "AbortError") {
+      return {
+        actionPlan: null,
+        errorMessage: "Request timed out, please try again.",
+      };
+    }
+
+    // Generic error handling
     console.error("Error fetching action plan:", error);
-    return null;
+    return {
+      actionPlan: null,
+      errorMessage:
+        "The server encountered an unexpected error. Please try again later.",
+    };
   }
 }
