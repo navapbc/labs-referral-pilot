@@ -1,5 +1,5 @@
 export function getApiDomain(): string {
-  const environment = process.env.ENVIRONMENT;
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
   switch (environment) {
     case "local":
