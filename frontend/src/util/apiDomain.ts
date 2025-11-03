@@ -1,6 +1,7 @@
 export function getApiDomain(): string {
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
-  const environment = process.env.ENVIRONMENT;
+  //const environment = process.env.ENVIRONMENT;
+  console.log("API Domain Environment:", environment);
 
   switch (environment) {
     case "local":
