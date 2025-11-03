@@ -242,6 +242,7 @@ export default function Page() {
 
     setIsGeneratingActionPlan(true);
     setActionPlan(null);
+    setErrorMessage(undefined);
 
     try {
       const { actionPlan: plan, errorMessage: planError } =

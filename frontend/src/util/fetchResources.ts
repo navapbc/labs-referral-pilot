@@ -64,7 +64,12 @@ export async function fetchResources(
       };
     }
 
-    return { resultId: resultUuid, resources: resourcesAsArray };
+    // Success, return result
+    return {
+      resultId: resultUuid,
+      resources: resourcesAsArray,
+      errorMessage: undefined,
+    };
   } catch (error) {
     // Check if the error is due to timeout
     if (error instanceof Error && error.name === "AbortError") {
