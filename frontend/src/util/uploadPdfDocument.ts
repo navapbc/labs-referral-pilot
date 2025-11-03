@@ -1,9 +1,6 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
 
-const generateReferralsFromDocURL =
-  getApiDomain() + "generate_referrals_from_doc/run";
-
 /**
  * Extracts JSON from text that may contain a prefix or suffix
  * Finds the first { and matching } to extract the JSON object
@@ -41,7 +38,8 @@ export async function uploadPdfDocument(
   userEmail: string,
   file: File,
 ): Promise<Resource[]> {
-  const url = generateReferralsFromDocURL;
+  const apiDomain = await getApiDomain();
+  const url = apiDomain + "generate_referrals_from_doc/run";
 
   const formData = new FormData();
   formData.append("files", file);

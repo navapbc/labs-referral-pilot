@@ -1,15 +1,13 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
 
-// TODO update the logic above to be ready for when we deploy to a PROD env
-const generateReferralsURL = getApiDomain() + "generate_referrals/run";
-
 export async function fetchResources(
   clientDescription: string,
   userEmail: string,
   prompt_version_id: string | null,
 ) {
-  const url = generateReferralsURL;
+  const apiDomain = await getApiDomain();
+  const url = apiDomain + "generate_referrals/run";
   const headers = {
     "Content-Type": "application/json",
   };

@@ -1,9 +1,8 @@
 import { getApiDomain } from "./apiDomain";
 
-const emailResultURL = getApiDomain() + "email_result/run";
-
 export async function emailResult(resultId: string, email: string) {
-  const url = emailResultURL;
+  const apiDomain = await getApiDomain();
+  const url = apiDomain + "email_result/run";
   const headers = {
     "Content-Type": "application/json",
   };

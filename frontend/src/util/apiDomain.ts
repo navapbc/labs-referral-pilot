@@ -1,5 +1,9 @@
-export function getApiDomain(): string {
+"use server";
+
+// eslint-disable-next-line @typescript-eslint/require-await
+export async function getApiDomain(): Promise<string> {
   const environment = process.env.ENVIRONMENT;
+  console.log("API Domain Environment:", environment);
 
   switch (environment) {
     case "local":
