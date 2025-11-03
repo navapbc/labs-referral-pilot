@@ -11,11 +11,13 @@ so the components must be thread-safe.
 
 import json
 import logging
+from json import JSONDecodeError
 from pprint import pformat
-from typing import List, Optional, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
 from fastapi import UploadFile
 from haystack import component
+from haystack.core.component.types import Variadic
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from openai import OpenAI
@@ -238,6 +240,7 @@ class EmailResult:
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
+# TODO: Replace with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
 @component
 class LlmOutputValidator:
     def __init__(self, pydantic_model: type[BaseModelT]):
@@ -270,3 +273,45 @@ class LlmOutputValidator:
                 reply,
             )
             return {"invalid_replies": replies, "error_message": str(e)}
+
+
+@component
+class ReadableLogger:
+    """Logs input in a human-readable format for debugging purposes."""
+
+    @staticmethod
+    def default_mapper(msg: Any) -> Optional[Any]:
+        if isinstance(msg, ChatMessage):
+            # Don't log 'system' messages
+            return msg if msg.role in ["user", "assistant"] else None
+        return msg
+
+    def __init__(self, mapper: Optional[Callable] = None) -> None:
+        self.mapper = mapper if mapper is not None else self.default_mapper
+
+    @component.output_types(logs=list)
+    def run(self, messages_list: Variadic[List]) -> dict:
+        logs = []
+        for messages in messages_list:
+            for item in messages:
+                mapped_item = self.mapper(item)
+                if mapped_item is None:
+                    continue
+
+                if isinstance(mapped_item, ChatMessage):
+                    for content in mapped_item._content:
+                        logs.append(self.parse_json_if_possible(content))
+                else:
+                    logs.append(self.parse_json_if_possible(mapped_item))
+        return {"logs": logs}
+
+    def parse_json_if_possible(self, content: Any) -> Any:
+        if hasattr(content, "text"):
+            # Usually for ChatMessage._content[*] but could be for any object with 'text' attribute
+            try:
+                return json.loads(content.text)
+            except JSONDecodeError:
+                logger.warning("Failed to parse content as JSON: %s", content.text, exc_info=True)
+                return content.text
+
+        return content

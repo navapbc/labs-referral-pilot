@@ -1,17 +1,13 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
-
-// TODO update the logic above to be ready for when we deploy to a PROD env
-const generateReferralsURL =
-  process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/generate_referrals/run"
-    : "https://referral-pilot-dev.navateam.com/generate_referrals/run";
+import { getApiDomain } from "./apiDomain";
 
 export async function fetchResources(
   clientDescription: string,
   userEmail: string,
   prompt_version_id: string | null,
 ) {
-  const url = generateReferralsURL;
+  const apiDomain = await getApiDomain();
+  const url = apiDomain + "generate_referrals/run";
   const headers = {
     "Content-Type": "application/json",
   };

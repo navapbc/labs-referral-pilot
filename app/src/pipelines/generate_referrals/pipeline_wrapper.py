@@ -9,7 +9,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
-from openinference.instrumentation import using_attributes
+from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
 from src.common import components, haystack_utils
@@ -89,11 +89,14 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("output_validator.error_message", "prompt_builder.error_message")
         pipeline.connect("output_validator.invalid_replies", "prompt_builder.invalid_replies")
 
+        pipeline.add_component("logger", components.ReadableLogger())
+        pipeline.connect("output_validator.valid_replies", "logger")
+
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
-        with using_attributes(user_id=user_email):
+        with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Retrieve the requested prompt_version_id and error if requested prompt version is not found
             try:
                 prompt_template = haystack_utils.get_phoenix_prompt(
@@ -108,6 +111,9 @@ class PipelineWrapper(BasePipelineWrapper):
             try:
                 response = self.pipeline.run(
                     {
+                        "logger": {
+                            "messages_list": [{"query": query, "user_email": user_email}],
+                        },
                         "prompt_builder": {
                             "template": prompt_template,
                             "query": query,
@@ -117,7 +123,7 @@ class PipelineWrapper(BasePipelineWrapper):
                     },
                     include_outputs_from={"llm", "save_result"},
                 )
-                logger.info("Results: %s", pformat(response, width=160))
+                logger.debug("Results: %s", pformat(response, width=160))
                 return response
             except PipelineRuntimeError as re:
                 logger.error("PipelineRuntimeError: %s", re, exc_info=True)

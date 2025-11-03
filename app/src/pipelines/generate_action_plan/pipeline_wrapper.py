@@ -1,13 +1,14 @@
 import logging
+from pprint import pformat
 
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from openinference.instrumentation import using_attributes
+from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
 from src.common import haystack_utils
-from src.common.components import OpenAIWebSearchGenerator
+from src.common.components import OpenAIWebSearchGenerator, ReadableLogger
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
@@ -48,23 +49,32 @@ class PipelineWrapper(BasePipelineWrapper):
         )
         pipeline.connect("prompt_builder", "llm.messages")
 
+        pipeline.add_component("logger", ReadableLogger())
+        pipeline.connect("llm", "logger")
+
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
     def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
         resource_objects = get_resources(resources)
 
-        with using_attributes(user_id=user_email):
+        with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             response = self.pipeline.run(
                 {
+                    "logger": {
+                        "messages_list": [
+                            {"resource_count": len(resource_objects), "user_email": user_email}
+                        ],
+                    },
                     "prompt_builder": {
                         "resources": format_resources(resource_objects),
                         "action_plan_json": action_plan_as_json,
                     },
                     "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-                }
+                },
+                include_outputs_from={"llm"},
             )
-            # logger.info("Results: %s", pformat(response["response"], width=160))
+            logger.debug("Results: %s", pformat(response, width=160))
             return {"response": response["llm"]["replies"][0]._content[0].text}
 
 

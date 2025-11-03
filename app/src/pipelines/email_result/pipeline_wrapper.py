@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
+from openinference.instrumentation import using_metadata
 
 from src.common import components
 
@@ -20,33 +21,41 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("email_result", components.EmailResult())
 
         pipeline.connect("load_result.result_json", "email_result.json_dict")
+
+        pipeline.add_component("logger", components.ReadableLogger())
+
         self.pipeline = pipeline
 
     def run_api(self, result_id: str, email: str) -> dict:
-        try:
-            response = self.pipeline.run(
-                {
-                    "load_result": {
-                        "result_id": result_id,
+        with using_metadata({"email": email}):
+            try:
+                response = self.pipeline.run(
+                    {
+                        "logger": {
+                            "messages_list": [{"result_id": result_id, "email": email}],
+                        },
+                        "load_result": {
+                            "result_id": result_id,
+                        },
+                        "email_result": {
+                            "email": email,
+                        },
                     },
-                    "email_result": {
-                        "email": email,
-                    },
-                },
-            )
-            logger.debug("Results: %s", pformat(response, width=160))
-            return response
-        except PipelineRuntimeError as re:
-            error_msg = str(re)
-            if re.component_type == components.LoadResult:
-                if "Invalid JSON format in result" in error_msg:
-                    status_code = 500  # Internal error
+                    include_outputs_from={"email_result"},
+                )
+                logger.debug("Results: %s", pformat(response, width=160))
+                return response
+            except PipelineRuntimeError as re:
+                error_msg = str(re)
+                if re.component_type == components.LoadResult:
+                    if "Invalid JSON format in result" in error_msg:
+                        status_code = 500  # Internal error
+                    else:
+                        status_code = 400  # User error
                 else:
-                    status_code = 400  # User error
-            else:
-                status_code = 500  # Internal error
+                    status_code = 500  # Internal error
 
-            raise HTTPException(
-                status_code=status_code,
-                detail=f"Error occurred: {error_msg}",
-            ) from re
+                raise HTTPException(
+                    status_code=status_code,
+                    detail=f"Error occurred: {error_msg}",
+                ) from re

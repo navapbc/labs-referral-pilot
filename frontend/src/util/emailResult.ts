@@ -1,10 +1,8 @@
-const emailResultURL =
-  process.env.ENVIRONMENT == "local"
-    ? "http://0.0.0.0:3000/email_result/run"
-    : "https://referral-pilot-dev.navateam.com/email_result/run";
+import { getApiDomain } from "./apiDomain";
 
 export async function emailResult(resultId: string, email: string) {
-  const url = emailResultURL;
+  const apiDomain = await getApiDomain();
+  const url = apiDomain + "email_result/run";
   const headers = {
     "Content-Type": "application/json",
   };

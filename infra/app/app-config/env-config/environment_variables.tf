@@ -9,9 +9,10 @@ locals {
     # Don't send telemetry to Haystack
     HAYSTACK_TELEMETRY_ENABLED = "False"
     # Where Haystack will connect to Phoenix
-    PHOENIX_COLLECTOR_ENDPOINT = "https://phoenix.referral-pilot-${var.environment}.navateam.com:6006"
+    # TODO: Move Phoenix (used for both dev and prod) to a URL without "dev"
+    PHOENIX_COLLECTOR_ENDPOINT = "https://phoenix.referral-pilot-dev.navateam.com:6006"
     # The project where OTEL data will be stored in Phoenix
-    PHOENIX_PROJECT_NAME = "pilot2.alpha"
+    PHOENIX_PROJECT_NAME = "pilot-${var.environment}"
     # Example environment variables
     # WORKER_THREADS_COUNT    = 4
     # LOG_LEVEL               = "info"
