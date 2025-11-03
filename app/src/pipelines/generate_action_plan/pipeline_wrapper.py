@@ -1,4 +1,5 @@
 import logging
+from pprint import pformat
 
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
@@ -70,9 +71,10 @@ class PipelineWrapper(BasePipelineWrapper):
                         "action_plan_json": action_plan_as_json,
                     },
                     "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-                }
+                },
+                include_outputs_from={"llm"},
             )
-            # logger.info("Results: %s", pformat(response["response"], width=160))
+            logger.debug("Results: %s", pformat(response, width=160))
             return {"response": response["llm"]["replies"][0]._content[0].text}
 
 

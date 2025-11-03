@@ -41,7 +41,8 @@ class PipelineWrapper(BasePipelineWrapper):
                     },
                     "echo_component": {"prompt": messages, "history": []},
                     "echo_component2": {"prompt": messages, "history": []},
-                }
+                },
+                include_outputs_from={"echo_component", "echo_component2"},
             )
             logger.info("Results: %s", pformat(response))
             return response
