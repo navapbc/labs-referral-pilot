@@ -68,7 +68,6 @@ export async function fetchResources(
     return {
       resultId: resultUuid,
       resources: resourcesAsArray,
-      errorMessage: undefined,
     };
   } catch (error) {
     // Check if the error is due to timeout
