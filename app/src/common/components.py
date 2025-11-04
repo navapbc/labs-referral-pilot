@@ -199,6 +199,16 @@ class OpenAIWebSearchGenerator:
         return {"replies": [ChatMessage.from_assistant(response.output_text)]}
 
 
+EMAIL_INTRO = """\
+Hello,
+
+Here is your personalized report with resources your case manager recommends to support your goals.
+You've already taken a great first step by exploring these options.
+
+**Your next step**: Look over the resources to see contact info and details about how to get started.
+"""
+
+
 @component
 class EmailResult:
     """
@@ -210,7 +220,7 @@ class EmailResult:
         logger.info("Emailing result to %s", email)
         logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
         formatted_resources = self.format_resources(json_dict.get("resources", []))
-        message = f"Here are the resources you requested:\n\n{formatted_resources}"
+        message = f"{EMAIL_INTRO}\n{formatted_resources}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources"
@@ -225,14 +235,13 @@ class EmailResult:
     def format_resource(self, resource: dict) -> str:
         return "\n".join(
             [
-                f"{resource.get('name', 'Unnamed Resource')}",
+                f"### {resource.get('name', 'Unnamed Resource')}",
                 f"- Referral Type: {resource.get('referral_type', 'None')}",
                 f"- Description: {resource.get('description', 'None')}",
                 f"- Website: {resource.get('website', 'None')}",
                 f"- Phone: {', '.join(resource.get('phones', ['None']))}",
                 f"- Email: {', '.join(resource.get('emails', ['None']))}",
                 f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
-                f"- Justification: {resource.get('justification', 'None')}",
             ]
         )
 
