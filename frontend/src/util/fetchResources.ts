@@ -70,6 +70,7 @@ export async function fetchResources(
       resources: resourcesAsArray,
     };
   } catch (error) {
+    clearTimeout(timer);
     // Check if the error is due to timeout
     if (error instanceof Error && error.name === "AbortError") {
       return {
