@@ -147,7 +147,7 @@ export function ClientDetailsInput({
                     data-testid={"resourceCategoryToggle-" + category.id}
                     aria-pressed={isSelected}
                   >
-                    <Icon className="mr-2 size-2.5 w-6 h-6" />
+                    <Icon className="mr-2 w-6 h-6" />
                     {category.label}
                   </Button>
                 );
