@@ -41,7 +41,7 @@ locals {
     }
 
     prod = {
-      account_name = "prod"
+      account_name = "referral-pilot"
 
       domain_config = {
         manage_dns  = true
