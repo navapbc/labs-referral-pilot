@@ -106,13 +106,14 @@ export async function fetchActionPlan(
         actionPlan: null,
         errorMessage: "Request timed out, please try again.",
       };
-
-    // Generic error handling
-    console.error("Error fetching action plan:", error);
-    return {
-      actionPlan: null,
-      errorMessage:
-        "The server encountered an unexpected error. Please try again later.",
-    };
+    }
   }
+  // Generic error handling
+  console.error("Error fetching action plan");
+  clearTimeout(timer);
+  return {
+    actionPlan: null,
+    errorMessage:
+      "The server encountered an unexpected error. Please try again later.",
+  };
 }

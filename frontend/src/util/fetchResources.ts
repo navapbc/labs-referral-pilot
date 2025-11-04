@@ -79,13 +79,13 @@ export async function fetchResources(
         errorMessage: "Request timed out, please try again.",
       };
     }
-
-    // Generic error handling
-    return {
-      resultId: "",
-      resources: [],
-      errorMessage:
-        "The server encountered an unexpected error. Please try again later.",
-    };
   }
+
+  // Generic error handling
+  return {
+    resultId: "",
+    resources: [],
+    errorMessage:
+      "The server encountered an unexpected error. Please try again later.",
+  };
 }
