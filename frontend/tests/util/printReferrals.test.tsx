@@ -28,7 +28,12 @@ describe("PrintableReferralsReport", () => {
   ];
 
   it("displays the header with organization name", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     expect(screen.getByText("Goodwill Central Texas")).toBeInTheDocument();
     expect(
@@ -37,13 +42,23 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays the generated date in the header", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     expect(screen.getByText(/Generated on/)).toBeInTheDocument();
   });
 
   it("displays all resources from the array", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     mockResources.forEach((resource) => {
       expect(screen.getByText(resource.name)).toBeInTheDocument();
@@ -51,7 +66,12 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays resource descriptions", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     mockResources.forEach((resource) => {
       // @ts-expect-error resources will be populated in this test
@@ -60,7 +80,12 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays resource addresses", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     mockResources.forEach((resource) => {
       resource.addresses?.forEach((address) => {
@@ -71,7 +96,12 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays resource emails", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     mockResources.forEach((resource) => {
       resource.emails?.forEach((email) => {
@@ -82,7 +112,12 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays resource websites", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     mockResources.forEach((resource) => {
       expect(
@@ -93,13 +128,23 @@ describe("PrintableReferralsReport", () => {
   });
 
   it("displays 'No resources found' when array is empty", () => {
-    render(<PrintableReferralsReport resources={[]} />);
+    render(
+      <PrintableReferralsReport
+        resources={[]}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     expect(screen.getByText("No resources found.")).toBeInTheDocument();
   });
 
   it("displays footer text", () => {
-    render(<PrintableReferralsReport resources={mockResources} />);
+    render(
+      <PrintableReferralsReport
+        resources={mockResources}
+        clientDescription={"client needs help accessing Goodwill classes"}
+      />,
+    );
 
     expect(
       screen.getByText(
