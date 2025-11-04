@@ -119,6 +119,7 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
 
         Here is your personalized report with resources your case manager recommends to support your goals.
         You've already taken a great first step by exploring these options.
+
         **Your next step**: Look over the resources to see contact info and details about how to get started.
 
         ### Resource 1
