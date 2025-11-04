@@ -115,7 +115,11 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
     assert output["email"] == "test@example.com"
     assert output["message"] == dedent(
         """\
-        Here are the resources you requested:
+        Hello,
+
+        Here is your personalized report with resources your case manager recommends to support your goals.
+        You've already taken a great first step by exploring these options.
+        **Your next step**: Look over the resources to see contact info and details about how to get started.
 
         ### Resource 1
         - Referral Type: external
@@ -124,7 +128,6 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
         - Phone: 555-1234
         - Email: resource1@example.com
         - Addresses: 123 Main St
-        - Justification: Justification for Resource 1
 
         ### Resource 2
         - Referral Type: None
@@ -132,8 +135,7 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
         - Website: None
         - Phone: None
         - Email: None
-        - Addresses: None
-        - Justification: None"""
+        - Addresses: None"""
     )
 
 
