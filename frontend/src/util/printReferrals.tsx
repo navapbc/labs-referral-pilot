@@ -1,11 +1,14 @@
 import { Resource } from "@/types/resources";
 import React from "react";
 import ResourcesList from "@/components/ResourcesList";
+import ClientDetailsPromptBubble from "@/components/ClientDetailsPromptBubble";
 
 export function PrintableReferralsReport({
   resources,
+  clientDescription,
 }: {
   resources: Resource[];
+  clientDescription: string;
 }) {
   const date = new Date();
   return (
@@ -20,7 +23,7 @@ export function PrintableReferralsReport({
           {date.toLocaleTimeString()}
         </p>
       </div>
-
+      <ClientDetailsPromptBubble clientDescription={clientDescription} />
       <ResourcesList resources={resources ?? []} />
 
       <div className="text-center text-slate-500 text-[12px] mt-5 pt-4 border-t border-slate-200">
