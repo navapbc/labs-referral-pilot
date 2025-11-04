@@ -127,6 +127,9 @@ export default function Page() {
   const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
   const [activeTab, setActiveTab] = useState("find-referrals");
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined,
+  );
 
   const searchParams = useSearchParams();
 
@@ -177,14 +180,16 @@ export default function Page() {
 
     setLoading(true);
     setResult(null);
+    setErrorMessage(undefined);
     try {
       const request = clientDescription + getCollatedReferralOptions();
-      const { resultId, resources } = await fetchResources(
+      const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
         prompt_version_id,
       );
       setResultId(resultId);
+      setErrorMessage(errorMessage);
       onResources(resources);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -210,6 +215,7 @@ export default function Page() {
     setClientDescription("");
     setSelectedResources([]);
     setActionPlan(null);
+    setErrorMessage(undefined);
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -236,12 +242,20 @@ export default function Page() {
 
     setIsGeneratingActionPlan(true);
     setActionPlan(null);
+    setErrorMessage(undefined);
 
     try {
-      const plan = await fetchActionPlan(selectedResources, userEmail);
+      const { actionPlan: plan, errorMessage: planError } =
+        await fetchActionPlan(selectedResources, userEmail);
       setActionPlan(plan);
+      if (planError) {
+        setErrorMessage(planError);
+      }
     } catch (error) {
       console.error("Error generating action plan:", error);
+      setErrorMessage(
+        "The server encountered an unexpected error. Please try again later.",
+      );
     } finally {
       setIsGeneratingActionPlan(false);
     }
@@ -549,7 +563,10 @@ export default function Page() {
                     {resultId && <EmailReferralsButton resultId={resultId} />}
                   </div>
                 </div>
-                <ResourcesList resources={result ?? []} />
+                <ResourcesList
+                  resources={result ?? []}
+                  errorMessage={errorMessage}
+                />
                 {result && result.length > 0 && (
                   <ActionPlanSection
                     resources={result}
