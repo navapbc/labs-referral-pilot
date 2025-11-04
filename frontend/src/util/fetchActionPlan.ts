@@ -99,13 +99,13 @@ export async function fetchActionPlan(
 
     return { actionPlan: actionPlan as ActionPlan };
   } catch (error) {
+    clearTimeout(timer);
     // Check if the error is due to timeout
     if (error instanceof Error && error.name === "AbortError") {
       return {
         actionPlan: null,
         errorMessage: "Request timed out, please try again.",
       };
-    }
 
     // Generic error handling
     console.error("Error fetching action plan:", error);
