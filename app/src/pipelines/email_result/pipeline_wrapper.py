@@ -7,9 +7,11 @@ from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
 from openinference.instrumentation import using_metadata
 
+from src.app_config import config
 from src.common import components
 
 logger = logging.getLogger(__name__)
+tracer = config.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -26,6 +28,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         self.pipeline = pipeline
 
+    @tracer.chain(name=name)
     def run_api(self, result_id: str, email: str) -> dict:
         with using_metadata({"email": email}):
             try:

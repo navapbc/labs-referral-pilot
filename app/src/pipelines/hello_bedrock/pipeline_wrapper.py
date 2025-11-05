@@ -8,8 +8,10 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
-logger = logging.getLogger(__name__)
+from src.app_config import config
 
+logger = logging.getLogger(__name__)
+tracer = config.tracer_provider.get_tracer(__name__)
 
 system_prompt = (
     "Your role is to say hello to the name provided by the user, if no name is found politely inform the user."
@@ -28,6 +30,7 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline.add_component("llm", AmazonBedrockChatGenerator(model=model))
         self.pipeline.connect("prompt_builder", "llm")
 
+    @tracer.chain(name=name)
     # Called for the `hello_bedrock/run` endpoint
     def run_api(self, name: str) -> dict:
         messages = [

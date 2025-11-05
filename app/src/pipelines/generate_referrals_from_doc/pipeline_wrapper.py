@@ -9,11 +9,12 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
 from openinference.instrumentation import using_metadata
 
+from src.app_config import config
 from src.common import components, haystack_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
 
 logger = logging.getLogger(__name__)
-
+tracer = config.tracer_provider.get_tracer(__name__)
 
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals_from_document"
@@ -58,6 +59,7 @@ class PipelineWrapper(BasePipelineWrapper):
         # pipeline.draw(path="generate_referrals_from_document_pipeline.png")
         self.pipeline = pipeline
 
+    @tracer.chain(name=name)
     # Called for the `{pipeline_name}/run` endpoint
     # Must use the `files` parameter name for file uploads to work
     # See https://github.com/deepset-ai/hayhooks/blob/2070f51db4c0d2bb45131b87d736304996e09058/docs/concepts/pipeline-wrapper.md#file-upload-support
