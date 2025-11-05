@@ -7,11 +7,10 @@ from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
 from openinference.instrumentation import using_metadata
 
-from src.app_config import config
-from src.common import components
+from src.common import components, phoenix_utils
 
 logger = logging.getLogger(__name__)
-tracer = config.tracer_provider.get_tracer(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):

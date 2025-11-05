@@ -7,13 +7,13 @@ from haystack.components.builders import ChatPromptBuilder
 from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
-from src.app_config import config
-from src.common import haystack_utils
+from src.common import haystack_utils, phoenix_utils
 from src.common.components import OpenAIWebSearchGenerator, ReadableLogger
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
-tracer = config.tracer_provider.get_tracer(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
+
 
 class ActionPlan(BaseModel):
     title: str

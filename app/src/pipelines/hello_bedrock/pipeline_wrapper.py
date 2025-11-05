@@ -8,10 +8,10 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockChatGenerator
 
-from src.app_config import config
+from src.common import phoenix_utils
 
 logger = logging.getLogger(__name__)
-tracer = config.tracer_provider.get_tracer(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 system_prompt = (
     "Your role is to say hello to the name provided by the user, if no name is found politely inform the user."

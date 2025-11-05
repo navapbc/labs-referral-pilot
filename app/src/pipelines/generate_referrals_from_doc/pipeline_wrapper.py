@@ -9,12 +9,12 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
 from openinference.instrumentation import using_metadata
 
-from src.app_config import config
-from src.common import components, haystack_utils
+from src.common import components, haystack_utils, phoenix_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
 
 logger = logging.getLogger(__name__)
-tracer = config.tracer_provider.get_tracer(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
+
 
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals_from_document"
