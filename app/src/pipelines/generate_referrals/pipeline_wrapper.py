@@ -12,9 +12,11 @@ from haystack.core.errors import PipelineRuntimeError
 from openinference.instrumentation import using_attributes, using_metadata
 from pydantic import BaseModel
 
+from src.app_config import config
 from src.common import components, haystack_utils
 
 logger = logging.getLogger(__name__)
+tracer = config.tracer_provider.get_tracer(__name__)
 
 
 class ReferralType(str, Enum):
@@ -94,6 +96,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         self.pipeline = pipeline
 
+    @tracer.chain(name=name)
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):

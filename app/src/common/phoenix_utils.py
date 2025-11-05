@@ -54,7 +54,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     logger.info("Using phoenix.otel.register with batch_otel=%s", config.batch_otel)
     # This uses PHOENIX_COLLECTOR_ENDPOINT and PHOENIX_PROJECT_NAME env variables
     # and PHOENIX_API_KEY to handle authentication to Phoenix.
-    tracer_provider = phoenix.otel.register(
+    tracer_provider = config.tracer_provider = phoenix.otel.register(
         endpoint=trace_endpoint,
         batch=config.batch_otel,
         # Auto-instrument based on installed OpenInference dependencies

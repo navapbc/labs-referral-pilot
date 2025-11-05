@@ -7,10 +7,11 @@ from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import using_metadata
 
+from src.app_config import config
 from src.common import components
 
 logger = logging.getLogger(__name__)
-
+tracer = config.tracer_provider.get_tracer(__name__)
 
 system_msg = "This is a sample pipeline, it echoes back the system and user messages provided"
 
@@ -27,6 +28,7 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline.connect("echo_component", "logger")
         self.pipeline.connect("echo_component2", "logger")
 
+    @tracer.chain(name=name)
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
         with using_metadata({"user_id": "someone@example.com"}):

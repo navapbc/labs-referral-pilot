@@ -1,5 +1,7 @@
 from functools import cached_property
 
+from opentelemetry.trace import TracerProvider
+
 from src.adapters import db
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -37,6 +39,8 @@ class AppConfig(PydanticBaseEnvConfig):
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
+
+    tracer_provider: TracerProvider | None = None
 
 
 config = AppConfig()
