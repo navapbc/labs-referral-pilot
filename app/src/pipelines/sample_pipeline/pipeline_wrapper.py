@@ -33,11 +33,11 @@ class PipelineWrapper(BasePipelineWrapper):
         with using_metadata({"user_id": "someone@example.com"}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"
+                self.name, openinference_span_kind="chain"  # type: ignore
             ) as span:
                 result = self._run(question)
-                span.set_input(question)
-                span.set_output(result["echo_component"]["full_prompt"][-1].texts)
+                span.set_input(question)  # type: ignore
+                span.set_output(result["echo_component"]["full_prompt"][-1].texts)  # type: ignore
                 span.set_status(Status(StatusCode.OK))
                 return result
 

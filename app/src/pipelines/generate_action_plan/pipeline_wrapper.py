@@ -62,12 +62,12 @@ class PipelineWrapper(BasePipelineWrapper):
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg,call-arg
-                self.name, openinference_span_kind="chain"
+            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                self.name, openinference_span_kind="chain"  # type: ignore
             ) as span:
                 result = self._run(resource_objects, user_email)
-                span.set_input([r.name for r in resource_objects])
-                span.set_output(result["response"])
+                span.set_input([r.name for r in resource_objects])  # type: ignore
+                span.set_output(result["response"])  # type: ignore
                 span.set_status(Status(StatusCode.OK))
                 return result
 

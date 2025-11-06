@@ -72,19 +72,19 @@ class PipelineWrapper(BasePipelineWrapper):
         with using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"
+                self.name, openinference_span_kind="chain"  # type: ignore
             ) as span:
-                result = self._run(user_email, files)
-                span.set_input([file.filename for file in files])
+                result = self._run(files)
+                span.set_input([file.filename for file in files])  # type: ignore
                 try:
                     resp_obj = json.loads(result["llm"]["replies"][-1].text)
-                    span.set_output([r["name"] for r in resp_obj["resources"]])
+                    span.set_output([r["name"] for r in resp_obj["resources"]])  # type: ignore
                 except (KeyError, IndexError):
-                    span.set_output(result["llm"]["replies"][-1].text)
+                    span.set_output(result["llm"]["replies"][-1].text)  # type: ignore
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, user_email: str, files: Optional[List[UploadFile]] = None) -> dict:
+    def _run(self, files: List[UploadFile]) -> dict:
         response = self.pipeline.run(
             {
                 "logger": {
