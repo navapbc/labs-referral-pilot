@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
-from openinference.instrumentation import using_metadata
+from openinference.instrumentation import _tracers, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 
 from src.common import components, phoenix_utils
@@ -31,12 +31,13 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(self, result_id: str, email: str) -> dict:
         with using_metadata({"email": email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"  # type: ignore
+                self.name, openinference_span_kind="chain"
             ) as span:
                 result = self._run(result_id, email)
-                span.set_input(result_id)  # type: ignore
-                span.set_output(result["email_result"]["status"])  # type: ignore
+                span.set_input(result_id)
+                span.set_output(result["email_result"]["status"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 

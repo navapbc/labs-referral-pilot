@@ -8,7 +8,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
-from openinference.instrumentation import using_metadata
+from openinference.instrumentation import _tracers, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 
 from src.common import components, haystack_utils, phoenix_utils
@@ -71,16 +71,17 @@ class PipelineWrapper(BasePipelineWrapper):
 
         with using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"  # type: ignore
+                self.name, openinference_span_kind="chain"
             ) as span:
                 result = self._run(files)
-                span.set_input([file.filename for file in files])  # type: ignore
+                span.set_input([file.filename for file in files])
                 try:
                     resp_obj = json.loads(result["llm"]["replies"][-1].text)
-                    span.set_output([r["name"] for r in resp_obj["resources"]])  # type: ignore
+                    span.set_output([r["name"] for r in resp_obj["resources"]])
                 except (KeyError, IndexError):
-                    span.set_output(result["llm"]["replies"][-1].text)  # type: ignore
+                    span.set_output(result["llm"]["replies"][-1].text)
                 span.set_status(Status(StatusCode.OK))
                 return result
 

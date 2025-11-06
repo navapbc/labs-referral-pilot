@@ -10,7 +10,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
-from openinference.instrumentation import using_attributes, using_metadata
+from openinference.instrumentation import _tracers, using_attributes, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
@@ -101,16 +101,17 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"  # type: ignore
+                self.name, openinference_span_kind="chain"
             ) as span:
                 result = self._run(query, user_email, prompt_version_id)
-                span.set_input(query)  # type: ignore
+                span.set_input(query)
                 try:
                     resp_obj = json.loads(result["llm"]["replies"][-1].text)
-                    span.set_output([r["name"] for r in resp_obj["resources"]])  # type: ignore
+                    span.set_output([r["name"] for r in resp_obj["resources"]])
                 except (KeyError, IndexError):
-                    span.set_output(result["llm"]["replies"][-1].text)  # type: ignore
+                    span.set_output(result["llm"]["replies"][-1].text)
                 span.set_status(Status(StatusCode.OK))
                 return result
 

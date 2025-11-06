@@ -4,7 +4,7 @@ from pprint import pformat
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from openinference.instrumentation import using_attributes, using_metadata
+from openinference.instrumentation import _tracers, using_attributes, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
@@ -62,12 +62,13 @@ class PipelineWrapper(BasePipelineWrapper):
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"  # type: ignore
+                self.name, openinference_span_kind="chain"
             ) as span:
                 result = self._run(resource_objects, user_email)
-                span.set_input([r.name for r in resource_objects])  # type: ignore
-                span.set_output(result["response"])  # type: ignore
+                span.set_input([r.name for r in resource_objects])
+                span.set_output(result["response"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
