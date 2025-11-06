@@ -10,7 +10,6 @@ from haystack_integrations.components.generators.amazon_bedrock import AmazonBed
 
 logger = logging.getLogger(__name__)
 
-
 system_prompt = (
     "Your role is to say hello to the name provided by the user, if no name is found politely inform the user."
     "Assure them any PII is handled securely in AWS Bedrock. You should only greet the user, do not respond "

@@ -4,14 +4,16 @@ from pprint import pformat
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from openinference.instrumentation import using_attributes, using_metadata
+from openinference.instrumentation import _tracers, using_attributes, using_metadata
+from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
-from src.common import haystack_utils
+from src.common import haystack_utils, phoenix_utils
 from src.common.components import OpenAIWebSearchGenerator, ReadableLogger
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class ActionPlan(BaseModel):
@@ -59,23 +61,35 @@ class PipelineWrapper(BasePipelineWrapper):
         resource_objects = get_resources(resources)
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
-            response = self.pipeline.run(
-                {
-                    "logger": {
-                        "messages_list": [
-                            {"resource_count": len(resource_objects), "user_email": user_email}
-                        ],
-                    },
-                    "prompt_builder": {
-                        "resources": format_resources(resource_objects),
-                        "action_plan_json": action_plan_as_json,
-                    },
-                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+            # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
+            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                self.name, openinference_span_kind="chain"
+            ) as span:
+                result = self._run(resource_objects, user_email)
+                span.set_input([r.name for r in resource_objects])
+                span.set_output(result["response"])
+                span.set_status(Status(StatusCode.OK))
+                return result
+
+    def _run(self, resource_objects: list[Resource], user_email: str) -> dict:
+        response = self.pipeline.run(
+            {
+                "logger": {
+                    "messages_list": [
+                        {"resource_count": len(resource_objects), "user_email": user_email}
+                    ],
                 },
-                include_outputs_from={"llm"},
-            )
-            logger.debug("Results: %s", pformat(response, width=160))
-            return {"response": response["llm"]["replies"][0]._content[0].text}
+                "prompt_builder": {
+                    "resources": format_resources(resource_objects),
+                    "action_plan_json": action_plan_as_json,
+                },
+                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+            },
+            include_outputs_from={"llm"},
+        )
+        logger.debug("Results: %s", pformat(response, width=160))
+        return {"response": response["llm"]["replies"][0]._content[0].text}
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:

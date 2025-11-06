@@ -6,6 +6,7 @@ import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
 import phoenix.otel
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace import NoOpTracerProvider, TracerProvider
 
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
@@ -38,6 +39,9 @@ def service_alive() -> bool:
     return False
 
 
+tracer_provider: TracerProvider = NoOpTracerProvider()
+
+
 def configure_phoenix(only_if_alive: bool = True) -> None:
     "Set only_if_alive=True to fail fast if Phoenix is not reachable."
     if only_if_alive and not service_alive():
@@ -54,6 +58,7 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     logger.info("Using phoenix.otel.register with batch_otel=%s", config.batch_otel)
     # This uses PHOENIX_COLLECTOR_ENDPOINT and PHOENIX_PROJECT_NAME env variables
     # and PHOENIX_API_KEY to handle authentication to Phoenix.
+    global tracer_provider
     tracer_provider = phoenix.otel.register(
         endpoint=trace_endpoint,
         batch=config.batch_otel,

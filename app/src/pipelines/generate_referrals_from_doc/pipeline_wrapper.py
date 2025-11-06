@@ -1,3 +1,4 @@
+import json
 import logging
 from pprint import pformat
 from typing import List, Optional
@@ -7,16 +8,18 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter, PyPDFToDocument
-from openinference.instrumentation import using_metadata
+from openinference.instrumentation import _tracers, using_metadata
+from opentelemetry.trace.status import Status, StatusCode
 
-from src.common import components, haystack_utils
+from src.common import components, haystack_utils, phoenix_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
 
 logger = logging.getLogger(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):
-    name = "generate_referrals_from_document"
+    name = "generate_referrals_from_doc"
 
     def setup(self) -> None:
         pipeline = Pipeline()
@@ -67,18 +70,34 @@ class PipelineWrapper(BasePipelineWrapper):
             raise HTTPException(status_code=400, detail="No files provided for processing.")
 
         with using_metadata({"user_id": user_email}):
-            response = self.pipeline.run(
-                {
-                    "logger": {
-                        "messages_list": [{"filenames": [file.filename for file in files]}],
-                    },
-                    "files_to_bytestreams": {"files": files},
-                    "prompt_builder": {
-                        "response_json": response_schema,
-                    },
-                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+            # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
+            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                self.name, openinference_span_kind="chain"
+            ) as span:
+                result = self._run(files)
+                span.set_input([file.filename for file in files])
+                try:
+                    resp_obj = json.loads(result["llm"]["replies"][-1].text)
+                    span.set_output([r["name"] for r in resp_obj["resources"]])
+                except (KeyError, IndexError):
+                    span.set_output(result["llm"]["replies"][-1].text)
+                span.set_status(Status(StatusCode.OK))
+                return result
+
+    def _run(self, files: List[UploadFile]) -> dict:
+        response = self.pipeline.run(
+            {
+                "logger": {
+                    "messages_list": [{"filenames": [file.filename for file in files]}],
                 },
-                include_outputs_from={"llm"},
-            )
-            logger.info("Pipeline result: %s", pformat(response, width=160))
-            return response
+                "files_to_bytestreams": {"files": files},
+                "prompt_builder": {
+                    "response_json": response_schema,
+                },
+                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+            },
+            include_outputs_from={"llm"},
+        )
+        logger.info("Pipeline result: %s", pformat(response, width=160))
+        return response

@@ -1,3 +1,4 @@
+import json
 import logging
 from enum import Enum
 from pprint import pformat
@@ -9,12 +10,14 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
-from openinference.instrumentation import using_attributes, using_metadata
+from openinference.instrumentation import _tracers, using_attributes, using_metadata
+from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
-from src.common import components, haystack_utils
+from src.common import components, haystack_utils, phoenix_utils
 
 logger = logging.getLogger(__name__)
+tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class ReferralType(str, Enum):
@@ -97,37 +100,53 @@ class PipelineWrapper(BasePipelineWrapper):
     # Called for the `generate-referrals/run` endpoint
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
-            # Retrieve the requested prompt_version_id and error if requested prompt version is not found
-            try:
-                prompt_template = haystack_utils.get_phoenix_prompt(
-                    "generate_referrals", prompt_version_id
-                )
-            except httpx.HTTPStatusError as he:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
-                ) from he
+            # Must set using_metadata context before calling tracer.start_as_current_span()
+            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
+            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                self.name, openinference_span_kind="chain"
+            ) as span:
+                result = self._run(query, user_email, prompt_version_id)
+                span.set_input(query)
+                try:
+                    resp_obj = json.loads(result["llm"]["replies"][-1].text)
+                    span.set_output([r["name"] for r in resp_obj["resources"]])
+                except (KeyError, IndexError):
+                    span.set_output(result["llm"]["replies"][-1].text)
+                span.set_status(Status(StatusCode.OK))
+                return result
 
-            try:
-                response = self.pipeline.run(
-                    {
-                        "logger": {
-                            "messages_list": [{"query": query, "user_email": user_email}],
-                        },
-                        "prompt_builder": {
-                            "template": prompt_template,
-                            "query": query,
-                            "response_json": response_schema,
-                        },
-                        "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+    def _run(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
+        # Retrieve the requested prompt_version_id and error if requested prompt version is not found
+        try:
+            prompt_template = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id
+            )
+        except httpx.HTTPStatusError as he:
+            raise HTTPException(
+                status_code=422,
+                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
+            ) from he
+
+        try:
+            response = self.pipeline.run(
+                {
+                    "logger": {
+                        "messages_list": [{"query": query, "user_email": user_email}],
                     },
-                    include_outputs_from={"llm", "save_result"},
-                )
-                logger.debug("Results: %s", pformat(response, width=160))
-                return response
-            except PipelineRuntimeError as re:
-                logger.error("PipelineRuntimeError: %s", re, exc_info=True)
-                raise HTTPException(status_code=500, detail=str(re)) from re
-            except Exception as e:
-                logger.error("Error %s: %s", type(e), e, exc_info=True)
-                raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+                    "prompt_builder": {
+                        "template": prompt_template,
+                        "query": query,
+                        "response_json": response_schema,
+                    },
+                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                },
+                include_outputs_from={"llm", "save_result"},
+            )
+            logger.debug("Results: %s", pformat(response, width=160))
+            return response
+        except PipelineRuntimeError as re:
+            logger.error("PipelineRuntimeError: %s", re, exc_info=True)
+            raise HTTPException(status_code=500, detail=str(re)) from re
+        except Exception as e:
+            logger.error("Error %s: %s", type(e), e, exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
