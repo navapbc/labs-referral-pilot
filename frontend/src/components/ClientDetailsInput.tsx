@@ -276,7 +276,10 @@ export function ClientDetailsInput({
       <Button
         type="button"
         onClick={onFindResources}
-        disabled={!clientDescription.trim() || loading}
+        disabled={
+          loading ||
+          (selectedCategories.length === 0 && !clientDescription.trim())
+        }
         className="min-w-[16rem] generate-referrals-button text-lg pt-6 pb-6"
         data-testid="findResourcesButton"
       >
