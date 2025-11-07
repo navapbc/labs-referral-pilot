@@ -57,7 +57,9 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
-    def run_api(self, resources: list[Resource] | list[dict], user_email: str, user_query: str) -> dict:
+    def run_api(
+        self, resources: list[Resource] | list[dict], user_email: str, user_query: str
+    ) -> dict:
         resource_objects = get_resources(resources)
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
