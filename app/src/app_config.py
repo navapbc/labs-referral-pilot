@@ -33,7 +33,7 @@ class AppConfig(PydanticBaseEnvConfig):
     PROMPT_VERSIONS: dict = {
         "extract_supports": "UHJvbXB0VmVyc2lvbjo0Ng==",
         "generate_referrals": "UHJvbXB0VmVyc2lvbjo0OA==",
-        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo1MQ==",
+        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo1Mg==",
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
