@@ -162,7 +162,7 @@ export default function Page() {
 
     try {
       const { actionPlan: plan, errorMessage: planError } =
-        await fetchActionPlan(selectedResources, userEmail);
+        await fetchActionPlan(selectedResources, userEmail, clientDescription);
       setActionPlan(plan);
       if (planError) {
         setErrorMessage(planError);

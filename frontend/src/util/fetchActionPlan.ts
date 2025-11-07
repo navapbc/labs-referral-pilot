@@ -52,6 +52,7 @@ function fixJsonControlCharacters(jsonString: string): string {
 export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
+  userQuery: string,
 ): Promise<{ actionPlan: ActionPlan | null; errorMessage?: string }> {
   const apiDomain = await getApiDomain();
   const url = apiDomain + "generate_action_plan/run";
@@ -69,6 +70,7 @@ export async function fetchActionPlan(
       body: JSON.stringify({
         resources: resources,
         user_email: userEmail,
+        user_query: userQuery,
       }),
       cache: "no-store",
       signal: ac.signal,
