@@ -45,7 +45,8 @@ class PipelineWrapper(BasePipelineWrapper):
         prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                template=prompt_template, required_variables=["resources", "action_plan_json", "user_query"]
+                template=prompt_template,
+                required_variables=["resources", "action_plan_json", "user_query"],
             ),
             name="prompt_builder",
         )
