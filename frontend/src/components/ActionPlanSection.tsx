@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Resource } from "@/types/resources";
 import { ActionPlan } from "@/util/fetchActionPlan";
-import { GeneratedActionPlanDisplay } from "@/components/GeneratedActionPlanDisplay";
+import { ActionPlanDisplay } from "@/components/ActionPlanDisplay";
 
 interface ActionPlanSectionProps {
   resources: Resource[];
@@ -104,7 +104,7 @@ export function ActionPlanSection({
       </Card>
 
       {/* Action Plan Display */}
-      {actionPlan && <GeneratedActionPlanDisplay actionPlan={actionPlan} />}
+      {actionPlan && <ActionPlanDisplay actionPlan={actionPlan} />}
     </>
   );
 }

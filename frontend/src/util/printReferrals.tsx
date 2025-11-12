@@ -2,7 +2,7 @@ import { Resource } from "@/types/resources";
 import React from "react";
 import ResourcesList from "@/components/ResourcesList";
 import ClientDetailsPromptBubble from "@/components/ClientDetailsPromptBubble";
-import { GeneratedActionPlanDisplay } from "@/components/GeneratedActionPlanDisplay";
+import { ActionPlanDisplay } from "@/components/ActionPlanDisplay";
 import { ActionPlan } from "@/util/fetchActionPlan";
 
 export function PrintableReferralsReport({
@@ -31,7 +31,7 @@ export function PrintableReferralsReport({
       <ResourcesList resources={resources ?? []} />
       {actionPlan && (
         <div className="print:mt-3">
-          <GeneratedActionPlanDisplay actionPlan={actionPlan} />
+          <ActionPlanDisplay actionPlan={actionPlan} />
         </div>
       )}
 

@@ -2,11 +2,7 @@ import { ActionPlan } from "@/util/fetchActionPlan";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 import { parseMarkdownToHTML } from "@/util/markdown";
-export function GeneratedActionPlanDisplay({
-  actionPlan,
-}: {
-  actionPlan: ActionPlan;
-}) {
+export function ActionPlanDisplay({ actionPlan }: { actionPlan: ActionPlan }) {
   return (
     <Card className="bg-blue-50 border-blue-200 shadow-sm mb-5">
       <CardHeader>

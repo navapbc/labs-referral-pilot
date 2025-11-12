@@ -7,14 +7,6 @@ export interface ActionPlan {
   content: string;
 }
 
-export const sampleActionPlan: ActionPlan = {
-  title: "Expunge your record after fulfilling probation requirements",
-  summary:
-    "Having a clean record will help you in your job application process.",
-  content:
-    "### Project RIO\\n**How to apply:**\\n- Call the Project RIO line and ask for the Austin office: 1-800-453-8140. ([hrw.org](https://www.hrw.org/news/2010/07/20/texas-prison-resources?utm_source=openai))\\n- Visit or mail to the TWC Project RIO office at 101 East 15th Street, Room 506-T, Austin, TX 78778 to set an intake appointment. ([hrw.org](https://www.hrw.org/news/2010/07/20/texas-prison-resources?utm_source=openai))\\n\\n**Documents needed:**\\n- Photo ID (state ID or driver’s license)\\n- Proof of release/parole papers or probation completion\\n- Social Security card or number\\n- Recent resume or list of past jobs (if available)\\n\\n**Timeline:**\\n- First appointment often same week to 2 weeks.\\n\\n**Key tip:**\\n- Tell staff you are eligible for employer incentives (Work Opportunity Tax Credit). Project RIO staff can connect you to employers and note hiring incentives. ([ojp.gov](https://www.ojp.gov/ncjrs/virtual-library/abstracts/project-rio-procedures-and-reporting-manual?utm_source=openai))\\n",
-};
-
 /**
  * Fixes unescaped control characters in JSON string values
  * This handles cases where the LLM returns JSON with literal newlines, tabs, etc.
