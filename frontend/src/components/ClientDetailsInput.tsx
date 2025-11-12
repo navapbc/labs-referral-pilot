@@ -280,7 +280,7 @@ export function ClientDetailsInput({
           loading ||
           (selectedCategories.length === 0 && !clientDescription.trim())
         }
-        className="min-w-[16rem] generate-referrals-button text-lg pt-6 pb-6"
+        className="min-w-[16rem] w-full row-auto generate-referrals-button text-lg pt-6 pb-6"
         data-testid="findResourcesButton"
       >
         {!loading && (
@@ -290,7 +290,7 @@ export function ClientDetailsInput({
         )}
         {loading && (
           <>
-            <Spinner className="" />
+            <Spinner className="w-5 h-5" />
             Generating Resources...
           </>
         )}

@@ -331,6 +331,7 @@ export default function Page() {
         <PrintableReferralsReport
           resources={result ?? []}
           clientDescription={clientDescription}
+          actionPlan={actionPlan}
         />
       </div>
     </>
