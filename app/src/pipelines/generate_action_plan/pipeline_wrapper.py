@@ -45,7 +45,8 @@ class PipelineWrapper(BasePipelineWrapper):
         prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                template=prompt_template, required_variables=["resources", "action_plan_json"]
+                template=prompt_template,
+                required_variables=["resources", "action_plan_json", "user_query"],
             ),
             name="prompt_builder",
         )
@@ -57,7 +58,9 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-action-plan/run` endpoint
-    def run_api(self, resources: list[Resource] | list[dict], user_email: str) -> dict:
+    def run_api(
+        self, resources: list[Resource] | list[dict], user_email: str, user_query: str
+    ) -> dict:
         resource_objects = get_resources(resources)
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
@@ -66,13 +69,13 @@ class PipelineWrapper(BasePipelineWrapper):
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(resource_objects, user_email)
+                result = self._run(resource_objects, user_email, user_query)
                 span.set_input([r.name for r in resource_objects])
                 span.set_output(result["response"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, resource_objects: list[Resource], user_email: str) -> dict:
+    def _run(self, resource_objects: list[Resource], user_email: str, user_query: str) -> dict:
         response = self.pipeline.run(
             {
                 "logger": {
@@ -83,6 +86,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "prompt_builder": {
                     "resources": format_resources(resource_objects),
                     "action_plan_json": action_plan_as_json,
+                    "user_query": user_query,
                 },
                 "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             },

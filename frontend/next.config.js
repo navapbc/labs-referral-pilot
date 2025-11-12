@@ -19,6 +19,16 @@ const nextConfig = {
   output: "standalone",
   // Continue to support older browsers (ES5)
   transpilePackages: [],
+
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/generate-referrals",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

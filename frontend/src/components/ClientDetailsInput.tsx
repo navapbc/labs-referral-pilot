@@ -119,7 +119,7 @@ export function ClientDetailsInput({
   return (
     <>
       <Card
-        className="bg-gray-50 border-gray-200 focus:ring-blue-500 focus:outline-none focus:ring-0"
+        className="bg-gray-50 border-gray-200"
         data-testid="referralFiltersSection"
       >
         <CardContent className="p-4 space-y-4">
@@ -268,7 +268,7 @@ export function ClientDetailsInput({
           id="clientDescriptionInput"
           value={clientDescription}
           onChange={(e) => onClientDescriptionChange(e.target.value)}
-          className="min-h-[8rem] min-w-[16rem] text-base focus:border-blue-500 focus:outline-none focus:ring-0"
+          className="min-h-[8rem] min-w-[16rem] text-base"
           data-testid="clientDescriptionInput"
         />
       </div>
@@ -276,8 +276,11 @@ export function ClientDetailsInput({
       <Button
         type="button"
         onClick={onFindResources}
-        disabled={!clientDescription.trim() || loading}
-        className="min-w-[16rem] w-full row-auto generate-referrals-button text-lg pt-6 pb-6 focus:border-blue-500 focus:outline-none focus:ring-0"
+        disabled={
+          loading ||
+          (selectedCategories.length === 0 && !clientDescription.trim())
+        }
+        className="min-w-[16rem] w-full row-auto generate-referrals-button text-lg pt-6 pb-6"
         data-testid="findResourcesButton"
       >
         {!loading && (
