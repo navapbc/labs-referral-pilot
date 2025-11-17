@@ -380,6 +380,7 @@ export default function Page() {
         <PrintableReferralsReport
           resources={retainedResources ?? []}
           clientDescription={clientDescription}
+          actionPlan={actionPlan}
         />
       </div>
     </>
