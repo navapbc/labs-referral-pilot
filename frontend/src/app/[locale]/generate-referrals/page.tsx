@@ -31,6 +31,7 @@ import { RemoveResourceNotification } from "@/components/RemoveResourceNotificat
 
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [result, setResult] = useState<Resource[] | null>(null);
   const [resultId, setResultId] = useState("");
   const [loading, setLoading] = useState(false);

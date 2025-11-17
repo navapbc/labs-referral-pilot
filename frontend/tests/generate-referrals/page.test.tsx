@@ -738,12 +738,10 @@ describe("Generate Referrals Page", () => {
         },
       ];
 
-      jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue({
-          resultId: "test-result-id",
-          resources: mockMultipleResources,
-        });
+      jest.spyOn(fetchResourcesModule, "fetchResources").mockResolvedValue({
+        resultId: "test-result-id",
+        resources: mockMultipleResources,
+      });
 
       render(<Page />);
 
@@ -770,7 +768,6 @@ describe("Generate Referrals Page", () => {
 
       // Verify the second resource is still present
       expect(screen.getAllByText("Test Resource 2")).toHaveLength(3);
-
     });
   });
 });
