@@ -26,7 +26,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         pipeline = Pipeline(max_runs_per_component=3)
 
         # Replace LoadSupports() with retrieval from vector DB
-        pipeline.add_component("query_embedder", SentenceTransformersTextEmbedder())
+        pipeline.add_component("query_embedder", SentenceTransformersTextEmbedder(model=direct.embedding_model))
         pipeline.add_component("retriever", ChromaEmbeddingRetriever(document_store))
         pipeline.add_component(
             "output_adapter",
