@@ -14,14 +14,30 @@ const mockResource: Resource = {
 };
 
 describe("ResourcesList", () => {
+  let mockHandleRemoveResource: jest.Mock;
+
+  beforeEach(() => {
+    mockHandleRemoveResource = jest.fn();
+  });
+
   it("renders 'No resources found' when list is empty", () => {
-    render(<ResourcesList resources={[]} />);
+    render(
+      <ResourcesList
+        resources={[]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByText("No resources found.")).toBeInTheDocument();
   });
 
   it("renders single resource with all fields", () => {
-    render(<ResourcesList resources={[mockResource]} />);
+    render(
+      <ResourcesList
+        resources={[mockResource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByText("Test Resource")).toBeInTheDocument();
     expect(screen.getByText("Test description")).toBeInTheDocument();
@@ -37,7 +53,12 @@ describe("ResourcesList", () => {
       { name: "Resource 3", description: "Third resource" },
     ];
 
-    render(<ResourcesList resources={resources} />);
+    render(
+      <ResourcesList
+        resources={resources}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByText("Resource 1")).toBeInTheDocument();
     expect(screen.getByText("Resource 2")).toBeInTheDocument();
@@ -50,7 +71,12 @@ describe("ResourcesList", () => {
       referral_type: "goodwill",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByTestId("goodwill_referral")).toBeInTheDocument();
   });
@@ -61,7 +87,12 @@ describe("ResourcesList", () => {
       referral_type: "government",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByTestId("government_referral")).toBeInTheDocument();
   });
@@ -72,7 +103,12 @@ describe("ResourcesList", () => {
       referral_type: "external",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByTestId("external_referral")).toBeInTheDocument();
   });
@@ -83,7 +119,12 @@ describe("ResourcesList", () => {
       description: "No type specified",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.queryByText("Goodwill")).not.toBeInTheDocument();
     expect(screen.queryByText("Government")).not.toBeInTheDocument();
@@ -91,7 +132,12 @@ describe("ResourcesList", () => {
   });
 
   it("renders website link with proper attributes", () => {
-    render(<ResourcesList resources={[mockResource]} />);
+    render(
+      <ResourcesList
+        resources={[mockResource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     const link = screen.getByRole("link", { name: /example.com/i });
     expect(link).toHaveAttribute("href", "https://example.com");
@@ -105,7 +151,12 @@ describe("ResourcesList", () => {
       website: "example.com",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     const link = screen.getByRole("link", { name: /example.com/i });
     expect(link).toHaveAttribute("href", "https://example.com");
@@ -117,7 +168,12 @@ describe("ResourcesList", () => {
       addresses: ["123 Main St", "456 Oak Ave", "789 Pine Rd"],
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(
       screen.getByText(/123 Main St \| 456 Oak Ave \| 789 Pine Rd/),
@@ -130,7 +186,12 @@ describe("ResourcesList", () => {
       phones: ["555-1111", "555-2222"],
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByText(/555-1111 \| 555-2222/)).toBeInTheDocument();
   });
@@ -142,7 +203,12 @@ describe("ResourcesList", () => {
       { name: "Third" },
     ];
 
-    render(<ResourcesList resources={resources} />);
+    render(
+      <ResourcesList
+        resources={resources}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
@@ -154,7 +220,12 @@ describe("ResourcesList", () => {
       name: "Minimal Resource",
     };
 
-    render(<ResourcesList resources={[resource]} />);
+    render(
+      <ResourcesList
+        resources={[resource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
 
     expect(screen.queryByText(/Address/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Phone/)).not.toBeInTheDocument();
@@ -162,14 +233,24 @@ describe("ResourcesList", () => {
   });
 
   it("passes accessibility scan with single resource", async () => {
-    const { container } = render(<ResourcesList resources={[mockResource]} />);
+    const { container } = render(
+      <ResourcesList
+        resources={[mockResource]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
     const results = await axe(container);
 
     expect(results).toHaveNoViolations();
   });
 
   it("passes accessibility scan with empty list", async () => {
-    const { container } = render(<ResourcesList resources={[]} />);
+    const { container } = render(
+      <ResourcesList
+        resources={[]}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
     const results = await axe(container);
 
     expect(results).toHaveNoViolations();
@@ -181,7 +262,12 @@ describe("ResourcesList", () => {
       { name: "Resource 2", description: "Second" },
     ];
 
-    const { container } = render(<ResourcesList resources={resources} />);
+    const { container } = render(
+      <ResourcesList
+        resources={resources}
+        handleRemoveResource={mockHandleRemoveResource}
+      />,
+    );
     const results = await axe(container);
 
     expect(results).toHaveNoViolations();
