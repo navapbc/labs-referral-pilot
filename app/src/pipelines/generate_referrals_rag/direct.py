@@ -120,7 +120,7 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("logger", components.ReadableLogger())
         pipeline.connect("output_validator.valid_replies", "logger")
 
-        pipeline.draw(path="generate_referrals_rag_pipeline.png")
+        # pipeline.draw(path="generate_referrals_rag_direct_pipeline.png")
 
         self.pipeline = pipeline
 
@@ -324,22 +324,22 @@ def export_db_supports_to_md_file() -> None:  # pragma: no cover
             f.write("\n\n".join(supports))
 
 
-def populate_vector_db() -> None:  # pragma: no cover
+def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
     # Check if the vector DB path exists
-    if os.path.exists("chroma_db"):
-        # Check if the vector DB is already populated
-        if (doc_count := document_store.count_documents()) > 0:
-            logger.info("Skipping: vector DB already populated with %d documents.", doc_count)
-            return
+    if not os.path.exists("chroma_db") or document_store.count_documents() == 0:
+        logger.info("Ingesting documents into vector DB...")
+        ingest_documents(
+            [
+                "referral-docs-for-RAG/LocationListInfo (5).pdf",
+                # "referral-docs-for-RAG/Basic Needs Resource Guide.pdf",
+                "referral-docs-for-RAG/extracted_support_entries.md",
+                "referral-docs-for-RAG/from-Sharepoint/Austin Area Resource List 2025.pdf",
+            ]
+        )
+    else:
+        logger.info("Vector DB already populated.")
 
-    ingest_documents(
-        [
-            "referral-docs-for-RAG/LocationListInfo (5).pdf",
-            # "referral-docs-for-RAG/Basic Needs Resource Guide.pdf",
-            "referral-docs-for-RAG/extracted_support_entries.md",
-            "referral-docs-for-RAG/from-Sharepoint/Austin Area Resource List 2025.pdf",
-        ]
-    )
+    return document_store
 
 
 def ingest_documents(sources: list[str]) -> None:
@@ -424,7 +424,8 @@ def rag_query(query: str, user_email: str) -> dict:
 
 ## Query endpoint:
 # make start
-# curl -X 'POST' 'http://localhost:4000/generate_referrals_rag/run' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"query": "rent assistance", "user_email": "my_email"}'
+# curl -X 'POST' 'http://localhost:4000/generate_referrals_rag/run' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"query": "rent assistance", "user_email": "my_email"}' \
+#   | jq -r '.result.llm.replies[0]._content[0].text' | jq .
 
 
 def print_retrieved_docs(docs: list[Document]) -> None:
