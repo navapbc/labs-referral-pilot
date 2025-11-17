@@ -631,4 +631,146 @@ describe("Generate Referrals Page", () => {
       expect(screen.getByTestId("referralFiltersSection")).toBeInTheDocument();
     });
   });
+
+  describe("Remove Resource", () => {
+    it("removes a resource when the Remove button is clicked", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Generate resources first
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for resources to appear
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Verify the resource is initially present
+      expect(screen.getAllByText("Test Resource")).toHaveLength(3); // resource card, print view, and action plan
+
+      // Click the Remove button for the first resource
+      const removeButton = screen.getAllByTestId("remove-resource-button-0")[0]; // Button is on the page twice, rendered and print view
+      await user.click(removeButton);
+
+      // Verify the resource is removed
+      await waitFor(() => {
+        expect(screen.queryAllByText("Test Resource")).toHaveLength(0);
+      });
+
+      // Verify undo notification appears
+      expect(screen.getByText("Resource removed")).toBeInTheDocument();
+    });
+
+    it("adds the removed resource back when undo is clicked", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Generate resources first
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for resources to appear
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Click the Remove button
+      const removeButton = screen.getAllByTestId("remove-resource-button-0")[0]; // [0] is rendered, not printed button
+      await user.click(removeButton);
+
+      // Wait for resource to be removed
+      await waitFor(() => {
+        expect(screen.queryAllByText("Test Resource")).toHaveLength(0);
+      });
+
+      // Click the Undo button
+      const undoButton = screen.getByText("Undo");
+      await user.click(undoButton);
+
+      // Verify the resource is added back
+      await waitFor(() => {
+        expect(screen.getAllByText("Test Resource")).toHaveLength(3);
+      });
+
+      // Verify undo notification is gone
+      expect(screen.queryByText("Resource removed")).not.toBeInTheDocument();
+    });
+
+    it("ensures removed resource is not in Generate Action Plan section", async () => {
+      const user = userEvent.setup();
+
+      // Create a mock with multiple resources
+      const mockMultipleResources: Resource[] = [
+        {
+          name: "Test Resource 1",
+          addresses: ["123 Test St"],
+          phones: ["555-1234"],
+          emails: ["test1@example.com"],
+          website: "https://example1.com",
+          description: "Test description 1",
+          justification: "Test justification 1",
+        },
+        {
+          name: "Test Resource 2",
+          addresses: ["456 Test Ave"],
+          phones: ["555-5678"],
+          emails: ["test2@example.com"],
+          website: "https://example2.com",
+          description: "Test description 2",
+          justification: "Test justification 2",
+        },
+      ];
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue({
+          resultId: "test-result-id",
+          resources: mockMultipleResources,
+        });
+
+      render(<Page />);
+
+      // Generate resources
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for resources to appear
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Remove the first resource
+      const removeButton = screen.getAllByTestId("remove-resource-button-0")[0];
+      await user.click(removeButton);
+
+      // Wait for the first resource to be removed from the display
+      await waitFor(() => {
+        expect(screen.queryAllByText("Test Resource 1")).toHaveLength(0);
+      });
+
+      // Verify the second resource is still present
+      expect(screen.getAllByText("Test Resource 2")).toHaveLength(3);
+
+    });
+  });
 });

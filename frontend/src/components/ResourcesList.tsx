@@ -2,7 +2,7 @@ import { Resource } from "@/types/resources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import React from "react";
-import { HandHeart, Landmark } from "lucide-react";
+import { HandHeart, Landmark, X } from "lucide-react";
 
 const referralTypeIndicator = (referralType: string | undefined) => {
   switch (referralType) {
@@ -57,36 +57,43 @@ const normalizeUrl = (url: string) => {
   return `https://${trimmed}`;
 };
 
+type ResourcesListProps = {
+  resources: Resource[];
+  errorMessage?: string;
+  handleRemoveResource: (resource: Resource) => void;
+};
+
 const ResourcesList = ({
   resources,
   errorMessage,
-}: {
-  resources: Resource[];
-  errorMessage?: string;
-}) => {
+  handleRemoveResource,
+}: ResourcesListProps) => {
   return resources.length === 0 ? (
     <div className="m-3">{errorMessage || "No resources found."}</div>
   ) : (
     <div className="mt-2">
       {resources.map((r, i) => (
-        <Card key={i} className="bg-white shadow-sm mb-5 min-w-[16rem]">
+        <Card
+          key={i}
+          className="relative bg-white shadow-sm mb-5 min-w-[16rem]"
+        >
           {referralTypeIndicator(r.referral_type)}
+          {/* Remove button */}
+          <button
+            onClick={() => handleRemoveResource(r)}
+            className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200 print:hidden"
+            title="Remove resource"
+            data-testid={`remove-resource-button-${i}`}
+          >
+            <X className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Remove</span>
+          </button>
           <CardHeader className="p-3 ml-3">
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
                 {i + 1}
               </span>
               <div>{r.name}</div>
-              {!!r.website && (
-                <Link
-                  href={normalizeUrl(r.website)}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  className="text-base text-gray-500 flex items-center gap-2"
-                >
-                  {r.website}
-                </Link>
-              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="ml-9 mr-4">
@@ -111,6 +118,19 @@ const ResourcesList = ({
               <div className="mt-1">
                 <span className="font-semibold">Email:</span>{" "}
                 {r.emails.join(" | ")}
+              </div>
+            )}
+            {!!r.website && (
+              <div className="mt-1">
+                <span className="font-semibold">Website:</span>{" "}
+                <Link
+                  href={normalizeUrl(r.website)}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="text-base text-gray-800"
+                >
+                  {r.website}
+                </Link>
               </div>
             )}
           </CardContent>

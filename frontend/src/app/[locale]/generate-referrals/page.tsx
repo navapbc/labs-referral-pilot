@@ -27,6 +27,7 @@ import {
   ClientDetailsInput,
   resourceCategories,
 } from "@/components/ClientDetailsInput";
+import { RemoveResourceNotification } from "@/components/RemoveResourceNotification";
 
 export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
@@ -53,6 +54,10 @@ export default function Page() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCheckingUser, setIsCheckingUser] = useState(true);
+
+  // Remove functionality state
+  const [retainedResources, setRetainedResources] = useState<Resource[]>();
+  const [recentlyRemoved, setRecentlyRemoved] = useState<Resource | null>(null);
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -88,6 +93,7 @@ export default function Page() {
 
   const onResources = (resources: Resource[]) => {
     setResult(resources);
+    setRetainedResources(resources); // this creates a copy of the original list of resources, may be edited by the user
     setReadyToPrint(true);
   };
 
@@ -145,11 +151,11 @@ export default function Page() {
   }
 
   function handleSelectAllResources() {
-    if (!result) return;
-    if (selectedResources.length === result.length) {
+    if (!retainedResources) return;
+    if (selectedResources.length === retainedResources.length) {
       setSelectedResources([]);
     } else {
-      setSelectedResources(result);
+      setSelectedResources(retainedResources);
     }
   }
 
@@ -210,6 +216,43 @@ export default function Page() {
   if (isCheckingUser) {
     return null;
   }
+
+  // Remove resource handler
+  const handleRemoveResource = (resourceToRemove: Resource) => {
+    setRecentlyRemoved(resourceToRemove);
+
+    // Immediately remove from retainedResources
+    setRetainedResources((current) =>
+      current?.filter((r) => r !== resourceToRemove),
+    );
+
+    // Auto-clear the undo notification after 5 seconds
+    setTimeout(() => {
+      setRecentlyRemoved((current) => {
+        // If the resource is still marked as recently removed, clear it
+        if (current === resourceToRemove) {
+          return null;
+        }
+        return current;
+      });
+    }, 7500);
+  };
+
+  // Undo remove handler
+  const handleUndoRemove = () => {
+    if (recentlyRemoved) {
+      // Add the resource back to retainedResources
+      setRetainedResources((current) => {
+        if (current) {
+          return [...current, recentlyRemoved];
+        }
+        return [recentlyRemoved];
+      });
+
+      // Clear the recently removed state
+      setRecentlyRemoved(null);
+    }
+  };
 
   return (
     <>
@@ -306,12 +349,13 @@ export default function Page() {
                   clientDescription={clientDescription}
                 />
                 <ResourcesList
-                  resources={result ?? []}
+                  resources={retainedResources ?? []}
                   errorMessage={errorMessage}
+                  handleRemoveResource={handleRemoveResource}
                 />
-                {result && result.length > 0 && (
+                {retainedResources && retainedResources.length > 0 && (
                   <ActionPlanSection
-                    resources={result}
+                    resources={retainedResources}
                     selectedResources={selectedResources}
                     actionPlan={actionPlan}
                     isGeneratingActionPlan={isGeneratingActionPlan}
@@ -326,10 +370,14 @@ export default function Page() {
         </div>
       )}
 
+      {recentlyRemoved && (
+        <RemoveResourceNotification handleUndoRemove={handleUndoRemove} />
+      )}
+
       {/* ----- Print-only section ----- */}
       <div className="hidden print:block">
         <PrintableReferralsReport
-          resources={result ?? []}
+          resources={retainedResources ?? []}
           clientDescription={clientDescription}
         />
       </div>
