@@ -59,6 +59,9 @@ export default function Page() {
   // Remove functionality state
   const [retainedResources, setRetainedResources] = useState<Resource[]>();
   const [recentlyRemoved, setRecentlyRemoved] = useState<Resource | null>(null);
+  const [removedResourceIndex, setRemovedResourceIndex] = useState<
+    number | null
+  >(null);
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -220,14 +223,27 @@ export default function Page() {
 
   // Remove resource handler
   const handleRemoveResource = (resourceToRemove: Resource) => {
+    // Find and store the index before removing
+    const index = retainedResources?.findIndex(
+      (r) => r.name === resourceToRemove.name,
+    );
+    if (index !== undefined && index !== -1) {
+      setRemovedResourceIndex(index);
+    }
+
     setRecentlyRemoved(resourceToRemove);
 
     // Immediately remove from retainedResources
     setRetainedResources((current) =>
-      current?.filter((r) => r !== resourceToRemove),
+      current?.filter((r) => r.name !== resourceToRemove.name),
     );
 
-    // Auto-clear the undo notification after 5 seconds
+    // Remove from selectedResources as well
+    setSelectedResources((current) =>
+      current.filter((r) => r.name !== resourceToRemove.name),
+    );
+
+    // Auto-clear the undo notification after 7.5 seconds
     setTimeout(() => {
       setRecentlyRemoved((current) => {
         // If the resource is still marked as recently removed, clear it
@@ -236,22 +252,33 @@ export default function Page() {
         }
         return current;
       });
+      setRemovedResourceIndex(null);
     }, 7500);
   };
 
   // Undo remove handler
   const handleUndoRemove = () => {
     if (recentlyRemoved) {
-      // Add the resource back to retainedResources
+      // Add the resource back to retainedResources at its original index
       setRetainedResources((current) => {
-        if (current) {
-          return [...current, recentlyRemoved];
+        if (!current) {
+          return [recentlyRemoved];
         }
-        return [recentlyRemoved];
+
+        // If we have a stored index, insert at that position
+        if (removedResourceIndex !== null && removedResourceIndex >= 0) {
+          const newArray = [...current];
+          newArray.splice(removedResourceIndex, 0, recentlyRemoved);
+          return newArray;
+        }
+
+        // Fallback: append to the end
+        return [...current, recentlyRemoved];
       });
 
       // Clear the recently removed state
       setRecentlyRemoved(null);
+      setRemovedResourceIndex(null);
     }
   };
 
