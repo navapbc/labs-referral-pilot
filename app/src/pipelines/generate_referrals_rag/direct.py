@@ -303,7 +303,9 @@ When to recommend: Clients without high school diploma asking about GED should b
 
 # View contents: poetry run chroma browse documents
 document_store = ChromaDocumentStore(persist_path="chroma_db")
-embedding_model = "multi-qa-mpnet-base-cos-v1"
+# multi-qa-mpnet-base-cos-v1 was used for pilot 1
+# all-MiniLM-L6-v2 is a smaller, more efficient model
+embedding_model = "all-MiniLM-L6-v2"
 
 
 def export_db_supports_to_md_file() -> None:  # pragma: no cover

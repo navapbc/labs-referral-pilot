@@ -9,7 +9,7 @@ FROM python:3.12-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir --upgrade pip==25.3 poetry==1.5
+RUN pip install --no-cache-dir --upgrade pip==25.3 poetry==2.1
 
 RUN apt-get update \
     # Install security updates

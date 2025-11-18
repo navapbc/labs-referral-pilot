@@ -50,6 +50,7 @@ jq = "^1.10.0"
 openpyxl = "^3.1.5"
 tabulate = "^0.9.0"
 pandas = "^2.3.3"
+# sentence-transformers requires torch, but we want the smaller CPU-only version in order to deploy in GitHub Action
 # Need to specify exact torch version due to "Local version label can only be used with `==` or `!=` operators"
 torch = {version = "2.9.1+cpu", source = "pytorch_cpu"}
 
