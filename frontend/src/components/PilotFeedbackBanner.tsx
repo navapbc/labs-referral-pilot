@@ -28,7 +28,7 @@ export function PilotFeedbackBanner() {
           }
         >
           <MessageCircle className="w-4 h-4" />
-          Share Feedback
+          Pilot Tool Feedback
         </Button>
       </div>
     </div>

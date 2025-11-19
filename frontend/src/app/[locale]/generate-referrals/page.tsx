@@ -287,20 +287,6 @@ export default function Page() {
                     <ChevronLeft className="w-4 h-4" />
                     Return To Search
                   </Button>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handlePrint}
-                      variant="outline"
-                      className="hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      <Printer
-                        data-testid="printReferralsButton"
-                        className="w-4 h-4"
-                      />
-                      Print Referrals
-                    </Button>
-                    {resultId && <EmailReferralsButton resultId={resultId} />}
-                  </div>
                 </div>
                 <ClientDetailsPromptBubble
                   clientDescription={clientDescription}
@@ -320,6 +306,22 @@ export default function Page() {
                     onGenerateActionPlan={() => void generateActionPlan()}
                   />
                 )}
+                <div className="flex gap-2">
+                  {actionPlan && (
+                    <Button
+                      onClick={handlePrint}
+                      variant="outline"
+                      className="hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      <Printer
+                        data-testid="printReferralsButton"
+                        className="w-4 h-4"
+                      />
+                      Print Action Plan
+                    </Button>
+                  )}
+                  {resultId && <EmailReferralsButton resultId={resultId} />}
+                </div>
               </div>
             )}
           </div>
