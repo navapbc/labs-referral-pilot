@@ -348,7 +348,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
                 os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
                 s3.download_file(bucket, s3_key, local_file_path)
                 logger.info(f"Downloaded {s3_key} to {local_file_path}")
-        return local_file_path
+        return local_folder
     except NoCredentialsError:
         logger.error("AWS credentials not found. Please configure your AWS credentials.")
 
