@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 
 os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
 
@@ -8,6 +9,7 @@ from enum import Enum
 from pprint import pformat
 from typing import Optional
 
+from botocore.exceptions import NoCredentialsError
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Document, Pipeline
@@ -24,11 +26,11 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 from pydantic import BaseModel
-from smart_open import open as smart_open
 
 from src.app_config import config
 from src.common import components
 from src.db.models.support_listing import Support
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,7 @@ class Resource(BaseModel):
 
 class ResourceList(BaseModel):
     resources: list[Resource]
+
 
 response_schema = """
 {
@@ -125,8 +128,6 @@ class PipelineWrapper(BasePipelineWrapper):
 
         self.pipeline = pipeline
 
-
-
     def run_api(self, query: str, user_email: str, prompt_version_id: str = "") -> dict:
         result = self._run(query, user_email, prompt_version_id)
         logger.info("User query: %s", query)
@@ -146,11 +147,9 @@ class PipelineWrapper(BasePipelineWrapper):
                     "logger": {
                         "messages_list": [{"query": query, "user_email": user_email}],
                     },
-
                     # query RAG DB
                     "query_embedder": {"text": query},
                     "retriever": {"top_k": top_k, "filters": None},
-
                     "prompt_builder": {
                         "template": self.prompt_template,
                         "query": query,
@@ -170,7 +169,8 @@ class PipelineWrapper(BasePipelineWrapper):
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
     prompt_template = [
-        ChatMessage.from_system("""\
+        ChatMessage.from_system(
+            """\
 You are an API endpoint for Goodwill Central Texas Referral and you return only a JSON object.
 You are designed to help career case managers provide high-quality, local resource referrals to client's in Central Texas.
 Your role is to support case managers working with low-income job seekers and learners in Austin and surrounding counties (Bastrop, Blanco, Burnet, Caldwell, DeWitt, Fayette, Gillespie, Gonzales, Hays, Lavaca, Lee, Llano, Mason, Travis, Williamson).
@@ -297,7 +297,8 @@ Website: https://excelcenterhighschool.org/
 When to recommend: Clients without high school diploma asking about GED should be informed about Excel Center as a superior alternative to traditional GED programs.
 
 {% endif %}
-""")
+"""
+        )
     ]
 
 
@@ -327,17 +328,44 @@ def export_db_supports_to_md_file() -> None:  # pragma: no cover
             f.write("\n\n".join(supports))
 
 
-from src.util import file_util
-from botocore.exceptions import NoCredentialsError
+_once_lock = threading.Lock()
+_once_done = False
+
+
+def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
+    global _once_done
+
+    # Fast path: avoid locking after it's already done
+    if _once_done:
+        logger.info("Ingestion to vector DB is already done")
+        return document_store
+
+    # Multiple threads may reach this point simultaneously
+    # First thread can complete this with-block; second thread will enter the with-block afterwards
+    with _once_lock:  # Only 1 thread can enter this block at a time
+        # Check again inside the lock in case first thread already did it
+        if _once_done:
+            logger.info("Ingestion to vector DB completed by another thread")
+            return document_store
+
+        local_folder = download_s3_folder_to_local()
+        logger.info("Ingesting documents into vector DB...")
+        ingest_documents(
+            [
+                f"{local_folder}/LocationListInfo (5).pdf",
+                # f"{local_folder}/Basic Needs Resource Guide.pdf",
+                f"{local_folder}/extracted_support_entries.md",
+                f"{local_folder}/from-Sharepoint/Austin Area Resource List 2025.pdf",
+            ]
+        )
+        _once_done = True
+        return document_store
+
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
     local_folder = s3_folder
-    if os.path.exists(local_folder):
-        logger.warning("Local folder %s already exists. Skipping download.", local_folder)
-        return local_folder
-
     s3 = file_util.get_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
     try:
@@ -347,30 +375,10 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
                 local_file_path = os.path.join(local_folder, os.path.relpath(s3_key, s3_folder))
                 os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
                 s3.download_file(bucket, s3_key, local_file_path)
-                logger.info(f"Downloaded {s3_key} to {local_file_path}")
+                logger.info("Downloaded %s to %s", s3_key, local_file_path)
         return local_folder
     except NoCredentialsError:
         logger.error("AWS credentials not found. Please configure your AWS credentials.")
-
-
-
-def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
-    # Check if the vector DB path exists
-    if not os.path.exists("chroma_db") or document_store.count_documents() == 0:
-        logger.info("Ingesting documents into vector DB...")
-        local_folder = download_s3_folder_to_local()
-        ingest_documents(
-            [
-                f"{local_folder}/LocationListInfo (5).pdf",
-                # f"{local_folder}/Basic Needs Resource Guide.pdf",
-                f"{local_folder}/extracted_support_entries.md",
-                f"{local_folder}/from-Sharepoint/Austin Area Resource List 2025.pdf",
-            ]
-        )
-    else:
-        logger.info("Vector DB already populated.")
-
-    return document_store
 
 
 def ingest_documents(sources: list[str]) -> None:
@@ -415,7 +423,7 @@ def retrieve_documents(query: str, top_k: int = 5) -> list[Document]:
 
     # input_docs = [Document(content=query)]
     print("Running retrieval...", query)
-    query_embedding = text_embedder.run(query)['embedding']
+    query_embedding = text_embedder.run(query)["embedding"]
     retrieval: dict = retriever.run(query_embedding=query_embedding, top_k=top_k)
     return retrieval["documents"]
 
@@ -436,6 +444,7 @@ def rag_query(query: str, user_email: str) -> dict:
     pipeline_wrapper = PipelineWrapper()
     pipeline_wrapper.setup()
     return pipeline_wrapper.run_api(query, user_email)
+
 
 ## Create extracted_support_entries.md file:
 # make extract-supports NAME="Basic Needs Resources" FILE="Basic Needs Resource Guide.pdf"
