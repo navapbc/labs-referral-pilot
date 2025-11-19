@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mail } from "lucide-react";
+import { Mail, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,7 +73,13 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
         <DialogHeader>
           <DialogTitle>Email Referrals</DialogTitle>
           <DialogDescription>
-            Enter your email address to receive the referrals.
+            Enter your email address to receive the list of referrals.
+            <br />
+            <br />
+            <span className="flex items-center gap-2">
+              <TriangleAlert className="w-4 h-4" />
+              Emailing the Action Plan is under development
+            </span>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
