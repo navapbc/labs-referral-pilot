@@ -28,7 +28,10 @@ export function PrintableReferralsReport({
         </p>
       </div>
       <ClientDetailsPromptBubble clientDescription={clientDescription} />
-      <ResourcesList resources={resources ?? []} />
+      <ResourcesList
+        resources={resources ?? []}
+        handleRemoveResource={() => {}}
+      />
       {actionPlan && (
         <div className="print:mt-3">
           <ActionPlanDisplay actionPlan={actionPlan} />
