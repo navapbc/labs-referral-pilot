@@ -81,7 +81,7 @@ const ResourcesList = ({
           {/* Remove button */}
           <button
             onClick={() => handleRemoveResource(r)}
-            className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200 print:hidden"
+            className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200 cursor-pointer print:hidden"
             title="Remove resource"
             data-testid={`remove-resource-button-${i}`}
           >
