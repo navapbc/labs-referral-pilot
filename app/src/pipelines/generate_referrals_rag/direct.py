@@ -348,6 +348,7 @@ def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
             logger.info("Ingestion to vector DB completed by another thread")
             return document_store
 
+        logger.info("Downloading documents from S3...")
         local_folder = download_s3_folder_to_local()
         logger.info("Ingesting documents into vector DB...")
         ingest_documents(
@@ -372,6 +373,8 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
             for obj in result.get("Contents", []):
                 s3_key = obj["Key"]
+                if s3_key.endswith("/"):
+                    continue  # Skip folders
                 local_file_path = os.path.join(local_folder, os.path.relpath(s3_key, s3_folder))
                 os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
                 s3.download_file(bucket, s3_key, local_file_path)
