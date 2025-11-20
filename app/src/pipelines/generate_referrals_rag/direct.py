@@ -3,6 +3,9 @@ import os
 import threading
 
 os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
+if "ANONYMIZED_TELEMETRY" not in os.environ:
+    # Disable posthog telemetry for ChromaDB https://docs.trychroma.com/docs/overview/telemetry
+    os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 import logging
 from enum import Enum
@@ -332,25 +335,26 @@ _once_lock = threading.Lock()
 _once_done = False
 
 
-def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
+async def populate_vector_db() -> None:  # pragma: no cover
     global _once_done
 
     # Fast path: avoid locking after it's already done
     if _once_done:
         logger.info("Ingestion to vector DB is already done")
-        return document_store
+        return
 
     # Multiple threads may reach this point simultaneously
+    logger.info("thread=%s id=%s", threading.current_thread().name, threading.get_ident())
     # First thread can complete this with-block; second thread will enter the with-block afterwards
     with _once_lock:  # Only 1 thread can enter this block at a time
         # Check again inside the lock in case first thread already did it
         if _once_done:
             logger.info("Ingestion to vector DB completed by another thread")
-            return document_store
+            return
 
-        logger.info("Downloading documents from S3...")
+        logger.info("Downloading documents from S3... thread=%s id=%s", threading.current_thread().name, threading.get_ident())
         local_folder = download_s3_folder_to_local()
-        logger.info("Ingesting documents into vector DB...")
+        logger.info("Ingesting documents into vector DB... doc_count=%d id=%s", document_store.count_documents(), threading.get_ident())
         ingest_documents(
             [
                 f"{local_folder}/LocationListInfo (5).pdf",
@@ -359,14 +363,20 @@ def populate_vector_db() -> ChromaDocumentStore:  # pragma: no cover
                 f"{local_folder}/from-Sharepoint/Austin Area Resource List 2025.pdf",
             ]
         )
+        logger.info("Ingested documents into vector DB... doc_count=%d id=%s", document_store.count_documents(), threading.get_ident())
         _once_done = True
-        return document_store
+        return
 
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
     local_folder = s3_folder
+
+    if os.path.exists(local_folder):
+        logger.info("Local folder already exists, skipping download: %s", local_folder)
+        return local_folder
+
     s3 = file_util.get_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
     try:
@@ -483,6 +493,9 @@ if __name__ == "__main__":
     import sys
 
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
+    print("Running direct module...")
+    logger.info("Running direct module...")
+
     command = sys.argv[1]
     docs = None
     if command == "export":

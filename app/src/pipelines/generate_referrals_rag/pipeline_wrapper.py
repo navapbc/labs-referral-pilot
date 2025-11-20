@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -21,13 +22,15 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
     name = "generate_referrals_rag"
 
     def setup(self) -> None:
-        document_store = direct.populate_vector_db()
+        # Start vector DB ingestion in the background
+        asyncio.create_task(direct.populate_vector_db())
 
         pipeline = Pipeline(max_runs_per_component=3)
 
         # Replace LoadSupports() with retrieval from vector DB
         pipeline.add_component("query_embedder", SentenceTransformersTextEmbedder(model=direct.embedding_model))
-        pipeline.add_component("retriever", ChromaEmbeddingRetriever(document_store))
+        logger.info("Using document store: %s", direct.document_store)
+        pipeline.add_component("retriever", ChromaEmbeddingRetriever(direct.document_store))
         pipeline.add_component(
             "output_adapter",
             # https://docs.haystack.deepset.ai/docs/outputadapter
