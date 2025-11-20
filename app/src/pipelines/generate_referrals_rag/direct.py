@@ -331,41 +331,19 @@ def export_db_supports_to_md_file() -> None:  # pragma: no cover
             f.write("\n\n".join(supports))
 
 
-_once_lock = threading.Lock()
-_once_done = False
-
-
 async def populate_vector_db() -> None:  # pragma: no cover
-    global _once_done
-
-    # Fast path: avoid locking after it's already done
-    if _once_done:
-        logger.info("Ingestion to vector DB is already done")
-        return
-
-    # Multiple threads may reach this point simultaneously
-    logger.info("thread=%s id=%s", threading.current_thread().name, threading.get_ident())
-    # First thread can complete this with-block; second thread will enter the with-block afterwards
-    with _once_lock:  # Only 1 thread can enter this block at a time
-        # Check again inside the lock in case first thread already did it
-        if _once_done:
-            logger.info("Ingestion to vector DB completed by another thread")
-            return
-
-        logger.info("Downloading documents from S3... thread=%s id=%s", threading.current_thread().name, threading.get_ident())
-        local_folder = download_s3_folder_to_local()
-        logger.info("Ingesting documents into vector DB... doc_count=%d id=%s", document_store.count_documents(), threading.get_ident())
-        ingest_documents(
-            [
-                f"{local_folder}/LocationListInfo (5).pdf",
-                # f"{local_folder}/Basic Needs Resource Guide.pdf",
-                f"{local_folder}/extracted_support_entries.md",
-                f"{local_folder}/from-Sharepoint/Austin Area Resource List 2025.pdf",
-            ]
-        )
-        logger.info("Ingested documents into vector DB... doc_count=%d id=%s", document_store.count_documents(), threading.get_ident())
-        _once_done = True
-        return
+    logger.info("Downloading documents from S3... thread=%s id=%s", threading.current_thread().name, threading.get_ident())
+    local_folder = download_s3_folder_to_local()
+    logger.info("Ingesting documents into vector DB %s doc_count=%d thread_id=%s", document_store, document_store.count_documents(), threading.get_ident())
+    ingest_documents(
+        [
+            f"{local_folder}/LocationListInfo (5).pdf",
+            # f"{local_folder}/Basic Needs Resource Guide.pdf",
+            f"{local_folder}/extracted_support_entries.md",
+            f"{local_folder}/from-Sharepoint/Austin Area Resource List 2025.pdf",
+        ]
+    )
+    logger.info("Ingested documents into vector DB %s doc_count=%d thread_id=%s", document_store, document_store.count_documents(), threading.get_ident())
 
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
