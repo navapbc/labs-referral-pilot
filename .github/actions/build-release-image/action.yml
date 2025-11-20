@@ -44,6 +44,19 @@ runs:
       run: |
         mkdir -p /tmp/.buildx-cache
 
+    - run: df -h
+      shell: bash
+
+    - name: "node-cleanup"
+      shell: bash
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo docker builder prune -a
+
+    - run: df -h
+      shell: bash
+
     - name: Build and tag Docker image for scanning
       shell: bash
       run: |
@@ -52,11 +65,17 @@ runs:
         --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
         --load"
 
+    - run: df -h
+      shell: bash
+
     - name: Replace the cache
       shell: bash
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+    - run: df -h
+      shell: bash
 
     - name: List layers in the docker image
       shell: bash
