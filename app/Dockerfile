@@ -121,4 +121,6 @@ ENV HOST=0.0.0.0
 USER ${RUN_USER}
 
 # Run the application.
+# TEMP: fix for PR: FastAPI workers cannot directly share access to an in-memory or embedded ChromaDB instance when running with multiple worker processes
+# so limit to 1 worker for now.
 CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--workers", "1", "src.app:hayhooks_app", "-b 0.0.0.0:8000"]
