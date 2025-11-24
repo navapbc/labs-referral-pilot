@@ -409,7 +409,7 @@ text_embedder = SentenceTransformersTextEmbedder(model=embedding_model)
 text_embedder.warm_up()
 
 
-def retrieve_documents(query: str, top_k: int = 5) -> list[Document]:
+def retrieve_documents(query: str, top_k: int = 10) -> list[Document]:
     """Retrieve documents from the vector store."""
 
     # input_docs = [Document(content=query)]
