@@ -86,6 +86,10 @@ jobs:
           app_name: ${{ inputs.app_name }}
           commit_hash: ${{ needs.get-commit-hash.outputs.commit_hash }}
 
+      - run: df -h
+        shell: bash
+        if: always()
+
       - name: Publish release
         if: steps.check-image-published.outputs.is_image_published == 'false'
         run: make APP_NAME=${{ inputs.app_name }} release-publish
