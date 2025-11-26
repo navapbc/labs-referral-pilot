@@ -72,6 +72,7 @@ copy-prompts= "src.common.phoenix_utils:copy_deployed_prompts"
 run-experiment= "src.experiments:main"
 manage-crawl-job= "src.db.manage_crawl_job:main"
 process-crawl-jobs= "src.ingestion.process_crawl_jobs:main"
+delete-support= "src.db.delete_support:main"
 
 [tool.black]
 line-length = 100
