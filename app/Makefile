@@ -241,9 +241,9 @@ add-crawl-jobs:
 	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_indeed" DOMAIN="indeed.com" INTERVAL=6
 	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_gcta" DOMAIN="gctatraining.org" INTERVAL=6
 
-# Usage: make delete-support NAME="Support Name"
+# Usage: make delete-support NAME="Support(or SupportListing) Name" DELETE_LISTING=true
 delete-support:
-	$(PY_RUN_CMD) delete-support "$(NAME)"
+	$(PY_RUN_CMD) delete-support "$(NAME)" $(if $(DELETE_LISTING),--delete-listing)
 
 process-crawl-jobs:
 	$(PY_RUN_CMD) process-crawl-jobs
