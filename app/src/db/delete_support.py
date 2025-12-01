@@ -30,7 +30,6 @@ def delete_support_by_name(db_session: Session, support_name: str) -> bool:
         return False
 
     # Get the associated SupportListing before deleting the support
-    support_listing_id = support.support_listing_id
     support_listing = support.support_listing
 
     logger.info("Found Support (id=%s, name='%s')", support.id, support.name)
@@ -47,7 +46,7 @@ def delete_support_by_name(db_session: Session, support_name: str) -> bool:
 
     # Check if the SupportListing has any remaining supports
     remaining_supports_count = (
-        db_session.query(Support).where(Support.support_listing_id == support_listing_id).count()
+        db_session.query(Support).where(Support.support_listing_id == support_listing.id).count()
     )
 
     if remaining_supports_count == 0:
