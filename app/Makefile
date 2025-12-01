@@ -243,7 +243,7 @@ add-crawl-jobs:
 
 # Usage: make delete-support NAME="Support or SupportListing Name" DELETE_LISTING=true
 delete-support:
-	$(PY_RUN_CMD) delete-support "$(NAME)" $(if $(DELETE_LISTING),--delete-listing)
+	$(PY_RUN_CMD) delete-support "$(NAME)" $(if $(filter true,$(DELETE_LISTING)),--delete-listing)
 
 process-crawl-jobs:
 	$(PY_RUN_CMD) process-crawl-jobs
