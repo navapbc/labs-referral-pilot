@@ -87,15 +87,9 @@ class TestDeleteSupportByName:
         """Test deleting supports one by one until listing is also deleted."""
         # Create a support listing with three supports
         support_listing = factories.SupportListingFactory.create(name="Multi Support Listing")
-        factories.SupportFactory.create(
-            name="Support 1", support_listing=support_listing
-        )
-        factories.SupportFactory.create(
-            name="Support 2", support_listing=support_listing
-        )
-        factories.SupportFactory.create(
-            name="Support 3", support_listing=support_listing
-        )
+        factories.SupportFactory.create(name="Support 1", support_listing=support_listing)
+        factories.SupportFactory.create(name="Support 2", support_listing=support_listing)
+        factories.SupportFactory.create(name="Support 3", support_listing=support_listing)
         db_session.flush()
 
         listing_id = support_listing.id
@@ -150,7 +144,8 @@ class TestDeleteSupportListingByName:
         assert result is True
         assert "Associated with 3 Support(s)" in caplog_info.text
         assert (
-            "Deleted SupportListing 'Test Listing 2' and 3 associated Support(s)" in caplog_info.text
+            "Deleted SupportListing 'Test Listing 2' and 3 associated Support(s)"
+            in caplog_info.text
         )
 
         # Verify listing and all supports are deleted

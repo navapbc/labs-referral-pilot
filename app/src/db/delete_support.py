@@ -26,7 +26,7 @@ def delete_support_by_name(db_session: Session, support_name: str) -> bool:
     support = db_session.query(Support).where(Support.name == support_name).one_or_none()
 
     if not support:
-        logger.error("ERROR: Support with name '%s' not found", support_name)
+        logger.error("Support with name '%s' not found", support_name)
         return False
 
     # Get the associated SupportListing before deleting the support
@@ -83,7 +83,7 @@ def delete_support_listing_by_name(db_session: Session, listing_name: str) -> bo
     )
 
     if not support_listing:
-        logger.error("ERROR: SupportListing with name '%s' not found", listing_name)
+        logger.error("SupportListing with name '%s' not found", listing_name)
         return False
 
     # Count associated supports before deletion
