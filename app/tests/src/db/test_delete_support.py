@@ -79,7 +79,7 @@ class TestDeleteSupportByName:
         result = delete_support_by_name(db_session, "Nonexistent Support")
 
         assert result is False
-        assert "ERROR: Support with name 'Nonexistent Support' not found" in caplog_info.text
+        assert "Support with name 'Nonexistent Support' not found" in caplog_info.text
 
     def test_delete_support_with_multiple_supports_in_listing(
         self, enable_factory_create, db_session, caplog_info
@@ -207,7 +207,7 @@ class TestDeleteSupportListingByName:
         result = delete_support_listing_by_name(db_session, "Nonexistent Listing")
 
         assert result is False
-        assert "ERROR: SupportListing with name 'Nonexistent Listing' not found" in caplog_info.text
+        assert "SupportListing with name 'Nonexistent Listing' not found" in caplog_info.text
 
     def test_delete_listing_does_not_affect_other_listings(
         self, enable_factory_create, db_session, caplog_info
