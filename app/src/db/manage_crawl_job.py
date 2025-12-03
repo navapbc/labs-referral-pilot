@@ -93,9 +93,12 @@ def delete_crawl_job(db_session: Session, domain: str) -> bool:
 
         if support_listing:
             delete_support_listing_by_name(db_session, support_listing_name)
-            logger.info("Finished deleting SupportListing and dependent support(s) for: %s", support_listing_name)
+            logger.info(
+                "Finished deleting SupportListing and dependent support(s) for: %s",
+                support_listing_name,
+            )
         else:
-            logger.info("No Matching Support Listing was found for domain: %s",  domain)
+            logger.info("No Matching Support Listing was found for domain: %s", domain)
 
         logger.info("Deleting CrawlJob (id=%s) for domain: %s", existing_job.id, domain)
         db_session.delete(existing_job)
