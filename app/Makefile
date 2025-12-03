@@ -234,16 +234,20 @@ manage-crawl-job:
 ifeq ($(ACTION),delete)
 	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(DOMAIN)"
 else
-	$(PY_RUN_CMD) manage-crawl-job $(ACTION) "$(PROMPT_NAME)" "$(DOMAIN)" "$(INTERVAL)"
+	$(PY_RUN_CMD) manage-crawl-job $(ACTION) --prompt-name "$(PROMPT_NAME)" "$(DOMAIN)" "$(INTERVAL)"
 endif
 
 add-crawl-jobs:
 	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_indeed" DOMAIN="indeed.com" INTERVAL=6
 	make manage-crawl-job ACTION="upsert" PROMPT_NAME="crawl_gcta" DOMAIN="gctatraining.org" INTERVAL=6
 
-# Usage: make delete-support NAME="Support or SupportListing Name"
+# Usage: make delete-support NAME="Support Name"
 delete-support:
 	$(PY_RUN_CMD) delete-support "$(NAME)"
+
+# Usage: make delete-support-listing NAME="SupportListing Name"
+delete-support-listing:
+	$(PY_RUN_CMD) delete-support-listing "$(NAME)"
 
 process-crawl-jobs:
 	$(PY_RUN_CMD) process-crawl-jobs

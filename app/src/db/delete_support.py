@@ -69,8 +69,8 @@ def delete_support_by_name(db_session: Session, support_name: str) -> bool:
 def main() -> None:  # pragma: no cover
     logging.basicConfig(format="%(levelname)s - %(name)s - %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Delete a Support or SupportListing entry by name")
-    parser.add_argument("name", help="Name of the support or support listing to delete")
+    parser = argparse.ArgumentParser(description="Delete a Support entry by name")
+    parser.add_argument("name", help="Name of the support to delete")
 
     args = parser.parse_args()
 

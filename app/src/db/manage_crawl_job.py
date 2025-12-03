@@ -6,7 +6,9 @@ import logging
 from sqlalchemy.orm import Session
 
 from src.app_config import config
+from src.db.delete_support_listing import delete_support_listing_by_name
 from src.db.models.crawl_job import CrawlJob
+from src.db.models.support_listing import SupportListing
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +80,23 @@ def delete_crawl_job(db_session: Session, domain: str) -> bool:
     existing_job = db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none()
 
     if existing_job:
+        # Support listings created by crawl job
+        support_listing_name = (
+            f"Crawl Job: {domain}"  # See first line of save_job_results in process_crawl_jobs.py
+        )
+        logger.info("Searching for SupportListing named: '%s'", support_listing_name)
+        support_listing = (
+            db_session.query(SupportListing)
+            .where(SupportListing.name == support_listing_name)
+            .one_or_none()
+        )
+
+        if support_listing:
+            delete_support_listing_by_name(db_session, support_listing_name)
+            logger.info("Finished deleting SupportListing and dependent support(s) for: %s", support_listing_name)
+        else:
+            logger.info("No Matching Support Listing was found for domain: %s",  domain)
+
         logger.info("Deleting CrawlJob (id=%s) for domain: %s", existing_job.id, domain)
         db_session.delete(existing_job)
         logger.info("Deleted CrawlJob for domain: %s", domain)
