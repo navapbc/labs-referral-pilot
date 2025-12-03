@@ -5,12 +5,12 @@ import pytest
 from haystack import component
 from haystack.dataclasses.chat_message import ChatMessage
 
-from app.src.ingestion.process_crawl_jobs import get_support_listing_name_for_crawl_job
 from src.adapters import db
 from src.common import haystack_utils
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import Support, SupportListing
 from src.ingestion import process_crawl_jobs
+from src.ingestion.process_crawl_jobs import get_support_listing_name_for_crawl_job
 from src.util import datetime_util
 
 
