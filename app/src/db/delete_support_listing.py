@@ -28,7 +28,7 @@ def delete_support_listing_by_name(db_session: Session, listing_name: str) -> bo
     )
 
     if not support_listing:
-        logger.error("ERROR: SupportListing with name '%s' not found", listing_name)
+        logger.error("SupportListing with name '%s' not found", listing_name)
         return False
 
     # Count associated supports before deletion

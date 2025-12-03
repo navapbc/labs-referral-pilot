@@ -5,6 +5,7 @@ import pytest
 from haystack import component
 from haystack.dataclasses.chat_message import ChatMessage
 
+from app.src.ingestion.process_crawl_jobs import get_support_listing_name_for_crawl_job
 from src.adapters import db
 from src.common import haystack_utils
 from src.db.models.crawl_job import CrawlJob
@@ -188,7 +189,7 @@ def test_save_job_results_new_listing(db_session: db.Session) -> None:
     # Verify SupportListing was created
     listing = (
         db_session.query(SupportListing)
-        .where(SupportListing.name == f"Crawl Job: {job.domain}")
+        .where(SupportListing.name == get_support_listing_name_for_crawl_job(job.domain))
         .one()
     )
     assert listing.uri == job.domain
@@ -223,7 +224,7 @@ def test_save_job_results_existing_listing(db_session: db.Session) -> None:
     db_session.add(job)
 
     # Create existing listing with old supports
-    listing_name = f"Crawl Job: {job.domain}"
+    listing_name = get_support_listing_name_for_crawl_job(job.domain)
     existing_listing = SupportListing(name=listing_name, uri="example.com")
     db_session.add(existing_listing)
     db_session.flush()

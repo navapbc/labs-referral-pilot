@@ -9,6 +9,7 @@ from src.app_config import config
 from src.db.delete_support_listing import delete_support_listing_by_name
 from src.db.models.crawl_job import CrawlJob
 from src.db.models.support_listing import SupportListing
+from src.ingestion.process_crawl_jobs import get_support_listing_name_for_crawl_job
 
 logger = logging.getLogger(__name__)
 
@@ -81,9 +82,7 @@ def delete_crawl_job(db_session: Session, domain: str) -> bool:
 
     if existing_job:
         # Support listings created by crawl job
-        support_listing_name = (
-            f"Crawl Job: {domain}"  # See first line of save_job_results in process_crawl_jobs.py
-        )
+        support_listing_name = get_support_listing_name_for_crawl_job(domain)
         logger.info("Searching for SupportListing named: '%s'", support_listing_name)
         support_listing = (
             db_session.query(SupportListing)
@@ -98,7 +97,7 @@ def delete_crawl_job(db_session: Session, domain: str) -> bool:
                 support_listing_name,
             )
         else:
-            logger.info("No Matching Support Listing was found for domain: %s", domain)
+            logger.warning("No Matching Support Listing was found for domain: %s", domain)
 
         logger.info("Deleting CrawlJob (id=%s) for domain: %s", existing_job.id, domain)
         db_session.delete(existing_job)
