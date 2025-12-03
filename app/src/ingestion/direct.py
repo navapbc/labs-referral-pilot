@@ -292,7 +292,7 @@ When to recommend: Clients without high school diploma asking about GED should b
     ]
 
 
-def __retrieve_documents(query: str, top_k: int = 10) -> list[Document]:
+def __retrieve_documents(query: str, top_k: int) -> list[Document]:
     """Retrieve documents from the vector store."""
 
     retriever = ChromaEmbeddingRetriever(document_store=config.chroma_document_store())
@@ -306,7 +306,7 @@ def __retrieve_documents(query: str, top_k: int = 10) -> list[Document]:
     return retrieval["documents"]
 
 
-def __retrieve_documents_pipeline(query: str, top_k: int = 5) -> list[Document]:
+def __retrieve_documents_pipeline(query: str, top_k: int) -> list[Document]:
     querying = Pipeline()
     querying.add_component("query_embedder", SentenceTransformersTextEmbedder())
     querying.add_component(
@@ -386,17 +386,18 @@ if __name__ == "__main__":
 
     command = sys.argv[1]
     docs = None
+    top_k = config.retrieval_top_k
     if command == "export":
         __export_db_supports_to_md_file()
     elif command == "ingest":
         rag_utils.populate_vector_db()
     elif command == "retrieve":
         query = sys.argv[2]
-        docs = __retrieve_documents(query)
+        docs = __retrieve_documents(query, top_k)
         __print_retrieved_docs(docs)
     elif command == "retrieve_pipeline":
         query = sys.argv[2]
-        docs = __retrieve_documents_pipeline(query)
+        docs = __retrieve_documents_pipeline(query, top_k)
         __print_retrieved_docs(docs)
     elif command == "rag_query":
         query = sys.argv[2]

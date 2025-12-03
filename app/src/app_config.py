@@ -2,6 +2,7 @@ import os
 from functools import cached_property
 
 import chromadb
+from chromadb.api import ClientAPI
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 
 from src.adapters import db
@@ -60,12 +61,13 @@ class AppConfig(PydanticBaseEnvConfig):
         "extracted_support_entries.md",  # instead of the raw "Basic Needs Resource Guide.pdf",
         "from-Sharepoint/Austin Area Resource List 2025.pdf",
     ]
+    retrieval_top_k: int = 5
 
-    def chroma_client(self) -> chromadb.HttpClient:
+    def chroma_client(self) -> ClientAPI:
         self.conditionally_disable_chroma_telemetry()
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
 
-    def conditionally_disable_chroma_telemetry(self):
+    def conditionally_disable_chroma_telemetry(self) -> None:
         if "ANONYMIZED_TELEMETRY" not in os.environ:
             # Disable posthog telemetry for ChromaDB https://docs.trychroma.com/docs/overview/telemetry
             os.environ["ANONYMIZED_TELEMETRY"] = "False"

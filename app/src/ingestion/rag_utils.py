@@ -62,6 +62,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         return local_folder
     except NoCredentialsError:
         logger.error("AWS credentials not found. Please configure your AWS credentials.")
+        raise
 
 
 def ingest_documents(doc_store: ChromaDocumentStore, sources: list[str]) -> None:

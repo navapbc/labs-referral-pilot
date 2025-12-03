@@ -4,6 +4,7 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter
 from haystack.components.embedders import SentenceTransformersTextEmbedder
+from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
@@ -73,11 +74,11 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         pipeline.add_component("logger", components.ReadableLogger())
         pipeline.connect("output_validator.valid_replies", "logger")
 
-        pipeline.draw(path="generate_referrals_rag.png")
+        # pipeline.draw(path="generate_referrals_rag.png")
         self.pipeline = pipeline
 
-    def _run_arg_data(self, query: str, user_email: str, prompt_template: str) -> dict:
-        top_k = 5
+    def _run_arg_data(self, query: str, user_email: str, prompt_template: list[ChatMessage]) -> dict:
+        top_k = config.retrieval_top_k
         logger.info("RAG top_k=%d query: %s", top_k, query)
         return super()._run_arg_data(query, user_email, prompt_template) | {
             # For querying RAG DB

@@ -10,6 +10,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
+from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import _tracers, using_attributes, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
@@ -141,7 +142,7 @@ class PipelineWrapper(BasePipelineWrapper):
             logger.error("Error %s: %s", type(e), e, exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
-    def _run_arg_data(self, query: str, user_email: str, prompt_template: str) -> dict:
+    def _run_arg_data(self, query: str, user_email: str, prompt_template: list[ChatMessage]) -> dict:
         return {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email}],
