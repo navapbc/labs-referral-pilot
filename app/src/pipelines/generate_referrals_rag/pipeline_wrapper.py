@@ -77,7 +77,9 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         self.pipeline = pipeline
 
-    def _run_arg_data(self, query: str, user_email: str, prompt_template: list[ChatMessage]) -> dict:
+    def _run_arg_data(
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    ) -> dict:
         top_k = config.retrieval_top_k
         logger.info("RAG top_k=%d query: %s", top_k, query)
         return super()._run_arg_data(query, user_email, prompt_template) | {

@@ -142,7 +142,9 @@ class PipelineWrapper(BasePipelineWrapper):
             logger.error("Error %s: %s", type(e), e, exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
-    def _run_arg_data(self, query: str, user_email: str, prompt_template: list[ChatMessage]) -> dict:
+    def _run_arg_data(
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    ) -> dict:
         return {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email}],
