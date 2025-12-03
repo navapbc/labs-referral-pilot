@@ -32,11 +32,28 @@ certifi = "^2025.8.3"
 presidio-analyzer = "^2.2.359"
 presidio-anonymizer = "^2.2.359"
 spacy = "^3.8.7"
-en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"}
+# Exclude the large English model to reduce disk usage in GitHub Actions
+# en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"}
 pypdf = "^6.1.3"
 arize-phoenix = "^11.37.0"
 pip = ">=25.3"
 markdown = "^3.10"
+chroma-haystack = "^3.4.1"
+# chroma and posthog compatibility workaround: https://github.com/vanna-ai/vanna/issues/917#issuecomment-3036668545
+posthog = ">=2.4.0,<6.0.0"
+sentence-transformers = "^5.1.2"
+markdown-it-py = "^4.0.0"
+python-docx = "^1.2.0"
+mdit-plain = "^1.0.1"
+trafilatura = "^2.0.0"
+python-pptx = "^1.0.2"
+jq = "^1.10.0"
+openpyxl = "^3.1.5"
+tabulate = "^0.9.0"
+pandas = "^2.3.3"
+# sentence-transformers requires torch, but we want the smaller CPU-only version in order to deploy in GitHub Action
+# Need to specify exact torch version due to "Local version label can only be used with `==` or `!=` operators"
+torch = {version = "2.9.1+cpu", source = "pytorch_cpu"}
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2025.8.3"
@@ -58,6 +75,12 @@ debugpy = "^1.8.1"
 ruff = "^0.4.9"
 types-requests = "^2.32.4.20250913"
 types-markdown = "^3.9.0.20250906"
+
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

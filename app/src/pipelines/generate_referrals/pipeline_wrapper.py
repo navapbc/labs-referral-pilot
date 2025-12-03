@@ -129,17 +129,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         try:
             response = self.pipeline.run(
-                {
-                    "logger": {
-                        "messages_list": [{"query": query, "user_email": user_email}],
-                    },
-                    "prompt_builder": {
-                        "template": prompt_template,
-                        "query": query,
-                        "response_json": response_schema,
-                    },
-                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-                },
+                self._run_arg_data(query, user_email, prompt_template),
                 include_outputs_from={"llm", "save_result"},
             )
             logger.debug("Results: %s", pformat(response, width=160))
@@ -150,3 +140,16 @@ class PipelineWrapper(BasePipelineWrapper):
         except Exception as e:
             logger.error("Error %s: %s", type(e), e, exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+
+    def _run_arg_data(self, query: str, user_email: str, prompt_template: str) -> dict:
+        return {
+            "logger": {
+                "messages_list": [{"query": query, "user_email": user_email}],
+            },
+            "prompt_builder": {
+                "template": prompt_template,
+                "query": query,
+                "response_json": response_schema,
+            },
+            "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+        }
