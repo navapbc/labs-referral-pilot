@@ -88,7 +88,7 @@ class PipelineWrapper(BasePipelineWrapper):
                     "action_plan_json": action_plan_as_json,
                     "user_query": user_query,
                 },
-                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                "llm": {"model": "gpt-5.1", "reasoning_effort": "low"},
             },
             include_outputs_from={"llm"},
         )
