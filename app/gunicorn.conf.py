@@ -11,10 +11,8 @@ For more information, see https://docs.gunicorn.org/en/stable/configure.html
 
 import os
 
-from src.app_config import AppConfig
-from src.ingestion import rag_utils
+from src.app_config import config as app_config
 
-app_config = AppConfig()
 
 bind = app_config.host + ':' + str(app_config.port)
 # Calculates the number of usable cores and doubles it. Recommended number of workers per core is two.
@@ -30,4 +28,3 @@ threads = 4
 # https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
 def when_ready(server: object) -> None:
     print("when_ready()", server)
-    print("ChromaDB populated. Collections:", app_config.chroma_client().list_collections())

@@ -39,7 +39,12 @@ def populate_vector_db() -> None:
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
-    local_folder = s3_folder
+    try:
+        os.makedirs(s3_folder, exist_ok=True)
+    except Exception as e:
+        logger.error("Error creating directories for %s: %s", s3_folder, e)
+
+    local_folder = f"/tmp/${s3_folder}"
 
     if config.environment == "local":
         assert os.path.exists(

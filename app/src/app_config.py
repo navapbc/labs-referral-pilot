@@ -46,7 +46,7 @@ class AppConfig(PydanticBaseEnvConfig):
     # For RAG vector DB
     rag_db_host: str = "52.4.126.145"
     rag_db_port: int = 8000
-    collection_name: str = "referral_resources"
+    collection_name_prefix: str = "referral_resources"
     # If true, the vector DB cleared and documents are re-ingested on startup
     reset_rag_db: bool = True
     # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is too large for deployment
@@ -78,7 +78,9 @@ class AppConfig(PydanticBaseEnvConfig):
 
         self.conditionally_disable_chroma_telemetry()
         return ChromaDocumentStore(
-            collection_name=self.collection_name, host=self.rag_db_host, port=self.rag_db_port
+            collection_name=f"{self.collection_name_prefix}_{self.environment}",
+            host=self.rag_db_host,
+            port=self.rag_db_port,
         )
 
 
