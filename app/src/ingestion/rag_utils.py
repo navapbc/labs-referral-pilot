@@ -17,11 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 def populate_vector_db() -> None:
-    logger.info(
-        "populate_vector_db()... thread=%s id=%s",
-        threading.current_thread().name,
-        threading.get_ident(),
-    )
+    logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
+    logger.info("populate_vector_db()...")
 
     doc_store = config.chroma_document_store()
     if config.reset_rag_db and doc_store.count_documents() > 0:
@@ -35,16 +32,19 @@ def populate_vector_db() -> None:
     local_folder = download_s3_folder_to_local()
     ingest_documents(doc_store, [f"{local_folder}/{file}" for file in config.files_to_ingest])
 
+    print("ChromaDB collections:", config.chroma_client().list_collections())
+
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
     try:
-        os.makedirs(s3_folder, exist_ok=True)
+        local_folder = s3_folder
+        os.makedirs(local_folder, exist_ok=True)
     except Exception as e:
         logger.error("Error creating directories for %s: %s", s3_folder, e)
-
-    local_folder = f"/tmp/${s3_folder}"
+        local_folder = f"/tmp/{s3_folder}"
+    logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
 
     if config.environment == "local":
         assert os.path.exists(
