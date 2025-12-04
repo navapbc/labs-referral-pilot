@@ -156,7 +156,7 @@ class OpenAIWebSearchGenerator:
         self,
         messages: list[ChatMessage],
         domain: str | None = None,
-        model: str = "gpt-5",
+        model: str = "gpt-5.1",
         reasoning_effort: str = "high",
     ) -> dict:
         """

@@ -54,8 +54,7 @@ export async function fetchActionPlan(
   userEmail: string,
   userQuery: string,
 ): Promise<{ actionPlan: ActionPlan | null; errorMessage?: string }> {
-  const apiDomain = await getApiDomain();
-  const url = apiDomain + "generate_action_plan/run";
+  const url = "https://p-112-app-dev-1362942778.us-east-1.elb.amazonaws.com/generate_action_plan/run";
   const headers = {
     "Content-Type": "application/json",
   };

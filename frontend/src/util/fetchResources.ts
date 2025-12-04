@@ -6,8 +6,7 @@ export async function fetchResources(
   userEmail: string,
   prompt_version_id: string | null,
 ) {
-  const apiDomain = await getApiDomain();
-  const url = apiDomain + "generate_referrals/run";
+  const url = "https://p-112-app-dev-1362942778.us-east-1.elb.amazonaws.com/generate_referrals/run";
   const headers = {
     "Content-Type": "application/json",
   };

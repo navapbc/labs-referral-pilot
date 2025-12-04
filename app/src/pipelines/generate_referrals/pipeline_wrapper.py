@@ -138,7 +138,7 @@ class PipelineWrapper(BasePipelineWrapper):
                         "query": query,
                         "response_json": response_schema,
                     },
-                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                    "llm": {"model": "gpt-5.1", "reasoning_effort": "low"},
                 },
                 include_outputs_from={"llm", "save_result"},
             )
