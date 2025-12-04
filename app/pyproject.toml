@@ -73,6 +73,7 @@ run-experiment= "src.experiments:main"
 manage-crawl-job= "src.db.manage_crawl_job:main"
 process-crawl-jobs= "src.ingestion.process_crawl_jobs:main"
 delete-support= "src.db.delete_support:main"
+delete-support-listing= "src.db.delete_support_listing:main"
 
 [tool.black]
 line-length = 100

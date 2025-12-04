@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 
 from src.db.manage_crawl_job import delete_crawl_job, upsert_crawl_job
 from src.db.models.crawl_job import CrawlJob
+from src.db.models.support_listing import Support, SupportListing
+from src.ingestion.process_crawl_jobs import get_support_listing_name_for_crawl_job
 
 
 def test_create_new_crawl_job(db_session: Session):
@@ -173,3 +175,115 @@ def test_update_crawl_job_to_add_prompt_name(db_session: Session):
     db_session.commit()
     all_jobs = db_session.query(CrawlJob).where(CrawlJob.domain == domain).all()
     assert len(all_jobs) == 1
+
+
+def test_delete_crawl_job_with_support_listing(db_session: Session):
+    """Test that deleting a CrawlJob also deletes its associated SupportListing and Supports"""
+    domain = "example.com"
+    support_listing_name = get_support_listing_name_for_crawl_job(domain)
+
+    # Create a CrawlJob
+    upsert_crawl_job(db_session, "test_prompt", domain, 24)
+    db_session.commit()
+
+    # Create a SupportListing - we're mocking the result of processing a crawl job for testing
+    support_listing = SupportListing(name=support_listing_name, uri=domain)
+    db_session.add(support_listing)
+    db_session.flush()
+
+    # Create some associated Support entries - we're mocking the result of processing a crawl job for testing
+    support1 = Support(
+        support_listing_id=support_listing.id,
+        name="Test Support 1",
+        description="Description 1",
+        addresses=[],
+        phone_numbers=[],
+        email_addresses=[],
+    )
+    support2 = Support(
+        support_listing_id=support_listing.id,
+        name="Test Support 2",
+        description="Description 2",
+        addresses=[],
+        phone_numbers=[],
+        email_addresses=[],
+    )
+    db_session.add_all([support1, support2])
+    db_session.commit()
+
+    assert db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none() is not None
+    assert (
+        db_session.query(SupportListing)
+        .where(SupportListing.name == support_listing_name)
+        .one_or_none()
+        is not None
+    )
+    assert (
+        db_session.query(Support).where(Support.support_listing_id == support_listing.id).count()
+        == 2
+    )
+
+    result = delete_crawl_job(db_session, domain)
+    assert result is True
+    db_session.commit()
+
+    assert db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none() is None
+    assert (
+        db_session.query(SupportListing)
+        .where(SupportListing.name == support_listing_name)
+        .one_or_none()
+        is None
+    )
+    assert (
+        db_session.query(Support).where(Support.support_listing_id == support_listing.id).count()
+        == 0
+    )
+
+
+def test_delete_crawl_job_still_works_without_a_related_support_listing(db_session: Session):
+    """Test that deleting a CrawlJob without an associated SupportListing still works"""
+    domain = "example-no-listing.com"
+
+    upsert_crawl_job(db_session, "test_prompt", domain, 24)
+    db_session.commit()
+
+    assert db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none() is not None
+
+    # Delete the CrawlJob (should succeed even without SupportListing)
+    result = delete_crawl_job(db_session, domain)
+    assert result is True
+    db_session.commit()
+
+    assert db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none() is None
+
+
+def test_delete_crawl_job_with_differently_named_support_listing(db_session: Session):
+    """Test that a SupportListing with a different name is NOT deleted when deleting CrawlJob"""
+    domain = "example.com"
+    wrong_support_listing_name = "Different Name"
+
+    upsert_crawl_job(db_session, "test_prompt", domain, 24)
+    db_session.commit()
+
+    # Create a SupportListing with a DIFFERENT name (not following the naming convention)
+    support_listing = SupportListing(name=wrong_support_listing_name, uri=domain)
+    db_session.add(support_listing)
+    db_session.commit()
+    support_listing_id = support_listing.id
+
+    # Delete the CrawlJob
+    result = delete_crawl_job(db_session, domain)
+    assert result is True
+    db_session.commit()
+
+    # Verify CrawlJob is deleted
+    assert db_session.query(CrawlJob).where(CrawlJob.domain == domain).one_or_none() is None
+
+    # Verify the SupportListing with different name still exists (was NOT deleted)
+    still_exists = (
+        db_session.query(SupportListing)
+        .where(SupportListing.id == support_listing_id)
+        .one_or_none()
+    )
+    assert still_exists is not None
+    assert still_exists.name == wrong_support_listing_name
