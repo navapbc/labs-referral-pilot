@@ -96,6 +96,7 @@ run-experiment= "src.experiments:main"
 manage-crawl-job= "src.db.manage_crawl_job:main"
 process-crawl-jobs= "src.ingestion.process_crawl_jobs:main"
 delete-support= "src.db.delete_support:main"
+populate-vector-db= "src.ingestion.rag_utils:populate_vector_db"
 
 [tool.black]
 line-length = 100

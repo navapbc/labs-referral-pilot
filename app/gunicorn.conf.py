@@ -29,6 +29,5 @@ threads = 4
 # This function is called once regardless of the number of workers.
 # https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
 def when_ready(server: object) -> None:
-    print("Ingesting into ChromaDB...", server)
-    rag_utils.populate_vector_db()
+    print("when_ready()", server)
     print("ChromaDB populated. Collections:", app_config.chroma_client().list_collections())
