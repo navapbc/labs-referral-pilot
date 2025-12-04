@@ -10,6 +10,7 @@ For more information, see https://docs.gunicorn.org/en/stable/configure.html
 """
 
 import os
+from src.ingestion import rag_utils
 
 from src.app_config import AppConfig
 
@@ -23,3 +24,12 @@ bind = app_config.host + ':' + str(app_config.port)
 # os.cpu_count(): Return the number of CPUs in the system.
 workers = len(os.sched_getaffinity(0)) * 2
 threads = 4
+
+
+
+# This function is called once regardless of the number of workers.
+# https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
+def on_starting(server: object) -> None:
+    print("Ingesting into ChromaDB...", server)
+    rag_utils.populate_vector_db()
+    print("ChromaDB populated. Collections:", app_config.chroma_client().list_collections())
