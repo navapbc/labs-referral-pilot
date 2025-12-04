@@ -27,6 +27,8 @@ def populate_vector_db() -> None:
     if count > 0:
         logger.info("Deleting existing vector DB collection=%r ...", doc_store._collection_name)
         chroma_client.delete_collection(doc_store._collection_name)
+        # Re-create the document store after deletion
+        doc_store = config.chroma_document_store()
 
     local_folder = download_s3_folder_to_local()
     ingest_documents(doc_store, [f"{local_folder}/{file}" for file in config.files_to_ingest])
@@ -75,7 +77,7 @@ def ingest_documents(doc_store: ChromaDocumentStore, sources: list[str]) -> None
     pipeline = _create_ingest_pipeline(doc_store)
 
     # Run the pipeline to index documents
-    logger.info("Ingesting documents into %s doc_count=%d", doc_store, doc_store.count_documents())
+    logger.info("Ingesting documents into %s", doc_store)
     pipeline.run({"converter": {"sources": sources}})
     logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
 
