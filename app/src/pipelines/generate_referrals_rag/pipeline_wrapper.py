@@ -80,10 +80,8 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
     def _run_arg_data(
         self, query: str, user_email: str, prompt_template: list[ChatMessage]
     ) -> dict:
-        top_k = config.retrieval_top_k
-        logger.info("RAG top_k=%d query: %s", top_k, query)
         return super()._run_arg_data(query, user_email, prompt_template) | {
             # For querying RAG DB
             "query_embedder": {"text": query},
-            "retriever": {"top_k": top_k, "filters": None},
+            "retriever": {"top_k": config.retrieval_top_k, "filters": None},
         }

@@ -47,8 +47,6 @@ class AppConfig(PydanticBaseEnvConfig):
     rag_db_host: str = "52.4.126.145"
     rag_db_port: int = 8000
     collection_name_prefix: str = "referral_resources"
-    # If true, the vector DB cleared and documents are re-ingested on startup
-    reset_rag_db: bool = True
     # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is too large for deployment
     # all-MiniLM-L6-v2 is a smaller, more efficient model
     rag_embedding_model: str = "all-MiniLM-L6-v2"
@@ -61,7 +59,7 @@ class AppConfig(PydanticBaseEnvConfig):
         "extracted_support_entries.md",  # instead of the raw "Basic Needs Resource Guide.pdf",
         "from-Sharepoint/Austin Area Resource List 2025.pdf",
     ]
-    retrieval_top_k: int = 5
+    retrieval_top_k: int = 10
 
     def chroma_client(self) -> ClientAPI:
         self.conditionally_disable_chroma_telemetry()
