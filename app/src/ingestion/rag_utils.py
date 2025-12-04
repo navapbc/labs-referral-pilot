@@ -1,6 +1,5 @@
 import logging
 import os
-import threading
 
 from botocore.exceptions import NoCredentialsError
 from haystack import Pipeline
@@ -20,19 +19,19 @@ def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
     logger.info("populate_vector_db()...")
 
-    doc_store = config.chroma_document_store()
-    if config.reset_rag_db and doc_store.count_documents() > 0:
-        logger.info("Resetting RAG vector DB...")
-        doc_store.delete_all_documents()
+    chroma_client = config.chroma_client()
+    print("ChromaDB collections:", chroma_client.list_collections())
 
-    if count := doc_store.count_documents():
-        logger.info("Document collection exists with %d documents. Skipping ingestion.", count)
-        return
+    doc_store = config.chroma_document_store()
+    count = doc_store.count_documents()
+    if count > 0:
+        logger.info("Deleting existing vector DB collection=%r ...", doc_store._collection_name)
+        chroma_client.delete_collection(doc_store._collection_name)
 
     local_folder = download_s3_folder_to_local()
     ingest_documents(doc_store, [f"{local_folder}/{file}" for file in config.files_to_ingest])
 
-    print("ChromaDB collections:", config.chroma_client().list_collections())
+    print("ChromaDB collections:", chroma_client.list_collections())
 
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
