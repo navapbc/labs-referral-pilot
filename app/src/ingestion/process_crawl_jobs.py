@@ -173,7 +173,7 @@ def save_job_results(
         job: CrawlJob instance that was processed
         support_entries: Iterable of SupportEntry objects to save
     """
-    listing_name = f"Crawl Job: {job.domain}"
+    listing_name = get_support_listing_name_for_crawl_job(job.domain)
 
     # Find or create the SupportListing
     support_listing = (
@@ -269,6 +269,10 @@ def process_all_jobs(db_session: db.Session) -> None:
         )
     else:
         logger.info("Successfully processed and saved %d jobs", len(results))
+
+
+def get_support_listing_name_for_crawl_job(domain: str) -> str:
+    return "Crawl Job: " + domain
 
 
 def main() -> None:  # pragma: no cover
