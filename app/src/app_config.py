@@ -49,7 +49,7 @@ class AppConfig(PydanticBaseEnvConfig):
     collection_name_prefix: str = "referral_resources"
     # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is too large for deployment
     # all-MiniLM-L6-v2 is a smaller, more efficient model
-    rag_embedding_model: str = "all-MiniLM-L6-v2"
+    rag_embedding_model: str = "multi-qa-mpnet-base-cos-v1"
     # The parameters can be adjusted based on the desired chunk size
     rag_chunk_split_length: int = 500
     rag_chunk_split_overlap: int = 50
