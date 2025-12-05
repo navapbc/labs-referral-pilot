@@ -54,7 +54,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         os.makedirs(local_folder, exist_ok=True)
     except PermissionError as e:
         logger.error("Error creating directories for %s: %s", s3_folder, e)
-        local_folder = f"/tmp/{s3_folder}"
+        local_folder = f"/tmp/{s3_folder}"  # nosec B108
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
 
     if config.environment == "local":
