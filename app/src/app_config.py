@@ -63,14 +63,15 @@ class AppConfig(PydanticBaseEnvConfig):
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
 
     def chroma_document_store(self) -> ChromaDocumentStore:
-        # SENTENCE_TRANSFORMERS_HOME is used by SentenceTransformersTextEmbedder Haystack component
-        os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
-
         return ChromaDocumentStore(
             collection_name=f"{self.collection_name_prefix}_{self.environment}",
             host=self.rag_db_host,
             port=self.rag_db_port,
         )
 
+
+# SENTENCE_TRANSFORMERS_HOME is used by SentenceTransformersTextEmbedder Haystack component
+if "SENTENCE_TRANSFORMERS_HOME" not in os.environ:
+    os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
 
 config = AppConfig()

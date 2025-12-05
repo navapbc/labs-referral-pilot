@@ -20,13 +20,14 @@ def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     chroma_client = config.chroma_client()
-    print("ChromaDB collections:", chroma_client.list_collections())
+    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
     doc_store = config.chroma_document_store()
+    collection_name = doc_store._collection_name
 
     # Clear existing collection if any
     if doc_store.count_documents() > 0:
-        logger.info("Deleting existing vector DB collection=%r ...", doc_store._collection_name)
-        chroma_client.delete_collection(doc_store._collection_name)
+        logger.info("Deleting existing vector DB collection=%r", collection_name)
+        chroma_client.delete_collection(collection_name)
         # Re-create the document store after deletion
         doc_store = config.chroma_document_store()
 
@@ -36,13 +37,13 @@ def populate_vector_db() -> None:
     logger.info("Files to ingest: %s", files_to_ingest)
 
     # Ingest documents into ChromaDB
-    logger.info("Ingesting documents into collection=%s", doc_store._collection_name)
+    logger.info("Ingesting documents into collection=%r", collection_name)
     # Run the pipeline to index documents
     pipeline = _create_ingest_pipeline(doc_store)
     pipeline.run({"converter": {"sources": files_to_ingest}})
     logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
 
-    print("ChromaDB collections:", chroma_client.list_collections())
+    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
 
 
 def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
@@ -51,7 +52,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
     try:
         local_folder = s3_folder
         os.makedirs(local_folder, exist_ok=True)
-    except Exception as e:
+    except PermissionError as e:
         logger.error("Error creating directories for %s: %s", s3_folder, e)
         local_folder = f"/tmp/{s3_folder}"
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
