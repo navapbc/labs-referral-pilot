@@ -88,10 +88,9 @@ def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> Prompt
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
     logger.info(
-        "Retrieved prompt with %r: id='%s'\n%s",
+        "Retrieved prompt with %r: id='%s'",
         prompt_params,
         prompt.id,
-        pformat(prompt._dumps(), width=160),
     )
     return prompt
 

@@ -10,6 +10,7 @@ from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.core.errors import PipelineRuntimeError
+from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import _tracers, using_attributes, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
@@ -129,17 +130,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         try:
             response = self.pipeline.run(
-                {
-                    "logger": {
-                        "messages_list": [{"query": query, "user_email": user_email}],
-                    },
-                    "prompt_builder": {
-                        "template": prompt_template,
-                        "query": query,
-                        "response_json": response_schema,
-                    },
-                    "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
-                },
+                self._run_arg_data(query, user_email, prompt_template),
                 include_outputs_from={"llm", "save_result"},
             )
             logger.debug("Results: %s", pformat(response, width=160))
@@ -150,3 +141,18 @@ class PipelineWrapper(BasePipelineWrapper):
         except Exception as e:
             logger.error("Error %s: %s", type(e), e, exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+
+    def _run_arg_data(
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    ) -> dict:
+        return {
+            "logger": {
+                "messages_list": [{"query": query, "user_email": user_email}],
+            },
+            "prompt_builder": {
+                "template": prompt_template,
+                "query": query,
+                "response_json": response_schema,
+            },
+            "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+        }

@@ -9,7 +9,7 @@ FROM python:3.12-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir --upgrade pip==25.3 poetry==1.5
+RUN pip install --no-cache-dir --upgrade pip==25.3 poetry==2.1
 
 RUN apt-get update \
     # Install security updates
@@ -118,7 +118,10 @@ ENV PATH="/app/.venv/bin:$PATH"
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
+# Disable posthog telemetry for ChromaDB (used for RAG) https://docs.trychroma.com/docs/overview/telemetry
+ENV ANONYMIZED_TELEMETRY=False
+
 USER ${RUN_USER}
 
 # Run the application.
-CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b 0.0.0.0:8000"]
+CMD ["poetry", "run", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "src.app:hayhooks_app", "-b", "0.0.0.0:8000"]

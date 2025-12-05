@@ -1,4 +1,9 @@
+import os
 from functools import cached_property
+
+import chromadb
+from chromadb.api import ClientAPI
+from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 
 from src.adapters import db
 from src.util.env_config import PydanticBaseEnvConfig
@@ -38,5 +43,35 @@ class AppConfig(PydanticBaseEnvConfig):
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
 
+    # For RAG vector DB
+    rag_db_host: str = "52.4.126.145"
+    rag_db_port: int = 8000
+    collection_name_prefix: str = "referral_resources"
+
+    # The embedding model is downloaded by SentenceTransformersTextEmbedder when it first runs
+    # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is large (400M)
+    # all-MiniLM-L6-v2 is a smaller (100M), more efficient model
+    # When this is changed, the vector DB should be re-populated with embeddings from the new model (populate-vector-db)
+    rag_embedding_model: str = "multi-qa-mpnet-base-cos-v1"
+
+    # The parameters can be adjusted based on the desired chunk size
+    rag_chunk_split_length: int = 500
+    rag_chunk_split_overlap: int = 50
+    retrieval_top_k: int = 10
+
+    def chroma_client(self) -> ClientAPI:
+        return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
+
+    def chroma_document_store(self) -> ChromaDocumentStore:
+        return ChromaDocumentStore(
+            collection_name=f"{self.collection_name_prefix}_{self.environment}",
+            host=self.rag_db_host,
+            port=self.rag_db_port,
+        )
+
+
+# SENTENCE_TRANSFORMERS_HOME is used by SentenceTransformersTextEmbedder Haystack component
+if "SENTENCE_TRANSFORMERS_HOME" not in os.environ:
+    os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
 
 config = AppConfig()
