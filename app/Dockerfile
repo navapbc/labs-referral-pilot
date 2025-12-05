@@ -118,6 +118,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
+# Disable posthog telemetry for ChromaDB (used for RAG) https://docs.trychroma.com/docs/overview/telemetry
+ENV ANONYMIZED_TELEMETRY=False
+
 USER ${RUN_USER}
 
 # Run the application.

@@ -47,28 +47,25 @@ class AppConfig(PydanticBaseEnvConfig):
     rag_db_host: str = "52.4.126.145"
     rag_db_port: int = 8000
     collection_name_prefix: str = "referral_resources"
-    # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is too large for deployment
-    # all-MiniLM-L6-v2 is a smaller, more efficient model
+
+    # The embedding model is downloaded by SentenceTransformersTextEmbedder when it first runs
+    # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is large (400M)
+    # all-MiniLM-L6-v2 is a smaller (100M), more efficient model
+    # When this is changed, the vector DB should be re-populated with embeddings from the new model (populate-vector-db)
     rag_embedding_model: str = "multi-qa-mpnet-base-cos-v1"
+
     # The parameters can be adjusted based on the desired chunk size
     rag_chunk_split_length: int = 500
     rag_chunk_split_overlap: int = 50
     retrieval_top_k: int = 10
 
     def chroma_client(self) -> ClientAPI:
-        self.conditionally_disable_chroma_telemetry()
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
-
-    def conditionally_disable_chroma_telemetry(self) -> None:
-        if "ANONYMIZED_TELEMETRY" not in os.environ:
-            # Disable posthog telemetry for ChromaDB https://docs.trychroma.com/docs/overview/telemetry
-            os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
     def chroma_document_store(self) -> ChromaDocumentStore:
         # SENTENCE_TRANSFORMERS_HOME is used by SentenceTransformersTextEmbedder Haystack component
         os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.curdir + "/sentence_transformers"
 
-        self.conditionally_disable_chroma_telemetry()
         return ChromaDocumentStore(
             collection_name=f"{self.collection_name_prefix}_{self.environment}",
             host=self.rag_db_host,
