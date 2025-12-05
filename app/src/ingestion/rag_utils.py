@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from botocore.exceptions import NoCredentialsError
 from haystack import Pipeline
@@ -17,21 +18,29 @@ logger = logging.getLogger(__name__)
 
 def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
-    logger.info("populate_vector_db()...")
 
     chroma_client = config.chroma_client()
     print("ChromaDB collections:", chroma_client.list_collections())
-
     doc_store = config.chroma_document_store()
-    count = doc_store.count_documents()
-    if count > 0:
+
+    # Clear existing collection if any
+    if doc_store.count_documents() > 0:
         logger.info("Deleting existing vector DB collection=%r ...", doc_store._collection_name)
         chroma_client.delete_collection(doc_store._collection_name)
         # Re-create the document store after deletion
         doc_store = config.chroma_document_store()
 
+    # Download files from S3
     local_folder = download_s3_folder_to_local()
-    ingest_documents(doc_store, [f"{local_folder}/{file}" for file in config.files_to_ingest])
+    files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
+    logger.info("Files to ingest: %s", files_to_ingest)
+
+    # Ingest documents into ChromaDB
+    logger.info("Ingesting documents into collection=%s", doc_store._collection_name)
+    # Run the pipeline to index documents
+    pipeline = _create_ingest_pipeline(doc_store)
+    pipeline.run({"converter": {"sources": files_to_ingest}})
+    logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
 
     print("ChromaDB collections:", chroma_client.list_collections())
 
@@ -69,17 +78,6 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
     except NoCredentialsError:
         logger.error("AWS credentials not found. Please configure your AWS credentials.")
         raise
-
-
-def ingest_documents(doc_store: ChromaDocumentStore, sources: list[str]) -> None:
-    """Ingest documents into the vector store."""
-
-    pipeline = _create_ingest_pipeline(doc_store)
-
-    # Run the pipeline to index documents
-    logger.info("Ingesting documents into %s", doc_store)
-    pipeline.run({"converter": {"sources": sources}})
-    logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
 
 
 def _create_ingest_pipeline(doc_store: ChromaDocumentStore) -> Pipeline:

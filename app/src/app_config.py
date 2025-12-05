@@ -53,12 +53,6 @@ class AppConfig(PydanticBaseEnvConfig):
     # The parameters can be adjusted based on the desired chunk size
     rag_chunk_split_length: int = 500
     rag_chunk_split_overlap: int = 50
-    # List of files to ingest into vector DB relative to the S3 downloaded folder
-    files_to_ingest: list[str] = [
-        "LocationListInfo (5).pdf",
-        "extracted_support_entries.md",  # instead of the raw "Basic Needs Resource Guide.pdf",
-        "from-Sharepoint/Austin Area Resource List 2025.pdf",
-    ]
     retrieval_top_k: int = 10
 
     def chroma_client(self) -> ClientAPI:
