@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from botocore.exceptions import NoCredentialsError
+from chromadb.api import ClientAPI
 from haystack import Pipeline
 from haystack.components.converters import MultiFileConverter
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
@@ -16,13 +17,24 @@ from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
-# TODO: Clear out old preview env collections
+
+def delete_preview_collections(chroma_client: ClientAPI) -> None:
+    collections = chroma_client.list_collections()
+    for collection in collections:
+        name = collection.name
+        if name.startswith(f"{config.collection_name_prefix}_p-"):
+            logger.info("Deleting preview collection: %s", name)
+            chroma_client.delete_collection(name)
+
+    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
 
 
 def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     chroma_client = config.chroma_client()
+    delete_preview_collections(chroma_client)
+
     logger.info("ChromaDB collections: %s", chroma_client.list_collections())
     doc_store = config.chroma_document_store()
     collection_name = doc_store._collection_name
