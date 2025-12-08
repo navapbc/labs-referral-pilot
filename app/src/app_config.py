@@ -67,15 +67,12 @@ class AppConfig(PydanticBaseEnvConfig):
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
 
     def chroma_document_store(self) -> ChromaDocumentStore:
-        if self.bucket_name == "local":
-            # Note: since there's a single ChromaDB instance for all environments,
-            # there can be collision if multiple developers are running RAG simultaneously,
-            # but this is unlikely at this time.
-            # If doing read-only RAG retrievals locally, temporarily change this to
-            # "dev" to use the same collection as the deployed dev environment.
-            bucket_name: str = "local"
-        else:
-            bucket_name = self.bucket_name
+        # Note: since there's a single ChromaDB instance for all environments,
+        # there can be collision if multiple developers are running RAG simultaneously,
+        # but this is unlikely at this time.
+        # If doing read-only RAG retrievals locally, temporarily change this to
+        # "dev" to use the same collection as the deployed dev environment.
+        bucket_name = self.bucket_name
 
         # Use bucket name as part of collection name to avoid collision with `dev` environment for PRs
         return ChromaDocumentStore(
