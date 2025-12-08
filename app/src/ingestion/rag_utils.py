@@ -26,8 +26,6 @@ def delete_preview_collections(chroma_client: ClientAPI) -> None:
             logger.info("Deleting preview collection: %s", name)
             chroma_client.delete_collection(name)
 
-    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
-
 
 def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
