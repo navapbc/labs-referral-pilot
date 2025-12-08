@@ -26,10 +26,9 @@ def populate_vector_db() -> None:
 
     # Clear existing collection if any
     if doc_store.count_documents() > 0:
-        logger.info("Deleting existing vector DB collection=%r", collection_name)
-        chroma_client.delete_collection(collection_name)
-        # Re-create the document store after deletion
-        doc_store = config.chroma_document_store()
+        # Don't delete collection since it's referenced by existing pipelines upon their startup
+        logger.info("Clearing out existing vector DB collection=%r", collection_name)
+        doc_store.delete_all_documents()
 
     # Download files from S3
     local_folder = download_s3_folder_to_local()
