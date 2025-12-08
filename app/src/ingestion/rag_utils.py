@@ -48,7 +48,11 @@ def populate_vector_db() -> None:
             doc_store.delete_all_documents(recreate_index=False)
         except DocumentStoreError as e:
             # Ignore this error from haystack.logging, which is okay since logging is the last step in delete_all_documents
-            assert "ChromaDB: \"Attempt to overwrite 'name' in LogRecord\"" in str(e)
+            if "overwrite 'name' in LogRecord" in str(e):
+                logger.info("Ignoring expected DocumentStoreError: %s", e)
+            else:
+                logger.warning("Unexpected DocumentStoreError: %s", e)
+                raise
     assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
     # Download files from S3
