@@ -8,10 +8,10 @@ export async function fetchResources(
 ) {
   const apiDomain = await getApiDomain();
 
-  const useRag = true;
-  const url_path = useRag
-    ? "generate_referrals_rag/run"
-    : "generate_referrals/run";
+  const useNonRag = process.env.NEXT_PUBLIC_USE_NONRAG === "true";
+  const url_path = useNonRag
+    ? "generate_referrals/run"
+    : "generate_referrals_rag/run";
 
   const url = apiDomain + url_path;
   const headers = {
