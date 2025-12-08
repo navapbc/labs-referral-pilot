@@ -7,7 +7,13 @@ export async function fetchResources(
   prompt_version_id: string | null,
 ) {
   const apiDomain = await getApiDomain();
-  const url = apiDomain + "generate_referrals/run";
+
+  const useNonRag = process.env.NEXT_PUBLIC_USE_NONRAG === "true";
+  const url_path = useNonRag
+    ? "generate_referrals/run"
+    : "generate_referrals_rag/run";
+
+  const url = apiDomain + url_path;
   const headers = {
     "Content-Type": "application/json",
   };

@@ -3,11 +3,13 @@ import os
 from pathlib import Path
 
 from botocore.exceptions import NoCredentialsError
+from chromadb.api import ClientAPI
 from haystack import Pipeline
 from haystack.components.converters import MultiFileConverter
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from haystack.components.preprocessors import DocumentPreprocessor
 from haystack.components.writers import DocumentWriter
+from haystack.document_stores.errors.errors import DocumentStoreError
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 
 from src.app_config import config
@@ -16,19 +18,40 @@ from src.util import file_util
 logger = logging.getLogger(__name__)
 
 
+def delete_preview_collections(chroma_client: ClientAPI) -> None:
+    collections = chroma_client.list_collections()
+    for collection in collections:
+        name = collection.name
+        if name.startswith(f"{config.collection_name_prefix}_p-"):
+            logger.info("Deleting preview collection: %s", name)
+            chroma_client.delete_collection(name)
+
+
 def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     chroma_client = config.chroma_client()
+    delete_preview_collections(chroma_client)
+
     logger.info("ChromaDB collections: %s", chroma_client.list_collections())
     doc_store = config.chroma_document_store()
     collection_name = doc_store._collection_name
 
     # Clear existing collection if any
     if doc_store.count_documents() > 0:
-        # Don't delete collection since it's referenced by existing pipelines upon their startup
-        logger.info("Clearing out existing vector DB collection=%r", collection_name)
-        doc_store.delete_all_documents()
+        try:
+            # Don't delete collection since it's referenced by existing pipelines upon their startup
+            logger.info("Clearing out existing vector DB collection=%r", collection_name)
+            # recreate_index=True results in a new id for the collection, which breaks existing pipelines
+            doc_store.delete_all_documents(recreate_index=False)
+        except DocumentStoreError as e:
+            # Ignore this error from haystack.logging, which is okay since logging is the last step in delete_all_documents
+            if "overwrite 'name' in LogRecord" in str(e):
+                logger.info("Ignoring expected DocumentStoreError: %s", e)
+            else:
+                logger.warning("Unexpected DocumentStoreError: %s", e)
+                raise
+    assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
     # Download files from S3
     local_folder = download_s3_folder_to_local()
