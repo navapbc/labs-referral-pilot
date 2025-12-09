@@ -31,7 +31,8 @@ def populate_vector_db() -> None:
     logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.INFO)
 
     chroma_client = config.chroma_client()
-    delete_preview_collections(chroma_client)
+    if config.delete_preview_collections:
+        delete_preview_collections(chroma_client)
 
     logger.info("ChromaDB collections: %s", chroma_client.list_collections())
     doc_store = config.chroma_document_store()

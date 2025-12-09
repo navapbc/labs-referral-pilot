@@ -11,11 +11,8 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 class AppConfig(PydanticBaseEnvConfig):
     environment: str = "local"
-    # Use the similar syntax as the preview environment bucket names
-    # Note: since there's a single ChromaDB instance for all environments,
-    # there can be collision if multiple developers are running RAG simultaneously,
-    # but this is unlikely at this time.
-    bucket_name: str = "local-labs-referral-pilot-app-dev"
+    # Preview environment bucket names look like 'p-###-labs-referral-pilot-app-dev'
+    bucket_name: str = "local"
     # Set HOST to 127.0.0.1 by default to avoid other machines on the network
     # from accessing the application. This is especially important if you are
     # running the application locally on a public network. This needs to be
@@ -52,6 +49,8 @@ class AppConfig(PydanticBaseEnvConfig):
     rag_db_host: str = "52.4.126.145"
     rag_db_port: int = 8000
     collection_name_prefix: str = "referral_resources"
+    # Whether to delete collections created for preview environments in ChromaDB
+    delete_preview_collections: bool = True
 
     # The embedding model is downloaded by SentenceTransformersTextEmbedder when it first runs
     # multi-qa-mpnet-base-cos-v1 was used for pilot 1 but is large (400M)
@@ -68,9 +67,16 @@ class AppConfig(PydanticBaseEnvConfig):
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
 
     def chroma_document_store(self) -> ChromaDocumentStore:
+        # Note: since there's a single ChromaDB instance for all environments,
+        # there can be collision if multiple developers are running RAG simultaneously,
+        # but this is unlikely at this time.
+        # If doing read-only RAG retrievals locally, temporarily change this to
+        # "dev" to use the same collection as the deployed dev environment.
+        bucket_name = self.bucket_name
+
         # Use bucket name as part of collection name to avoid collision with `dev` environment for PRs
         return ChromaDocumentStore(
-            collection_name=f"{self.collection_name_prefix}_{self.bucket_name}",
+            collection_name=f"{self.collection_name_prefix}_{bucket_name}",
             host=self.rag_db_host,
             port=self.rag_db_port,
         )
