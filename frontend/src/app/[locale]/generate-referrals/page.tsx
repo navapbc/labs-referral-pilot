@@ -365,7 +365,7 @@ export default function Page() {
                     onClearAllFilters={clearAllFilters}
                     onToggleResourceType={toggleResourceType}
                     onLocationChange={setLocationText}
-                    onLocationBlur={handleLocationBlur}
+                    onLocationBlur={() => void handleLocationBlur()}
                     onClientDescriptionChange={setClientDescription}
                     onFindResources={() => void handleClick()}
                   />
