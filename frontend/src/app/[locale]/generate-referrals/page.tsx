@@ -207,16 +207,20 @@ export default function Page() {
     const locationFilterPrefix =
       "\nFocus on resources close to the following location: ";
 
-    // Check if locationText contains a zip code (5 digits or 5+4 format)
+    // Check if locationText contains zip codes (5 digits or 5+4 format)
     let processedLocation = locationText;
-    const zipCodeRegex = /\b\d{5}(-\d{4})?\b/;
-    const zipMatch = locationText.match(zipCodeRegex);
+    const zipCodeRegex = /\b\d{5}(-\d{4})?\b/g;
+    const zipMatches = Array.from(locationText.matchAll(zipCodeRegex));
 
-    if (zipMatch) {
-      const zipCode = zipMatch[0].split("-")[0]; // Get just the 5-digit portion
-      const cityState = await fetchLocationFromZip(zipCode);
-      if (cityState) {
-        processedLocation = locationText.replace(zipCodeRegex, cityState);
+    if (zipMatches.length > 0) {
+      // Process all zip codes and replace them with city, state
+      for (const match of zipMatches) {
+        const zipCode = match[0].split("-")[0]; // Get just the 5-digit portion
+        const cityState = await fetchLocationFromZip(zipCode);
+        if (cityState) {
+          // Replace this specific occurrence
+          processedLocation = processedLocation.replace(match[0], cityState);
+        }
       }
     }
 
