@@ -374,7 +374,9 @@ export default function Page() {
                   </div>
                 </div>
                 <ClientDetailsPromptBubble
-                  clientDescription={clientDescription + getCollatedReferralOptions()}
+                  clientDescription={
+                    clientDescription + getCollatedReferralOptions()
+                  }
                 />
                 <ResourcesList
                   resources={retainedResources ?? []}
