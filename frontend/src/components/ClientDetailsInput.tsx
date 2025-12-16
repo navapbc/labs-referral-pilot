@@ -229,7 +229,7 @@ export function ClientDetailsInput({
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
               <Input
-                placeholder="Enter location (city, area, zip code, etc.)"
+                placeholder="Enter location (city, county, area, etc.)"
                 value={locationText}
                 onChange={(e) => onLocationChange(e.target.value)}
                 className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
