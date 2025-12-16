@@ -15,19 +15,18 @@ const zipCodeCache = new Map<string, string | null>();
 
 export async function fetchLocationFromZip(
   zipCode: string,
-  timeoutMs: number = 5000,
 ): Promise<string | null> {
   // Check cache first
   if (zipCodeCache.has(zipCode)) {
     return zipCodeCache.get(zipCode) ?? null;
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const ac = new AbortController();
+  const timeoutId = setTimeout(() => ac.abort(), 5_000);
 
   try {
     const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`, {
-      signal: controller.signal,
+      signal: ac.signal,
     });
     clearTimeout(timeoutId);
 

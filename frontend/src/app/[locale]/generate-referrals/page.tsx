@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, Printer, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,9 @@ export default function Page() {
   >(null);
   const [collatedOptions, setCollatedOptions] = useState("");
 
+  // Ref to track pending location resolution
+  const pendingLocationResolution = useRef<Promise<void> | null>(null);
+
   // Check if user has provided info on first load
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
@@ -104,12 +107,22 @@ export default function Page() {
   };
 
   const handleLocationBlur = async () => {
-    const options = await getCollatedReferralOptions();
-    setCollatedOptions(options);
+    const promise = (async () => {
+      const options = await getCollatedReferralOptions();
+      setCollatedOptions(options);
+    })();
+    pendingLocationResolution.current = promise;
+    await promise;
+    pendingLocationResolution.current = null;
   };
 
   async function handleClick() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
+
+    // Wait for any pending location resolution to complete
+    if (pendingLocationResolution.current) {
+      await pendingLocationResolution.current;
+    }
 
     setLoading(true);
     setResult(null);
@@ -218,20 +231,28 @@ export default function Page() {
     const zipMatches = Array.from(locationText.matchAll(zipCodeRegex));
 
     if (zipMatches.length > 0) {
-      // Process all zip codes and replace them with city, state
-      for (const match of zipMatches) {
-        const zipCode = match[0].split("-")[0]; // Get just the 5-digit portion
-        const cityState = await fetchLocationFromZip(zipCode);
-        if (cityState) {
-          // Replace this specific occurrence
-          processedLocation = processedLocation.replace(match[0], cityState);
-        } else {
-          processedLocation = processedLocation.replace(
-            match[0],
-            match[0] + " (unknown)",
-          );
-        }
-      }
+      // Fetch all city/state lookups in parallel
+      const replacements = await Promise.all(
+        zipMatches.map(async (match) => {
+          const zipCode = match[0].split("-")[0];
+          const cityState = await fetchLocationFromZip(zipCode);
+          return {
+            original: match[0],
+            replacement: cityState || match[0],
+            index: match.index!,
+          };
+        }),
+      );
+
+      // Process replacements in reverse order to preserve string positions
+      replacements
+        .sort((a, b) => b.index - a.index)
+        .forEach(({ original, replacement, index }) => {
+          processedLocation =
+            processedLocation.slice(0, index) +
+            replacement +
+            processedLocation.slice(index + original.length);
+        });
     }
 
     return (
