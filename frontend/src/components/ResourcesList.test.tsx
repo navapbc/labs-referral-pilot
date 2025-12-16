@@ -1,7 +1,7 @@
 import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
 import { Resource } from "@/types/resources";
-import ResourcesList from "./ResourcesList";
+import ResourcesList, { getCardBorderClass } from "./ResourcesList";
 
 const mockResource: Resource = {
   name: "Test Resource",
@@ -138,18 +138,19 @@ describe("ResourcesList", () => {
         referral_type: "goodwill",
       };
 
-      const { container } = render(
+      render(
         <ResourcesList
           resources={[resource]}
           handleRemoveResource={mockHandleRemoveResource}
         />,
       );
 
-      const card = container.querySelector('[class*="border-t-blue-600"]');
+      const expectedClasses = getCardBorderClass("goodwill");
+      const card = screen.getByTestId("resource-card-goodwill-0");
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass("border-t-4");
-      expect(card).toHaveClass("border-t-blue-600");
-      expect(card).toHaveClass("rounded-t-lg");
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
     });
 
     it("applies gray border class for government referral type", () => {
@@ -158,18 +159,19 @@ describe("ResourcesList", () => {
         referral_type: "government",
       };
 
-      const { container } = render(
+      render(
         <ResourcesList
           resources={[resource]}
           handleRemoveResource={mockHandleRemoveResource}
         />,
       );
 
-      const card = container.querySelector('[class*="border-t-gray-600"]');
+      const expectedClasses = getCardBorderClass("government");
+      const card = screen.getByTestId("resource-card-government-0");
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass("border-t-4");
-      expect(card).toHaveClass("border-t-gray-600");
-      expect(card).toHaveClass("rounded-t-lg");
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
     });
 
     it("applies green border class for external referral type", () => {
@@ -178,18 +180,19 @@ describe("ResourcesList", () => {
         referral_type: "external",
       };
 
-      const { container } = render(
+      render(
         <ResourcesList
           resources={[resource]}
           handleRemoveResource={mockHandleRemoveResource}
         />,
       );
 
-      const card = container.querySelector('[class*="border-t-green-600"]');
+      const expectedClasses = getCardBorderClass("external");
+      const card = screen.getByTestId("resource-card-external-0");
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass("border-t-4");
-      expect(card).toHaveClass("border-t-green-600");
-      expect(card).toHaveClass("rounded-t-lg");
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
     });
 
     it("does not apply border classes when referral type is undefined", () => {
@@ -198,23 +201,23 @@ describe("ResourcesList", () => {
         description: "No type specified",
       };
 
-      const { container } = render(
+      render(
         <ResourcesList
           resources={[resource]}
           handleRemoveResource={mockHandleRemoveResource}
         />,
       );
 
-      const card = container.querySelector('[class*="border-t-blue-600"]');
-      expect(card).not.toBeInTheDocument();
+      const expectedClasses = getCardBorderClass(undefined);
+      expect(expectedClasses).toBe("");
 
-      const grayCard = container.querySelector('[class*="border-t-gray-600"]');
-      expect(grayCard).not.toBeInTheDocument();
+      const card = screen.getByTestId("resource-card-0");
+      expect(card).toBeInTheDocument();
 
-      const greenCard = container.querySelector(
-        '[class*="border-t-green-600"]',
-      );
-      expect(greenCard).not.toBeInTheDocument();
+      // Verify no colored border classes are applied
+      expect(card).not.toHaveClass("border-t-blue-600");
+      expect(card).not.toHaveClass("border-t-gray-600");
+      expect(card).not.toHaveClass("border-t-green-600");
     });
 
     it("applies correct border classes to multiple resources with different types", () => {
@@ -224,22 +227,30 @@ describe("ResourcesList", () => {
         { name: "Community Center", referral_type: "external" },
       ];
 
-      const { container } = render(
+      render(
         <ResourcesList
           resources={resources}
           handleRemoveResource={mockHandleRemoveResource}
         />,
       );
 
-      const blueCard = container.querySelector('[class*="border-t-blue-600"]');
-      const grayCard = container.querySelector('[class*="border-t-gray-600"]');
-      const greenCard = container.querySelector(
-        '[class*="border-t-green-600"]',
-      );
+      const goodwillClasses = getCardBorderClass("goodwill");
+      const governmentClasses = getCardBorderClass("government");
+      const externalClasses = getCardBorderClass("external");
 
-      expect(blueCard).toBeInTheDocument();
-      expect(grayCard).toBeInTheDocument();
-      expect(greenCard).toBeInTheDocument();
+      const goodwillCard = screen.getByTestId("resource-card-goodwill-0");
+      const govCard = screen.getByTestId("resource-card-government-1");
+      const externalCard = screen.getByTestId("resource-card-external-2");
+
+      goodwillClasses.split(" ").forEach((className) => {
+        expect(goodwillCard).toHaveClass(className);
+      });
+      governmentClasses.split(" ").forEach((className) => {
+        expect(govCard).toHaveClass(className);
+      });
+      externalClasses.split(" ").forEach((className) => {
+        expect(externalCard).toHaveClass(className);
+      });
     });
   });
 

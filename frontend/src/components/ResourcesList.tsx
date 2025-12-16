@@ -49,7 +49,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
   }
 };
 
-const getCardBorderClass = (referralType: string | undefined) => {
+export const getCardBorderClass = (referralType: string | undefined) => {
   switch (referralType) {
     case "goodwill":
       return "border-t-4 border-t-blue-600 rounded-t-lg";
@@ -74,8 +74,6 @@ type ResourcesListProps = {
   resources: Resource[];
   errorMessage?: string;
   handleRemoveResource: (resource: Resource) => void;
-  selectedResources: Resource[];
-  onResourceSelection: (resource: Resource, checked: boolean) => void;
 };
 
 const ResourcesList = ({
@@ -91,6 +89,7 @@ const ResourcesList = ({
         <Card
           key={i}
           className={`relative bg-white shadow-sm mb-5 min-w-[16rem] ${getCardBorderClass(r.referral_type)}`}
+          data-testid={`resource-card${r.referral_type ? `-${r.referral_type}` : ""}-${i}`}
         >
           {referralTypeIndicator(r.referral_type)}
           {/* Remove button */}
