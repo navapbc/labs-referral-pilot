@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, Printer, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import { fetchResources } from "@/util/fetchResources";
+import { fetchLocationFromZip } from "@/util/fetchLocation";
 import { Resource } from "@/types/resources";
 import "@/app/globals.css";
 
@@ -62,6 +63,7 @@ export default function Page() {
   const [removedResourceIndex, setRemovedResourceIndex] = useState<
     number | null
   >(null);
+  const [collatedOptions, setCollatedOptions] = useState("");
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -108,7 +110,7 @@ export default function Page() {
     setResult(null);
     setErrorMessage(undefined);
     try {
-      const request = clientDescription + getCollatedReferralOptions();
+      const request = clientDescription + collatedOptions;
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
@@ -187,34 +189,61 @@ export default function Page() {
     }
   }
 
-  const getCollatedReferralOptions = (): string => {
-    const resourceTypeFiltersPrefix =
-      "\nInclude resources that support the following categories: ";
-    const resourceTypeFilters = selectedCategories
-      .map((categoryId) => {
-        const category = resourceCategories.find((c) => c.id === categoryId);
-        return category?.label;
-      })
-      .filter(Boolean)
-      .join(", ");
+  const getCollatedReferralOptions = useCallback(
+    async (): Promise<string> => {
+      const resourceTypeFiltersPrefix =
+        "\nInclude resources that support the following categories: ";
+      const resourceTypeFilters = selectedCategories
+        .map((categoryId) => {
+          const category = resourceCategories.find((c) => c.id === categoryId);
+          return category?.label;
+        })
+        .filter(Boolean)
+        .join(", ");
 
-    const providerTypeFiltersPrefix =
-      "\nInclude the following types of providers: ";
-    const providerTypeFilters = selectedResourceTypes.join(", ");
+      const providerTypeFiltersPrefix =
+        "\nInclude the following types of providers: ";
+      const providerTypeFilters = selectedResourceTypes.join(", ");
 
-    const locationFilterPrefix =
-      "\nFocus on resources close to the following location: ";
+      const locationFilterPrefix =
+        "\nFocus on resources close to the following location: ";
 
-    return (
-      (resourceTypeFilters.length > 0
-        ? resourceTypeFiltersPrefix + resourceTypeFilters
-        : "") +
-      (providerTypeFilters
-        ? providerTypeFiltersPrefix + providerTypeFilters
-        : "") +
-      (locationText.length > 0 ? locationFilterPrefix + locationText : "")
-    );
-  };
+      // Check if locationText contains a zip code (5 digits or 5+4 format)
+      let processedLocation = locationText;
+      const zipCodeRegex = /\b\d{5}(-\d{4})?\b/;
+      const zipMatch = locationText.match(zipCodeRegex);
+
+      if (zipMatch) {
+        const zipCode = zipMatch[0].split("-")[0]; // Get just the 5-digit portion
+        const cityState = await fetchLocationFromZip(zipCode);
+        if (cityState) {
+          processedLocation = locationText.replace(zipCodeRegex, cityState);
+        }
+      }
+
+      return (
+        (resourceTypeFilters.length > 0
+          ? resourceTypeFiltersPrefix + resourceTypeFilters
+          : "") +
+        (providerTypeFilters
+          ? providerTypeFiltersPrefix + providerTypeFilters
+          : "") +
+        (processedLocation.length > 0
+          ? locationFilterPrefix + processedLocation
+          : "")
+      );
+    },
+    [selectedCategories, locationText, selectedResourceTypes],
+  );
+
+  // Update collated options whenever filters change
+  useEffect(() => {
+    const updateCollatedOptions = async () => {
+      const options = await getCollatedReferralOptions();
+      setCollatedOptions(options);
+    };
+    void updateCollatedOptions();
+  }, [getCollatedReferralOptions]);
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
@@ -374,9 +403,7 @@ export default function Page() {
                   </div>
                 </div>
                 <ClientDetailsPromptBubble
-                  clientDescription={
-                    clientDescription + getCollatedReferralOptions()
-                  }
+                  clientDescription={clientDescription + collatedOptions}
                 />
                 <ResourcesList
                   resources={retainedResources ?? []}
