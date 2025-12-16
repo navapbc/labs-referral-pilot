@@ -1,7 +1,7 @@
 import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
 import { Resource } from "@/types/resources";
-import ResourcesList from "./ResourcesList";
+import ResourcesList, { getCardBorderClass } from "./ResourcesList";
 
 const mockResource: Resource = {
   name: "Test Resource",
@@ -129,6 +129,129 @@ describe("ResourcesList", () => {
     expect(screen.queryByText("Goodwill")).not.toBeInTheDocument();
     expect(screen.queryByText("Government")).not.toBeInTheDocument();
     expect(screen.queryByText("External")).not.toBeInTheDocument();
+  });
+
+  describe("Card border styling", () => {
+    it("applies blue border class for goodwill referral type", () => {
+      const resource: Resource = {
+        name: "Goodwill Center",
+        referral_type: "goodwill",
+      };
+
+      render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const expectedClasses = getCardBorderClass("goodwill");
+      const card = screen.getByTestId("resource-card-goodwill-0");
+      expect(card).toBeInTheDocument();
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
+    });
+
+    it("applies gray border class for government referral type", () => {
+      const resource: Resource = {
+        name: "Government Service",
+        referral_type: "government",
+      };
+
+      render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const expectedClasses = getCardBorderClass("government");
+      const card = screen.getByTestId("resource-card-government-0");
+      expect(card).toBeInTheDocument();
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
+    });
+
+    it("applies green border class for external referral type", () => {
+      const resource: Resource = {
+        name: "Community Center",
+        referral_type: "external",
+      };
+
+      render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const expectedClasses = getCardBorderClass("external");
+      const card = screen.getByTestId("resource-card-external-0");
+      expect(card).toBeInTheDocument();
+      expectedClasses.split(" ").forEach((className) => {
+        expect(card).toHaveClass(className);
+      });
+    });
+
+    it("does not apply border classes when referral type is undefined", () => {
+      const resource: Resource = {
+        name: "Generic Resource",
+        description: "No type specified",
+      };
+
+      render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const expectedClasses = getCardBorderClass(undefined);
+      expect(expectedClasses).toBe("");
+
+      const card = screen.getByTestId("resource-card-0");
+      expect(card).toBeInTheDocument();
+
+      // Verify no colored border classes are applied
+      expect(card).not.toHaveClass("border-t-blue-600");
+      expect(card).not.toHaveClass("border-t-gray-600");
+      expect(card).not.toHaveClass("border-t-green-600");
+    });
+
+    it("applies correct border classes to multiple resources with different types", () => {
+      const resources: Resource[] = [
+        { name: "Goodwill Center", referral_type: "goodwill" },
+        { name: "Government Service", referral_type: "government" },
+        { name: "Community Center", referral_type: "external" },
+      ];
+
+      render(
+        <ResourcesList
+          resources={resources}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const goodwillClasses = getCardBorderClass("goodwill");
+      const governmentClasses = getCardBorderClass("government");
+      const externalClasses = getCardBorderClass("external");
+
+      const goodwillCard = screen.getByTestId("resource-card-goodwill-0");
+      const govCard = screen.getByTestId("resource-card-government-1");
+      const externalCard = screen.getByTestId("resource-card-external-2");
+
+      goodwillClasses.split(" ").forEach((className) => {
+        expect(goodwillCard).toHaveClass(className);
+      });
+      governmentClasses.split(" ").forEach((className) => {
+        expect(govCard).toHaveClass(className);
+      });
+      externalClasses.split(" ").forEach((className) => {
+        expect(externalCard).toHaveClass(className);
+      });
+    });
   });
 
   it("renders website link with proper attributes", () => {
