@@ -226,7 +226,10 @@ export default function Page() {
           // Replace this specific occurrence
           processedLocation = processedLocation.replace(match[0], cityState);
         } else {
-          processedLocation = processedLocation.replace(match[0], match[0] + " (unknown)");
+          processedLocation = processedLocation.replace(
+            match[0],
+            match[0] + " (unknown)",
+          );
         }
       }
     }
