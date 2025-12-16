@@ -247,6 +247,15 @@ export default function Page() {
     );
   }, [selectedCategories, locationText, selectedResourceTypes]);
 
+  // Update collated options for category and resource type changes only
+  useEffect(() => {
+    const updateCollatedOptions = async () => {
+      const options = await getCollatedReferralOptions();
+      setCollatedOptions(options);
+    };
+    void updateCollatedOptions();
+  }, [selectedCategories, selectedResourceTypes]);
+
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
     return null;
