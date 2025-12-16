@@ -7,6 +7,9 @@ import { Resource } from "src/types/resources";
 // Mock the modules
 jest.mock("src/util/fetchResources");
 jest.mock("src/util/fetchActionPlan");
+jest.mock("src/util/fetchLocation", () => ({
+  fetchLocationFromZip: jest.fn(() => Promise.resolve(null)),
+}));
 
 // Mock only the markdown parser to avoid ESM module issues
 jest.mock("src/util/markdown", () => ({
@@ -29,6 +32,24 @@ describe("Generate Referrals Page", () => {
     resultId: "test-result-id",
     resources: mockResources,
   };
+
+  // Suppress act() warnings for async useEffect updates
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = (...args: unknown[]) => {
+      if (
+        typeof args[0] === "string" &&
+        args[0].includes("was not wrapped in act")
+      ) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

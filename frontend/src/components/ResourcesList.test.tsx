@@ -16,6 +16,24 @@ const mockResource: Resource = {
 describe("ResourcesList", () => {
   let mockHandleRemoveResource: jest.Mock;
 
+  // Suppress act() warnings for Next.js Link component updates
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = (...args: unknown[]) => {
+      if (
+        typeof args[0] === "string" &&
+        args[0].includes("was not wrapped in act")
+      ) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
+
   beforeEach(() => {
     mockHandleRemoveResource = jest.fn();
   });
