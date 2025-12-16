@@ -189,52 +189,49 @@ export default function Page() {
     }
   }
 
-  const getCollatedReferralOptions = useCallback(
-    async (): Promise<string> => {
-      const resourceTypeFiltersPrefix =
-        "\nInclude resources that support the following categories: ";
-      const resourceTypeFilters = selectedCategories
-        .map((categoryId) => {
-          const category = resourceCategories.find((c) => c.id === categoryId);
-          return category?.label;
-        })
-        .filter(Boolean)
-        .join(", ");
+  const getCollatedReferralOptions = useCallback(async (): Promise<string> => {
+    const resourceTypeFiltersPrefix =
+      "\nInclude resources that support the following categories: ";
+    const resourceTypeFilters = selectedCategories
+      .map((categoryId) => {
+        const category = resourceCategories.find((c) => c.id === categoryId);
+        return category?.label;
+      })
+      .filter(Boolean)
+      .join(", ");
 
-      const providerTypeFiltersPrefix =
-        "\nInclude the following types of providers: ";
-      const providerTypeFilters = selectedResourceTypes.join(", ");
+    const providerTypeFiltersPrefix =
+      "\nInclude the following types of providers: ";
+    const providerTypeFilters = selectedResourceTypes.join(", ");
 
-      const locationFilterPrefix =
-        "\nFocus on resources close to the following location: ";
+    const locationFilterPrefix =
+      "\nFocus on resources close to the following location: ";
 
-      // Check if locationText contains a zip code (5 digits or 5+4 format)
-      let processedLocation = locationText;
-      const zipCodeRegex = /\b\d{5}(-\d{4})?\b/;
-      const zipMatch = locationText.match(zipCodeRegex);
+    // Check if locationText contains a zip code (5 digits or 5+4 format)
+    let processedLocation = locationText;
+    const zipCodeRegex = /\b\d{5}(-\d{4})?\b/;
+    const zipMatch = locationText.match(zipCodeRegex);
 
-      if (zipMatch) {
-        const zipCode = zipMatch[0].split("-")[0]; // Get just the 5-digit portion
-        const cityState = await fetchLocationFromZip(zipCode);
-        if (cityState) {
-          processedLocation = locationText.replace(zipCodeRegex, cityState);
-        }
+    if (zipMatch) {
+      const zipCode = zipMatch[0].split("-")[0]; // Get just the 5-digit portion
+      const cityState = await fetchLocationFromZip(zipCode);
+      if (cityState) {
+        processedLocation = locationText.replace(zipCodeRegex, cityState);
       }
+    }
 
-      return (
-        (resourceTypeFilters.length > 0
-          ? resourceTypeFiltersPrefix + resourceTypeFilters
-          : "") +
-        (providerTypeFilters
-          ? providerTypeFiltersPrefix + providerTypeFilters
-          : "") +
-        (processedLocation.length > 0
-          ? locationFilterPrefix + processedLocation
-          : "")
-      );
-    },
-    [selectedCategories, locationText, selectedResourceTypes],
-  );
+    return (
+      (resourceTypeFilters.length > 0
+        ? resourceTypeFiltersPrefix + resourceTypeFilters
+        : "") +
+      (providerTypeFilters
+        ? providerTypeFiltersPrefix + providerTypeFilters
+        : "") +
+      (processedLocation.length > 0
+        ? locationFilterPrefix + processedLocation
+        : "")
+    );
+  }, [selectedCategories, locationText, selectedResourceTypes]);
 
   // Update collated options whenever filters change
   useEffect(() => {

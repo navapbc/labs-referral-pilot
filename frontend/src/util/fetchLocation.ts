@@ -1,9 +1,9 @@
 interface ZippopotamPlace {
-  "place name": string;  // city name
-  "state": string;
+  "place name": string; // city name
+  state: string;
   "state abbreviation": string;
-  "longitude": string;
-  "latitude": string;  
+  longitude: string;
+  latitude: string;
 }
 
 interface ZippopotamResponse {
