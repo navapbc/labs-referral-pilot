@@ -254,7 +254,7 @@ export default function Page() {
       setCollatedOptions(options);
     };
     void updateCollatedOptions();
-  }, [selectedCategories, selectedResourceTypes]);
+  }, [selectedCategories, selectedResourceTypes, getCollatedReferralOptions]);
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
