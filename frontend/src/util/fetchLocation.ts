@@ -12,9 +12,17 @@ interface ZippopotamResponse {
 
 export async function fetchLocationFromZip(
   zipCode: string,
+  timeoutMs: number = 5000,
 ): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
-    const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
+    const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       return null;
     }
@@ -25,7 +33,12 @@ export async function fetchLocationFromZip(
     }
     return null;
   } catch (error) {
-    console.error("Error fetching city/state from zip code:", error);
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("Zip code lookup timed out:", zipCode);
+    } else {
+      console.error("Error fetching city/state from zip code:", error);
+    }
     return null;
   }
 }
