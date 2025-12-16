@@ -14,8 +14,9 @@ describe("fetchLocationFromZip", () => {
     jest.resetModules();
 
     // Re-import module to get fresh cache
-    const module = await import("@/util/fetchLocation");
-    fetchLocationFromZip = module.fetchLocationFromZip;
+    // eslint-disable-next-line @next/next/no-assign-module-variable
+    const fetchLocationModule = await import("@/util/fetchLocation");
+    fetchLocationFromZip = fetchLocationModule.fetchLocationFromZip;
   });
 
   afterEach(() => {
@@ -37,7 +38,7 @@ describe("fetchLocationFromZip", () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse,
+      json: () => Promise.resolve(mockResponse),
     });
 
     const result = await fetchLocationFromZip("90210");
@@ -46,7 +47,8 @@ describe("fetchLocationFromZip", () => {
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.zippopotam.us/us/90210",
       expect.objectContaining({
-        signal: expect.any(AbortSignal),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        signal: expect.any(Object),
       }),
     );
   });
@@ -65,7 +67,7 @@ describe("fetchLocationFromZip", () => {
   it("should return null when API returns no places", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ places: [] }),
+      json: () => Promise.resolve({ places: [] }),
     });
 
     const result = await fetchLocationFromZip("99999");
@@ -76,7 +78,7 @@ describe("fetchLocationFromZip", () => {
   it("should return null when API returns undefined places", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({}),
+      json: () => Promise.resolve({}),
     });
 
     const result = await fetchLocationFromZip("99999");
@@ -111,11 +113,13 @@ describe("fetchLocationFromZip", () => {
 
     // Mock a fetch that never resolves but is abortable
     (global.fetch as jest.Mock).mockImplementation(
-      (_url, options) =>
+      (_url: string, options?: { signal?: AbortSignal }) =>
         new Promise((resolve, reject) => {
-          options?.signal?.addEventListener("abort", () => {
-            reject(new DOMException("Aborted", "AbortError"));
-          });
+          if (options?.signal) {
+            options.signal.addEventListener("abort", () => {
+              reject(new DOMException("Aborted", "AbortError"));
+            });
+          }
           // Never resolves unless aborted
         }),
     );
@@ -145,7 +149,7 @@ describe("fetchLocationFromZip", () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse,
+      json: () => Promise.resolve(mockResponse),
     });
 
     // Should work with custom timeout
@@ -168,7 +172,7 @@ describe("fetchLocationFromZip", () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse,
+      json: () => Promise.resolve(mockResponse),
     });
 
     // First call - should hit the API
@@ -227,11 +231,11 @@ describe("fetchLocationFromZip", () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse1,
+        json: () => Promise.resolve(mockResponse1),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse2,
+        json: () => Promise.resolve(mockResponse2),
       });
 
     const result1 = await fetchLocationFromZip("90210");
@@ -261,7 +265,7 @@ describe("fetchLocationFromZip", () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse,
+      json: () => Promise.resolve(mockResponse),
     });
 
     // Note: In the actual implementation, the caller extracts the 5-digit portion
