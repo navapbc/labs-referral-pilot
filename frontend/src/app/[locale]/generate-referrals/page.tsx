@@ -103,6 +103,11 @@ export default function Page() {
     setReadyToPrint(true);
   };
 
+  const handleLocationBlur = async () => {
+    const options = await getCollatedReferralOptions();
+    setCollatedOptions(options);
+  };
+
   async function handleClick() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
 
@@ -237,14 +242,14 @@ export default function Page() {
     );
   }, [selectedCategories, locationText, selectedResourceTypes]);
 
-  // Update collated options whenever filters change
+  // Update collated options for category and resource type changes only
   useEffect(() => {
     const updateCollatedOptions = async () => {
       const options = await getCollatedReferralOptions();
       setCollatedOptions(options);
     };
     void updateCollatedOptions();
-  }, [getCollatedReferralOptions]);
+  }, [selectedCategories, selectedResourceTypes, getCollatedReferralOptions]);
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
@@ -360,6 +365,7 @@ export default function Page() {
                     onClearAllFilters={clearAllFilters}
                     onToggleResourceType={toggleResourceType}
                     onLocationChange={setLocationText}
+                    onLocationBlur={handleLocationBlur}
                     onClientDescriptionChange={setClientDescription}
                     onFindResources={() => void handleClick()}
                   />
