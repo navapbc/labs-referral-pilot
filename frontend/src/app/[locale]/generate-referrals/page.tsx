@@ -225,6 +225,8 @@ export default function Page() {
         if (cityState) {
           // Replace this specific occurrence
           processedLocation = processedLocation.replace(match[0], cityState);
+        } else {
+          processedLocation = processedLocation.replace(match[0], match[0] + " (unknown)");
         }
       }
     }
@@ -241,15 +243,6 @@ export default function Page() {
         : "")
     );
   }, [selectedCategories, locationText, selectedResourceTypes]);
-
-  // Update collated options for category and resource type changes only
-  useEffect(() => {
-    const updateCollatedOptions = async () => {
-      const options = await getCollatedReferralOptions();
-      setCollatedOptions(options);
-    };
-    void updateCollatedOptions();
-  }, [selectedCategories, selectedResourceTypes, getCollatedReferralOptions]);
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {

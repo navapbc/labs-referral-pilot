@@ -36,6 +36,7 @@ export async function fetchLocationFromZip(
       zipCodeCache.set(zipCode, null);
       return null;
     }
+
     const data = (await response.json()) as ZippopotamResponse;
     const place = data.places?.[0];
     if (place) {
@@ -44,6 +45,7 @@ export async function fetchLocationFromZip(
       zipCodeCache.set(zipCode, result);
       return result;
     }
+
     // Cache null if no place found
     zipCodeCache.set(zipCode, null);
     return null;
