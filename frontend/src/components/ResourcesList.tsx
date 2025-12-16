@@ -2,7 +2,7 @@ import { Resource } from "@/types/resources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import React from "react";
-import { HandHeart, Landmark, X } from "lucide-react";
+import { Building, Users, X } from "lucide-react";
 
 const referralTypeIndicator = (referralType: string | undefined) => {
   switch (referralType) {
@@ -27,7 +27,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
           data-testid="government_referral"
           className="inline-flex items-center gap-1.5 bg-transparent text-gray-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
-          <Landmark className="h-4 w-4 shrink-0" />
+          <Building className="h-4 w-4 shrink-0" />
           <span className="truncate">Government</span>
         </span>
       );
@@ -38,7 +38,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
           data-testid="external_referral"
           className="inline-flex items-center gap-1.5 bg-transparent text-green-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
-          <HandHeart className="h-4 w-4 shrink-0" />
+          <Users className="h-4 w-4 shrink-0" />
           <span className="truncate">External</span>
         </span>
       );
@@ -46,6 +46,19 @@ const referralTypeIndicator = (referralType: string | undefined) => {
     default: {
       return null;
     }
+  }
+};
+
+const getCardBorderClass = (referralType: string | undefined) => {
+  switch (referralType) {
+    case "goodwill":
+      return "border-t-4 border-t-blue-600 rounded-t-lg";
+    case "government":
+      return "border-t-4 border-t-gray-600 rounded-t-lg";
+    case "external":
+      return "border-t-4 border-t-green-600 rounded-t-lg";
+    default:
+      return "";
   }
 };
 
@@ -61,6 +74,8 @@ type ResourcesListProps = {
   resources: Resource[];
   errorMessage?: string;
   handleRemoveResource: (resource: Resource) => void;
+  selectedResources: Resource[];
+  onResourceSelection: (resource: Resource, checked: boolean) => void;
 };
 
 const ResourcesList = ({
@@ -75,7 +90,7 @@ const ResourcesList = ({
       {resources.map((r, i) => (
         <Card
           key={i}
-          className="relative bg-white shadow-sm mb-5 min-w-[16rem]"
+          className={`relative bg-white shadow-sm mb-5 min-w-[16rem] ${getCardBorderClass(r.referral_type)}`}
         >
           {referralTypeIndicator(r.referral_type)}
           {/* Remove button */}

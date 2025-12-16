@@ -131,6 +131,118 @@ describe("ResourcesList", () => {
     expect(screen.queryByText("External")).not.toBeInTheDocument();
   });
 
+  describe("Card border styling", () => {
+    it("applies blue border class for goodwill referral type", () => {
+      const resource: Resource = {
+        name: "Goodwill Center",
+        referral_type: "goodwill",
+      };
+
+      const { container } = render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const card = container.querySelector('[class*="border-t-blue-600"]');
+      expect(card).toBeInTheDocument();
+      expect(card).toHaveClass("border-t-4");
+      expect(card).toHaveClass("border-t-blue-600");
+      expect(card).toHaveClass("rounded-t-lg");
+    });
+
+    it("applies gray border class for government referral type", () => {
+      const resource: Resource = {
+        name: "Government Service",
+        referral_type: "government",
+      };
+
+      const { container } = render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const card = container.querySelector('[class*="border-t-gray-600"]');
+      expect(card).toBeInTheDocument();
+      expect(card).toHaveClass("border-t-4");
+      expect(card).toHaveClass("border-t-gray-600");
+      expect(card).toHaveClass("rounded-t-lg");
+    });
+
+    it("applies green border class for external referral type", () => {
+      const resource: Resource = {
+        name: "Community Center",
+        referral_type: "external",
+      };
+
+      const { container } = render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const card = container.querySelector('[class*="border-t-green-600"]');
+      expect(card).toBeInTheDocument();
+      expect(card).toHaveClass("border-t-4");
+      expect(card).toHaveClass("border-t-green-600");
+      expect(card).toHaveClass("rounded-t-lg");
+    });
+
+    it("does not apply border classes when referral type is undefined", () => {
+      const resource: Resource = {
+        name: "Generic Resource",
+        description: "No type specified",
+      };
+
+      const { container } = render(
+        <ResourcesList
+          resources={[resource]}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const card = container.querySelector('[class*="border-t-blue-600"]');
+      expect(card).not.toBeInTheDocument();
+
+      const grayCard = container.querySelector('[class*="border-t-gray-600"]');
+      expect(grayCard).not.toBeInTheDocument();
+
+      const greenCard = container.querySelector(
+        '[class*="border-t-green-600"]',
+      );
+      expect(greenCard).not.toBeInTheDocument();
+    });
+
+    it("applies correct border classes to multiple resources with different types", () => {
+      const resources: Resource[] = [
+        { name: "Goodwill Center", referral_type: "goodwill" },
+        { name: "Government Service", referral_type: "government" },
+        { name: "Community Center", referral_type: "external" },
+      ];
+
+      const { container } = render(
+        <ResourcesList
+          resources={resources}
+          handleRemoveResource={mockHandleRemoveResource}
+        />,
+      );
+
+      const blueCard = container.querySelector('[class*="border-t-blue-600"]');
+      const grayCard = container.querySelector('[class*="border-t-gray-600"]');
+      const greenCard = container.querySelector(
+        '[class*="border-t-green-600"]',
+      );
+
+      expect(blueCard).toBeInTheDocument();
+      expect(grayCard).toBeInTheDocument();
+      expect(greenCard).toBeInTheDocument();
+    });
+  });
+
   it("renders website link with proper attributes", () => {
     render(
       <ResourcesList
