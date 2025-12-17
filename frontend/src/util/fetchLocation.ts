@@ -50,9 +50,9 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
-      console.error("Zip code lookup timed out:", zipCode);
+      console.warn("Zip code lookup timed out:", zipCode);
     } else {
-      console.error("Error fetching city/state from zip code:", error);
+      console.warn("Error fetching city/state from zip code:", error);
     }
   }
 
