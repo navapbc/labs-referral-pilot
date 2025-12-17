@@ -33,6 +33,7 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
     const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`, {
       signal: ac.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       // Cache empty string for failed lookups
@@ -49,6 +50,7 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
     }
 
     // Query FCC API via our server-side API route to avoid CORS issues
+    const timeoutId2 = setTimeout(() => ac.abort(), 5_000);
     try {
       const fccResponse = await fetch(
         `/api/fcc-lookup?latitude=${place.latitude}&longitude=${place.longitude}`,
@@ -56,7 +58,7 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
           signal: ac.signal,
         },
       );
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
 
       if (!fccResponse.ok) {
         // Fall back to zippopotam data if FCC fails
@@ -75,7 +77,7 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
       }
     } catch (fccError) {
       // If FCC API throws any error, fall back to zippopotam's city and state
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
       console.warn("Error fetching from FCC API:", fccError);
     }
     const result = `${place["place name"]}, ${place["state abbreviation"]}`;
