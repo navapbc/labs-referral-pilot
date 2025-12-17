@@ -951,13 +951,14 @@ describe("Generate Referrals Page", () => {
 
     beforeEach(() => {
       // Get the mock function from the module
-      fetchLocationFromZipMock = jest.requireMock(
-        "src/util/fetchLocation",
-      ).fetchLocationFromZip;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      fetchLocationFromZipMock = jest.requireMock("src/util/fetchLocation")
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .fetchLocationFromZip;
       fetchLocationFromZipMock.mockClear();
     });
 
-    it("replaces single zip code with city/state on location field blur", async () => {
+    it("replaces single zip code with city/state automatically", async () => {
       const user = userEvent.setup();
       fetchLocationFromZipMock.mockResolvedValue("Beverly Hills, CA");
 
@@ -977,10 +978,7 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "90210");
 
-      // Blur the field to trigger zip code lookup
-      await user.tab();
-
-      // Wait for the zip code lookup to complete
+      // Wait for the zip code lookup to complete automatically
       await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
       });
@@ -1028,12 +1026,11 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "90210 or 10001");
 
-      // Blur the field
-      await user.tab();
-
-      // Wait for both lookups
+      // Wait for both lookups to happen automatically
       await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
+      });
+      await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("10001");
       });
 
@@ -1046,11 +1043,15 @@ describe("Generate Referrals Page", () => {
 
       // Verify both locations were replaced in the request
       await waitFor(() => {
-        const call = (fetchResourcesModule.fetchResources as jest.Mock).mock
-          .calls[0];
-        expect(call[0]).toContain("Beverly Hills, CA");
-        expect(call[0]).toContain("New York, NY");
+        expect(fetchResourcesModule.fetchResources).toHaveBeenCalled();
       });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const call = (fetchResourcesModule.fetchResources as jest.Mock).mock
+        .calls[0];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(call[0]).toContain("Beverly Hills, CA");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(call[0]).toContain("New York, NY");
     });
 
     it("handles ZIP+4 format by using only first 5 digits", async () => {
@@ -1073,10 +1074,7 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "60601-1234");
 
-      // Blur the field
-      await user.tab();
-
-      // Verify only the first 5 digits were used for lookup
+      // Verify only the first 5 digits were used for lookup automatically
       await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("60601");
       });
@@ -1118,9 +1116,7 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "00000");
 
-      // Blur the field
-      await user.tab();
-
+      // Wait for lookup to happen automatically
       await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("00000");
       });
@@ -1161,10 +1157,7 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "Los Angeles");
 
-      // Blur the field
-      await user.tab();
-
-      // Should not call fetchLocationFromZip
+      // Should not call fetchLocationFromZip since there's no zip code
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(fetchLocationFromZipMock).not.toHaveBeenCalled();
 
@@ -1185,27 +1178,13 @@ describe("Generate Referrals Page", () => {
       });
     });
 
-    it("waits for pending location resolution before searching", async () => {
+    it("updates collatedOptions automatically as location changes", async () => {
       const user = userEvent.setup();
-
-      // Create a delayed resolution to simulate slow API
-      let resolveLocation: ((value: string) => void) | null = null;
-      const slowLocationPromise = new Promise<string>((resolve) => {
-        setTimeout(() => {
-          resolveLocation = resolve;
-          resolve("Beverly Hills, CA");
-        }, 100); // Simulate 100ms delay
-      });
-
-      fetchLocationFromZipMock.mockReturnValue(slowLocationPromise);
-
-      jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      fetchLocationFromZipMock.mockResolvedValue("Beverly Hills, CA");
 
       render(<Page />);
 
-      // Select a category
+      // Select a category first
       const housingButton = screen.getByTestId(
         "resourceCategoryToggle-housing",
       );
@@ -1215,31 +1194,17 @@ describe("Generate Referrals Page", () => {
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "90210");
 
-      // Blur the field to start lookup
-      locationInput.blur();
+      // Wait for the zip code to be looked up and collatedOptions to update automatically
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
+      });
 
-      // Give enough time for blur to trigger but not for the promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      // Immediately enter description and click Find Resources
-      const textarea = screen.getByTestId("clientDescriptionInput");
-      await user.type(textarea, "Client needs housing");
-
-      const findButton = screen.getByTestId("findResourcesButton");
-      await user.click(findButton);
-
-      // The search function should wait for location resolution and then proceed
-      // Wait for the search to complete with the resolved location
-      await waitFor(
-        () => {
-          expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
-            expect.stringContaining("Beverly Hills, CA"),
-            "test@example.com",
-            null,
-          );
-        },
-        { timeout: 3000 },
-      );
+      // Wait for collatedOptions to be updated with the resolved location
+      await waitFor(() => {
+        expect(screen.getByTestId("collatedOptionsDisplay")).toBeInTheDocument();
+      });
+      const display = screen.getByTestId("collatedOptionsDisplay");
+      expect(display).toHaveTextContent("Beverly Hills, CA");
     });
 
     it("displays collatedOptions in the UI when filters are active", async () => {
@@ -1256,10 +1221,10 @@ describe("Generate Referrals Page", () => {
 
       // Wait for collatedOptions to update
       await waitFor(() => {
-        const display = screen.queryByTestId("collatedOptionsDisplay");
-        expect(display).toBeInTheDocument();
-        expect(display).toHaveTextContent("Employment & Job Training");
+        expect(screen.getByTestId("collatedOptionsDisplay")).toBeInTheDocument();
       });
+      let display = screen.getByTestId("collatedOptionsDisplay");
+      expect(display).toHaveTextContent("Employment & Job Training");
 
       // Select goodwill provider type
       const goodwillButton = screen.getByTestId(
@@ -1269,27 +1234,30 @@ describe("Generate Referrals Page", () => {
 
       // Wait for collatedOptions to update with provider type
       await waitFor(() => {
-        const display = screen.getByTestId("collatedOptionsDisplay");
-        expect(display).toHaveTextContent("goodwill");
+        expect(screen.getByTestId("collatedOptionsDisplay")).toHaveTextContent(
+          "goodwill",
+        );
       });
 
       // Enter zip code in location
       const locationInput = screen.getByTestId("locationFilterInput");
       await user.type(locationInput, "90210");
-      await user.tab();
 
-      // Wait for location to be replaced and displayed
+      // Wait for location to be replaced and displayed automatically
       await waitFor(() => {
         expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
       });
 
       // The collatedOptions should now include all three selections
       await waitFor(() => {
-        const display = screen.getByTestId("collatedOptionsDisplay");
-        expect(display).toHaveTextContent("Employment & Job Training");
-        expect(display).toHaveTextContent("goodwill");
-        expect(display).toHaveTextContent("Beverly Hills, CA");
+        expect(
+          screen.getByTestId("collatedOptionsDisplay"),
+        ).toBeInTheDocument();
       });
+      display = screen.getByTestId("collatedOptionsDisplay");
+      expect(display).toHaveTextContent("Employment & Job Training");
+      expect(display).toHaveTextContent("goodwill");
+      expect(display).toHaveTextContent("Beverly Hills, CA");
     });
   });
 });

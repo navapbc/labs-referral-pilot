@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, Printer, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -65,9 +65,6 @@ export default function Page() {
   >(null);
   const [collatedOptions, setCollatedOptions] = useState("");
 
-  // Ref to track pending location resolution
-  const pendingLocationResolution = useRef<Promise<void> | null>(null);
-
   // Check if user has provided info on first load
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
@@ -106,23 +103,8 @@ export default function Page() {
     setReadyToPrint(true);
   };
 
-  const handleLocationBlur = async () => {
-    const promise = (async () => {
-      const options = await getCollatedReferralOptions();
-      setCollatedOptions(options);
-    })();
-    pendingLocationResolution.current = promise;
-    await promise;
-    pendingLocationResolution.current = null;
-  };
-
   async function handleClick() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
-
-    // Wait for any pending location resolution to complete
-    if (pendingLocationResolution.current) {
-      await pendingLocationResolution.current;
-    }
 
     setLoading(true);
     setResult(null);
@@ -268,14 +250,14 @@ export default function Page() {
     );
   }, [selectedCategories, locationText, selectedResourceTypes]);
 
-  // Update collated options for category and resource type changes only
+  // Update collated options when filters or location changes
   useEffect(() => {
     const updateCollatedOptions = async () => {
       const options = await getCollatedReferralOptions();
       setCollatedOptions(options);
     };
     void updateCollatedOptions();
-  }, [selectedCategories, selectedResourceTypes, getCollatedReferralOptions]);
+  }, [selectedCategories, selectedResourceTypes, locationText, getCollatedReferralOptions]);
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
@@ -392,7 +374,6 @@ export default function Page() {
                     onClearAllFilters={clearAllFilters}
                     onToggleResourceType={toggleResourceType}
                     onLocationChange={setLocationText}
-                    onLocationBlur={() => void handleLocationBlur()}
                     onClientDescriptionChange={setClientDescription}
                     onFindResources={() => void handleClick()}
                   />

@@ -100,7 +100,6 @@ interface ClientDetailsInputProps {
   onClearAllFilters: () => void;
   onToggleResourceType: (type: string) => void;
   onLocationChange: (location: string) => void;
-  onLocationBlur?: () => void;
   onClientDescriptionChange: (description: string) => void;
   onFindResources: () => void;
 }
@@ -116,7 +115,6 @@ export function ClientDetailsInput({
   onClearAllFilters,
   onToggleResourceType,
   onLocationChange,
-  onLocationBlur,
   onClientDescriptionChange,
   onFindResources,
 }: ClientDetailsInputProps) {
@@ -236,7 +234,6 @@ export function ClientDetailsInput({
                 placeholder="Enter location (city, county, area, etc.)"
                 value={locationText}
                 onChange={(e) => onLocationChange(e.target.value)}
-                onBlur={onLocationBlur}
                 className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
                 data-testid="locationFilterInput"
               />
