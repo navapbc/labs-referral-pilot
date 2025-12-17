@@ -1158,8 +1158,10 @@ describe("Generate Referrals Page", () => {
       await user.type(locationInput, "Los Angeles");
 
       // Should not call fetchLocationFromZip since there's no zip code
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      expect(fetchLocationFromZipMock).not.toHaveBeenCalled();
+      await waitFor(
+        () => expect(fetchLocationFromZipMock).not.toHaveBeenCalled(),
+        { timeout: 200 },
+      );
 
       // Enter client description and search
       const textarea = screen.getByTestId("clientDescriptionInput");
