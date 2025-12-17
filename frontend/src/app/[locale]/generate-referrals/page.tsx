@@ -221,7 +221,7 @@ export default function Page() {
         if (location) {
           // Use a global replace to handle all occurrences of this zip code
           const zipRegex = new RegExp(
-            `\\b${zipCode.replace(/[-]/g, "\\-")}\\b`,
+            `\\b${zipCode.replace(/-/g, "\\-")}\\b`,
             "g",
           );
           result = result.replace(zipRegex, `${location} ${zipCode}`);
