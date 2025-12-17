@@ -49,7 +49,7 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
-  const [processedRequest, setProcessedRequest] = useState("");
+  const [builtRequest, setBuiltRequest] = useState("");
 
   const searchParams = useSearchParams();
 
@@ -111,7 +111,7 @@ export default function Page() {
     setErrorMessage(undefined);
     try {
       const request = await buildRequestWithResolvedZipCodes();
-      setProcessedRequest(request);
+      setBuiltRequest(request);
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
@@ -145,7 +145,7 @@ export default function Page() {
     setSelectedResources([]);
     setActionPlan(null);
     setErrorMessage(undefined);
-    setProcessedRequest("");
+    setBuiltRequest("");
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -390,7 +390,7 @@ export default function Page() {
               </TabsContent>
             </Tabs>
 
-            {readyToPrint && (
+            {readyToPrint && builtRequest && (
               <div className="space-y-4" data-testid="readyToPrintSection">
                 <div className="flex items-center justify-between pt-3">
                   <Button
@@ -418,7 +418,7 @@ export default function Page() {
                   </div>
                 </div>
                 <ClientDetailsPromptBubble
-                  clientDescription={processedRequest}
+                  clientDescription={builtRequest}
                 />
                 <ResourcesList
                   resources={retainedResources ?? []}
