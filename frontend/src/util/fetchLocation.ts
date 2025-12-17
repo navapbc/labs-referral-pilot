@@ -50,36 +50,33 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
     }
 
     // Query FCC API via our server-side API route to avoid CORS issues
-    const timeoutId2 = setTimeout(() => ac.abort(), 5_000);
+    const fccAc = new AbortController();
+    const timeoutId2 = setTimeout(() => fccAc.abort(), 5_000);
     try {
       const fccResponse = await fetch(
         `/api/fcc-lookup?latitude=${place.latitude}&longitude=${place.longitude}`,
         {
-          signal: ac.signal,
+          signal: fccAc.signal,
         },
       );
       clearTimeout(timeoutId2);
 
-      if (!fccResponse.ok) {
-        // Fall back to zippopotam data if FCC fails
-        const result = `${place["place name"]}, ${place["state abbreviation"]}`;
-        zipCodeCache.set(zipCode, result);
-        return result;
-      }
+      if (fccResponse.ok) {
+        const fccData = (await fccResponse.json()) as FCCResponse;
 
-      const fccData = (await fccResponse.json()) as FCCResponse;
-
-      // Use county name from FCC and state abbreviation
-      if (fccData.County && fccData.State) {
-        const result = `${place["place name"]} (${fccData.County.name} county), ${fccData.State.code}`;
-        zipCodeCache.set(zipCode, result);
-        return result;
+        // Use county name from FCC and state abbreviation
+        if (fccData.County && fccData.State) {
+          const result = `${place["place name"]} (${fccData.County.name} county), ${fccData.State.code}`;
+          zipCodeCache.set(zipCode, result);
+          return result;
+        }
       }
     } catch (fccError) {
       // If FCC API throws any error, fall back to zippopotam's city and state
       clearTimeout(timeoutId2);
       console.warn("Error fetching from FCC API:", fccError);
     }
+    // Fall back to zippopotam data if FCC fails
     const result = `${place["place name"]}, ${place["state abbreviation"]}`;
     zipCodeCache.set(zipCode, result);
     return result;
