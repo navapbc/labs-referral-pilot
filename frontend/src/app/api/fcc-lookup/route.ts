@@ -32,10 +32,7 @@ export async function GET(request: Request) {
         ? `Missing parameter: ${missingParams[0]}`
         : `Missing parameters: ${missingParams.join(", ")}`;
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 
   try {
