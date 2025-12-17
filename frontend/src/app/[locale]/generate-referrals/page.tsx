@@ -416,29 +416,34 @@ export default function Page() {
                     {resultId && <EmailReferralsButton resultId={resultId} />}
                   </div>
                 </div>
-                (resolvedRequest &&
-                <ClientDetailsPromptBubble
-                  clientDescription={resolvedRequest}
-                />
-                )
-                <ResourcesList
-                  resources={retainedResources ?? []}
-                  errorMessage={errorMessage}
-                  handleRemoveResource={handleRemoveResource}
-                />
-                {retainedResources && retainedResources.length > 0 && (
-                  <ActionPlanSection
-                    resources={retainedResources}
-                    selectedResources={selectedResources}
-                    actionPlan={actionPlan}
-                    isGeneratingActionPlan={isGeneratingActionPlan}
-                    onResourceSelection={handleResourceSelection}
-                    onSelectAllResources={handleSelectAllResources}
-                    onGenerateActionPlan={() => void generateActionPlan()}
-                  />
-                )}
               </div>
             )}
+
+            {resolvedRequest && (
+              <ClientDetailsPromptBubble clientDescription={resolvedRequest} />
+            )}
+
+            {readyToPrint && (
+              <ResourcesList
+                resources={retainedResources ?? []}
+                errorMessage={errorMessage}
+                handleRemoveResource={handleRemoveResource}
+              />
+            )}
+
+            {readyToPrint &&
+              retainedResources &&
+              retainedResources.length > 0 && (
+                <ActionPlanSection
+                  resources={retainedResources}
+                  selectedResources={selectedResources}
+                  actionPlan={actionPlan}
+                  isGeneratingActionPlan={isGeneratingActionPlan}
+                  onResourceSelection={handleResourceSelection}
+                  onSelectAllResources={handleSelectAllResources}
+                  onGenerateActionPlan={() => void generateActionPlan()}
+                />
+              )}
           </div>
         </div>
       )}
