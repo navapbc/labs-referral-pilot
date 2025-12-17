@@ -1,5 +1,7 @@
 import { LRUCache } from "lru-cache";
 
+import { FCCResponse } from "@/app/api/fcc-lookup/route";
+
 interface ZippopotamPlace {
   "place name": string; // city name
   state: string;
@@ -16,23 +18,6 @@ interface ZippopotamResponse {
 const zipCodeCache = new LRUCache<string, string>({
   max: 100,
 });
-
-interface FCCCounty {
-  FIPS: string;
-  name: string;
-}
-
-interface FCCState {
-  FIPS: string;
-  code: string;
-  name: string;
-}
-
-interface FCCResponse {
-  status: string;
-  County?: FCCCounty;
-  State?: FCCState;
-}
 
 export async function fetchLocationFromZip(zipCode: string): Promise<string> {
   // Check cache first
@@ -88,15 +73,14 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
         zipCodeCache.set(zipCode, result);
         return result;
       }
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (fccError) {
       // If FCC API throws any error, fall back to zippopotam's city and state
       clearTimeout(timeoutId);
-      const result = `${place["place name"]}, ${place["state abbreviation"]}`;
-      zipCodeCache.set(zipCode, result);
-      return result;
+      console.warn("Error fetching from FCC API:", fccError);
     }
+    const result = `${place["place name"]}, ${place["state abbreviation"]}`;
+    zipCodeCache.set(zipCode, result);
+    return result;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {

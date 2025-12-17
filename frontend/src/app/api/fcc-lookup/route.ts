@@ -11,7 +11,7 @@ interface FCCState {
   name: string;
 }
 
-interface FCCResponse {
+export interface FCCResponse {
   status: string;
   County?: FCCCounty;
   State?: FCCState;
