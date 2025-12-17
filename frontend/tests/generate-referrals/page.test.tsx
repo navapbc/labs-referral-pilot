@@ -945,4 +945,351 @@ describe("Generate Referrals Page", () => {
       });
     });
   });
+
+  describe("Zip code to city/state replacement", () => {
+    let fetchLocationFromZipMock: jest.Mock;
+
+    beforeEach(() => {
+      // Get the mock function from the module
+      fetchLocationFromZipMock = jest.requireMock(
+        "src/util/fetchLocation",
+      ).fetchLocationFromZip;
+      fetchLocationFromZipMock.mockClear();
+    });
+
+    it("replaces single zip code with city/state on location field blur", async () => {
+      const user = userEvent.setup();
+      fetchLocationFromZipMock.mockResolvedValue("Beverly Hills, CA");
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter zip code in location field
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "90210");
+
+      // Blur the field to trigger zip code lookup
+      await user.tab();
+
+      // Wait for the zip code lookup to complete
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
+      });
+
+      // Enter client description
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      // Click Find Resources
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Verify fetchResources was called with the replaced location
+      await waitFor(() => {
+        expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
+          expect.stringContaining("Beverly Hills, CA"),
+          "test@example.com",
+          null,
+        );
+      });
+    });
+
+    it("replaces multiple zip codes in location field", async () => {
+      const user = userEvent.setup();
+      // Use mockImplementation to return different values based on input
+      fetchLocationFromZipMock.mockImplementation((zipCode: string) => {
+        if (zipCode === "90210") return Promise.resolve("Beverly Hills, CA");
+        if (zipCode === "10001") return Promise.resolve("New York, NY");
+        return Promise.resolve(null);
+      });
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter multiple zip codes
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "90210 or 10001");
+
+      // Blur the field
+      await user.tab();
+
+      // Wait for both lookups
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("10001");
+      });
+
+      // Enter client description and search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Verify both locations were replaced in the request
+      await waitFor(() => {
+        const call = (fetchResourcesModule.fetchResources as jest.Mock).mock
+          .calls[0];
+        expect(call[0]).toContain("Beverly Hills, CA");
+        expect(call[0]).toContain("New York, NY");
+      });
+    });
+
+    it("handles ZIP+4 format by using only first 5 digits", async () => {
+      const user = userEvent.setup();
+      fetchLocationFromZipMock.mockResolvedValue("Chicago, IL");
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter ZIP+4 format
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "60601-1234");
+
+      // Blur the field
+      await user.tab();
+
+      // Verify only the first 5 digits were used for lookup
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("60601");
+      });
+
+      // Enter client description and search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Verify the city/state was used
+      await waitFor(() => {
+        expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
+          expect.stringContaining("Chicago, IL"),
+          "test@example.com",
+          null,
+        );
+      });
+    });
+
+    it("preserves zip code when lookup fails", async () => {
+      const user = userEvent.setup();
+      fetchLocationFromZipMock.mockResolvedValue(null);
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter invalid zip code
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "00000");
+
+      // Blur the field
+      await user.tab();
+
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("00000");
+      });
+
+      // Enter client description and search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Verify original zip code was preserved
+      await waitFor(() => {
+        expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
+          expect.stringContaining("00000"),
+          "test@example.com",
+          null,
+        );
+      });
+    });
+
+    it("does not replace non-zip code text in location field", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter city name (no zip code)
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "Los Angeles");
+
+      // Blur the field
+      await user.tab();
+
+      // Should not call fetchLocationFromZip
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(fetchLocationFromZipMock).not.toHaveBeenCalled();
+
+      // Enter client description and search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Verify original text was preserved
+      await waitFor(() => {
+        expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
+          expect.stringContaining("Los Angeles"),
+          "test@example.com",
+          null,
+        );
+      });
+    });
+
+    it("waits for pending location resolution before searching", async () => {
+      const user = userEvent.setup();
+
+      // Create a delayed resolution to simulate slow API
+      let resolveLocation: ((value: string) => void) | null = null;
+      const slowLocationPromise = new Promise<string>((resolve) => {
+        setTimeout(() => {
+          resolveLocation = resolve;
+          resolve("Beverly Hills, CA");
+        }, 100); // Simulate 100ms delay
+      });
+
+      fetchLocationFromZipMock.mockReturnValue(slowLocationPromise);
+
+      jest
+        .spyOn(fetchResourcesModule, "fetchResources")
+        .mockResolvedValue(mockFetchResourcesResult);
+
+      render(<Page />);
+
+      // Select a category
+      const housingButton = screen.getByTestId(
+        "resourceCategoryToggle-housing",
+      );
+      await user.click(housingButton);
+
+      // Enter zip code
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "90210");
+
+      // Blur the field to start lookup
+      locationInput.blur();
+
+      // Give enough time for blur to trigger but not for the promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Immediately enter description and click Find Resources
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // The search function should wait for location resolution and then proceed
+      // Wait for the search to complete with the resolved location
+      await waitFor(
+        () => {
+          expect(fetchResourcesModule.fetchResources).toHaveBeenCalledWith(
+            expect.stringContaining("Beverly Hills, CA"),
+            "test@example.com",
+            null,
+          );
+        },
+        { timeout: 3000 },
+      );
+    });
+
+    it("displays collatedOptions in the UI when filters are active", async () => {
+      const user = userEvent.setup();
+      fetchLocationFromZipMock.mockResolvedValue("Beverly Hills, CA");
+
+      render(<Page />);
+
+      // Select employment category
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      await user.click(employmentButton);
+
+      // Wait for collatedOptions to update
+      await waitFor(() => {
+        const display = screen.queryByTestId("collatedOptionsDisplay");
+        expect(display).toBeInTheDocument();
+        expect(display).toHaveTextContent("Employment & Job Training");
+      });
+
+      // Select goodwill provider type
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      await user.click(goodwillButton);
+
+      // Wait for collatedOptions to update with provider type
+      await waitFor(() => {
+        const display = screen.getByTestId("collatedOptionsDisplay");
+        expect(display).toHaveTextContent("goodwill");
+      });
+
+      // Enter zip code in location
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "90210");
+      await user.tab();
+
+      // Wait for location to be replaced and displayed
+      await waitFor(() => {
+        expect(fetchLocationFromZipMock).toHaveBeenCalledWith("90210");
+      });
+
+      // The collatedOptions should now include all three selections
+      await waitFor(() => {
+        const display = screen.getByTestId("collatedOptionsDisplay");
+        expect(display).toHaveTextContent("Employment & Job Training");
+        expect(display).toHaveTextContent("goodwill");
+        expect(display).toHaveTextContent("Beverly Hills, CA");
+      });
+    });
+  });
 });
