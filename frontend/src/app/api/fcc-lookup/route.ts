@@ -36,14 +36,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    const fccResponse = await fetch(
-      `https://geo.fcc.gov/api/census/block/find?format=json&latitude=${latitude}&longitude=${longitude}`,
-      {
-        // Add a timeout
-        signal: AbortSignal.timeout(5000),
-      },
-    );
+    const params = new URLSearchParams({
+      format: "json",
+      latitude,
+      longitude,
+    });
 
+    const fccUrl = `https://geo.fcc.gov/api/census/block/find?${params.toString()}`;
+
+    const fccResponse = await fetch(fccUrl, {
+      // Add a timeout
+      signal: AbortSignal.timeout(5000),
+    });
     if (!fccResponse.ok) {
       return NextResponse.json(
         { error: "FCC API request failed" },
