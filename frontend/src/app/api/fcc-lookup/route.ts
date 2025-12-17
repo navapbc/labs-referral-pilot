@@ -1,0 +1,63 @@
+import { NextResponse } from "next/server";
+
+interface FCCCounty {
+  FIPS: string;
+  name: string;
+}
+
+interface FCCState {
+  FIPS: string;
+  code: string;
+  name: string;
+}
+
+interface FCCResponse {
+  status: string;
+  County?: FCCCounty;
+  State?: FCCState;
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const latitude = searchParams.get("latitude");
+  const longitude = searchParams.get("longitude");
+
+  if (!latitude || !longitude) {
+    return NextResponse.json(
+      { error: "Missing latitude or longitude parameter" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const fccResponse = await fetch(
+      `https://geo.fcc.gov/api/census/block/find?format=json&latitude=${latitude}&longitude=${longitude}`,
+      {
+        // Add a timeout
+        signal: AbortSignal.timeout(5000),
+      },
+    );
+
+    if (!fccResponse.ok) {
+      return NextResponse.json(
+        { error: "FCC API request failed" },
+        { status: fccResponse.status },
+      );
+    }
+
+    const fccData = (await fccResponse.json()) as FCCResponse;
+
+    // Strip " County" suffix from county name if present, for consistency
+    if (fccData.County?.name) {
+      fccData.County.name = fccData.County.name.replace(/ County$/i, "");
+    }
+
+    return NextResponse.json(fccData);
+  } catch (error) {
+    console.error("Error fetching from FCC API:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch from FCC API" },
+      { status: 500 },
+    );
+  }
+}
