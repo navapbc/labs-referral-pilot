@@ -95,6 +95,7 @@ interface ClientDetailsInputProps {
   selectedResourceTypes: string[];
   clientDescription: string;
   loading: boolean;
+  collatedOptions: string;
   onToggleCategory: (categoryId: string) => void;
   onClearAllFilters: () => void;
   onToggleResourceType: (type: string) => void;
@@ -110,6 +111,7 @@ export function ClientDetailsInput({
   selectedResourceTypes,
   clientDescription,
   loading,
+  collatedOptions,
   onToggleCategory,
   onClearAllFilters,
   onToggleResourceType,
@@ -259,6 +261,22 @@ export function ClientDetailsInput({
           )}
         </CardContent>
       </Card>
+
+      {collatedOptions && (
+        <div
+          className="mt-2 mb-2 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-gray-700"
+          data-testid="collatedOptionsDisplay"
+        >
+          <span className="font-medium text-blue-900">Selections:</span>
+          {collatedOptions.split("\n").map((line, index, array) => (
+            <span className="ml-2" key={index}>
+              {line}
+              {index < array.length - 1 && <br />}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="mt-4 mb-2" data-testid={"clientDescriptionInputSection"}>
         <Label
           className="font-medium text-gray-900 text-lg mb-2"

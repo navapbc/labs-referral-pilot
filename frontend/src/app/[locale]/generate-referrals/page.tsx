@@ -239,7 +239,7 @@ export default function Page() {
           return {
             original: match[0],
             replacement: cityState || match[0],
-            index: match.index!,
+            index: match.index,
           };
         }),
       );
@@ -387,6 +387,7 @@ export default function Page() {
                     selectedResourceTypes={selectedResourceTypes}
                     clientDescription={clientDescription}
                     loading={loading}
+                    collatedOptions={collatedOptions}
                     onToggleCategory={toggleCategory}
                     onClearAllFilters={clearAllFilters}
                     onToggleResourceType={toggleResourceType}
