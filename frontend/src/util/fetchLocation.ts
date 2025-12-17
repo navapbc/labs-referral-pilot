@@ -104,8 +104,8 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
     } else {
       console.warn("Error fetching city/state from zip code:", error);
     }
-    // Cache empty string if errors (including timeouts)
-    zipCodeCache.set(zipCode, "");
-    return "";
   }
+  // Cache empty string if errors
+  zipCodeCache.set(zipCode, "");
+  return "";
 }
