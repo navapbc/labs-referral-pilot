@@ -261,7 +261,6 @@ export default function Page() {
     selectedCategories,
     selectedResourceTypes,
     locationText,
-    getCollatedReferralOptions,
   ]);
 
   // Show nothing while checking localStorage to prevent flash
