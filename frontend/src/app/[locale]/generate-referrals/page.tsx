@@ -205,12 +205,14 @@ export default function Page() {
       const uniqueZipCodes = Array.from(new Set(matches.map((m) => m[0])));
 
       // Fetch locations for all unique zip codes
-      const zipToLocation = new Map<string, string | null>();
+      const zipToLocation = new Map<string, string>();
       for (const zipCode of uniqueZipCodes) {
         // For zip+4 format, only use the 5-digit part for lookup
         const zipForLookup = zipCode.split("-")[0];
         const location = await fetchLocationFromZip(zipForLookup);
-        zipToLocation.set(zipCode, location);
+        if (location.length > 0) {
+          zipToLocation.set(zipCode, location);
+        }
       }
 
       // Replace all zip codes with their city, state prepended

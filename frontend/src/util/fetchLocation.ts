@@ -1,3 +1,5 @@
+import { LRUCache } from "lru-cache";
+
 interface ZippopotamPlace {
   "place name": string; // city name
   state: string;
@@ -10,15 +12,16 @@ interface ZippopotamResponse {
   places?: ZippopotamPlace[];
 }
 
-// Cache for storing zip code lookup results
-const zipCodeCache = new Map<string, string | null>();
+// Cache for storing zip code lookup results (max 100 entries)
+const zipCodeCache = new LRUCache<string, string>({
+  max: 100,
+});
 
-export async function fetchLocationFromZip(
-  zipCode: string,
-): Promise<string | null> {
+export async function fetchLocationFromZip(zipCode: string): Promise<string> {
   // Check cache first
-  if (zipCodeCache.has(zipCode)) {
-    return zipCodeCache.get(zipCode) ?? null;
+  const cachedValue = zipCodeCache.get(zipCode);
+  if (cachedValue !== undefined) {
+    return cachedValue;
   }
 
   const ac = new AbortController();
@@ -31,9 +34,9 @@ export async function fetchLocationFromZip(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // Cache null result for failed lookups
-      zipCodeCache.set(zipCode, null);
-      return null;
+      // Cache empty string for failed lookups
+      zipCodeCache.set(zipCode, "");
+      return "";
     }
 
     const data = (await response.json()) as ZippopotamResponse;
@@ -44,10 +47,6 @@ export async function fetchLocationFromZip(
       zipCodeCache.set(zipCode, result);
       return result;
     }
-
-    // Cache null if no place found
-    zipCodeCache.set(zipCode, null);
-    return null;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
@@ -55,8 +54,9 @@ export async function fetchLocationFromZip(
     } else {
       console.error("Error fetching city/state from zip code:", error);
     }
-    // Cache null result for errors (including timeouts)
-    zipCodeCache.set(zipCode, null);
-    return null;
   }
+
+  // Cache empty string if no place found or errors (including timeouts)
+  zipCodeCache.set(zipCode, "");
+  return "";
 }
