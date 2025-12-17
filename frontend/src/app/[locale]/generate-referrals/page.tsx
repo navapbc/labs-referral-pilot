@@ -49,7 +49,7 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
-  const [builtRequest, setBuiltRequest] = useState("");
+  const [resolvedRequest, setResolvedRequest] = useState("");
 
   const searchParams = useSearchParams();
 
@@ -111,7 +111,7 @@ export default function Page() {
     setErrorMessage(undefined);
     try {
       const request = await buildRequestWithResolvedZipCodes();
-      setBuiltRequest(request);
+      setResolvedRequest(request);
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
@@ -145,7 +145,7 @@ export default function Page() {
     setSelectedResources([]);
     setActionPlan(null);
     setErrorMessage(undefined);
-    setBuiltRequest("");
+    setResolvedRequest("");
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -389,52 +389,55 @@ export default function Page() {
               </TabsContent>
             </Tabs>
 
-            {readyToPrint && (builtRequest || activeTab === "upload-forms") && (
-              <div className="space-y-4" data-testid="readyToPrintSection">
-                <div className="flex items-center justify-between pt-3">
-                  <Button
-                    onClick={handleReturnToSearch}
-                    variant="outline"
-                    className="hover:bg-gray-100 hover:text-gray-900"
-                    data-testid="returnToSearchButton"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Return To Search
-                  </Button>
-                  <div className="flex gap-2">
+            {readyToPrint &&
+              (resolvedRequest || activeTab === "upload-forms") && (
+                <div className="space-y-4" data-testid="readyToPrintSection">
+                  <div className="flex items-center justify-between pt-3">
                     <Button
-                      onClick={handlePrint}
+                      onClick={handleReturnToSearch}
                       variant="outline"
                       className="hover:bg-gray-100 hover:text-gray-900"
+                      data-testid="returnToSearchButton"
                     >
-                      <Printer
-                        data-testid="printReferralsButton"
-                        className="w-4 h-4"
-                      />
-                      Print Referrals
+                      <ChevronLeft className="w-4 h-4" />
+                      Return To Search
                     </Button>
-                    {resultId && <EmailReferralsButton resultId={resultId} />}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handlePrint}
+                        variant="outline"
+                        className="hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        <Printer
+                          data-testid="printReferralsButton"
+                          className="w-4 h-4"
+                        />
+                        Print Referrals
+                      </Button>
+                      {resultId && <EmailReferralsButton resultId={resultId} />}
+                    </div>
                   </div>
-                </div>
-                <ClientDetailsPromptBubble clientDescription={builtRequest} />
-                <ResourcesList
-                  resources={retainedResources ?? []}
-                  errorMessage={errorMessage}
-                  handleRemoveResource={handleRemoveResource}
-                />
-                {retainedResources && retainedResources.length > 0 && (
-                  <ActionPlanSection
-                    resources={retainedResources}
-                    selectedResources={selectedResources}
-                    actionPlan={actionPlan}
-                    isGeneratingActionPlan={isGeneratingActionPlan}
-                    onResourceSelection={handleResourceSelection}
-                    onSelectAllResources={handleSelectAllResources}
-                    onGenerateActionPlan={() => void generateActionPlan()}
+                  <ClientDetailsPromptBubble
+                    clientDescription={resolvedRequest}
                   />
-                )}
-              </div>
-            )}
+                  <ResourcesList
+                    resources={retainedResources ?? []}
+                    errorMessage={errorMessage}
+                    handleRemoveResource={handleRemoveResource}
+                  />
+                  {retainedResources && retainedResources.length > 0 && (
+                    <ActionPlanSection
+                      resources={retainedResources}
+                      selectedResources={selectedResources}
+                      actionPlan={actionPlan}
+                      isGeneratingActionPlan={isGeneratingActionPlan}
+                      onResourceSelection={handleResourceSelection}
+                      onSelectAllResources={handleSelectAllResources}
+                      onGenerateActionPlan={() => void generateActionPlan()}
+                    />
+                  )}
+                </div>
+              )}
           </div>
         </div>
       )}
