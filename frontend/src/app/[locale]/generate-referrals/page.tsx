@@ -208,12 +208,13 @@ export default function Page() {
       const zipToLocation = new Map<string, string>();
       for (const zipCode of uniqueZipCodes) {
         // For zip+4 format, only use the 5-digit part for lookup
+      const locationPromises = uniqueZipCodes.map(async (zipCode) => {
+        // For zip+4 format, only use the 5-digit part for lookup
         const zipForLookup = zipCode.split("-")[0];
         const location = await fetchLocationFromZip(zipForLookup);
-        if (location.length > 0) {
-          zipToLocation.set(zipCode, location);
-        }
-      }
+        zipToLocation.set(zipCode, location);
+      });
+      await Promise.all(locationPromises);
 
       // Replace all zip codes with their city, state prepended
       let result = text;
