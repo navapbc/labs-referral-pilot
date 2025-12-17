@@ -389,55 +389,56 @@ export default function Page() {
               </TabsContent>
             </Tabs>
 
-            {readyToPrint &&
-              (resolvedRequest || activeTab === "upload-forms") && (
-                <div className="space-y-4" data-testid="readyToPrintSection">
-                  <div className="flex items-center justify-between pt-3">
+            {readyToPrint && (
+              <div className="space-y-4" data-testid="readyToPrintSection">
+                <div className="flex items-center justify-between pt-3">
+                  <Button
+                    onClick={handleReturnToSearch}
+                    variant="outline"
+                    className="hover:bg-gray-100 hover:text-gray-900"
+                    data-testid="returnToSearchButton"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Return To Search
+                  </Button>
+                  <div className="flex gap-2">
                     <Button
-                      onClick={handleReturnToSearch}
+                      onClick={handlePrint}
                       variant="outline"
                       className="hover:bg-gray-100 hover:text-gray-900"
-                      data-testid="returnToSearchButton"
                     >
-                      <ChevronLeft className="w-4 h-4" />
-                      Return To Search
+                      <Printer
+                        data-testid="printReferralsButton"
+                        className="w-4 h-4"
+                      />
+                      Print Referrals
                     </Button>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handlePrint}
-                        variant="outline"
-                        className="hover:bg-gray-100 hover:text-gray-900"
-                      >
-                        <Printer
-                          data-testid="printReferralsButton"
-                          className="w-4 h-4"
-                        />
-                        Print Referrals
-                      </Button>
-                      {resultId && <EmailReferralsButton resultId={resultId} />}
-                    </div>
+                    {resultId && <EmailReferralsButton resultId={resultId} />}
                   </div>
-                  <ClientDetailsPromptBubble
-                    clientDescription={resolvedRequest}
-                  />
-                  <ResourcesList
-                    resources={retainedResources ?? []}
-                    errorMessage={errorMessage}
-                    handleRemoveResource={handleRemoveResource}
-                  />
-                  {retainedResources && retainedResources.length > 0 && (
-                    <ActionPlanSection
-                      resources={retainedResources}
-                      selectedResources={selectedResources}
-                      actionPlan={actionPlan}
-                      isGeneratingActionPlan={isGeneratingActionPlan}
-                      onResourceSelection={handleResourceSelection}
-                      onSelectAllResources={handleSelectAllResources}
-                      onGenerateActionPlan={() => void generateActionPlan()}
-                    />
-                  )}
                 </div>
-              )}
+                (resolvedRequest &&
+                <ClientDetailsPromptBubble
+                  clientDescription={resolvedRequest}
+                />
+                )
+                <ResourcesList
+                  resources={retainedResources ?? []}
+                  errorMessage={errorMessage}
+                  handleRemoveResource={handleRemoveResource}
+                />
+                {retainedResources && retainedResources.length > 0 && (
+                  <ActionPlanSection
+                    resources={retainedResources}
+                    selectedResources={selectedResources}
+                    actionPlan={actionPlan}
+                    isGeneratingActionPlan={isGeneratingActionPlan}
+                    onResourceSelection={handleResourceSelection}
+                    onSelectAllResources={handleSelectAllResources}
+                    onGenerateActionPlan={() => void generateActionPlan()}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
