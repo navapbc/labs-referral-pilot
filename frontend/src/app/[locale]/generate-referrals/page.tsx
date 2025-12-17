@@ -206,7 +206,6 @@ export default function Page() {
 
       // Fetch locations for all unique zip codes
       const zipToLocation = new Map<string, string>();
-      // For zip+4 format, only use the 5-digit part for lookup
       const locationPromises = uniqueZipCodes.map(async (zipCode) => {
         // For zip+4 format, only use the 5-digit part for lookup
         const zipForLookup = zipCode.split("-")[0];
