@@ -390,7 +390,7 @@ export default function Page() {
               </TabsContent>
             </Tabs>
 
-            {readyToPrint && builtRequest && (
+            {readyToPrint && (builtRequest || activeTab === "upload-forms") && (
               <div className="space-y-4" data-testid="readyToPrintSection">
                 <div className="flex items-center justify-between pt-3">
                   <Button
