@@ -952,9 +952,9 @@ describe("Generate Referrals Page", () => {
     beforeEach(() => {
       // Get the mock function from the module
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      fetchLocationFromZipMock = jest.requireMock("src/util/fetchLocation")
+      fetchLocationFromZipMock =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        .fetchLocationFromZip;
+        jest.requireMock("src/util/fetchLocation").fetchLocationFromZip;
       fetchLocationFromZipMock.mockClear();
     });
 
@@ -1201,7 +1201,9 @@ describe("Generate Referrals Page", () => {
 
       // Wait for collatedOptions to be updated with the resolved location
       await waitFor(() => {
-        expect(screen.getByTestId("collatedOptionsDisplay")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("collatedOptionsDisplay"),
+        ).toBeInTheDocument();
       });
       const display = screen.getByTestId("collatedOptionsDisplay");
       expect(display).toHaveTextContent("Beverly Hills, CA");
@@ -1221,7 +1223,9 @@ describe("Generate Referrals Page", () => {
 
       // Wait for collatedOptions to update
       await waitFor(() => {
-        expect(screen.getByTestId("collatedOptionsDisplay")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("collatedOptionsDisplay"),
+        ).toBeInTheDocument();
       });
       let display = screen.getByTestId("collatedOptionsDisplay");
       expect(display).toHaveTextContent("Employment & Job Training");
