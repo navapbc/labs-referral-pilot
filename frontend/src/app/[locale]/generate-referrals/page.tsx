@@ -206,8 +206,7 @@ export default function Page() {
 
       // Fetch locations for all unique zip codes
       const zipToLocation = new Map<string, string>();
-      for (const zipCode of uniqueZipCodes) {
-        // For zip+4 format, only use the 5-digit part for lookup
+      // For zip+4 format, only use the 5-digit part for lookup
       const locationPromises = uniqueZipCodes.map(async (zipCode) => {
         // For zip+4 format, only use the 5-digit part for lookup
         const zipForLookup = zipCode.split("-")[0];
@@ -236,8 +235,6 @@ export default function Page() {
     const processedLocationText = await replaceZipCodes(locationText);
     const processedClientDescription = await replaceZipCodes(clientDescription);
 
-    const resourceTypeFiltersPrefix =
-      "\nInclude resources that support the following categories: ";
     const resourceTypeFilters = selectedCategories
       .map((categoryId) => {
         const category = resourceCategories.find((c) => c.id === categoryId);
@@ -246,22 +243,18 @@ export default function Page() {
       .filter(Boolean)
       .join(", ");
 
-    const providerTypeFiltersPrefix =
-      "\nInclude the following types of providers: ";
-    const providerTypeFilters = selectedResourceTypes.join(", ");
-
-    const locationFilterPrefix =
-      "\nFocus on resources close to the following location: ";
-
     const options =
       (resourceTypeFilters.length > 0
-        ? resourceTypeFiltersPrefix + resourceTypeFilters
+        ? "\nInclude resources that support the following categories: " +
+          resourceTypeFilters
         : "") +
-      (providerTypeFilters.length > 0
-        ? providerTypeFiltersPrefix + providerTypeFilters
+      (selectedResourceTypes.length > 0
+        ? "\nInclude the following types of providers: " +
+          selectedResourceTypes.join(", ")
         : "") +
       (processedLocationText.length > 0
-        ? locationFilterPrefix + processedLocationText
+        ? "\nFocus on resources close to the following location: " +
+          processedLocationText
         : "");
 
     return processedClientDescription + options;
