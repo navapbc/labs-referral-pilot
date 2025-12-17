@@ -49,7 +49,8 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
-  const [resolvedRequest, setResolvedRequest] = useState("");
+  const [requestAfterZipResolution, setRequestAfterZipResolution] =
+    useState("");
 
   const searchParams = useSearchParams();
 
@@ -111,7 +112,7 @@ export default function Page() {
     setErrorMessage(undefined);
     try {
       const request = await buildRequestWithResolvedZipCodes();
-      setResolvedRequest(request);
+      setRequestAfterZipResolution(request);
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
@@ -145,7 +146,7 @@ export default function Page() {
     setSelectedResources([]);
     setActionPlan(null);
     setErrorMessage(undefined);
-    setResolvedRequest("");
+    setRequestAfterZipResolution("");
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -419,8 +420,10 @@ export default function Page() {
               </div>
             )}
 
-            {resolvedRequest && (
-              <ClientDetailsPromptBubble clientDescription={resolvedRequest} />
+            {requestAfterZipResolution && (
+              <ClientDetailsPromptBubble
+                clientDescription={requestAfterZipResolution}
+              />
             )}
 
             {readyToPrint && (
