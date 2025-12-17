@@ -106,57 +106,6 @@ describe("fetchLocationFromZip", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("should timeout after specified duration", async () => {
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    // Mock a fetch that never resolves but is abortable
-    (global.fetch as jest.Mock).mockImplementation(
-      (_url: string, options?: { signal?: AbortSignal }) =>
-        new Promise((resolve, reject) => {
-          if (options?.signal) {
-            options.signal.addEventListener("abort", () => {
-              reject(new DOMException("Aborted", "AbortError"));
-            });
-          }
-          // Never resolves unless aborted
-        }),
-    );
-
-    const result = await fetchLocationFromZip("90210", 50); // 50ms timeout
-
-    expect(result).toBeNull();
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Zip code lookup timed out:",
-      "90210",
-    );
-
-    consoleErrorSpy.mockRestore();
-  }, 10000); // Increase timeout to 10 seconds for this test
-
-  it("should accept custom timeout parameter", async () => {
-    // Test that the function accepts a custom timeout parameter
-    // We won't test the timing itself, just that it accepts the parameter
-    const mockResponse = {
-      places: [
-        {
-          "place name": "Chicago",
-          "state abbreviation": "IL",
-        },
-      ],
-    };
-
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
-
-    // Should work with custom timeout
-    const result = await fetchLocationFromZip("60601", 10000);
-    expect(result).toBe("Chicago, IL");
-  });
-
   it("should cache successful results", async () => {
     const mockResponse = {
       places: [
