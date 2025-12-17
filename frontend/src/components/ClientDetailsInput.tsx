@@ -266,7 +266,7 @@ export function ClientDetailsInput({
         >
           <span className="font-medium text-blue-900">Selections:</span>
           {collatedOptions.split("\n").map((line, index, array) => (
-            <span className="ml-2" key={index}>
+            <span className="ml-2" key={`${index}-${line.substring(0, 20)}`}>
               {line}
               {index < array.length - 1 && <br />}
             </span>
