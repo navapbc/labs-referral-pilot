@@ -241,7 +241,7 @@ export default function Page() {
       (resourceTypeFilters.length > 0
         ? resourceTypeFiltersPrefix + resourceTypeFilters
         : "") +
-      (providerTypeFilters
+      (providerTypeFilters.length > 0
         ? providerTypeFiltersPrefix + providerTypeFilters
         : "") +
       (processedLocation.length > 0
