@@ -1,5 +1,7 @@
 import { LRUCache } from "lru-cache";
 
+import { FCCResponse } from "@/app/api/fcc-lookup/route";
+
 interface ZippopotamPlace {
   "place name": string; // city name
   state: string;
@@ -41,12 +43,43 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
 
     const data = (await response.json()) as ZippopotamResponse;
     const place = data.places?.[0];
-    if (place) {
-      const result = `${place["place name"]}, ${place["state abbreviation"]}`;
-      // Cache successful result
-      zipCodeCache.set(zipCode, result);
-      return result;
+    if (!place) {
+      // Cache empty string if no place found
+      zipCodeCache.set(zipCode, "");
+      return "";
     }
+
+    // Query FCC API via our server-side API route to avoid CORS issues
+    const fccAc = new AbortController();
+    const timeoutId2 = setTimeout(() => fccAc.abort(), 5_000);
+    try {
+      const fccResponse = await fetch(
+        `/api/fcc-lookup?latitude=${place.latitude}&longitude=${place.longitude}`,
+        {
+          signal: fccAc.signal,
+        },
+      );
+      clearTimeout(timeoutId2);
+
+      if (fccResponse.ok) {
+        const fccData = (await fccResponse.json()) as FCCResponse;
+
+        // Use county name from FCC and state abbreviation
+        if (fccData.County && fccData.State) {
+          const result = `${place["place name"]} (${fccData.County.name} county), ${fccData.State.code}`;
+          zipCodeCache.set(zipCode, result);
+          return result;
+        }
+      }
+    } catch (fccError) {
+      // If FCC API throws any error, fall back to zippopotam's city and state
+      clearTimeout(timeoutId2);
+      console.warn("Error fetching from FCC API:", fccError);
+    }
+    // Fall back to zippopotam data if FCC fails
+    const result = `${place["place name"]}, ${place["state abbreviation"]}`;
+    zipCodeCache.set(zipCode, result);
+    return result;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
@@ -55,8 +88,7 @@ export async function fetchLocationFromZip(zipCode: string): Promise<string> {
       console.warn("Error fetching city/state from zip code:", error);
     }
   }
-
-  // Cache empty string if no place found or errors (including timeouts)
+  // Cache empty string if errors
   zipCodeCache.set(zipCode, "");
   return "";
 }
