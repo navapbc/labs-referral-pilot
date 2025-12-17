@@ -110,7 +110,7 @@ export default function Page() {
     setResult(null);
     setErrorMessage(undefined);
     try {
-      const request = await collateRequest();
+      const request = await buildRequestWithResolvedZipCodes();
       setProcessedRequest(request);
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
@@ -191,7 +191,7 @@ export default function Page() {
     }
   }
 
-  const collateRequest = async (): Promise<string> => {
+  const buildRequestWithResolvedZipCodes = async (): Promise<string> => {
     // Helper function to replace zip codes with "city, state zip_code" format
     const replaceZipCodes = async (text: string): Promise<string> => {
       if (!text) return text;
