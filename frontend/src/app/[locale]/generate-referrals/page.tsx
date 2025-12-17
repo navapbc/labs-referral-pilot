@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { fetchResources } from "@/util/fetchResources";
 import { Resource } from "@/types/resources";
 import "@/app/globals.css";
+import { fetchLocationFromZip } from "@/util/fetchLocation";
 
 import { PrintableReferralsReport } from "@/util/printReferrals";
 import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
@@ -48,6 +49,7 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
+  const [processedRequest, setProcessedRequest] = useState("");
 
   const searchParams = useSearchParams();
 
@@ -101,14 +103,15 @@ export default function Page() {
     setReadyToPrint(true);
   };
 
-  async function handleClick() {
+  async function findResources() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
 
     setLoading(true);
     setResult(null);
     setErrorMessage(undefined);
     try {
-      const request = clientDescription + getCollatedReferralOptions();
+      const request = await collateRequest();
+      setProcessedRequest(request);
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
@@ -142,6 +145,7 @@ export default function Page() {
     setSelectedResources([]);
     setActionPlan(null);
     setErrorMessage(undefined);
+    setProcessedRequest("");
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -187,7 +191,48 @@ export default function Page() {
     }
   }
 
-  const getCollatedReferralOptions = (): string => {
+  const collateRequest = async (): Promise<string> => {
+    // Helper function to replace zip codes with "city, state zip_code" format
+    const replaceZipCodes = async (text: string): Promise<string> => {
+      if (!text) return text;
+
+      const zipCodeRegex = /\b\d{5}(?:-\d{4})?\b/g;
+      const matches = Array.from(text.matchAll(zipCodeRegex));
+
+      if (matches.length === 0) return text;
+
+      // Collect unique zip codes to avoid duplicate API calls
+      const uniqueZipCodes = Array.from(new Set(matches.map((m) => m[0])));
+
+      // Fetch locations for all unique zip codes
+      const zipToLocation = new Map<string, string | null>();
+      for (const zipCode of uniqueZipCodes) {
+        // For zip+4 format, only use the 5-digit part for lookup
+        const zipForLookup = zipCode.split("-")[0];
+        const location = await fetchLocationFromZip(zipForLookup);
+        zipToLocation.set(zipCode, location);
+      }
+
+      // Replace all zip codes with their city, state prepended
+      let result = text;
+      for (const [zipCode, location] of zipToLocation.entries()) {
+        if (location) {
+          // Use a global replace to handle all occurrences of this zip code
+          const zipRegex = new RegExp(
+            `\\b${zipCode.replace(/[-]/g, "\\-")}\\b`,
+            "g",
+          );
+          result = result.replace(zipRegex, `${location} ${zipCode}`);
+        }
+      }
+
+      return result;
+    };
+
+    // Process both locationText and clientDescription for zip codes
+    const processedLocationText = await replaceZipCodes(locationText);
+    const processedClientDescription = await replaceZipCodes(clientDescription);
+
     const resourceTypeFiltersPrefix =
       "\nInclude resources that support the following categories: ";
     const resourceTypeFilters = selectedCategories
@@ -205,15 +250,18 @@ export default function Page() {
     const locationFilterPrefix =
       "\nFocus on resources close to the following location: ";
 
-    return (
+    const options =
       (resourceTypeFilters.length > 0
         ? resourceTypeFiltersPrefix + resourceTypeFilters
         : "") +
-      (providerTypeFilters
+      (providerTypeFilters.length > 0
         ? providerTypeFiltersPrefix + providerTypeFilters
         : "") +
-      (locationText.length > 0 ? locationFilterPrefix + locationText : "")
-    );
+      (processedLocationText.length > 0
+        ? locationFilterPrefix + processedLocationText
+        : "");
+
+    return processedClientDescription + options;
   };
 
   // Show nothing while checking localStorage to prevent flash
@@ -331,7 +379,7 @@ export default function Page() {
                     onToggleResourceType={toggleResourceType}
                     onLocationChange={setLocationText}
                     onClientDescriptionChange={setClientDescription}
-                    onFindResources={() => void handleClick()}
+                    onFindResources={() => void findResources()}
                   />
                 )}
               </TabsContent>
@@ -374,9 +422,7 @@ export default function Page() {
                   </div>
                 </div>
                 <ClientDetailsPromptBubble
-                  clientDescription={
-                    clientDescription + getCollatedReferralOptions()
-                  }
+                  clientDescription={processedRequest}
                 />
                 <ResourcesList
                   resources={retainedResources ?? []}
