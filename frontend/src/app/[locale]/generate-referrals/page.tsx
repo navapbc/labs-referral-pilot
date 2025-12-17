@@ -417,9 +417,7 @@ export default function Page() {
                     {resultId && <EmailReferralsButton resultId={resultId} />}
                   </div>
                 </div>
-                <ClientDetailsPromptBubble
-                  clientDescription={builtRequest}
-                />
+                <ClientDetailsPromptBubble clientDescription={builtRequest} />
                 <ResourcesList
                   resources={retainedResources ?? []}
                   errorMessage={errorMessage}
