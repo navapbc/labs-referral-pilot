@@ -146,6 +146,7 @@ export function ClientDetailsInput({
                     onClick={() => onToggleCategory(category.id)}
                     data-testid={"resourceCategoryToggle-" + category.id}
                     aria-pressed={isSelected}
+                    disabled={loading}
                   >
                     <Icon className="mr-2 w-6 h-6" />
                     {category.label}
@@ -176,6 +177,7 @@ export function ClientDetailsInput({
                 onClick={() => onToggleResourceType("goodwill")}
                 data-testid={"resourceCategoryToggle-goodwill"}
                 aria-pressed={selectedResourceTypes.includes("goodwill")}
+                disabled={loading}
               >
                 <Heart className="w-4 h-4 mr-2" />
                 Goodwill Internal
@@ -195,6 +197,7 @@ export function ClientDetailsInput({
                 onClick={() => onToggleResourceType("government")}
                 data-testid={"resourceCategoryToggle-government"}
                 aria-pressed={selectedResourceTypes.includes("government")}
+                disabled={loading}
               >
                 <Building className="w-4 h-4 mr-2" />
                 Government
@@ -214,6 +217,7 @@ export function ClientDetailsInput({
                 onClick={() => onToggleResourceType("community")}
                 data-testid={"resourceCategoryToggle-community"}
                 aria-pressed={selectedResourceTypes.includes("community")}
+                disabled={loading}
               >
                 <Users className="w-4 h-4 mr-2" />
                 Community
@@ -229,11 +233,12 @@ export function ClientDetailsInput({
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
               <Input
-                placeholder="Enter location (city, area, zip code, etc.)"
+                placeholder="Enter location (city, county, area, etc.)"
                 value={locationText}
                 onChange={(e) => onLocationChange(e.target.value)}
                 className="border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"
                 data-testid="locationFilterInput"
+                disabled={loading}
               />
             </div>
           </div>
@@ -249,6 +254,7 @@ export function ClientDetailsInput({
                 onClick={onClearAllFilters}
                 className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 data-testid="clearFiltersButton"
+                disabled={loading}
               >
                 Clear All Filters
               </Button>
@@ -270,6 +276,7 @@ export function ClientDetailsInput({
           onChange={(e) => onClientDescriptionChange(e.target.value)}
           className="min-h-[8rem] min-w-[16rem] text-base"
           data-testid="clientDescriptionInput"
+          disabled={loading}
         />
       </div>
 

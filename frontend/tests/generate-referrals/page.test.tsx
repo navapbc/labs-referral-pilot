@@ -258,7 +258,7 @@ describe("Generate Referrals Page", () => {
     });
   });
 
-  describe("handleClick", () => {
+  describe("findResources", () => {
     it("calls fetchResources with client description and filters", async () => {
       const user = userEvent.setup();
       const fetchResourcesSpy = jest
