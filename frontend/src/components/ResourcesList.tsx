@@ -39,7 +39,7 @@ const referralTypeIndicator = (referralType: string | undefined) => {
           className="inline-flex items-center gap-1.5 bg-transparent text-green-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
         >
           <Users className="h-4 w-4 shrink-0" />
-          <span className="truncate">External</span>
+          <span className="truncate">Community</span>
         </span>
       );
     }

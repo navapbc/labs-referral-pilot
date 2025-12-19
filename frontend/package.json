@@ -80,6 +80,7 @@
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
+    "baseline-browser-mapping": "^2.9.8",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.1.1",
     "eslint-config-prettier": "^9.0.0",

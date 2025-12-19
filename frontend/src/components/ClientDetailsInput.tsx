@@ -138,7 +138,7 @@ export function ClientDetailsInput({
                     key={category.id}
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
-                    className={`text-sm flex-col justify-center px-1 min-h-20 w-auto whitespace-normal break-words h-auto ${
+                    className={`text-sm flex-col justify-center px-1 min-h-20 w-auto whitespace-normal break-words h-auto disabled:cursor-not-allowed ${
                       isSelected
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -169,7 +169,7 @@ export function ClientDetailsInput({
                     : "outline"
                 }
                 size="sm"
-                className={`h-12 text-sm ${
+                className={`h-12 text-sm disabled:cursor-not-allowed ${
                   selectedResourceTypes.includes("goodwill")
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -189,7 +189,7 @@ export function ClientDetailsInput({
                     : "outline"
                 }
                 size="sm"
-                className={`h-12 text-sm ${
+                className={`h-12 text-sm disabled:cursor-not-allowed ${
                   selectedResourceTypes.includes("government")
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -209,7 +209,7 @@ export function ClientDetailsInput({
                     : "outline"
                 }
                 size="sm"
-                className={`h-12 text-sm ${
+                className={`h-12 text-sm disabled:cursor-not-allowed ${
                   selectedResourceTypes.includes("community")
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -252,7 +252,7 @@ export function ClientDetailsInput({
                 variant="ghost"
                 size="sm"
                 onClick={onClearAllFilters}
-                className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed"
                 data-testid="clearFiltersButton"
                 disabled={loading}
               >
@@ -287,7 +287,7 @@ export function ClientDetailsInput({
           loading ||
           (selectedCategories.length === 0 && !clientDescription.trim())
         }
-        className="min-w-[16rem] w-full row-auto generate-referrals-button text-lg pt-6 pb-6"
+        className="min-w-[16rem] w-full row-auto generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
         data-testid="findResourcesButton"
       >
         {!loading && (

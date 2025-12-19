@@ -104,6 +104,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
             <div className="flex gap-2 justify-end">
               <DialogClose asChild>
                 <Button
+                  className="cursor-pointer disabled:!cursor-not-allowed"
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
@@ -114,6 +115,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
                 </Button>
               </DialogClose>
               <Button
+                className="cursor-pointer "
                 type="submit"
                 onClick={() => void handleSendEmail()}
                 disabled={isLoading || !email.trim() || !isValidEmail(email)}
