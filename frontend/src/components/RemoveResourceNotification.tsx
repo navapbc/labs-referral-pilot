@@ -18,7 +18,7 @@ export function RemoveResourceNotification({
         <button
           onClick={handleUndoRemove}
           aria-label="Undo resource removal"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           Undo
