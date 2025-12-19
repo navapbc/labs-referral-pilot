@@ -115,7 +115,7 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
                 </Button>
               </DialogClose>
               <Button
-                className="cursor-pointer disabled:pointer-events-none"
+                className="cursor-pointer disabled:cursor-not-allowed"
                 type="submit"
                 onClick={() => void handleSendEmail()}
                 disabled={isLoading || !email.trim() || !isValidEmail(email)}
