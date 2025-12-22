@@ -54,7 +54,7 @@ export function ActionPlanSection({
                 <input
                   type="checkbox"
                   id={`resource-${index}`}
-                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                   onChange={(e) =>
                     onResourceSelection(resource, e.target.checked)
                   }
