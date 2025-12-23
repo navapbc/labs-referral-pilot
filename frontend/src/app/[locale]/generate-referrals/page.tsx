@@ -34,7 +34,8 @@ export default function Page() {
   const [clientDescription, setClientDescription] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [result, setResult] = useState<Resource[] | null>(null);
-  const [resultId, setResultId] = useState("");
+  const [resourcesResultId, setResourcesResultId] = useState("");
+  const [actionPlanResultId, setActionPlanResultId] = useState("");
   const [loading, setLoading] = useState(false);
   const [readyToPrint, setReadyToPrint] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -118,7 +119,7 @@ export default function Page() {
         userEmail,
         prompt_version_id,
       );
-      setResultId(resultId);
+      setResourcesResultId(resultId);
       setErrorMessage(errorMessage);
       onResources(resources);
     } catch (e: unknown) {
@@ -138,7 +139,7 @@ export default function Page() {
   function handleReturnToSearch() {
     setReadyToPrint(false);
     setResult([]);
-    setResultId("");
+    setResourcesResultId("");
     setLocationText("");
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
@@ -176,9 +177,17 @@ export default function Page() {
     setErrorMessage(undefined);
 
     try {
-      const { actionPlan: plan, errorMessage: planError } =
-        await fetchActionPlan(selectedResources, userEmail, clientDescription);
+      const {
+        actionPlan: plan,
+        resultId,
+        errorMessage: planError,
+      } = await fetchActionPlan(
+        selectedResources,
+        userEmail,
+        clientDescription,
+      );
       setActionPlan(plan);
+      setActionPlanResultId(resultId);
       if (planError) {
         setErrorMessage(planError);
       }
@@ -414,7 +423,12 @@ export default function Page() {
                       />
                       Print Referrals
                     </Button>
-                    {resultId && <EmailReferralsButton resultId={resultId} />}
+                    {resourcesResultId && (
+                      <EmailReferralsButton
+                        resultId={resourcesResultId}
+                        actionPlanResultId={actionPlanResultId}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

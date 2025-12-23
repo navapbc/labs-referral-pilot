@@ -1,6 +1,10 @@
 import { getApiDomain } from "./apiDomain";
 
-export async function emailResult(resultId: string, email: string) {
+export async function emailResult(
+  resultId: string,
+  actionPlanResultId: string | undefined,
+  email: string,
+) {
   const apiDomain = await getApiDomain();
   const url = apiDomain + "email_result/run";
   const headers = {
@@ -15,7 +19,8 @@ export async function emailResult(resultId: string, email: string) {
       method: "POST",
       headers,
       body: JSON.stringify({
-        result_id: resultId,
+        resources_result_id: resultId,
+        action_plan_results_id: actionPlanResultId || "",
         email: email,
       }),
       cache: "no-store",

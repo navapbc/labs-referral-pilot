@@ -19,9 +19,13 @@ import { emailResult } from "@/util/emailResult";
 
 interface EmailReferralsProps {
   resultId: string;
+  actionPlanResultId?: string;
 }
 
-export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
+export function EmailReferralsButton({
+  resultId,
+  actionPlanResultId,
+}: EmailReferralsProps) {
   const [email, setEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -38,7 +42,11 @@ export function EmailReferralsButton({ resultId }: EmailReferralsProps) {
     setStatusMessage("");
 
     try {
-      const { emailAddr } = await emailResult(resultId, email);
+      const { emailAddr } = await emailResult(
+        resultId,
+        actionPlanResultId,
+        email,
+      );
 
       setEmailSent(true);
       setStatusMessage(`Email sent successfully to ${emailAddr}`);

@@ -212,15 +212,24 @@ You've already taken a great first step by exploring these options.
 @component
 class EmailResult:
     """
-    Formats JSON object (representing a list of resources) and sends it to email address.
+    Formats JSON object (representing a list of resources and action plan) and sends it to email address.
     """
 
     @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, json_dict: dict) -> dict:
+    def run(self, email: str, resources_dict: dict, action_plan_dict: dict = None) -> dict:
         logger.info("Emailing result to %s", email)
-        logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
-        formatted_resources = self.format_resources(json_dict.get("resources", []))
-        message = f"{EMAIL_INTRO}\n{formatted_resources}"
+        logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
+        if action_plan_dict:
+            logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
+
+        formatted_resources = self.format_resources(resources_dict.get("resources", []))
+        formatted_action_plan = self.format_action_plan(action_plan_dict)
+
+        # Only append action plan if it's not empty
+        if formatted_action_plan:
+            message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
+        else:
+            message = f"{EMAIL_INTRO}\n{formatted_resources}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources"
@@ -244,6 +253,23 @@ class EmailResult:
                 f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
             ]
         )
+
+    def format_action_plan(self, action_plan: dict) -> str:
+        """Format the action plan for email display. Returns empty string if no action plan."""
+        if not action_plan:
+            return ""
+
+        title = action_plan.get("title", "Your Action Plan")
+        summary = action_plan.get("summary", "")
+        content = action_plan.get("content", "")
+
+        parts = [f"## {title}"]
+        if summary:
+            parts.append(f"\n{summary}")
+        if content:
+            parts.append(f"\n{content}")
+
+        return "\n".join(parts)
 
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
