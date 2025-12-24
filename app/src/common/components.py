@@ -261,14 +261,10 @@ class EmailFullResult:
         formatted_resources = format_resources(resources_dict.get("resources", []))
         formatted_action_plan = format_action_plan(action_plan_dict)
 
-        # Only append action plan if it's not empty
-        if formatted_action_plan:
-            message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
-        else:
-            message = f"{EMAIL_INTRO}\n{formatted_resources}"
+        message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
 
         # Send email via AWS SES
-        subject = "Your Requested Resources"
+        subject = "Your Requested Resources and Action Plan"
         success = send_email(recipient=email, subject=subject, body=message)
         status = "success" if success else "failed"
 

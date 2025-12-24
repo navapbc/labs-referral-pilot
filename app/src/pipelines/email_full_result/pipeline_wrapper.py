@@ -15,16 +15,16 @@ tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):
-    name = "email_result"
+    name = "email_full_result"
 
     def setup(self) -> None:
         pipeline = Pipeline()
         pipeline.add_component("load_resources", components.LoadResult())
         pipeline.add_component("load_action_plan", components.LoadResult())
-        pipeline.add_component("email_result", components.EmailFullResult())
+        pipeline.add_component("email_full_result", components.EmailFullResult())
 
-        pipeline.connect("load_resources.result_json", "email_result.resources_dict")
-        pipeline.connect("load_action_plan.result_json", "email_result.action_plan_dict")
+        pipeline.connect("load_resources.result_json", "email_full_result.resources_dict")
+        pipeline.connect("load_action_plan.result_json", "email_full_result.action_plan_dict")
         pipeline.add_component("logger", components.ReadableLogger())
 
         self.pipeline = pipeline
@@ -43,7 +43,7 @@ class PipelineWrapper(BasePipelineWrapper):
                         "action_plan_result_id": action_plan_result_id,
                     }
                 )
-                span.set_output(result["email_result"]["status"])
+                span.set_output(result["email_full_result"]["status"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
@@ -62,7 +62,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "load_resources": {
                     "result_id": resources_result_id,
                 },
-                "email_result": {
+                "email_full_result": {
                     "email": email,
                 },
             }
@@ -73,7 +73,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
             response = self.pipeline.run(
                 run_data,
-                include_outputs_from={"email_result"},
+                include_outputs_from={"email_full_result"},
             )
             logger.debug("Results: %s", pformat(response, width=160))
             return response
