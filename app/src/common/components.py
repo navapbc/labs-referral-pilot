@@ -270,22 +270,6 @@ class EmailFullResult:
 
         return {"status": status, "email": email, "message": message}
 
-    def format_resources(self, resources: list[dict]) -> str:
-        return "\n\n".join([format_resource(resource) for resource in resources])
-
-    def format_resource(self, resource: dict) -> str:
-        return "\n".join(
-            [
-                f"### {resource.get('name', 'Unnamed Resource')}",
-                f"- Referral Type: {resource.get('referral_type', 'None')}",
-                f"- Description: {resource.get('description', 'None')}",
-                f"- Website: {resource.get('website', 'None')}",
-                f"- Phone: {', '.join(resource.get('phones', ['None']))}",
-                f"- Email: {', '.join(resource.get('emails', ['None']))}",
-                f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
-            ]
-        )
-
 
 @component
 class EmailResult:
