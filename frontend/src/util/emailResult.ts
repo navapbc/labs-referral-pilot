@@ -67,7 +67,9 @@ export async function emailResult(
 
     /* eslint-disable */
     const responseData = await response.json();
-    const emailAddress: string = responseData.result.email_result.email;
+    const emailAddress: string = actionPlanResultId
+      ? responseData.result.email_full_result.email
+      : responseData.result.email_result.email;
     /* eslint-enable */
     return { emailAddr: emailAddress };
   } catch (error) {
