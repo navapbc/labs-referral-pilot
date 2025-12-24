@@ -9,7 +9,12 @@ from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
 from src.common import haystack_utils, phoenix_utils
-from src.common.components import OpenAIWebSearchGenerator, ReadableLogger
+from src.common.components import (
+    LlmOutputValidator,
+    OpenAIWebSearchGenerator,
+    ReadableLogger,
+    SaveResult,
+)
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
@@ -50,7 +55,12 @@ class PipelineWrapper(BasePipelineWrapper):
             ),
             name="prompt_builder",
         )
+        pipeline.add_component("output_validator", LlmOutputValidator(ActionPlan))
+        pipeline.add_component("save_result", SaveResult())
+
         pipeline.connect("prompt_builder", "llm.messages")
+        pipeline.connect("llm.replies", "output_validator")
+        pipeline.connect("output_validator.valid_replies", "save_result.replies")
 
         pipeline.add_component("logger", ReadableLogger())
         pipeline.connect("llm", "logger")
@@ -90,10 +100,13 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
                 "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             },
-            include_outputs_from={"llm"},
+            include_outputs_from={"llm", "save_result"},
         )
         logger.debug("Results: %s", pformat(response, width=160))
-        return {"response": response["llm"]["replies"][0]._content[0].text}
+        return {
+            "response": response["llm"]["replies"][0]._content[0].text,
+            "save_result": response["save_result"],
+        }
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:

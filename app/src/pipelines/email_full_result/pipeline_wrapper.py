@@ -15,47 +15,65 @@ tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):
-    name = "email_result"
+    name = "email_full_result"
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("load_result", components.LoadResult())
-        pipeline.add_component("email_result", components.EmailResult())
+        pipeline.add_component("load_resources", components.LoadResult())
+        pipeline.add_component("load_action_plan", components.LoadResult())
+        pipeline.add_component("email_full_result", components.EmailFullResult())
 
-        pipeline.connect("load_result.result_json", "email_result.json_dict")
-
+        pipeline.connect("load_resources.result_json", "email_full_result.resources_dict")
+        pipeline.connect("load_action_plan.result_json", "email_full_result.action_plan_dict")
         pipeline.add_component("logger", components.ReadableLogger())
 
         self.pipeline = pipeline
 
-    def run_api(self, resources_result_id: str, email: str) -> dict:
+    def run_api(self, resources_result_id: str, action_plan_result_id: str, email: str) -> dict:
         with using_metadata({"email": email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(resources_result_id, email)
-                span.set_input(resources_result_id)
-                span.set_output(result["email_result"]["status"])
+                result = self._run(resources_result_id, action_plan_result_id, email)
+                span.set_input(
+                    {
+                        "resources_result_id": resources_result_id,
+                        "action_plan_result_id": action_plan_result_id,
+                    }
+                )
+                span.set_output(result["email_full_result"]["status"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, result_id: str, email: str) -> dict:
+    def _run(self, resources_result_id: str, action_plan_result_id: str, email: str) -> dict:
         try:
-            response = self.pipeline.run(
-                {
-                    "logger": {
-                        "messages_list": [{"result_id": result_id, "email": email}],
-                    },
-                    "load_result": {
-                        "result_id": result_id,
-                    },
-                    "email_result": {
-                        "email": email,
-                    },
+            run_data = {
+                "logger": {
+                    "messages_list": [
+                        {
+                            "resources_result_id": resources_result_id,
+                            "action_plan_result_id": action_plan_result_id,
+                            "email": email,
+                        }
+                    ],
                 },
-                include_outputs_from={"email_result"},
+                "load_resources": {
+                    "result_id": resources_result_id,
+                },
+                "email_full_result": {
+                    "email": email,
+                },
+            }
+
+            run_data["load_action_plan"] = {
+                "result_id": action_plan_result_id,
+            }
+
+            response = self.pipeline.run(
+                run_data,
+                include_outputs_from={"email_full_result"},
             )
             logger.debug("Results: %s", pformat(response, width=160))
             return response

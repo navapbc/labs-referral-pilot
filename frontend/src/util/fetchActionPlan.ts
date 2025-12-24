@@ -53,7 +53,11 @@ export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
-): Promise<{ actionPlan: ActionPlan | null; errorMessage?: string }> {
+): Promise<{
+  actionPlan: ActionPlan | null;
+  resultId: string;
+  errorMessage?: string;
+}> {
   const apiDomain = await getApiDomain();
   const url = apiDomain + "generate_action_plan/run";
   const headers = {
@@ -82,6 +86,7 @@ export async function fetchActionPlan(
       console.error("Failed to generate action plan:", upstream.statusText);
       return {
         actionPlan: null,
+        resultId: "",
         errorMessage:
           "The server encountered an unexpected error. Please try again later.",
       };
@@ -89,6 +94,8 @@ export async function fetchActionPlan(
 
     /* eslint-disable */
     const responseData = await upstream.json();
+    // Extract the result ID from the API response
+    const resultUuid: string = responseData.result.save_result.result_id;
     // Extract the action plan from the API response
     const actionPlanText = responseData.result.response;
     console.log("Raw action plan text:", actionPlanText);
@@ -99,13 +106,14 @@ export async function fetchActionPlan(
     const actionPlan = JSON.parse(fixedJson);
     /* eslint-enable */
 
-    return { actionPlan: actionPlan as ActionPlan };
+    return { actionPlan: actionPlan as ActionPlan, resultId: resultUuid };
   } catch (error) {
     clearTimeout(timer);
     // Check if the error is due to timeout
     if (error instanceof Error && error.name === "AbortError") {
       return {
         actionPlan: null,
+        resultId: "",
         errorMessage: "Request timed out, please try again.",
       };
     }
@@ -115,6 +123,7 @@ export async function fetchActionPlan(
   clearTimeout(timer);
   return {
     actionPlan: null,
+    resultId: "",
     errorMessage:
       "The server encountered an unexpected error. Please try again later.",
   };

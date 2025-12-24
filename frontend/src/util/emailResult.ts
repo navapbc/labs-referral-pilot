@@ -1,11 +1,31 @@
 import { getApiDomain } from "./apiDomain";
 
-export async function emailResult(resultId: string, email: string) {
+export async function emailResult(
+  resultId: string,
+  actionPlanResultId: string | undefined,
+  email: string,
+) {
   const apiDomain = await getApiDomain();
-  const url = apiDomain + "email_result/run";
+
+  // Use email_full_result if actionPlanResultId is provided, otherwise use email_result
+  const endpoint = actionPlanResultId ? "email_full_result" : "email_result";
+  const url = `${apiDomain}${endpoint}/run`;
+
   const headers = {
     "Content-Type": "application/json",
   };
+
+  // Build request body conditionally
+  const body = actionPlanResultId
+    ? {
+        resources_result_id: resultId,
+        action_plan_result_id: actionPlanResultId,
+        email: email,
+      }
+    : {
+        resources_result_id: resultId,
+        email: email,
+      };
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 300_000);
@@ -14,10 +34,7 @@ export async function emailResult(resultId: string, email: string) {
     const response = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        result_id: resultId,
-        email: email,
-      }),
+      body: JSON.stringify(body),
       cache: "no-store",
       signal: ac.signal,
     });
@@ -50,7 +67,9 @@ export async function emailResult(resultId: string, email: string) {
 
     /* eslint-disable */
     const responseData = await response.json();
-    const emailAddress: string = responseData.result.email_result.email;
+    const emailAddress: string = actionPlanResultId
+      ? responseData.result.email_full_result.email
+      : responseData.result.email_result.email;
     /* eslint-enable */
     return { emailAddr: emailAddress };
   } catch (error) {

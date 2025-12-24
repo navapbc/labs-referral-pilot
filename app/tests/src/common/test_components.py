@@ -8,6 +8,7 @@ from haystack.dataclasses.chat_message import ChatMessage
 
 from src.adapters import db
 from src.common.components import (
+    EmailFullResult,
     EmailResult,
     LlmOutputValidator,
     LoadResult,
@@ -193,3 +194,240 @@ def test_ReadableLogger():
         "Not a JSON message",
         VALID_JSON_OBJ,
     ]
+
+
+def test_EmailFullResult_with_resources_and_action_plan(monkeypatch):
+    """Test EmailFullResult with both resources and action plan."""
+    resources_dict = {
+        "resources": [
+            {
+                "name": "Resource 1",
+                "referral_type": "external",
+                "description": "Description for Resource 1",
+                "website": "http://resource1.com",
+                "phones": ["555-1234"],
+                "emails": ["resource1@example.com"],
+                "addresses": ["123 Main St"],
+            },
+            {
+                "name": "Resource 2",
+                "referral_type": "internal",
+                "description": "Description for Resource 2",
+                "website": "http://resource2.com",
+                "phones": ["555-5678", "555-9012"],
+                "emails": ["resource2@example.com"],
+                "addresses": ["456 Oak Ave"],
+            },
+        ]
+    }
+
+    action_plan_dict = {
+        "title": "Your Action Plan",
+        "summary": "This is a summary of your action plan.",
+        "content": "Step 1: Contact Resource 1\nStep 2: Follow up with Resource 2",
+    }
+
+    # Mock send_email to always return success
+    email_calls = []
+
+    def mock_send_email(recipient, subject, body):
+        email_calls.append({"recipient": recipient, "subject": subject, "body": body})
+        return True
+
+    monkeypatch.setattr("src.common.components.send_email", mock_send_email)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "success"
+    assert output["email"] == "test@example.com"
+    assert "Resource 1" in output["message"]
+    assert "Resource 2" in output["message"]
+    assert "Your Action Plan" in output["message"]
+    assert "This is a summary of your action plan." in output["message"]
+    assert "Step 1: Contact Resource 1" in output["message"]
+
+    # Verify email was sent with correct parameters
+    assert len(email_calls) == 1
+    assert email_calls[0]["recipient"] == "test@example.com"
+    assert email_calls[0]["subject"] == "Your Requested Resources and Action Plan"
+
+
+def test_EmailFullResult_with_empty_resources(monkeypatch):
+    """Test EmailFullResult with empty resources list."""
+    resources_dict = {"resources": []}
+
+    action_plan_dict = {
+        "title": "Your Action Plan",
+        "summary": "Summary text",
+        "content": "Content text",
+    }
+
+    # Mock send_email
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "success"
+    assert "Your Action Plan" in output["message"]
+    # Should not contain any resource headers
+    assert "###" not in output["message"]
+
+
+def test_EmailFullResult_with_missing_resource_fields(monkeypatch):
+    """Test EmailFullResult with resources missing optional fields."""
+    resources_dict = {
+        "resources": [
+            {
+                "name": "Resource With Missing Fields",
+                # Missing all other fields
+            }
+        ]
+    }
+
+    action_plan_dict = {}
+
+    # Mock send_email
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "success"
+    assert "Resource With Missing Fields" in output["message"]
+    assert "- Referral Type: None" in output["message"]
+    assert "- Description: None" in output["message"]
+    assert "- Website: None" in output["message"]
+    assert "- Phone: None" in output["message"]
+    assert "- Email: None" in output["message"]
+    assert "- Addresses: None" in output["message"]
+
+
+def test_EmailFullResult_send_email_failure(monkeypatch):
+    """Test EmailFullResult when send_email fails."""
+    resources_dict = {
+        "resources": [
+            {
+                "name": "Resource 1",
+                "referral_type": "external",
+                "description": "Description",
+                "website": "http://resource1.com",
+                "phones": ["555-1234"],
+                "emails": ["resource1@example.com"],
+                "addresses": ["123 Main St"],
+            }
+        ]
+    }
+
+    action_plan_dict = {
+        "title": "Your Action Plan",
+        "summary": "Summary",
+        "content": "Content",
+    }
+
+    # Mock send_email to return failure
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: False)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "failed"
+    assert output["email"] == "test@example.com"
+    assert "Resource 1" in output["message"]
+    assert "Your Action Plan" in output["message"]
+
+
+def test_EmailFullResult_with_action_plan_missing_fields(monkeypatch):
+    """Test EmailFullResult with action plan missing optional fields."""
+    resources_dict = {"resources": []}
+
+    # Test with missing summary
+    action_plan_dict = {
+        "title": "Action Plan Title",
+        "content": "Some content",
+    }
+
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "success"
+    assert "Action Plan Title" in output["message"]
+    assert "Some content" in output["message"]
+
+
+def test_EmailFullResult_with_action_plan_only_title(monkeypatch):
+    """Test EmailFullResult with action plan containing only title."""
+    resources_dict = {"resources": []}
+
+    action_plan_dict = {
+        "title": "Just A Title",
+    }
+
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    assert output["status"] == "success"
+    assert "Just A Title" in output["message"]
+
+
+def test_EmailFullResult_message_format(monkeypatch):
+    """Test that EmailFullResult formats the message correctly."""
+    resources_dict = {
+        "resources": [
+            {
+                "name": "Test Resource",
+                "referral_type": "test_type",
+                "description": "Test description",
+                "website": "http://test.com",
+                "phones": ["111-1111"],
+                "emails": ["test@test.com"],
+                "addresses": ["Test Address"],
+            }
+        ]
+    }
+
+    action_plan_dict = {
+        "title": "Test Plan",
+        "summary": "Test summary",
+        "content": "Test content",
+    }
+
+    monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
+
+    component = EmailFullResult()
+    output = component.run(
+        email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
+    )
+
+    message = output["message"]
+
+    # Check that message starts with EMAIL_INTRO
+    assert message.startswith("Hello,")
+    assert "Here is your personalized report" in message
+
+    # Check resource formatting
+    assert "### Test Resource" in message
+    assert "- Referral Type: test_type" in message
+    assert "- Description: Test description" in message
+
+    # Check action plan formatting
+    assert "## Test Plan" in message
+    assert "Test summary" in message
+    assert "Test content" in message
