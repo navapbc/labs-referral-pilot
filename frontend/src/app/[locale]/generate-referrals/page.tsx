@@ -426,7 +426,7 @@ export default function Page() {
                     {resourcesResultId && (
                       <EmailReferralsButton
                         resultId={resourcesResultId}
-                        actionPlanResultId={actionPlanResultId}
+                        actionPlanResultId={actionPlanResultId || undefined}
                       />
                     )}
                   </div>
