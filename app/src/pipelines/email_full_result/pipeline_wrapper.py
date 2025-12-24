@@ -67,11 +67,9 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
             }
 
-            # Only load action plan if ID is provided
-            if action_plan_results_id:
-                run_data["load_action_plan"] = {
-                    "result_id": action_plan_results_id,
-                }
+            run_data["load_action_plan"] = {
+                "result_id": action_plan_results_id,
+            }
 
             response = self.pipeline.run(
                 run_data,
