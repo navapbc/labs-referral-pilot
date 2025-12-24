@@ -100,10 +100,13 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
                 "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             },
-            include_outputs_from={"llm"},
+            include_outputs_from={"llm", "save_result"},
         )
         logger.debug("Results: %s", pformat(response, width=160))
-        return {"response": response["llm"]["replies"][0]._content[0].text}
+        return {
+            "response": response["llm"]["replies"][0]._content[0].text,
+            "save_result": response["save_result"],
+        }
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
