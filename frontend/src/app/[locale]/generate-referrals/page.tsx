@@ -140,6 +140,7 @@ export default function Page() {
     setReadyToPrint(false);
     setResult([]);
     setResourcesResultId("");
+    setActionPlanResultId("");
     setLocationText("");
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
@@ -190,6 +191,7 @@ export default function Page() {
       setActionPlanResultId(resultId);
       if (planError) {
         setErrorMessage(planError);
+        setActionPlanResultId(""); // set the Action PLan Id to "" so we don't email an empty or errant result
       }
     } catch (error) {
       console.error("Error generating action plan:", error);
