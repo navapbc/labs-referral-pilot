@@ -1,6 +1,7 @@
 import logging
 from pprint import pformat
 
+import hayhooks
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -55,12 +56,12 @@ class PipelineWrapper(BasePipelineWrapper):
             ),
             name="prompt_builder",
         )
-        pipeline.add_component("output_validator", LlmOutputValidator(ActionPlan))
-        pipeline.add_component("save_result", SaveResult())
+        #pipeline.add_component("output_validator", LlmOutputValidator(ActionPlan))
+        #pipeline.add_component("save_result", SaveResult())
 
         pipeline.connect("prompt_builder", "llm.messages")
-        pipeline.connect("llm.replies", "output_validator")
-        pipeline.connect("output_validator.valid_replies", "save_result.replies")
+        #pipeline.connect("llm.replies", "output_validator")
+        #pipeline.connect("output_validator.valid_replies", "save_result.replies")
 
         pipeline.add_component("logger", ReadableLogger())
         pipeline.connect("llm", "logger")
@@ -100,13 +101,54 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
                 "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             },
-            include_outputs_from={"llm", "save_result"},
+            include_outputs_from={"llm"}, #, "save_result"},
         )
         logger.debug("Results: %s", pformat(response, width=160))
         return {
             "response": response["llm"]["replies"][0]._content[0].text,
-            "save_result": response["save_result"],
+            #"save_result": response["save_result"],
         }
+
+    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
+    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
+        # Extract custom parameters from the body
+        resources = body.get("resources", [])
+        user_email = body.get("user_email", "")
+        user_query = body.get("user_query", "")
+        # Note: 'model' parameter is the pipeline name, not the LLM model
+        # Get the actual LLM model from body, or use default
+        llm_model = body.get("llm_model", "gpt-5-mini")
+        reasoning_effort = body.get("reasoning_effort", "low")
+
+        # Fallback: extract user_query from the last message if not provided in body
+        if not user_query and messages:
+            user_query = hayhooks.get_last_user_message(messages)
+
+        resource_objects = get_resources(resources)
+        logger.info(
+            "Streaming action plan: %d resources, user=%s, model=%s",
+            len(resource_objects),
+            user_email,
+            llm_model,
+        )
+
+        return hayhooks.streaming_generator(
+            pipeline=self.pipeline,
+            pipeline_run_args={
+                "logger": {
+                    "messages_list": [
+                        {"resource_count": len(resource_objects), "user_email": user_email}
+                    ],
+                },
+                "prompt_builder": {
+                    "resources": format_resources(resource_objects),
+                    "action_plan_json": action_plan_as_json,
+                    "user_query": user_query,
+                },
+                "llm": {"model": llm_model, "reasoning_effort": reasoning_effort},
+            },
+        )
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
