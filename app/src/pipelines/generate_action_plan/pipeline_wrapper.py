@@ -8,6 +8,7 @@ from openinference.instrumentation import _tracers, using_attributes, using_meta
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
+from src.app_config import config
 from src.common import haystack_utils, phoenix_utils
 from src.common.components import (
     LlmOutputValidator,
@@ -98,7 +99,10 @@ class PipelineWrapper(BasePipelineWrapper):
                     "action_plan_json": action_plan_as_json,
                     "user_query": user_query,
                 },
-                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                "llm": {
+                    "model": config.generate_action_plan_model_version,
+                    "reasoning_effort": config.generate_action_plan_reasoning_level,
+                },
             },
             include_outputs_from={"llm", "save_result"},
         )

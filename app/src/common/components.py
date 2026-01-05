@@ -192,8 +192,8 @@ class OpenAIWebSearchGenerator:
         self,
         messages: list[ChatMessage],
         domain: str | None = None,
-        model: str = "gpt-5",
-        reasoning_effort: str = "high",
+        model: str = config.default_openai_model_version,
+        reasoning_effort: str = config.default_openai_reasoning_level,
     ) -> dict:
         """
         Run the OpenAI web search generator.
