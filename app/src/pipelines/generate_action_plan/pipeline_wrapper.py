@@ -104,8 +104,14 @@ class PipelineWrapper(BasePipelineWrapper):
             include_outputs_from={"llm", "save_result"},
         )
         logger.debug("Results: %s", pformat(response, width=160))
+
+        # Use the `ChatMessage` if streaming, `replies` if async. Maintaining async functionality for testing and evals
+        if "ChatMessage" in response["llm"]:
+            received_response = response["llm"]["ChatMessage"][0]._content[0].text
+        else:
+            received_response = response["llm"]["replies"][0]._content[0].text
         return {
-            "response": response["llm"]["ChatMessage"][0]._content[0].text,
+            "response": received_response,
             "save_result": response["save_result"],
         }
 

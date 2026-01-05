@@ -242,7 +242,11 @@ class OpenAIWebSearchGenerator:
 
         # Use streaming if callback is provided
         if self.streaming_callback:
-            logger.info("Starting OpenAI streaming request (model=%s, reasoning_effort=%s)", model, reasoning_effort)
+            logger.info(
+                "Starting OpenAI streaming request (model=%s, reasoning_effort=%s)",
+                model,
+                reasoning_effort,
+            )
             api_params["stream"] = True
 
             try:
@@ -279,10 +283,6 @@ class OpenAIWebSearchGenerator:
                         chunk_text = openai_chunk.output_text or ""
 
                     if chunk_text:
-                        # Ensure chunk_text is a string
-                        if not isinstance(chunk_text, str):
-                            chunk_text = "".join(str(item) for item in chunk_text) if isinstance(chunk_text, list) else str(chunk_text)
-
                         full_text += chunk_text
                         # Convert to Haystack StreamingChunk and call the callback
                         streaming_chunk = StreamingChunk(content=chunk_text)
@@ -422,11 +422,11 @@ class ReadableLogger:
                 if mapped_item is None:
                     continue
 
-                '''if isinstance(mapped_item, ChatMessage):
+                if isinstance(mapped_item, ChatMessage):
                     for content in mapped_item._content:
                         logs.append(self.parse_json_if_possible(content))
                 else:
-                    logs.append(self.parse_json_if_possible(mapped_item))'''
+                    logs.append(self.parse_json_if_possible(mapped_item))
         return {"logs": logs}
 
     def parse_json_if_possible(self, content: Any) -> Any:
