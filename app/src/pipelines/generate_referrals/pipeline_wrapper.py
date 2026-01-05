@@ -15,6 +15,7 @@ from openinference.instrumentation import _tracers, using_attributes, using_meta
 from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
+from src.app_config import config
 from src.common import components, haystack_utils, phoenix_utils
 
 logger = logging.getLogger(__name__)
@@ -154,5 +155,8 @@ class PipelineWrapper(BasePipelineWrapper):
                 "query": query,
                 "response_json": response_schema,
             },
-            "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+            "llm": {
+                "model": config.generate_referrals_model_version,
+                "reasoning_effort": config.generate_referrals_reasoning_level,
+            },
         }
