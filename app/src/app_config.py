@@ -71,7 +71,7 @@ class AppConfig(PydanticBaseEnvConfig):
     generate_referrals_reasoning_level: str = "none"
 
     generate_referrals_rag_model_version: str = "gpt-5.1"
-    generate_referrals_rag_reasoning_level: str = "low"
+    generate_referrals_rag_reasoning_level: str = "none"
 
     generate_action_plan_model_version: str = "gpt-5.1"
     generate_action_plan_reasoning_level: str = "none"
