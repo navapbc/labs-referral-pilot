@@ -56,12 +56,12 @@ class PipelineWrapper(BasePipelineWrapper):
             ),
             name="prompt_builder",
         )
-        #pipeline.add_component("output_validator", LlmOutputValidator(ActionPlan))
-        #pipeline.add_component("save_result", SaveResult())
+        pipeline.add_component("output_validator", LlmOutputValidator(ActionPlan))
+        pipeline.add_component("save_result", SaveResult())
 
         pipeline.connect("prompt_builder", "llm.messages")
-        #pipeline.connect("llm.replies", "output_validator")
-        #pipeline.connect("output_validator.valid_replies", "save_result.replies")
+        pipeline.connect("llm.replies", "output_validator")
+        pipeline.connect("output_validator.valid_replies", "save_result.replies")
 
         pipeline.add_component("logger", ReadableLogger())
         pipeline.connect("llm", "logger")
@@ -101,12 +101,12 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
                 "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
             },
-            include_outputs_from={"llm"}, #, "save_result"},
+            include_outputs_from={"llm", "save_result"},
         )
         logger.debug("Results: %s", pformat(response, width=160))
         return {
-            "response": response["llm"]["replies"][0]._content[0].text,
-            #"save_result": response["save_result"],
+            "response": response["llm"]["ChatMessage"][0]._content[0].text,
+            "save_result": response["save_result"],
         }
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility

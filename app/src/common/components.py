@@ -262,15 +262,7 @@ class OpenAIWebSearchGenerator:
 
                     # Extract text from OpenAI Responses API events
                     if hasattr(openai_chunk, "type"):
-                        # Method 1: Check for text/content attributes
-                        if hasattr(openai_chunk, "text"):
-                            text_val = openai_chunk.text
-                            chunk_text = "".join(str(item) for item in text_val) if isinstance(text_val, list) else (text_val or "")
-                        elif hasattr(openai_chunk, "content"):
-                            content_val = openai_chunk.content
-                            chunk_text = "".join(str(item) for item in content_val) if isinstance(content_val, list) else (content_val or "")
-
-                        # Method 2: Check delta attribute (for text delta events)
+                        # Check delta attribute (for text delta events)
                         if not chunk_text and hasattr(openai_chunk, "delta"):
                             delta = openai_chunk.delta
                             if isinstance(delta, str):
@@ -281,18 +273,6 @@ class OpenAIWebSearchGenerator:
                                 chunk_text = delta.content or ""
                             elif hasattr(delta, "text"):
                                 chunk_text = delta.text or ""
-
-                        # Method 3: Check item attribute (for output_item events)
-                        if not chunk_text and hasattr(openai_chunk, "item"):
-                            item = openai_chunk.item
-                            if hasattr(item, "output"):
-                                output = item.output
-                                if isinstance(output, str):
-                                    chunk_text = output
-                                elif isinstance(output, list):
-                                    chunk_text = "".join(str(item.text if hasattr(item, "text") else str(item)) for item in output)
-                                elif hasattr(output, "text"):
-                                    chunk_text = output.text
 
                     # Fallback for non-Responses API format
                     if not chunk_text and hasattr(openai_chunk, "output_text"):
