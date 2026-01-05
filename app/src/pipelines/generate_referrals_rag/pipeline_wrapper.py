@@ -84,4 +84,9 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             # For querying RAG DB
             "query_embedder": {"text": query},
             "retriever": {"top_k": config.retrieval_top_k, "filters": None},
+            # Override LLM config for RAG pipeline
+            "llm": {
+                "model": config.generate_referrals_rag_model_version,
+                "reasoning_effort": config.generate_referrals_rag_reasoning_level,
+            },
         }

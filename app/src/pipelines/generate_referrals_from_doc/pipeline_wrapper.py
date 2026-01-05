@@ -11,6 +11,7 @@ from haystack.components.converters import OutputAdapter, PyPDFToDocument
 from openinference.instrumentation import _tracers, using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 
+from src.app_config import config
 from src.common import components, haystack_utils, phoenix_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import response_schema
 
@@ -95,7 +96,10 @@ class PipelineWrapper(BasePipelineWrapper):
                 "prompt_builder": {
                     "response_json": response_schema,
                 },
-                "llm": {"model": "gpt-5-mini", "reasoning_effort": "low"},
+                "llm": {
+                    "model": config.generate_referrals_from_doc_model_version,
+                    "reasoning_effort": config.generate_referrals_from_doc_reasoning_level,
+                },
             },
             include_outputs_from={"llm"},
         )
