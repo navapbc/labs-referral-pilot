@@ -135,7 +135,7 @@ export function ClientDetailsInput({
             Tell us about your client
           </label>
           <Textarea
-            placeholder="Example: My client recently lost their job and is looking for employment assistance, job training programs, and help with rent while they get back on their feet."
+            placeholder="Example: My client is looking for medical assistant training, diapers and clothes for job interviews."
             id="clientDescriptionInput"
             value={clientDescription}
             onChange={(e) => onClientDescriptionChange(e.target.value)}
