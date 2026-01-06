@@ -7,6 +7,7 @@ import {
   DollarSign,
   Flag,
   GraduationCap,
+  HandHelping,
   Heart,
   Home,
   Layers,
@@ -121,6 +122,21 @@ export function ClientDetailsInput({
 }: ClientDetailsInputProps) {
   return (
     <div className="flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex flex-col items-center text-center py-6">
+        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+          <HandHelping className="w-8 h-8 text-purple-600" />
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+          Let's Find the Right Resources for Your Clients
+        </h1>
+        <p className="text-gray-600 max-w-xl">
+          Share some details about your client's situation, and we'll help you
+          discover the perfect resources and referrals tailored to their
+          specific needs.
+        </p>
+      </div>
+
       {/* Tell us about your client */}
       <Card
         className="bg-gray-50 border-gray-200"
