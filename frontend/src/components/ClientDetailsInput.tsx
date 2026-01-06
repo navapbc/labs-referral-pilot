@@ -121,7 +121,7 @@ export function ClientDetailsInput({
   onFindResources,
 }: ClientDetailsInputProps) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex flex-col items-center text-center py-6">
         <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
@@ -338,7 +338,7 @@ export function ClientDetailsInput({
             loading ||
             (selectedCategories.length === 0 && !clientDescription.trim())
           }
-          className="min-w-[16rem] w-full max-w-4xl mx-auto generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
+          className="min-w-[16rem] w-full max-w-3xl mx-auto generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
           data-testid="findResourcesButton"
         >
           {!loading && (
