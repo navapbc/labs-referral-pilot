@@ -7,7 +7,7 @@ export function PilotFeedbackBanner() {
       <div className="flex items-center justify-between gap-4">
         {/* Left section with icon and text */}
         <div className="flex items-start gap-3">
-          <div className="text-2xl">🚧</div>
+          <div className="text-2xl" aria-hidden="true">🚧</div>
           <div>
             <p className="font-semibold text-amber-900">
               Pilot Version - Work in Progress
@@ -27,7 +27,7 @@ export function PilotFeedbackBanner() {
             window.open("https://forms.gle/nfBWHpVbXT1kdSX3A", "_blank")
           }
         >
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-4 h-4" aria-hidden="true" />
           Share Feedback
         </Button>
       </div>

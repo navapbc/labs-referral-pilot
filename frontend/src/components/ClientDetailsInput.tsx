@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Accessibility,
   Baby,
@@ -7,10 +6,9 @@ import {
   DollarSign,
   Flag,
   GraduationCap,
-  HandHelping,
-  Heart,
   Home,
   Layers,
+  LucideIcon,
   MapPin,
   RotateCcw,
   Scale,
@@ -26,7 +24,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -93,6 +90,30 @@ export const resourceCategories = [
   },
 ];
 
+// Provider types for the Resource Provider Selection section
+const providerTypes: {
+  id: string;
+  label: string;
+  icon?: LucideIcon;
+  logoSrc?: string;
+}[] = [
+  {
+    id: "goodwill",
+    label: "Goodwill",
+    logoSrc: "/img/Goodwill_Industries_Logo.svg",
+  },
+  {
+    id: "government",
+    label: "Government",
+    icon: Building,
+  },
+  {
+    id: "community",
+    label: "Community",
+    icon: Users,
+  },
+];
+
 interface ClientDetailsInputProps {
   selectedCategories: string[];
   locationText: string;
@@ -124,9 +145,6 @@ export function ClientDetailsInput({
     <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex flex-col items-center text-center py-6">
-        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-          <HandHelping className="w-8 h-8 text-purple-600" />
-        </div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
           Let's Find the Right Resources for Your Clients
         </h1>
@@ -147,7 +165,7 @@ export function ClientDetailsInput({
             htmlFor="clientDescriptionInput"
             className="font-medium text-gray-900 mb-3 flex items-center gap-2"
           >
-            <UserRound className="w-4 h-4 text-blue-600" />
+            <UserRound className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Tell us about your client
           </label>
           <Textarea
@@ -168,10 +186,10 @@ export function ClientDetailsInput({
         data-testid="locationFilterSection"
       >
         <CardContent className="p-4">
-          <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
+          <h2 className="font-medium text-gray-900 mb-1 flex items-center gap-2 text-base">
+            <MapPin className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Location
-          </h4>
+          </h2>
           <p className="text-sm text-gray-500 mb-3">
             Optional - helps find resources near your client
           </p>
@@ -193,10 +211,10 @@ export function ClientDetailsInput({
         data-testid="referralFiltersSection"
       >
         <CardContent className="p-4">
-          <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-600" />
+          <h2 className="font-medium text-gray-900 mb-1 flex items-center gap-2 text-base">
+            <Layers className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Resource Categories
-          </h4>
+          </h2>
           <p className="text-sm text-gray-500 mb-3">
             Optional - select categories to narrow your search
           </p>
@@ -219,7 +237,7 @@ export function ClientDetailsInput({
                   aria-pressed={isSelected}
                   disabled={loading}
                 >
-                  <Icon className="mr-2 w-6 h-6" />
+                  <Icon className="mr-2 w-6 h-6" aria-hidden="true" />
                   {category.label}
                 </Button>
               );
@@ -234,76 +252,51 @@ export function ClientDetailsInput({
         data-testid="resourceProviderSection"
       >
         <CardContent className="p-4">
-          <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-2">
-            <Search className="w-4 h-4 text-blue-600" />
+          <h2 className="font-medium text-gray-900 mb-1 flex items-center gap-2 text-base">
+            <Search className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Resource Provider Selection
-          </h4>
+          </h2>
           <p className="text-sm text-gray-500 mb-3">
             Select up to 3 provider types, or leave empty to search all
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Button
-              variant={
-                selectedResourceTypes.includes("goodwill")
-                  ? "default"
-                  : "outline"
-              }
-              size="sm"
-              className={`h-12 text-sm cursor-pointer disabled:cursor-not-allowed ${
-                selectedResourceTypes.includes("goodwill")
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`}
-              onClick={() => onToggleResourceType("goodwill")}
-              data-testid={"resourceCategoryToggle-goodwill"}
-              aria-pressed={selectedResourceTypes.includes("goodwill")}
-              disabled={loading}
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              Goodwill
-            </Button>
-            <Button
-              variant={
-                selectedResourceTypes.includes("government")
-                  ? "default"
-                  : "outline"
-              }
-              size="sm"
-              className={`h-12 text-sm cursor-pointer disabled:cursor-not-allowed ${
-                selectedResourceTypes.includes("government")
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`}
-              onClick={() => onToggleResourceType("government")}
-              data-testid={"resourceCategoryToggle-government"}
-              aria-pressed={selectedResourceTypes.includes("government")}
-              disabled={loading}
-            >
-              <Building className="w-4 h-4 mr-2" />
-              Government
-            </Button>
-            <Button
-              variant={
-                selectedResourceTypes.includes("community")
-                  ? "default"
-                  : "outline"
-              }
-              size="sm"
-              className={`h-12 text-sm cursor-pointer disabled:cursor-not-allowed ${
-                selectedResourceTypes.includes("community")
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`}
-              onClick={() => onToggleResourceType("community")}
-              data-testid={"resourceCategoryToggle-community"}
-              aria-pressed={selectedResourceTypes.includes("community")}
-              disabled={loading}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Community
-            </Button>
+            {providerTypes.map((provider) => {
+              const isSelected = selectedResourceTypes.includes(provider.id);
+              return (
+                <Button
+                  key={provider.id}
+                  variant={isSelected ? "default" : "outline"}
+                  size="sm"
+                  className={`h-12 text-sm cursor-pointer disabled:cursor-not-allowed ${
+                    isSelected
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                  onClick={() => onToggleResourceType(provider.id)}
+                  data-testid={`resourceCategoryToggle-${provider.id}`}
+                  aria-pressed={isSelected}
+                  disabled={loading}
+                >
+                  {provider.logoSrc ? (
+                    <img
+                      src={provider.logoSrc}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-4 h-4 mr-2"
+                    />
+                  ) : (
+                    provider.icon && (
+                      <provider.icon
+                        className="w-4 h-4 mr-2"
+                        aria-hidden="true"
+                      />
+                    )
+                  )}
+                  {provider.label}
+                </Button>
+              );
+            })}
           </div>
-
         </CardContent>
       </Card>
 
@@ -320,14 +313,14 @@ export function ClientDetailsInput({
             data-testid="clearFiltersButton"
             disabled={loading}
           >
-            <RotateCcw className="w-4 h-4 mr-2" />
+            <RotateCcw className="w-4 h-4 mr-2" aria-hidden="true" />
             Clear All Filters
           </Button>
         </div>
       )}
 
       {/* Spacer to account for fixed button at bottom */}
-      <div className="h-20" />
+      <div className="h-24" />
 
       {/* Fixed floating button at bottom of viewport */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
@@ -344,7 +337,7 @@ export function ClientDetailsInput({
           >
             {!loading && (
               <>
-                <Sparkles className="w-5 h-5" /> Find Referrals
+                <Sparkles className="w-5 h-5" aria-hidden="true" /> Find Referrals
               </>
             )}
             {loading && (
