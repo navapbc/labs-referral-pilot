@@ -330,29 +330,31 @@ export function ClientDetailsInput({
       <div className="h-20" />
 
       {/* Fixed floating button at bottom of viewport */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
-        <Button
-          type="button"
-          onClick={onFindResources}
-          disabled={
-            loading ||
-            (selectedCategories.length === 0 && !clientDescription.trim())
-          }
-          className="min-w-[16rem] w-full max-w-3xl mx-auto generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
-          data-testid="findResourcesButton"
-        >
-          {!loading && (
-            <>
-              <Sparkles className="w-5 h-5" /> Find Referrals
-            </>
-          )}
-          {loading && (
-            <>
-              <Spinner className="w-5 h-5" />
-              Finding Resources...
-            </>
-          )}
-        </Button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <Button
+            type="button"
+            onClick={onFindResources}
+            disabled={
+              loading ||
+              (selectedCategories.length === 0 && !clientDescription.trim())
+            }
+            className="w-full generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
+            data-testid="findResourcesButton"
+          >
+            {!loading && (
+              <>
+                <Sparkles className="w-5 h-5" /> Find Referrals
+              </>
+            )}
+            {loading && (
+              <>
+                <Spinner className="w-5 h-5" />
+                Finding Resources...
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
