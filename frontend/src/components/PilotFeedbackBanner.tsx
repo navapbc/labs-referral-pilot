@@ -7,7 +7,9 @@ export function PilotFeedbackBanner() {
       <div className="flex items-center justify-between gap-4">
         {/* Left section with icon and text */}
         <div className="flex items-start gap-3">
-          <div className="text-2xl" aria-hidden="true">🚧</div>
+          <div className="text-2xl" aria-hidden="true">
+            🚧
+          </div>
           <div>
             <p className="font-semibold text-amber-900">
               Pilot Version - Work in Progress
