@@ -146,12 +146,12 @@ export function ClientDetailsInput({
       {/* Header */}
       <div className="flex flex-col items-center text-center py-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-          Let's Find the Right Resources for Your Clients
+          Let&apos;s Find the Right Resources for Your Clients
         </h1>
         <p className="text-gray-600 max-w-xl">
-          Share some details about your client's situation, and we'll help you
-          discover the perfect resources and referrals tailored to their
-          specific needs.
+          Share some details about your client&apos;s situation, and we&apos;ll
+          help you discover the perfect resources and referrals tailored to
+          their specific needs.
         </p>
       </div>
 
