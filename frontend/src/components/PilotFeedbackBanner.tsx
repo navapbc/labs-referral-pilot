@@ -22,7 +22,7 @@ export function PilotFeedbackBanner() {
         {/* Right section with button */}
         <Button
           variant="outline"
-          className="bg-white hover:bg-amber-50 border-amber-300 text-amber-900 cursor-pointer"
+          className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 hover:text-amber-900 hover:border-amber-400 cursor-pointer"
           onClick={() =>
             window.open("https://forms.gle/nfBWHpVbXT1kdSX3A", "_blank")
           }
