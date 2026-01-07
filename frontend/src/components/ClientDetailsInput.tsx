@@ -142,7 +142,7 @@ export function ClientDetailsInput({
   onFindResources,
 }: ClientDetailsInputProps) {
   return (
-    <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-4 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="flex flex-col items-center text-center py-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
@@ -324,7 +324,7 @@ export function ClientDetailsInput({
 
       {/* Fixed floating button at bottom of viewport */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button
             type="button"
             onClick={onFindResources}
