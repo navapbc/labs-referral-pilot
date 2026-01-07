@@ -1,7 +1,4 @@
-name: Automatically deploy latest app release to prod
-# run-name: Deploy to app prod
-
-# TODO: determine latest release tag name to deploy
+name: Autodeploy app release to prod
 
 on:
   schedule:
@@ -20,6 +17,9 @@ jobs:
       release_tag: ${{ steps.query_release_tag.outputs.tag }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Query last release tag name
         id: query_release_tag
         shell: bash
