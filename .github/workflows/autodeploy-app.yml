@@ -33,7 +33,7 @@ jobs:
           fi
 
   deploy:
-    needs: get_latest_release    
+    needs: get_latest_release
     name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
     uses: ./.github/workflows/deploy.yml
     with:
@@ -41,3 +41,13 @@ jobs:
       environment: "prod"
       version: ${{ needs.get_latest_release.outputs.release_tag }}
     secrets: inherit
+
+  notify:
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify workflow-failures channel
+        run: |
+          echo "Autodeploy app release to prod workflow has failed."
+          echo "Please notify the 'workflow-failures' channel about this failure."
