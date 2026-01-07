@@ -41,13 +41,3 @@ jobs:
       environment: "prod"
       version: ${{ needs.get_latest_release.outputs.release_tag }}
     secrets: inherit
-
-  notify:
-    needs: deploy
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify workflow-failures channel
-        run: |
-          echo "Autodeploy app release to prod workflow has failed."
-          echo "Please notify the 'workflow-failures' channel about this failure."
