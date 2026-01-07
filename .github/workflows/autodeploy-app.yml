@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: '0 11 * * *' # every day at 11am UTC
 
-    # For testing purposes
-  push:
-    branches:
-      - "yl/autdeploy-app-to-prod"
-
 jobs:
 
   get_latest_release:
