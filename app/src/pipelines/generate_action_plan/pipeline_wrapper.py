@@ -143,22 +143,50 @@ class PipelineWrapper(BasePipelineWrapper):
             llm_model,
         )
 
-        return hayhooks.streaming_generator(
-            pipeline=self.pipeline,
-            pipeline_run_args={
-                "logger": {
-                    "messages_list": [
-                        {"resource_count": len(resource_objects), "user_email": user_email}
-                    ],
-                },
-                "prompt_builder": {
-                    "resources": format_resources(resource_objects),
-                    "action_plan_json": action_plan_as_json,
-                    "user_query": user_query,
-                },
-                "llm": {"model": llm_model, "reasoning_effort": reasoning_effort},
-            },
-        )
+        # Wrap the streaming generator with span context to match run_api behavior
+        def streaming_with_span():
+            with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
+                # Must set using_metadata context before calling tracer.start_as_current_span()
+                assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
+                with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                    self.name, openinference_span_kind="chain"
+                ) as span:
+                    span.set_input([r.name for r in resource_objects])
+
+                    try:
+                        generator = hayhooks.streaming_generator(
+                            pipeline=self.pipeline,
+                            pipeline_run_args={
+                                "logger": {
+                                    "messages_list": [
+                                        {"resource_count": len(resource_objects), "user_email": user_email}
+                                    ],
+                                },
+                                "prompt_builder": {
+                                    "resources": format_resources(resource_objects),
+                                    "action_plan_json": action_plan_as_json,
+                                    "user_query": user_query,
+                                },
+                                "llm": {"model": llm_model, "reasoning_effort": reasoning_effort},
+                            },
+                        )
+
+                        # Stream the response and collect it for span output
+                        full_response = []
+                        for chunk in generator:
+                            # Extract content from StreamingChunk for span output
+                            if hasattr(chunk, 'content'):
+                                full_response.append(chunk.content)
+                            yield chunk
+
+                        # Set output after streaming completes
+                        span.set_output("".join(full_response))
+                        span.set_status(Status(StatusCode.OK))
+                    except Exception as e:
+                        span.set_status(Status(StatusCode.ERROR, str(e)))
+                        raise
+
+        return streaming_with_span()
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
