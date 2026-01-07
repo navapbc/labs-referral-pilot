@@ -1,0 +1,49 @@
+name: Automatically deploy latest app release to prod
+run-name: Deploy to app ${{ inputs.environment || 'dev' }}
+
+# TODO: determine latest release tag name to deploy
+
+on:
+  schedule:
+    - cron: '0 11 * * *' # every day at 11am UTC
+
+    # For testing purposes
+  push:
+    branches:
+      - "yl/autdeploy-app-to-prod"
+
+jobs:
+
+  get_latest_release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.query_release_tag.outputs.tag }}
+
+    steps:
+      - name: Query last release tag name
+        id: query_release_tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find existing release tags for today's date: vYYYY.MM.DD.*
+          # Retrieve recently created tags only, some of which may not follow the naming convention
+          # For grep, return true if no matches found to avoid errors
+          LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 20 --json tagName --jq '.[] | .tagName' | head -n 1)"
+          if [[ -n "${LAST_TAG}" ]]; then
+            echo "Found last release tag: ${LAST_TAG}"
+            echo "tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release tags found."
+            exit 2
+          fi
+
+  deploy:
+    needs: get_latest_release    
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "app"
+      environment: "prod"
+      version: ${{ needs.get_latest_release.outputs.release_tag }}
+    secrets: inherit
