@@ -1,5 +1,5 @@
 name: Automatically deploy latest app release to prod
-run-name: Deploy to app ${{ inputs.environment || 'dev' }}
+# run-name: Deploy to app prod
 
 # TODO: determine latest release tag name to deploy
 
@@ -26,10 +26,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Find existing release tags for today's date: vYYYY.MM.DD.*
-          # Retrieve recently created tags only, some of which may not follow the naming convention
-          # For grep, return true if no matches found to avoid errors
-          LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 20 --json tagName --jq '.[] | .tagName' | head -n 1)"
+          # Retrieve recently created tags that match the naming convention 'v0.0.0' so that we avoid other tags
+          RELEASE_FORMAT='v[0-9]\+.[0-9]\+.[0-9]\+'
+          LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 10 --json tagName --jq '.[] | .tagName' | { grep "${RELEASE_FORMAT}" || true; } | head -n 1)"
           if [[ -n "${LAST_TAG}" ]]; then
             echo "Found last release tag: ${LAST_TAG}"
             echo "tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
