@@ -280,7 +280,7 @@ export function ClientDetailsInput({
                   {provider.logoSrc ? (
                     <img
                       src={provider.logoSrc}
-                      alt=""
+                      alt={`${provider.label} logo`}
                       aria-hidden="true"
                       className="w-4 h-4 mr-2"
                     />
