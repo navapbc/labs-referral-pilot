@@ -317,7 +317,7 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      expect(screen.getByText("Generating Resources...")).toBeInTheDocument();
+      expect(screen.getByText("Finding Resources...")).toBeInTheDocument();
     });
 
     it("handles errors gracefully", async () => {
