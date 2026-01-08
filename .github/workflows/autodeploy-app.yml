@@ -7,15 +7,24 @@ on:
   # Enable manual triggering of the workflow
   workflow_dispatch:
 
+  push:
+    branches:
+      - "yl/autodeploy-fix"
+
 jobs:
 
-  get_latest_release:
+  force_reboot:
     runs-on: ubuntu-latest
-    # outputs:
-    #   release_tag: ${{ steps.query_release_tag.outputs.tag }}
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
@@ -26,30 +35,15 @@ jobs:
       - name: Force AWS app service to restart
         run: |
           aws ecs update-service --cluster app-prod --service app-prod --force-new-deployment
+          
+          echo "Started new task..."
+          sleep 10
+          TASKS=$(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text)
+          aws ecs describe-tasks --cluster app-prod --tasks $TASKS --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
+          
+          echo "Waiting for service to stabilize..."
+          aws ecs wait services-stable --cluster app-prod --service app-prod
 
-  #     - name: Query last release tag name
-  #       id: query_release_tag
-  #       shell: bash
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         # Retrieve recently created tags that match the naming convention 'v0.0.0' so that we avoid other tags
-  #         RELEASE_FORMAT='^v[0-9]+\.[0-9]+\.[0-9]+$'
-  #         LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 10 --json tagName --jq '.[] | .tagName' | { grep -E "${RELEASE_FORMAT}" || true; } | head -n 1)"
-  #         if [[ -n "${LAST_TAG}" ]]; then
-  #           echo "Found last release tag: ${LAST_TAG}"
-  #           echo "tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
-  #         else
-  #           echo "No release tags found."
-  #           exit 2
-  #         fi
-
-  # deploy:
-  #   needs: get_latest_release
-  #   name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-  #   uses: ./.github/workflows/deploy.yml
-  #   with:
-  #     app_name: "app"
-  #     environment: "prod"
-  #     version: ${{ needs.get_latest_release.outputs.release_tag }}
-  #   secrets: inherit
+          echo "Service stabilized. Current tasks:"
+          TASKS=$(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text)
+          aws ecs describe-tasks --cluster app-prod --tasks $TASKS --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
