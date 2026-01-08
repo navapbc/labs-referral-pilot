@@ -460,6 +460,7 @@ export default function Page() {
                   resourcesResultId={resourcesResultId}
                   actionPlanResultId={actionPlanResultId}
                   className="justify-end"
+                  testIdSuffix="bottom"
                 />
               </div>
             )}

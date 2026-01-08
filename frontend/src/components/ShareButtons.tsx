@@ -8,6 +8,7 @@ interface ShareButtonsProps {
   resourcesResultId: string;
   actionPlanResultId: string;
   className?: string;
+  testIdSuffix?: string;
 }
 
 export function ShareButtons({
@@ -15,6 +16,7 @@ export function ShareButtons({
   resourcesResultId,
   actionPlanResultId,
   className,
+  testIdSuffix,
 }: ShareButtonsProps) {
   return (
     <div className={cn("flex gap-2", className)}>
@@ -22,7 +24,7 @@ export function ShareButtons({
         onClick={onPrint}
         variant="outline"
         className="hover:bg-gray-100 hover:text-gray-900"
-        data-testid="printReferralsButton"
+        data-testid={`printReferralsButton${testIdSuffix ? `-${testIdSuffix}` : ""}`}
       >
         <Printer className="w-4 h-4" aria-hidden="true" />
         Print
