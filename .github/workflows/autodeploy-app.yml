@@ -4,40 +4,52 @@ on:
   schedule:
     - cron: '0 11 * * *' # every day at 11am UTC
 
+  # Enable manual triggering of the workflow
+  workflow_dispatch:
+
 jobs:
 
   get_latest_release:
     runs-on: ubuntu-latest
-    outputs:
-      release_tag: ${{ steps.query_release_tag.outputs.tag }}
+    # outputs:
+    #   release_tag: ${{ steps.query_release_tag.outputs.tag }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Query last release tag name
-        id: query_release_tag
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: app
+          environment: prod
+
+      - name: Force AWS app service to restart
         run: |
-          # Retrieve recently created tags that match the naming convention 'v0.0.0' so that we avoid other tags
-          RELEASE_FORMAT='^v[0-9]+\.[0-9]+\.[0-9]+$'
-          LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 10 --json tagName --jq '.[] | .tagName' | { grep -E "${RELEASE_FORMAT}" || true; } | head -n 1)"
-          if [[ -n "${LAST_TAG}" ]]; then
-            echo "Found last release tag: ${LAST_TAG}"
-            echo "tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
-          else
-            echo "No release tags found."
-            exit 2
-          fi
+          aws ecs update-service --cluster app-prod --service app-prod --force-new-deployment
 
-  deploy:
-    needs: get_latest_release
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-    uses: ./.github/workflows/deploy.yml
-    with:
-      app_name: "app"
-      environment: "prod"
-      version: ${{ needs.get_latest_release.outputs.release_tag }}
-    secrets: inherit
+  #     - name: Query last release tag name
+  #       id: query_release_tag
+  #       shell: bash
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         # Retrieve recently created tags that match the naming convention 'v0.0.0' so that we avoid other tags
+  #         RELEASE_FORMAT='^v[0-9]+\.[0-9]+\.[0-9]+$'
+  #         LAST_TAG="$(gh release list --order desc --exclude-drafts --exclude-pre-releases --limit 10 --json tagName --jq '.[] | .tagName' | { grep -E "${RELEASE_FORMAT}" || true; } | head -n 1)"
+  #         if [[ -n "${LAST_TAG}" ]]; then
+  #           echo "Found last release tag: ${LAST_TAG}"
+  #           echo "tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "No release tags found."
+  #           exit 2
+  #         fi
+
+  # deploy:
+  #   needs: get_latest_release
+  #   name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+  #   uses: ./.github/workflows/deploy.yml
+  #   with:
+  #     app_name: "app"
+  #     environment: "prod"
+  #     version: ${{ needs.get_latest_release.outputs.release_tag }}
+  #   secrets: inherit
