@@ -39,8 +39,8 @@ class AppConfig(PydanticBaseEnvConfig):
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "extract_supports": "UHJvbXB0VmVyc2lvbjo0Ng==",
-        "generate_referrals": "UHJvbXB0VmVyc2lvbjo0OA==",
-        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo1Mg==",
+        "generate_referrals": "UHJvbXB0VmVyc2lvbjo2MA==",
+        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo1OQ==",
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
@@ -78,6 +78,9 @@ class AppConfig(PydanticBaseEnvConfig):
 
     generate_referrals_from_doc_model_version: str = "gpt-5.1"
     generate_referrals_from_doc_reasoning_level: str = "none"
+
+    # Default service location
+    default_location: str = "Austin - Central Texas"
 
     def chroma_client(self) -> ClientAPI:
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)

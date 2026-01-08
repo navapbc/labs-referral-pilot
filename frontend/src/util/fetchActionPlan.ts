@@ -53,6 +53,7 @@ export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
+  location?: string,
 ): Promise<{
   actionPlan: ActionPlan | null;
   resultId: string;
@@ -68,14 +69,25 @@ export async function fetchActionPlan(
   const timer = setTimeout(() => ac.abort(), 120_000);
 
   try {
+    const requestBody: {
+      resources: Resource[];
+      user_email: string;
+      user_query: string;
+      location?: string;
+    } = {
+      resources: resources,
+      user_email: userEmail,
+      user_query: userQuery,
+    };
+
+    if (location) {
+      requestBody.location = location;
+    }
+
     const upstream = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        resources: resources,
-        user_email: userEmail,
-        user_query: userQuery,
-      }),
+      body: JSON.stringify(requestBody),
       cache: "no-store",
       signal: ac.signal,
     });

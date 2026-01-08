@@ -70,9 +70,15 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-action-plan/run` endpoint
     def run_api(
-        self, resources: list[Resource] | list[dict], user_email: str, user_query: str
+        self,
+        resources: list[Resource] | list[dict],
+        user_email: str,
+        user_query: str,
+        location: str = "",
     ) -> dict:
         resource_objects = get_resources(resources)
+        # Use default location if not provided
+        service_location = location if location else config.default_location
 
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
@@ -80,24 +86,35 @@ class PipelineWrapper(BasePipelineWrapper):
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(resource_objects, user_email, user_query)
+                result = self._run(resource_objects, user_email, user_query, service_location)
                 span.set_input([r.name for r in resource_objects])
                 span.set_output(result["response"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, resource_objects: list[Resource], user_email: str, user_query: str) -> dict:
+    def _run(
+        self, resource_objects: list[Resource], user_email: str, user_query: str, location: str
+    ) -> dict:
+        # Append location context to user_query if provided
+        user_query_with_location = user_query
+        if location:
+            user_query_with_location = f"{user_query}\n\nService Location: {location}"
+
         response = self.pipeline.run(
             {
                 "logger": {
                     "messages_list": [
-                        {"resource_count": len(resource_objects), "user_email": user_email}
+                        {
+                            "resource_count": len(resource_objects),
+                            "user_email": user_email,
+                            "location": location,
+                        }
                     ],
                 },
                 "prompt_builder": {
                     "resources": format_resources(resource_objects),
                     "action_plan_json": action_plan_as_json,
-                    "user_query": user_query,
+                    "user_query": user_query_with_location,
                 },
                 "llm": {
                     "model": config.generate_action_plan_model_version,
