@@ -162,7 +162,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "template": prompt_template,
                 "query": query,
                 "response_json": response_schema,
-                "location": location or config.default_location,
+                "location": location,
             },
             "llm": {
                 "model": config.generate_referrals_model_version,
