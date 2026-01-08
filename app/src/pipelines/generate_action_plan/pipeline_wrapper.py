@@ -110,7 +110,7 @@ class PipelineWrapper(BasePipelineWrapper):
                     "resources": format_resources(resource_objects),
                     "action_plan_json": action_plan_as_json,
                     "user_query": user_query,
-                    "location": location or config.default_location,
+                    "location": location,
                 },
                 "llm": {
                     "model": config.generate_action_plan_model_version,
