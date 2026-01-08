@@ -75,6 +75,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 variables=[
                     "query",
                     "supports",
+                    "location",
                     "response_json",
                     "error_message",
                     "invalid_replies",
@@ -153,19 +154,15 @@ class PipelineWrapper(BasePipelineWrapper):
     def _run_arg_data(
         self, query: str, user_email: str, prompt_template: list[ChatMessage], location: str = ""
     ) -> dict:
-        # Append location context to query if provided
-        query_with_location = query
-        if location:
-            query_with_location = f"{query}\n\nService Location: {location}"
-
         return {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email, "location": location}],
             },
             "prompt_builder": {
                 "template": prompt_template,
-                "query": query_with_location,
+                "query": query,
                 "response_json": response_schema,
+                "location": location or config.default_location,
             },
             "llm": {
                 "model": config.generate_referrals_model_version,

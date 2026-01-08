@@ -52,6 +52,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
                 variables=[
                     "query",
                     "supports",
+                    "location",
                     "response_json",
                     "error_message",
                     "invalid_replies",

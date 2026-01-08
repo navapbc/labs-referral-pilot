@@ -95,11 +95,6 @@ class PipelineWrapper(BasePipelineWrapper):
     def _run(
         self, resource_objects: list[Resource], user_email: str, user_query: str, location: str
     ) -> dict:
-        # Append location context to user_query if provided
-        user_query_with_location = user_query
-        if location:
-            user_query_with_location = f"{user_query}\n\nService Location: {location}"
-
         response = self.pipeline.run(
             {
                 "logger": {
@@ -114,7 +109,8 @@ class PipelineWrapper(BasePipelineWrapper):
                 "prompt_builder": {
                     "resources": format_resources(resource_objects),
                     "action_plan_json": action_plan_as_json,
-                    "user_query": user_query_with_location,
+                    "user_query": user_query,
+                    "location": location or config.default_location,
                 },
                 "llm": {
                     "model": config.generate_action_plan_model_version,
