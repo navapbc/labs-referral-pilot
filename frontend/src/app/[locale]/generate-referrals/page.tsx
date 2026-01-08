@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, Printer, Sparkles } from "lucide-react";
+import { ChevronLeft, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +16,7 @@ import { ActionPlanSection } from "@/components/ActionPlanSection";
 import ResourcesList from "@/components/ResourcesList";
 import { useSearchParams } from "next/navigation";
 import { UploadIntakeTab } from "@/components/UploadIntakeTab";
-import { EmailReferralsButton } from "@/components/EmailReferralsButton";
+import { ShareButtons } from "@/components/ShareButtons";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload } from "lucide-react";
@@ -345,10 +345,10 @@ export default function Page() {
           setUserEmail={setUserEmail}
         />
       ) : (
-        <div className="print:hidden">
+        <div className="print:hidden overflow-x-hidden">
           <PilotFeedbackBanner />
           <GoodwillReferralToolHeaderPilot />
-          <div className="flex flex-col gap-2 m-4">
+          <div className="max-w-5xl mx-auto px-4 flex flex-col gap-2">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -413,25 +413,11 @@ export default function Page() {
                     <ChevronLeft className="w-4 h-4" />
                     Return To Search
                   </Button>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handlePrint}
-                      variant="outline"
-                      className="hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      <Printer
-                        data-testid="printReferralsButton"
-                        className="w-4 h-4"
-                      />
-                      Print Referrals
-                    </Button>
-                    {resourcesResultId && (
-                      <EmailReferralsButton
-                        resultId={resourcesResultId}
-                        actionPlanResultId={actionPlanResultId || undefined}
-                      />
-                    )}
-                  </div>
+                  <ShareButtons
+                    onPrint={handlePrint}
+                    resourcesResultId={resourcesResultId}
+                    actionPlanResultId={actionPlanResultId}
+                  />
                 </div>
               </div>
             )}
@@ -463,6 +449,20 @@ export default function Page() {
                   onGenerateActionPlan={() => void generateActionPlan()}
                 />
               )}
+
+            {readyToPrint && (
+              <div className="pt-4 border-t mt-6 pb-8">
+                <h4 className="text-sm font-medium text-gray-700 mb-3 text-right">
+                  Share
+                </h4>
+                <ShareButtons
+                  onPrint={handlePrint}
+                  resourcesResultId={resourcesResultId}
+                  actionPlanResultId={actionPlanResultId}
+                  className="justify-end"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
