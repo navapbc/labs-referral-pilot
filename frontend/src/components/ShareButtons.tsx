@@ -22,7 +22,7 @@ export function ShareButtons({
         onClick={onPrint}
         variant="outline"
         className="hover:bg-gray-100 hover:text-gray-900"
-        data-testid="printButton"
+        data-testid="printReferralsButton"
       >
         <Printer className="w-4 h-4" aria-hidden="true" />
         Print
