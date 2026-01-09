@@ -7,6 +7,9 @@ on:
   # Enable manual triggering of the workflow
   workflow_dispatch:
 
+  push:
+    branches:
+      - "yl/autodeploy-fix"
 jobs:
 
   force_reboot:
@@ -37,7 +40,16 @@ jobs:
           aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
 
           echo "Waiting for "UNHEALTHY" service to stabilize..."
-          aws ecs wait services-stable --cluster app-prod --service app-prod
+          for i in $(seq 1 5); do
+              if aws ecs wait services-stable --cluster app-prod --service app-prod; then
+                echo "Service stabilized"
+                break
+              else
+                echo "Attempt $i failed or timed out. Retrying in 30 seconds..."
+                sleep 30
+              fi
+          done
+
 
           echo "Service stabilized. Current tasks:"
           aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
