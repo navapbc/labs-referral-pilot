@@ -39,9 +39,9 @@ class AppConfig(PydanticBaseEnvConfig):
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "extract_supports": "UHJvbXB0VmVyc2lvbjo0Ng==",
-        "generate_referrals": "UHJvbXB0VmVyc2lvbjo2MA==",
+        "generate_referrals": "UHJvbXB0VmVyc2lvbjo2MA==",  # if no suffix, the default Austin area prompt will be used
         "generate_referrals_keystone": "UHJvbXB0VmVyc2lvbjo2Nw==",
-        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo1OQ==",
+        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo2OQ==",
         "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
         "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }

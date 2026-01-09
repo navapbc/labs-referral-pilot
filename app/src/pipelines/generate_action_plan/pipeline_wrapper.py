@@ -72,7 +72,6 @@ class PipelineWrapper(BasePipelineWrapper):
         resources: list[Resource] | list[dict],
         user_email: str,
         user_query: str,
-        suffix: str = "",
     ) -> dict:
         resource_objects = get_resources(resources)
 
@@ -82,16 +81,14 @@ class PipelineWrapper(BasePipelineWrapper):
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(resource_objects, user_email, user_query, suffix)
+                result = self._run(resource_objects, user_email, user_query)
                 span.set_input([r.name for r in resource_objects])
                 span.set_output(result["response"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(
-        self, resource_objects: list[Resource], user_email: str, user_query: str, suffix: str = ""
-    ) -> dict:
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan", suffix=suffix)
+    def _run(self, resource_objects: list[Resource], user_email: str, user_query: str) -> dict:
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
 
         response = self.pipeline.run(
             {

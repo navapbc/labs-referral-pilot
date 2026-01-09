@@ -175,8 +175,6 @@ export default function Page() {
   async function generateActionPlan() {
     if (selectedResources.length === 0) return;
 
-    const suffix = searchParams?.get("suffix") ?? undefined;
-
     setIsGeneratingActionPlan(true);
     setActionPlan(null);
     setErrorMessage(undefined);
@@ -190,7 +188,6 @@ export default function Page() {
         selectedResources,
         userEmail,
         clientDescription,
-        suffix,
       );
       setActionPlan(plan);
       setActionPlanResultId(resultId);

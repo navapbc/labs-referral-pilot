@@ -100,7 +100,9 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "") -> dict:
+    def run_api(
+        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
+    ) -> dict:
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
@@ -117,7 +119,9 @@ class PipelineWrapper(BasePipelineWrapper):
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "") -> dict:
+    def _run(
+        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
+    ) -> dict:
         # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
         try:
             prompt_template = haystack_utils.get_phoenix_prompt(

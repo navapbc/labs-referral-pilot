@@ -73,16 +73,11 @@ export async function fetchActionPlan(
       resources: Resource[];
       user_email: string;
       user_query: string;
-      suffix?: string;
     } = {
       resources: resources,
       user_email: userEmail,
       user_query: userQuery,
     };
-
-    if (suffix) {
-      requestBody.suffix = suffix;
-    }
 
     const upstream = await fetch(url, {
       method: "POST",
