@@ -7,9 +7,6 @@ on:
   # Enable manual triggering of the workflow
   workflow_dispatch:
 
-  push:
-    branches:
-      - "yl/autodeploy-fix"
 jobs:
 
   force_reboot:
@@ -33,23 +30,26 @@ jobs:
 
       - name: Force AWS app service to restart
         run: |
-          aws ecs update-service --cluster app-prod --service app-prod --force-new-deployment
-          
-          echo "Started new task...(this can take about 5-10 minutes to complete, depending on the number of files in S3 to ingest into the RAG database)"
-          sleep 30
-          aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
+          set -e
 
-          echo "Waiting for "UNHEALTHY" service to stabilize..."
+          echo "Forcing new deployment of app-prod service in app-prod cluster..."
+          aws ecs update-service --cluster app-prod --service app-prod --force-new-deployment
+          echo "Started new task...(this can take about 5-10 minutes to complete, depending on the number of files in S3 to ingest into the RAG database)"
+
+          echo "Waiting for 'UNHEALTHY' service to stabilize..."
           for i in $(seq 1 5); do
+              sleep 30
+              echo "Current tasks:"
+              aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
+
               if aws ecs wait services-stable --cluster app-prod --service app-prod; then
                 echo "Service stabilized"
                 break
               else
-                echo "Attempt $i failed or timed out. Retrying in 30 seconds..."
-                sleep 30
+                echo "Waiting attempt $i timed out. Retrying in 30 seconds..."
               fi
           done
 
 
-          echo "Service stabilized. Current tasks:"
+          echo "Current tasks:"
           aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
