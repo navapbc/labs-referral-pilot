@@ -64,16 +64,9 @@ export function ActionPlanSection({
                 />
                 <label
                   htmlFor={`resource-${index}`}
-                  className="flex-1 cursor-pointer"
+                  className="flex-1 cursor-pointer font-medium text-gray-900"
                 >
-                  <div className="font-medium text-gray-900">
-                    {resource.name}
-                  </div>
-                  {resource.description && (
-                    <div className="text-sm text-gray-600">
-                      {resource.description}
-                    </div>
-                  )}
+                  {resource.name}
                 </label>
               </div>
             ))}
