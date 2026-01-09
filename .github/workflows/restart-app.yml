@@ -1,4 +1,4 @@
-name: Autodeploy app release to prod
+name: Restart app in prod
 
 on:
   schedule:
