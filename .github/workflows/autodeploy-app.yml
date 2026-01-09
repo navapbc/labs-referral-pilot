@@ -7,10 +7,6 @@ on:
   # Enable manual triggering of the workflow
   workflow_dispatch:
 
-  push:
-    branches:
-      - "yl/autodeploy-fix"
-
 jobs:
 
   force_reboot:
@@ -36,14 +32,13 @@ jobs:
         run: |
           aws ecs update-service --cluster app-prod --service app-prod --force-new-deployment
           
-          echo "Started new task..."
-          sleep 10
-          TASKS=$(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text)
-          aws ecs describe-tasks --cluster app-prod --tasks $TASKS --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
-          
-          echo "Waiting for service to stabilize..."
+          echo "Started new task...(this can take about 5-10 minutes to complete, depending on the number of files in S3 to ingest into the RAG database)"
+          sleep 30
+          aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
+
+          echo "Waiting for "UNHEALTHY" service to stabilize..."
           aws ecs wait services-stable --cluster app-prod --service app-prod
 
           echo "Service stabilized. Current tasks:"
           TASKS=$(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text)
-          aws ecs describe-tasks --cluster app-prod --tasks $TASKS --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
+          aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
