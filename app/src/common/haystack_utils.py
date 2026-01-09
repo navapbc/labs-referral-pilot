@@ -6,11 +6,8 @@ from phoenix.client.__generated__ import v1
 from src.common import phoenix_utils
 
 
-def get_phoenix_prompt(
-    prompt_name: str, prompt_version_id: str = "", suffix: str = ""
-) -> list[ChatMessage]:
-    full_prompt_name = f"{prompt_name}_{suffix}" if suffix else prompt_name
-    prompt_ver = phoenix_utils.get_prompt_template(full_prompt_name, prompt_version_id)
+def get_phoenix_prompt(prompt_name: str, prompt_version_id: str = "") -> list[ChatMessage]:
+    prompt_ver = phoenix_utils.get_prompt_template(prompt_name, prompt_version_id)
     return to_chat_messages(prompt_ver._template["messages"])
 
 
