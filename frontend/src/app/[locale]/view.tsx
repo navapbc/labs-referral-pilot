@@ -4,7 +4,7 @@ export function View() {
   const t = useTranslations("home");
 
   return (
-    <>
+    <div className="max-w-5xl mx-auto px-4">
       <h1>{t("title")}</h1>
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
@@ -15,7 +15,7 @@ export function View() {
           ),
         })}
       </p>
-      <div className="measure-6">
+      <div>
         {t.rich("body", {
           ul: (content) => <ul>{content}</ul>,
           li: (content) => <li>{content}</li>,
@@ -29,6 +29,6 @@ export function View() {
           })}
         </p>
       </div>
-    </>
+    </div>
   );
 }
