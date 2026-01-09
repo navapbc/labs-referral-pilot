@@ -79,11 +79,11 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         tracer_provider.add_span_processor(pii_processor)
 
 
-def get_prompt_template(prompt_name: str) -> PromptVersion:
+def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> PromptVersion:
     """Retrieve a prompt template from Phoenix by name.
     https://arize.com/docs/phoenix/sdk-api-reference/python/overview#prompt-management
     """
-    prompt_params = which_prompt_version(prompt_name)
+    prompt_params = which_prompt_version(prompt_name, prompt_version_id)
     logger.info("Using the prompt having %s", prompt_params)
     client = _create_client()
     prompt = client.prompts.get(**prompt_params)
@@ -95,7 +95,10 @@ def get_prompt_template(prompt_name: str) -> PromptVersion:
     return prompt
 
 
-def which_prompt_version(prompt_name: str) -> dict:
+def which_prompt_version(prompt_name: str, prompt_version_id: str = "") -> dict:
+    if prompt_version_id:
+        return {"prompt_version_id": prompt_version_id}
+
     if config.environment == "local":
         # Get the latest version regardless of tags
         return {"prompt_identifier": prompt_name}

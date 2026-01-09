@@ -91,7 +91,7 @@ class PipelineWrapper(BasePipelineWrapper):
     def _run(
         self, resource_objects: list[Resource], user_email: str, user_query: str, suffix: str = ""
     ) -> dict:
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan", suffix)
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan", suffix=suffix)
 
         response = self.pipeline.run(
             {

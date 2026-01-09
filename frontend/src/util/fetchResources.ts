@@ -4,6 +4,7 @@ import { getApiDomain } from "./apiDomain";
 export async function fetchResources(
   clientDescription: string,
   userEmail: string,
+  prompt_version_id: string | null,
   suffix?: string,
 ) {
   const apiDomain = await getApiDomain();
@@ -24,11 +25,16 @@ export async function fetchResources(
   const requestData: {
     query: string;
     user_email: string;
+    prompt_version_id?: string;
     suffix?: string;
   } = {
     query: clientDescription,
     user_email: userEmail,
   };
+
+  if (prompt_version_id) {
+    requestData.prompt_version_id = prompt_version_id;
+  }
 
   if (suffix) {
     requestData.suffix = suffix;
