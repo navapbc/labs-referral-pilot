@@ -40,6 +40,7 @@ jobs:
           for i in $(seq 1 5); do
               sleep 30
               echo "Current tasks:"
+              # shellcheck disable=SC2046
               aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
 
               if aws ecs wait services-stable --cluster app-prod --service app-prod; then
@@ -52,4 +53,5 @@ jobs:
 
 
           echo "Current tasks:"
+          # shellcheck disable=SC2046
           aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
