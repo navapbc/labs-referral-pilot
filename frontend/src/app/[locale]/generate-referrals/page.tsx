@@ -106,8 +106,7 @@ export default function Page() {
   };
 
   async function findResources() {
-    const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
-    const location = searchParams?.get("location") ?? undefined;
+    const suffix = searchParams?.get("suffix") ?? undefined;
 
     setLoading(true);
     setResult(null);
@@ -118,8 +117,7 @@ export default function Page() {
       const { resultId, resources, errorMessage } = await fetchResources(
         request,
         userEmail,
-        prompt_version_id,
-        location,
+        suffix,
       );
       setResourcesResultId(resultId);
       setErrorMessage(errorMessage);
@@ -175,7 +173,7 @@ export default function Page() {
   async function generateActionPlan() {
     if (selectedResources.length === 0) return;
 
-    const location = searchParams?.get("location") ?? undefined;
+    const suffix = searchParams?.get("suffix") ?? undefined;
 
     setIsGeneratingActionPlan(true);
     setActionPlan(null);
@@ -190,7 +188,7 @@ export default function Page() {
         selectedResources,
         userEmail,
         clientDescription,
-        location,
+        suffix,
       );
       setActionPlan(plan);
       setActionPlanResultId(resultId);

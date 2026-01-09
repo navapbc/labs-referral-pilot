@@ -75,7 +75,6 @@ class PipelineWrapper(BasePipelineWrapper):
                 variables=[
                     "query",
                     "supports",
-                    "location",
                     "response_json",
                     "error_message",
                     "invalid_replies",
@@ -101,19 +100,14 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     # Called for the `generate-referrals/run` endpoint
-    def run_api(
-        self, query: str, user_email: str, prompt_version_id: str = "", location: str = ""
-    ) -> dict:
-        # Use default location if not provided
-        service_location = location if location else config.default_location
-
+    def run_api(self, query: str, user_email: str, suffix: str = "") -> dict:
         with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(query, user_email, prompt_version_id, service_location)
+                result = self._run(query, user_email, suffix)
                 span.set_input(query)
                 try:
                     resp_obj = json.loads(result["llm"]["replies"][-1].text)
@@ -123,23 +117,19 @@ class PipelineWrapper(BasePipelineWrapper):
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(
-        self, query: str, user_email: str, prompt_version_id: str = "", location: str = ""
-    ) -> dict:
-        # Retrieve the requested prompt_version_id and error if requested prompt version is not found
+    def _run(self, query: str, user_email: str, suffix: str = "") -> dict:
+        # Retrieve the requested prompt with optional suffix
         try:
-            prompt_template = haystack_utils.get_phoenix_prompt(
-                "generate_referrals", prompt_version_id
-            )
+            prompt_template = haystack_utils.get_phoenix_prompt("generate_referrals", suffix)
         except httpx.HTTPStatusError as he:
             raise HTTPException(
                 status_code=422,
-                detail=f"The requested prompt version '{prompt_version_id}' could not be retrieved due to HTTP status {he.response.status_code}",
+                detail=f"The requested prompt with suffix '{suffix}' could not be retrieved due to HTTP status {he.response.status_code}",
             ) from he
 
         try:
             response = self.pipeline.run(
-                self._run_arg_data(query, user_email, prompt_template, location),
+                self._run_arg_data(query, user_email, prompt_template),
                 include_outputs_from={"llm", "save_result"},
             )
             logger.debug("Results: %s", pformat(response, width=160))
@@ -152,17 +142,16 @@ class PipelineWrapper(BasePipelineWrapper):
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
 
     def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage], location: str = ""
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
     ) -> dict:
         return {
             "logger": {
-                "messages_list": [{"query": query, "user_email": user_email, "location": location}],
+                "messages_list": [{"query": query, "user_email": user_email}],
             },
             "prompt_builder": {
                 "template": prompt_template,
                 "query": query,
                 "response_json": response_schema,
-                "location": location,
             },
             "llm": {
                 "model": config.generate_referrals_model_version,

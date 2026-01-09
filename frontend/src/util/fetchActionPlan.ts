@@ -53,7 +53,7 @@ export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
-  location?: string,
+  suffix?: string,
 ): Promise<{
   actionPlan: ActionPlan | null;
   resultId: string;
@@ -73,15 +73,15 @@ export async function fetchActionPlan(
       resources: Resource[];
       user_email: string;
       user_query: string;
-      location?: string;
+      suffix?: string;
     } = {
       resources: resources,
       user_email: userEmail,
       user_query: userQuery,
     };
 
-    if (location) {
-      requestBody.location = location;
+    if (suffix) {
+      requestBody.suffix = suffix;
     }
 
     const upstream = await fetch(url, {

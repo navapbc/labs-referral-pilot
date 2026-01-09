@@ -52,7 +52,6 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
                 variables=[
                     "query",
                     "supports",
-                    "location",
                     "response_json",
                     "error_message",
                     "invalid_replies",
@@ -79,9 +78,9 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         self.pipeline = pipeline
 
     def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage], location: str = ""
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
     ) -> dict:
-        return super()._run_arg_data(query, user_email, prompt_template, location) | {
+        return super()._run_arg_data(query, user_email, prompt_template) | {
             # For querying RAG DB
             "query_embedder": {"text": query},
             "retriever": {"top_k": config.retrieval_top_k, "filters": None},
