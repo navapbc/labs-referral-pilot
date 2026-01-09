@@ -40,5 +40,4 @@ jobs:
           aws ecs wait services-stable --cluster app-prod --service app-prod
 
           echo "Service stabilized. Current tasks:"
-          TASKS=$(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text)
           aws ecs describe-tasks --cluster app-prod --tasks $(aws ecs list-tasks --cluster app-prod --query 'taskArns[]' --output text) --query "tasks[].[taskArn, createdAt, lastStatus, healthStatus]" --output table
