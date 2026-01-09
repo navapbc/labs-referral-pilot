@@ -53,7 +53,6 @@ export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
-  suffix?: string,
 ): Promise<{
   actionPlan: ActionPlan | null;
   resultId: string;
