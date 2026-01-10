@@ -14,7 +14,7 @@ export async function fetchResources(
     ? "generate_referrals/run"
     : "generate_referrals_rag/run";
 
-  const url = apiDomain + url_path;
+  const url = "https://p-137-app-dev-1072198100.us-east-1.elb.amazonaws.com/generate_referrals_rag/run"; //apiDomain + url_path;
   const headers = {
     "Content-Type": "application/json",
   };
