@@ -5,6 +5,7 @@ from pprint import pformat
 import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
 import phoenix.otel
+from opentelemetry.instrumentation.threading import ThreadingInstrumentor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import NoOpTracerProvider, TracerProvider
 
@@ -17,6 +18,51 @@ from src.app_config import config
 from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
 
 logger = logging.getLogger(__name__)
+
+
+class ContextDetachErrorFilter(logging.Filter):
+    """Filter to suppress harmless OpenTelemetry context detach errors in threaded environments.
+
+    When using OpenInference instrumentation with threading (e.g., hayhooks.streaming_generator),
+    context tokens may be created in one thread and detached in another during cleanup,
+    causing harmless "Failed to detach context" or "was created in a different Context" errors.
+
+    These errors don't affect functionality - the spans are created correctly and traces work as expected.
+    This filter suppresses these specific error messages to reduce log noise.
+
+    Related issue: https://github.com/Arize-ai/openinference/issues/306
+    This is the recommended pattern until OpenInference fixes the upstream issue.
+    Similar approaches are used by other projects facing this issue:
+    - Google ADK (https://github.com/google/adk-python/issues/1670)
+    - Agno framework (https://github.com/agno-agi/agno/issues/5208)
+    - Langfuse (https://github.com/langfuse/langfuse/issues/8316)
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        message = record.getMessage()
+
+        # Suppress "Failed to detach context" errors
+        if "Failed to detach context" in message:
+            return False
+
+        # Suppress "was created in a different Context" errors
+        if "was created in a different Context" in message:
+            return False
+
+        # Also check exception info if present
+        if record.exc_info and record.exc_info[0] is ValueError:
+            exc_str = str(record.exc_info[1])
+            if "was created in a different Context" in exc_str:
+                return False
+
+        return True
+
+
+def _suppress_context_detach_errors() -> None:
+    """Add filter to suppress harmless OpenTelemetry context detach errors."""
+    otel_context_logger = logging.getLogger("opentelemetry.context")
+    otel_context_logger.addFilter(ContextDetachErrorFilter())
+    logger.info("Added filter to suppress harmless OpenTelemetry context detach errors")
 
 
 def _create_client(
@@ -66,11 +112,35 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
         auto_instrument=True,
     )
 
+    # Enable threading instrumentation to propagate OpenTelemetry context across threads
+    # This fixes the issue where hayhooks.streaming_generator() creates threads without
+    # inheriting the parent span context, causing orphaned spans in Phoenix traces.
+    # https://github.com/langfuse/langfuse/issues/8316#issuecomment-3154235201
+    ThreadingInstrumentor().instrument()
+    logger.info("Threading instrumentation enabled for OpenTelemetry context propagation during streaming")
+
+    # Suppress harmless context detach errors that occur when OpenInference instrumentation
+    # tries to clean up context tokens in different threads during streaming.
+    _suppress_context_detach_errors()
+
+
     if config.redact_pii:
         phoenix_api_key = os.environ.get("PHOENIX_API_KEY")
         span_exporter = otel_trace_exporter.OTLPSpanExporter(
             endpoint=trace_endpoint, headers={"Authorization": f"Bearer {phoenix_api_key}"}
         )
+
+        # # Tell Haystack to auto-detect the configured tracer
+        # from haystack import tracing
+        # tracing.auto_enable_tracing()
+
+        # # Explicitly tell Haystack to use your tracer
+        # from haystack.tracing import OpenTelemetryTracer
+
+        # tracer = tracer_provider.get_tracer("my_application")
+        # tracing.enable_tracing(OpenTelemetryTracer(tracer))
+        
+
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)
         # Add the pii processor to the otel instance
