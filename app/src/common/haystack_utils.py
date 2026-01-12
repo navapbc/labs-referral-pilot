@@ -5,6 +5,7 @@ import hayhooks
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import using_metadata
+from opentelemetry.trace import Span
 from opentelemetry.trace.status import Status, StatusCode
 from phoenix.client.__generated__ import v1
 
@@ -60,7 +61,6 @@ def to_chat_messages(
 
 
 logger = logging.getLogger(__name__)
-tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class TracedPipelineRunner:
@@ -80,9 +80,10 @@ class TracedPipelineRunner:
     ) -> Generator:
         with using_metadata(metadata):
             # Must set using_metadata context before calling tracer.start_as_current_span()
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+            with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"
             ) as span:
+                assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
                     span.set_input(input_)
 
@@ -122,11 +123,11 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
-        extract_output: Callable[[str], str] = lambda resp: resp,
+        extract_output: Callable[[Any], str] = lambda resp: resp,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_metadata(metadata):
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+            with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"
             ) as span:
                 try:

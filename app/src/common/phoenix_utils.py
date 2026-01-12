@@ -5,7 +5,7 @@ from pprint import pformat
 import httpx
 import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
 import phoenix.otel
-from openinference.instrumentation import _tracers
+from openinference.instrumentation import OITracer
 from opentelemetry.instrumentation.threading import ThreadingInstrumentor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import NoOpTracerProvider, TracerProvider
@@ -139,9 +139,17 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
             tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
         tracer_provider.add_span_processor(pii_processor)
 
-    # Confirm tracer is OITracer
-    tracer = tracer_provider.get_tracer(__name__)
-    assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
+
+_tracer: OITracer | None = None
+
+
+def tracer() -> OITracer:
+    global _tracer
+    if _tracer is None:
+        new_tracer = tracer_provider.get_tracer(__name__)
+        assert isinstance(new_tracer, OITracer), f"Got unexpected {type(new_tracer)}"
+        _tracer = new_tracer
+    return _tracer
 
 
 def get_prompt_template(prompt_name: str, prompt_version_id: str = "") -> PromptVersion:

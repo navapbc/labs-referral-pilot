@@ -1,5 +1,6 @@
 import logging
 from pprint import pformat
+from typing import Generator
 
 import hayhooks
 from hayhooks import BasePipelineWrapper
@@ -65,7 +66,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
-    def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
         logger.info("Running streaming LLM with model: %s, messages: %s", model, messages)
         question = hayhooks.get_last_user_message(messages)
         logger.info("Question: %s", question)
