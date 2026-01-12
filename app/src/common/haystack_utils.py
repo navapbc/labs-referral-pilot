@@ -76,7 +76,7 @@ class TracedPipelineRunner:
         *,
         metadata: dict[str, Any],
         input_: Any | None = None,
-        extract_output: Callable[[str], str] = lambda resp: resp,
+        shorten_output: Callable[[str], str] = lambda resp: resp,
     ) -> Generator:
         with using_metadata(metadata):
             # Must set using_metadata context before calling tracer.start_as_current_span()
@@ -108,7 +108,7 @@ class TracedPipelineRunner:
 
                     logger.info("Successfully streamed %d chunks", chunk_count)
                     response_text = "".join(full_response) if full_response else ""
-                    span.set_output(extract_output(response_text))
+                    span.set_output(shorten_output(response_text))
                     span.set_status(Status(StatusCode.OK))
                 except Exception as e:
                     logger.error("Error during streaming: %s", e, exc_info=True)
@@ -123,7 +123,7 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
-        extract_output: Callable[[Any], str] = lambda resp: resp,
+        extract_output: Callable[[Any], Any] = lambda resp: resp,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_metadata(metadata):

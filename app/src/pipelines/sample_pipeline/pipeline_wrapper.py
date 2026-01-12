@@ -91,6 +91,7 @@ class PipelineWrapper(BasePipelineWrapper):
         )
 
     def create_pipeline_args(self, location: str, messages: list[ChatMessage]) -> dict:
+        "Common args for both run_api and run_chat_completion"
         return {
             "echo_component2": {"prompt": messages, "history": []},
             "prompt_builder": {"template_variables": {"location": location}, "template": messages},
