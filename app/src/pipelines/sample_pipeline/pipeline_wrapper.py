@@ -7,13 +7,11 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses.chat_message import ChatMessage
-from openinference.instrumentation import _tracers
 
 from src.common import components, haystack_utils, phoenix_utils
 
 logger = logging.getLogger(__name__)
 tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
-assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
 
 system_msg = "This is a sample pipeline, it echoes back the system and user messages provided"
 
@@ -74,15 +72,16 @@ class PipelineWrapper(BasePipelineWrapper):
         logger.info("Question: %s", question)
 
         location = "Berlin"
-        messages = [ChatMessage.from_user("Write a summary sentence about {{location}}")]
+        chat_messages = haystack_utils.to_chat_messages(messages)
+        chat_messages.append(ChatMessage.from_user("Write a summary sentence about {{location}}"))
 
-        pipeline_run_args = self.create_pipeline_args(location, messages) | {
+        pipeline_run_args = self.create_pipeline_args(location, chat_messages) | {
             "logger": {
-                "messages_list": messages,
+                "messages_list": chat_messages,
             },
             "echo_component": {
                 "prompt": [ChatMessage.from_user(question)],
-                "history": messages[:-1],
+                "history": chat_messages[:-1],
             },
         }
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generator, Sequence
+from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
 from haystack import Pipeline
@@ -17,7 +17,7 @@ def get_phoenix_prompt(prompt_name: str, prompt_version_id: str = "") -> list[Ch
 
 
 def to_chat_messages(
-    msg_list: Sequence[dict | v1.PromptMessage | ChatMessage],
+    msg_list: Sequence[str | dict | v1.PromptMessage | ChatMessage],
 ) -> list[ChatMessage]:
     """Convert a list of dicts or Phoenix PromptMessage to a list of Haystack ChatMessage."""
     messages = []
@@ -31,11 +31,16 @@ def to_chat_messages(
         role = msg["role"]
         content = msg["content"]
 
-        assert isinstance(content, list), f"Expected list content, got {type(content)}: {content}"
-        assert len(content) == 1, f"Expected single content, got {len(content)} items: {content}"
-        assert content[0]["type"] == "text", f"Expected text content, got {content[0]['type']}"
-        assert "text" in content[0], f"Expected 'text' in content[0], got {content[0]}"
-        text = content[0]["text"]
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            assert isinstance(content, list), f"Expected list content, got {type(content)}: {content}"
+            assert len(content) == 1, f"Expected single content, got {len(content)} items: {content}"
+            assert content[0]["type"] == "text", f"Expected text content, got {content[0]['type']}"
+            assert "text" in content[0], f"Expected 'text' in content[0], got {content[0]}"
+            text = content[0]["text"]
+        else:
+            raise ValueError(f"Unexpected content type: {type(content)} for message {msg}")
 
         if role == "system":
             assert isinstance(text, str), f"Expected string, got {type(text)}"
@@ -55,7 +60,6 @@ def to_chat_messages(
 
 logger = logging.getLogger(__name__)
 tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
-assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
 
 
 class TracedPipelineRunner:
@@ -71,7 +75,7 @@ class TracedPipelineRunner:
         *,
         metadata: dict[str, Any],
         input_: Any | None = None,
-        extract_output: callable = lambda resp: resp,
+        extract_output: Callable[[str], str] = lambda resp: resp,
     ) -> Generator:
         with using_metadata(metadata):
             # Must set using_metadata context before calling tracer.start_as_current_span()
@@ -117,19 +121,25 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
-        extract_output: callable = lambda resp: resp,
+        extract_output: Callable[[str], str] = lambda resp: resp,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_metadata(metadata):
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"
             ) as span:
-                result = self.pipeline.run(
-                    pipeline_run_args,
-                    include_outputs_from=include_outputs_from,
-                )
-                # Shorter than span.set_attribute(SpanAttributes.INPUT_VALUE, ...)
-                span.set_input(input_)
-                span.set_output(extract_output(result))
-                span.set_status(Status(StatusCode.OK))
-                return result
+                try:
+                    result = self.pipeline.run(
+                        pipeline_run_args,
+                        include_outputs_from=include_outputs_from,
+                    )
+                    # Shorter than span.set_attribute(SpanAttributes.INPUT_VALUE, ...)
+                    span.set_input(input_)
+                    span.set_output(extract_output(result))
+                    span.set_status(Status(StatusCode.OK))
+                    return result
+                except Exception as e:
+                    logger.error("Error during pipeline run: %s", e, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(e)))
+                    span.record_exception(e)
+                    raise
