@@ -4,7 +4,7 @@ from typing import Any, Callable, Generator, Sequence
 import hayhooks
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
-from openinference.instrumentation import _tracers, using_metadata
+from openinference.instrumentation import using_metadata
 from opentelemetry.trace.status import Status, StatusCode
 from phoenix.client.__generated__ import v1
 
