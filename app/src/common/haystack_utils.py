@@ -79,7 +79,7 @@ class TracedPipelineRunner:
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
     ) -> Generator:
-        # Must set using_metadata context before calling tracer.start_as_current_span()
+        # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"

@@ -100,7 +100,7 @@ class PipelineWrapper(BasePipelineWrapper):
         *,
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
-        streaming: bool | None = None,
+        streaming: bool = False,
     ) -> dict:
         return {
             "logger": {
@@ -116,7 +116,7 @@ class PipelineWrapper(BasePipelineWrapper):
             "llm": {
                 "model": llm_model or config.generate_action_plan_model_version,
                 "reasoning_effort": reasoning_effort or config.generate_action_plan_reasoning_level,
-                "streaming": streaming or False,
+                "streaming": streaming,
             },
         }
 
@@ -131,9 +131,10 @@ class PipelineWrapper(BasePipelineWrapper):
         user_email = body.get("user_email", "")
         user_query = body.get("user_query", "")
 
-        assert resources, "resources parameter is required"
-        assert user_email, "user_email parameter is required"
-        assert user_query, "user_query parameter is required"
+        if not resources:
+            raise ValueError("resources parameter is required")
+        if not user_email:
+            raise ValueError("user_email parameter is required")
 
         resource_objects = get_resources(resources)
         pipeline_run_args = self.create_pipeline_args(
