@@ -188,13 +188,13 @@ class LoadResult:
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the OpenAI web search generator.
         """
 
         # Declare this attribute so it can be set when streaming_generator() is called
-        self.streaming_callback = None
+        self.streaming_callback: Callable | None = None
 
     @component.output_types(replies=List[ChatMessage])
     def run(
@@ -286,6 +286,9 @@ class OpenAIWebSearchGenerator:
                         full_text += chunk_text
                         # Convert to Haystack StreamingChunk and call the callback
                         streaming_chunk = StreamingChunk(content=chunk_text)
+                        assert (
+                            self.streaming_callback is not None
+                        ), "Expected streaming_callback to be set by Hayhooks"
                         self.streaming_callback(streaming_chunk)
 
             except Exception as e:
