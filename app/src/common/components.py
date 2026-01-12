@@ -188,14 +188,13 @@ class LoadResult:
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
-    def __init__(self, streaming_callback: Optional[Callable] = None):
+    def __init__(self):
         """
         Initialize the OpenAI web search generator.
-
-        Args:
-            streaming_callback: Optional callback function to handle streaming chunks
         """
-        self.streaming_callback = streaming_callback
+
+        # Declare this attribute so it can be set when streaming_generator() is called
+        self.streaming_callback = None
 
     @component.output_types(replies=List[ChatMessage])
     def run(
@@ -204,6 +203,7 @@ class OpenAIWebSearchGenerator:
         domain: str | None = None,
         model: str = config.default_openai_model_version,
         reasoning_effort: str = config.default_openai_reasoning_level,
+        streaming: bool = False,
     ) -> dict:
         """
         Run the OpenAI web search generator.
@@ -221,7 +221,7 @@ class OpenAIWebSearchGenerator:
             model,
             domain,
             reasoning_effort,
-            self.streaming_callback is not None,
+            streaming,
         )
 
         assert len(messages) == 1
@@ -241,7 +241,7 @@ class OpenAIWebSearchGenerator:
         client = OpenAI()
 
         # Use streaming if callback is provided
-        if self.streaming_callback:
+        if streaming:
             logger.info(
                 "Starting OpenAI streaming request (model=%s, reasoning_effort=%s)",
                 model,

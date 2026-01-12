@@ -100,6 +100,7 @@ class PipelineWrapper(BasePipelineWrapper):
         *,
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
+        streaming: bool | None = None,
     ) -> dict:
         return {
             "logger": {
@@ -115,6 +116,7 @@ class PipelineWrapper(BasePipelineWrapper):
             "llm": {
                 "model": llm_model or config.generate_action_plan_model_version,
                 "reasoning_effort": reasoning_effort or config.generate_action_plan_reasoning_level,
+                "streaming": streaming or False,
             },
         }
 
@@ -140,6 +142,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_query,
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
+            streaming=True,
         )
         logger.info("Streaming action plan: %s", pipeline_run_args)
         return self.runner.stream_response(
