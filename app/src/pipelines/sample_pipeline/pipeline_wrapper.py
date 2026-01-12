@@ -66,7 +66,7 @@ class PipelineWrapper(BasePipelineWrapper):
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
     def run_chat_completion(self, model: str, messages: list, body: dict) -> None:
-        logger.info("Running streaming chat completion with model: %s, messages: %s", model, messages)
+        logger.info("Running streaming LLM with model: %s, messages: %s", model, messages)
         question = hayhooks.get_last_user_message(messages)
         logger.info("Question: %s", question)
 
