@@ -117,29 +117,19 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     # inheriting the parent span context, causing orphaned spans in Phoenix traces.
     # https://github.com/langfuse/langfuse/issues/8316#issuecomment-3154235201
     ThreadingInstrumentor().instrument()
-    logger.info("Threading instrumentation enabled for OpenTelemetry context propagation during streaming")
+    logger.info(
+        "Threading instrumentation enabled for OpenTelemetry context propagation during streaming"
+    )
 
     # Suppress harmless context detach errors that occur when OpenInference instrumentation
     # tries to clean up context tokens in different threads during streaming.
     _suppress_context_detach_errors()
-
 
     if config.redact_pii:
         phoenix_api_key = os.environ.get("PHOENIX_API_KEY")
         span_exporter = otel_trace_exporter.OTLPSpanExporter(
             endpoint=trace_endpoint, headers={"Authorization": f"Bearer {phoenix_api_key}"}
         )
-
-        # # Tell Haystack to auto-detect the configured tracer
-        # from haystack import tracing
-        # tracing.auto_enable_tracing()
-
-        # # Explicitly tell Haystack to use your tracer
-        # from haystack.tracing import OpenTelemetryTracer
-
-        # tracer = tracer_provider.get_tracer("my_application")
-        # tracing.enable_tracing(OpenTelemetryTracer(tracer))
-        
 
         # Create the PII redacting processor with the OTLP exporter
         pii_processor = PresidioRedactionSpanProcessor(span_exporter)

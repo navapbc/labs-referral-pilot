@@ -7,12 +7,12 @@ export async function getApiDomain(): Promise<string> {
 
   switch (environment) {
     case "local":
-      return "http://0.0.0.0:4000/";
+      return "http://0.0.0.0:3000/";
     case "dev":
       return "https://referral-pilot-dev.navateam.com/";
     case "prod":
       return "https://api.referrals.navateam.com/";
     default:
-      return "http://localhost:4000/";
+      return "http://localhost:3000/";
   }
 }
