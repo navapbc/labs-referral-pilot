@@ -34,8 +34,9 @@ def to_chat_messages(
         if isinstance(content, str):
             text = content
         elif isinstance(content, list):
-            assert isinstance(content, list), f"Expected list content, got {type(content)}: {content}"
-            assert len(content) == 1, f"Expected single content, got {len(content)} items: {content}"
+            assert (
+                len(content) == 1
+            ), f"Expected single content, got {len(content)} items: {content}"
             assert content[0]["type"] == "text", f"Expected text content, got {content[0]['type']}"
             assert "text" in content[0], f"Expected 'text' in content[0], got {content[0]}"
             text = content[0]["text"]
