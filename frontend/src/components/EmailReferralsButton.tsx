@@ -74,7 +74,7 @@ export function EmailReferralsButton({
           data-testid="emailReferralsButton"
         >
           <Mail className="w-4 h-4" />
-          Email Referrals
+          Email
         </Button>
       </DialogTrigger>
       <DialogContent>
