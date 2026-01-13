@@ -117,7 +117,9 @@ const ResourcesList = ({
           </button>
           <CardHeader className="p-3 ml-3">
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <span className={`flex-shrink-0 w-7 h-7 ${getNumberBadgeClass(r.referral_type)} text-white rounded-full flex items-center justify-center text-m font-medium`}>
+              <span
+                className={`flex-shrink-0 w-7 h-7 ${getNumberBadgeClass(r.referral_type)} text-white rounded-full flex items-center justify-center text-m font-medium`}
+              >
                 {i + 1}
               </span>
               <div>{r.name}</div>

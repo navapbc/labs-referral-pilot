@@ -7,6 +7,86 @@ export interface ActionPlan {
   content: string;
 }
 
+export interface PartialActionPlan {
+  title: string;
+  summary: string;
+  content: string;
+}
+
+/**
+ * Unescapes JSON string escape sequences
+ */
+function unescapeJSON(str: string): string {
+  return str
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+}
+
+/**
+ * Parses streaming JSON to extract title, summary, and content fields
+ * Handles incomplete JSON gracefully - captures partial strings even without closing quotes
+ * Properly handles escaped characters like \", \n, etc.
+ */
+function parseStreamingJSON(jsonStr: string): PartialActionPlan {
+  let title = "";
+  let summary = "";
+  let content = "";
+
+  try {
+    // Pattern that matches escaped characters: (?:[^"\\]|\\.)*
+    // - [^"\\] matches any char except quote or backslash
+    // - \\. matches backslash followed by any char (handles \", \n, etc)
+
+    // Extract title - try complete first, then incomplete
+    const titleMatch = jsonStr.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (titleMatch) {
+      title = unescapeJSON(titleMatch[1]);
+    } else {
+      // Match incomplete title (no closing quote yet)
+      const incompleteTitleMatch = jsonStr.match(
+        /"title"\s*:\s*"((?:[^"\\]|\\.)*)/,
+      );
+      if (incompleteTitleMatch) {
+        title = unescapeJSON(incompleteTitleMatch[1]);
+      }
+    }
+
+    // Extract summary - same approach
+    const summaryMatch = jsonStr.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (summaryMatch) {
+      summary = unescapeJSON(summaryMatch[1]);
+    } else {
+      const incompleteSummaryMatch = jsonStr.match(
+        /"summary"\s*:\s*"((?:[^"\\]|\\.)*)/,
+      );
+      if (incompleteSummaryMatch) {
+        summary = unescapeJSON(incompleteSummaryMatch[1]);
+      }
+    }
+
+    // Extract content - this is where word-by-word streaming matters most
+    const contentMatch = jsonStr.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (contentMatch) {
+      content = unescapeJSON(contentMatch[1]);
+    } else {
+      // Match incomplete content (no closing quote yet) - this enables word-by-word rendering
+      const incompleteContentMatch = jsonStr.match(
+        /"content"\s*:\s*"((?:[^"\\]|\\.)*)/,
+      );
+      if (incompleteContentMatch) {
+        content = unescapeJSON(incompleteContentMatch[1]);
+      }
+    }
+  } catch (e) {
+    console.error("Error parsing streaming JSON:", e);
+  }
+
+  return { title, summary, content };
+}
+
 /**
  * Fixes unescaped control characters in JSON string values
  * This handles cases where the LLM returns JSON with literal newlines, tabs, etc.
@@ -129,17 +209,16 @@ export async function fetchActionPlan(
   };
 }
 
-
 /**
  * Fetches action plan with streaming support using Server-Sent Events (SSE).
- * Calls onChunk for each text chunk received, allowing progressive display.
+ * Calls onChunk with parsed structured data for progressive display.
  * Returns the same structure as fetchActionPlan for consistency.
  */
 export async function fetchActionPlanStreaming(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
-  onChunk: (chunk: string) => void,
+  onChunk: (partialPlan: PartialActionPlan) => void,
   onComplete: () => void,
   onError: (error: string) => void,
 ): Promise<{
@@ -205,6 +284,7 @@ export async function fetchActionPlanStreaming(
     }
 
     let buffer = "";
+    let accumulatedJSON = ""; // Accumulate the full JSON response
 
     while (true) {
       const { done, value } = await reader.read();
@@ -260,7 +340,12 @@ export async function fetchActionPlanStreaming(
             // Handle hayhooks response format: choices[0].delta.content
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
-              onChunk(content);
+              // Accumulate the JSON content
+              accumulatedJSON += content;
+
+              // Parse incrementally and pass structured data to callback
+              const partialPlan = parseStreamingJSON(accumulatedJSON);
+              onChunk(partialPlan);
             }
 
             // Check for finish_reason to detect completion
@@ -276,21 +361,41 @@ export async function fetchActionPlanStreaming(
       }
     }
 
-    // Return success with result_id
+    // Parse the final accumulated JSON to get complete ActionPlan
+    let finalActionPlan: ActionPlan | null = null;
+
+    if (!hasError && accumulatedJSON) {
+      try {
+        // Try to parse the complete JSON response
+        const fixedJson = fixJsonControlCharacters(accumulatedJSON);
+        finalActionPlan = JSON.parse(fixedJson) as ActionPlan;
+      } catch (e) {
+        console.error("Failed to parse final action plan JSON:", e);
+        console.error("Raw accumulated JSON:", accumulatedJSON);
+        errorMessage =
+          "Failed to parse the action plan response. Please try again.";
+        hasError = true;
+        onError(errorMessage);
+      }
+    }
+
+    // Return success with result_id and parsed action plan
     return {
-      actionPlan: null, // ActionPlan will be constructed by the caller from accumulated content
+      actionPlan: finalActionPlan,
       resultId: resultId,
       errorMessage: hasError ? errorMessage : undefined,
     };
   } catch (error) {
     clearTimeout(timer);
-    let errMsg = "Unknown error occurred";
+    let errMsg =
+      "There was an issue streaming the Action Plan. Please try again.";
 
     if (error instanceof Error) {
       if (error.name === "AbortError") {
-        errMsg = "Request timed out, please try again.";
+        errMsg = "Request timed out. Please try again.";
       } else {
-        errMsg = error.message;
+        errMsg =
+          "There was an issue streaming the Action Plan. Please try again.";
       }
     }
 

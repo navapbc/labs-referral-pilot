@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Resource } from "@/types/resources";
-import { ActionPlan } from "@/util/fetchActionPlan";
+import { ActionPlan, PartialActionPlan } from "@/util/fetchActionPlan";
 import { ActionPlanDisplay } from "@/components/ActionPlanDisplay";
 
 interface ActionPlanSectionProps {
@@ -11,7 +11,7 @@ interface ActionPlanSectionProps {
   selectedResources: Resource[];
   actionPlan: ActionPlan | null;
   isGeneratingActionPlan: boolean;
-  streamingContent?: string;
+  streamingPlan?: PartialActionPlan | null;
   isStreaming?: boolean;
   onResourceSelection: (resource: Resource, checked: boolean) => void;
   onSelectAllResources: () => void;
@@ -23,7 +23,7 @@ export function ActionPlanSection({
   selectedResources,
   actionPlan,
   isGeneratingActionPlan,
-  streamingContent,
+  streamingPlan,
   isStreaming,
   onResourceSelection,
   onSelectAllResources,
@@ -104,7 +104,7 @@ export function ActionPlanSection({
       {(actionPlan || isStreaming) && (
         <ActionPlanDisplay
           actionPlan={actionPlan}
-          streamingContent={streamingContent}
+          streamingPlan={streamingPlan}
           isStreaming={isStreaming}
         />
       )}
