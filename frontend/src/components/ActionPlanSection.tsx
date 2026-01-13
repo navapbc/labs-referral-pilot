@@ -11,6 +11,8 @@ interface ActionPlanSectionProps {
   selectedResources: Resource[];
   actionPlan: ActionPlan | null;
   isGeneratingActionPlan: boolean;
+  streamingContent?: string;
+  isStreaming?: boolean;
   onResourceSelection: (resource: Resource, checked: boolean) => void;
   onSelectAllResources: () => void;
   onGenerateActionPlan: () => void;
@@ -21,6 +23,8 @@ export function ActionPlanSection({
   selectedResources,
   actionPlan,
   isGeneratingActionPlan,
+  streamingContent,
+  isStreaming,
   onResourceSelection,
   onSelectAllResources,
   onGenerateActionPlan,
@@ -97,7 +101,13 @@ export function ActionPlanSection({
       </Card>
 
       {/* Action Plan Display */}
-      {actionPlan && <ActionPlanDisplay actionPlan={actionPlan} />}
+      {(actionPlan || isStreaming) && (
+        <ActionPlanDisplay
+          actionPlan={actionPlan}
+          streamingContent={streamingContent}
+          isStreaming={isStreaming}
+        />
+      )}
     </>
   );
 }

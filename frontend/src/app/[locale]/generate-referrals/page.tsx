@@ -10,7 +10,11 @@ import "@/app/globals.css";
 import { fetchLocationFromZip } from "@/util/fetchLocation";
 
 import { PrintableReferralsReport } from "@/util/printReferrals";
-import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
+import {
+  fetchActionPlan, // eslint-disable-line @typescript-eslint/no-unused-vars -- will be used for user preference between streaming/non-streaming
+  fetchActionPlanStreaming,
+  ActionPlan,
+} from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
@@ -45,7 +49,9 @@ export default function Page() {
   );
   const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
   const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
-  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
+  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false)
+  const [streamingContent, setStreamingContent] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState(false);
   const [activeTab, setActiveTab] = useState("find-referrals");
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
@@ -174,27 +180,95 @@ export default function Page() {
     if (selectedResources.length === 0) return;
 
     setIsGeneratingActionPlan(true);
+    setIsStreaming(true);
     setActionPlan(null);
+    setStreamingContent("");
     setErrorMessage(undefined);
+
+    // Use a local variable to accumulate content for parsing
+    let accumulatedContent = "";
 
     try {
       const {
-        actionPlan: plan,
         resultId,
         errorMessage: planError,
-      } = await fetchActionPlan(
+      } = await fetchActionPlanStreaming(
         selectedResources,
         userEmail,
         clientDescription,
+        // onChunk callback - accumulate streaming content
+        (chunk: string) => {
+          accumulatedContent += chunk;
+          setStreamingContent(accumulatedContent);
+        },
+        // onComplete callback - stop streaming UI
+        () => {
+          setIsStreaming(false);
+        },
+        // onError callback
+        (error: string) => {
+          setIsStreaming(false);
+          setIsGeneratingActionPlan(false);
+          setErrorMessage(error);
+        },
       );
-      setActionPlan(plan);
-      setActionPlanResultId(resultId);
+
+      // Handle errors from the streaming response
       if (planError) {
         setErrorMessage(planError);
-        setActionPlanResultId(""); // set the Action PLan Id to "" so we don't email an empty or errant result
+        setActionPlanResultId(""); // set the Action Plan Id to "" so we don't email an empty or errant result
+        return;
+      }
+
+      // The streaming response is pure markdown, not JSON
+      // Extract title (first # heading) and create an ActionPlan object
+      try {
+        let title = "Action Plan";
+        let remainingContent = accumulatedContent;
+
+        // Try to extract title from first # heading
+        const titleMatch = accumulatedContent.match(/^#\s+(.+?)$/m);
+        if (titleMatch) {
+          title = titleMatch[1].trim();
+          // Remove the title line from content
+          remainingContent = accumulatedContent
+            .replace(/^#\s+.+?$/m, "")
+            .trim();
+        }
+
+        // Extract summary (first paragraph after title)
+        let summary = "";
+        const paragraphs = remainingContent.split("\n\n");
+        if (paragraphs.length > 0 && paragraphs[0].trim()) {
+          summary = paragraphs[0].trim();
+          // Remove summary from content to avoid duplication
+          remainingContent = paragraphs.slice(1).join("\n\n").trim();
+        }
+
+        // Create ActionPlan object
+        const parsedPlan: ActionPlan = {
+          title: title,
+          summary: summary || "Your personalized action plan",
+          content: remainingContent,
+        };
+
+        setActionPlan(parsedPlan);
+        setActionPlanResultId(resultId);
+      } catch (e) {
+        console.error("Failed to process action plan:", e);
+        console.error("Raw content:", accumulatedContent);
+        // Still create a basic action plan with the raw content
+        setActionPlan({
+          title: "Action Plan",
+          summary: "Your personalized action plan",
+          content: accumulatedContent,
+        });
+        setActionPlanResultId(resultId);
       }
     } catch (error) {
       console.error("Error generating action plan:", error);
+      setIsStreaming(false);
+      setIsGeneratingActionPlan(false);
       setErrorMessage(
         "The server encountered an unexpected error. Please try again later.",
       );
@@ -444,6 +518,8 @@ export default function Page() {
                   selectedResources={selectedResources}
                   actionPlan={actionPlan}
                   isGeneratingActionPlan={isGeneratingActionPlan}
+                  streamingContent={streamingContent}
+                  isStreaming={isStreaming}
                   onResourceSelection={handleResourceSelection}
                   onSelectAllResources={handleSelectAllResources}
                   onGenerateActionPlan={() => void generateActionPlan()}
