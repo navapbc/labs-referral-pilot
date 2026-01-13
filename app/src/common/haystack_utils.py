@@ -4,7 +4,7 @@ from typing import Any, Callable, Generator, Sequence
 import hayhooks
 from haystack import Pipeline
 from haystack.dataclasses.chat_message import ChatMessage
-from openinference.instrumentation import using_metadata
+from openinference.instrumentation import using_attributes
 from opentelemetry.trace import Span
 from opentelemetry.trace.status import Status, StatusCode
 from phoenix.client.__generated__ import v1
@@ -74,12 +74,13 @@ class TracedPipelineRunner:
         self,
         pipeline_run_args: dict,
         *,
+        user_id: str,
         metadata: dict[str, Any],
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
     ) -> Generator:
-        with using_metadata(metadata):
-            # Must set using_metadata context before calling tracer.start_as_current_span()
+        # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
+        with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"
             ) as span:
@@ -120,13 +121,14 @@ class TracedPipelineRunner:
         self,
         pipeline_run_args: dict,
         *,
+        user_id: str,
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
         extract_output: Callable[[Any], Any] = lambda resp: resp,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
-        with using_metadata(metadata):
+        with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.parent_span_name, openinference_span_kind="chain"
             ) as span:

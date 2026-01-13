@@ -20,6 +20,7 @@ from haystack import component
 from haystack.core.component.types import Variadic
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
+from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openai import OpenAI
 from pydantic import BaseModel, ValidationError
 
@@ -187,6 +188,14 @@ class LoadResult:
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
+    def __init__(self) -> None:
+        """
+        Initialize the OpenAI web search generator.
+        """
+
+        # Declare this attribute so it can be set when streaming_generator() is called
+        self.streaming_callback: Callable | None = None
+
     @component.output_types(replies=List[ChatMessage])
     def run(
         self,
@@ -194,6 +203,7 @@ class OpenAIWebSearchGenerator:
         domain: str | None = None,
         model: str = config.default_openai_model_version,
         reasoning_effort: str = config.default_openai_reasoning_level,
+        streaming: bool = False,
     ) -> dict:
         """
         Run the OpenAI web search generator.
@@ -207,10 +217,11 @@ class OpenAIWebSearchGenerator:
         """
 
         logger.info(
-            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s",
+            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s, streaming=%s",
             model,
             domain,
             reasoning_effort,
+            streaming,
         )
 
         assert len(messages) == 1
@@ -228,11 +239,72 @@ class OpenAIWebSearchGenerator:
             api_params["tools"][0]["filters"] = {"allowed_domains": [domain]}
 
         client = OpenAI()
-        response = client.responses.create(**api_params)
 
-        logger.debug("Response: %s", pformat(response.output_text, width=160))
+        # Use streaming if callback is provided
+        if streaming:
+            logger.info(
+                "Starting OpenAI streaming request (model=%s, reasoning_effort=%s)",
+                model,
+                reasoning_effort,
+            )
+            api_params["stream"] = True
 
-        return {"replies": [ChatMessage.from_assistant(response.output_text)]}
+            try:
+                response = client.responses.create(**api_params)
+            except Exception as e:
+                logger.error("Failed to create OpenAI stream: %s", e, exc_info=True)
+                raise
+
+            # Collect full response while streaming
+            full_text = ""
+            chunk_count = 0
+
+            try:
+                for openai_chunk in response:
+                    chunk_count += 1
+                    chunk_text = ""
+
+                    # Extract text from OpenAI Responses API events
+                    if hasattr(openai_chunk, "type"):
+                        # Check delta attribute (for text delta events)
+                        if not chunk_text and hasattr(openai_chunk, "delta"):
+                            delta = openai_chunk.delta
+                            if isinstance(delta, str):
+                                chunk_text = delta
+                            elif isinstance(delta, list):
+                                chunk_text = "".join(str(item) for item in delta)
+                            elif hasattr(delta, "content"):
+                                chunk_text = delta.content or ""
+                            elif hasattr(delta, "text"):
+                                chunk_text = delta.text or ""
+
+                    # Fallback for non-Responses API format
+                    if not chunk_text and hasattr(openai_chunk, "output_text"):
+                        chunk_text = openai_chunk.output_text or ""
+
+                    if chunk_text:
+                        full_text += chunk_text
+                        # Convert to Haystack StreamingChunk and call the callback
+                        streaming_chunk = StreamingChunk(content=chunk_text)
+                        assert (
+                            self.streaming_callback is not None
+                        ), "Expected streaming_callback to be set by Hayhooks"
+                        self.streaming_callback(streaming_chunk)
+
+            except Exception as e:
+                logger.error("Error during streaming: %s", e, exc_info=True)
+                raise
+
+            logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
+            if not full_text:
+                logger.warning("No text collected during streaming")
+
+            return {"replies": [ChatMessage.from_assistant(full_text)]}
+        else:
+            # Non-streaming response
+            response = client.responses.create(**api_params)
+            logger.debug("Response: %s", pformat(response.output_text, width=160))
+            return {"replies": [ChatMessage.from_assistant(response.output_text)]}
 
 
 EMAIL_INTRO = """\

@@ -56,6 +56,7 @@ class PipelineWrapper(BasePipelineWrapper):
         }
         response = self.runner.return_response(
             pipeline_run_args,
+            user_id=user_id,
             metadata={"user_id": user_id},
             include_outputs_from={"echo_component", "echo_component2"},
             input_=question,
@@ -87,7 +88,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         user_id = "someone@example.com"
         return self.runner.stream_response(
-            pipeline_run_args, metadata={"user_id": user_id}, input_=question
+            pipeline_run_args, user_id=user_id, metadata={"user_id": user_id}, input_=question
         )
 
     def create_pipeline_args(self, location: str, messages: list[ChatMessage]) -> dict:
