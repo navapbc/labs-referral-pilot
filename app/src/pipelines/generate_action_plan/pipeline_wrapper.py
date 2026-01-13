@@ -48,7 +48,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                variables=["resources", "action_plan_json", "user_query"],
+                variables=["resources", "action_plan_json", "user_query", "location"],
             ),
             name="prompt_builder",
         )
@@ -71,12 +71,14 @@ class PipelineWrapper(BasePipelineWrapper):
         resources: list[Resource] | list[dict],
         user_email: str,
         user_query: str,
+        location: str,
     ) -> dict:
         resource_objects = get_resources(resources)
         pipeline_run_args = self.create_pipeline_args(
             user_email,
             resource_objects,
             user_query,
+            location,
         )
         response = self.runner.return_response(
             pipeline_run_args,
@@ -98,11 +100,13 @@ class PipelineWrapper(BasePipelineWrapper):
         user_email: str,
         resource_objects: list[Resource],
         user_query: str,
+        location: str,
         *,
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
     ) -> dict:
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         return {
             "logger": {
                 "messages_list": [
@@ -110,9 +114,11 @@ class PipelineWrapper(BasePipelineWrapper):
                 ],
             },
             "prompt_builder": {
+                "template": prompt_template,
                 "resources": format_resources(resource_objects),
                 "action_plan_json": action_plan_as_json,
                 "user_query": user_query,
+                "location": location,
             },
             "llm": {
                 "model": llm_model or config.generate_action_plan_model_version,
@@ -131,6 +137,7 @@ class PipelineWrapper(BasePipelineWrapper):
         resources = body.get("resources", [])
         user_email = body.get("user_email", "")
         user_query = body.get("user_query", "")
+        location = body.get("location", "")
 
         if not resources:
             raise ValueError("resources parameter is required")
@@ -142,6 +149,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_email,
             resource_objects,
             user_query,
+            location,
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
