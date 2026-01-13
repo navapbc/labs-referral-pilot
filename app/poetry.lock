@@ -4243,6 +4243,23 @@ packaging = ">=18.0"
 wrapt = ">=1.0.0,<2.0.0"
 
 [[package]]
+name = "opentelemetry-instrumentation-threading"
+version = "0.59b0"
+description = "Thread context propagation support for OpenTelemetry"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_threading-0.59b0-py3-none-any.whl", hash = "sha256:76da2fc01fe1dccebff6581080cff9e42ac7b27cc61eb563f3c4435c727e8eca"},
+    {file = "opentelemetry_instrumentation_threading-0.59b0.tar.gz", hash = "sha256:ce5658730b697dcbc0e0d6d13643a69fd8aeb1b32fa8db3bade8ce114c7975f3"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.12,<2.0"
+opentelemetry-instrumentation = "0.59b0"
+wrapt = ">=1.0.0,<2.0.0"
+
+[[package]]
 name = "opentelemetry-proto"
 version = "1.38.0"
 description = "OpenTelemetry Python Proto"
@@ -8630,4 +8647,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12"
-content-hash = "ba3eff3e621403eebf921dd7237016e80abf8e4bfa8ed9c1cb6fbaa86e2bd7fb"
+content-hash = "ad9f02ed6fd5ddd15ca4d399884c802c04a13e0a065556c74e320fc679a3eca7"

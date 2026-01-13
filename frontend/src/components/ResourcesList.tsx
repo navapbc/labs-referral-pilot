@@ -62,6 +62,19 @@ export const getCardBorderClass = (referralType: string | undefined) => {
   }
 };
 
+const getNumberBadgeClass = (referralType: string | undefined) => {
+  switch (referralType) {
+    case "goodwill":
+      return "bg-blue-600";
+    case "government":
+      return "bg-gray-600";
+    case "external":
+      return "bg-green-600";
+    default:
+      return "bg-blue-600";
+  }
+};
+
 const normalizeUrl = (url: string) => {
   const trimmed = url.trim();
   if (/^(https?:)?\/\//i.test(trimmed) || /^(mailto:|tel:)/i.test(trimmed)) {
@@ -104,7 +117,7 @@ const ResourcesList = ({
           </button>
           <CardHeader className="p-3 ml-3">
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <span className="flex-shrink-0 w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-m font-medium">
+              <span className={`flex-shrink-0 w-7 h-7 ${getNumberBadgeClass(r.referral_type)} text-white rounded-full flex items-center justify-center text-m font-medium`}>
                 {i + 1}
               </span>
               <div>{r.name}</div>
