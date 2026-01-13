@@ -1,15 +1,14 @@
 import logging
 from pprint import pformat
+from typing import Generator
 
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from openinference.instrumentation import _tracers, using_attributes, using_metadata
-from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
 from src.app_config import config
-from src.common import haystack_utils, phoenix_utils
+from src.common import haystack_utils
 from src.common.components import (
     LlmOutputValidator,
     OpenAIWebSearchGenerator,
@@ -19,7 +18,6 @@ from src.common.components import (
 from src.pipelines.generate_referrals.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
-tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class ActionPlan(BaseModel):
@@ -65,6 +63,7 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.connect("llm", "logger")
 
         self.pipeline = pipeline
+        self.runner = haystack_utils.TracedPipelineRunner(self.name, self.pipeline)
 
     # Called for the `generate-action-plan/run` endpoint
     def run_api(
@@ -74,50 +73,86 @@ class PipelineWrapper(BasePipelineWrapper):
         user_query: str,
     ) -> dict:
         resource_objects = get_resources(resources)
-
-        with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
-            # Must set using_metadata context before calling tracer.start_as_current_span()
-            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"
-            ) as span:
-                result = self._run(resource_objects, user_email, user_query)
-                span.set_input([r.name for r in resource_objects])
-                span.set_output(result["response"])
-                span.set_status(Status(StatusCode.OK))
-                return result
-
-    def _run(self, resource_objects: list[Resource], user_email: str, user_query: str) -> dict:
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
-
-        response = self.pipeline.run(
-            {
-                "logger": {
-                    "messages_list": [
-                        {
-                            "resource_count": len(resource_objects),
-                            "user_email": user_email,
-                        }
-                    ],
-                },
-                "prompt_builder": {
-                    "template": prompt_template,
-                    "resources": format_resources(resource_objects),
-                    "action_plan_json": action_plan_as_json,
-                    "user_query": user_query,
-                },
-                "llm": {
-                    "model": config.generate_action_plan_model_version,
-                    "reasoning_effort": config.generate_action_plan_reasoning_level,
-                },
-            },
+        pipeline_run_args = self.create_pipeline_args(
+            user_email,
+            resource_objects,
+            user_query,
+        )
+        response = self.runner.return_response(
+            pipeline_run_args,
+            user_id=user_email,
+            metadata={"user_id": user_email},
             include_outputs_from={"llm", "save_result"},
+            input_=[r.name for r in resource_objects],
+            extract_output=lambda response: response["llm"]["replies"][0]._content[0].text,
         )
         logger.debug("Results: %s", pformat(response, width=160))
+
         return {
             "response": response["llm"]["replies"][0]._content[0].text,
             "save_result": response["save_result"],
         }
+
+    def create_pipeline_args(
+        self,
+        user_email: str,
+        resource_objects: list[Resource],
+        user_query: str,
+        *,
+        llm_model: str | None = None,
+        reasoning_effort: str | None = None,
+        streaming: bool = False,
+    ) -> dict:
+        return {
+            "logger": {
+                "messages_list": [
+                    {"resource_count": len(resource_objects), "user_email": user_email}
+                ],
+            },
+            "prompt_builder": {
+                "resources": format_resources(resource_objects),
+                "action_plan_json": action_plan_as_json,
+                "user_query": user_query,
+            },
+            "llm": {
+                "model": llm_model or config.generate_action_plan_model_version,
+                "reasoning_effort": reasoning_effort or config.generate_action_plan_reasoning_level,
+                "streaming": streaming,
+            },
+        }
+
+    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
+    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
+        # Note: 'model' parameter is the pipeline name, not the LLM model
+        assert model == self.name, f"Unexpected model/pipeline name: {model}"
+
+        # Extract custom parameters from the body
+        resources = body.get("resources", [])
+        user_email = body.get("user_email", "")
+        user_query = body.get("user_query", "")
+
+        if not resources:
+            raise ValueError("resources parameter is required")
+        if not user_email:
+            raise ValueError("user_email parameter is required")
+
+        resource_objects = get_resources(resources)
+        pipeline_run_args = self.create_pipeline_args(
+            user_email,
+            resource_objects,
+            user_query,
+            llm_model=body.get("llm_model", None),
+            reasoning_effort=body.get("reasoning_effort", None),
+            streaming=True,
+        )
+        logger.info("Streaming action plan: %s", pipeline_run_args)
+        return self.runner.stream_response(
+            pipeline_run_args,
+            user_id=user_email,
+            metadata={"user_id": user_email},
+            input_=[r.name for r in resource_objects],
+        )
 
 
 def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
