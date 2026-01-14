@@ -7,8 +7,7 @@ export async function fetchResources(
   prompt_version_id: string | null,
   suffix?: string,
 ) {
-  const apiDomain =
-    "https://p-137-app-dev-1072198100.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
+  const apiDomain = await getApiDomain();
 
   const useNonRag = process.env.NEXT_PUBLIC_USE_NONRAG === "true";
   const url_path = useNonRag
