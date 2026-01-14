@@ -20,21 +20,16 @@ export async function fetchResources(
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 600_000); // TODO make configurable
-
-  const requestData: {
-    query: string;
-    user_email: string;
-    prompt_version_id?: string;
-  } = {
-    query: clientDescription,
-    user_email: userEmail,
-  };
-
-  if (prompt_version_id) {
-    requestData.prompt_version_id = prompt_version_id;
-  }
-
-  const requestBody = JSON.stringify(requestData);
+  const requestBody = prompt_version_id
+    ? JSON.stringify({
+        query: clientDescription,
+        user_email: userEmail,
+        prompt_version_id: prompt_version_id,
+      })
+    : JSON.stringify({
+        query: clientDescription,
+        user_email: userEmail,
+      });
 
   try {
     const upstream = await fetch(url, {
