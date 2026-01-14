@@ -48,7 +48,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                variables=["resources", "action_plan_json", "user_query", "location"],
+                variables=["resources", "action_plan_json", "user_query"],
             ),
             name="prompt_builder",
         )
