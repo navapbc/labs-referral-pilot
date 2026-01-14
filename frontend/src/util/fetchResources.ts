@@ -25,7 +25,6 @@ export async function fetchResources(
     query: string;
     user_email: string;
     prompt_version_id?: string;
-    suffix?: string;
   } = {
     query: clientDescription,
     user_email: userEmail,
