@@ -38,6 +38,6 @@ def when_ready(server: object) -> None:
     # Not sure why this is needed but without this sleep,
     # pipelines can get stuck on "Running component retriever".
     # Hypothesis: There's some initialization that is presenting a race condition.
-    time.sleep(1)
+    time.sleep(4)
 
     print("when_ready() Done")
