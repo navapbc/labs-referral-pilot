@@ -39,10 +39,14 @@ def populate_vector_db() -> None:
     collection_name = doc_store._collection_name
 
     # Clear existing collection if any
-    if doc_store.count_documents() > 0:
+    if (doc_count := doc_store.count_documents()) > 0:
         try:
             # Don't delete collection since it's referenced by existing pipelines upon their startup
-            logger.info("Clearing out existing vector DB collection=%r", collection_name)
+            logger.info(
+                "Clearing out existing vector DB collection=%r with %d docs",
+                collection_name,
+                doc_count,
+            )
             # recreate_index=True results in a new id for the collection, which breaks existing pipelines
             doc_store.delete_all_documents(recreate_index=False)
         except DocumentStoreError as e:
@@ -65,7 +69,6 @@ def populate_vector_db() -> None:
     pipeline = _create_ingest_pipeline(doc_store)
     pipeline.run({"converter": {"sources": files_to_ingest}})
     logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
-
     logger.info("ChromaDB collections: %s", chroma_client.list_collections())
 
 
@@ -78,7 +81,6 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
     except PermissionError as e:
         logger.error("Error creating directories for %s: %s", s3_folder, e)
         local_folder = f"/tmp/{s3_folder}"  # nosec B108
-    logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
 
     if config.environment == "local":
         assert os.path.exists(
@@ -86,8 +88,11 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
         return local_folder
 
+    logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
     s3 = file_util.get_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
+    if not s3_folder.endswith("/"):
+        s3_folder += "/"
     try:
         for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
             for obj in result.get("Contents", []):
