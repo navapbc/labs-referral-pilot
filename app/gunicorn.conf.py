@@ -10,11 +10,12 @@ For more information, see https://docs.gunicorn.org/en/stable/configure.html
 """
 
 import os
+import threading
 
 from src.app_config import config as app_config
 from src.ingestion import rag_utils
 
-bind = app_config.host + ':' + str(app_config.port)
+bind = app_config.host + ":" + str(app_config.port)
 # Calculates the number of usable cores and doubles it. Recommended number of workers per core is two.
 # https://docs.gunicorn.org/en/latest/design.html#how-many-workers
 # We use 'os.sched_getaffinity(pid)' not 'os.cpu_count()' because it returns only allowable CPUs.
@@ -28,4 +29,5 @@ threads = 4
 # https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
 def when_ready(server: object) -> None:
     print("when_ready()", server)
-    rag_utils.populate_vector_db()
+    populate_rag_db_thread = threading.Thread(target=rag_utils.populate_vector_db)
+    populate_rag_db_thread.start()
