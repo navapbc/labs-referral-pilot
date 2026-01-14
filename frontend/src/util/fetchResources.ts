@@ -34,10 +34,6 @@ export async function fetchResources(
     requestData.prompt_version_id = prompt_version_id;
   }
 
-  if (suffix) {
-    requestData.suffix = suffix;
-  }
-
   const requestBody = JSON.stringify(requestData);
 
   try {
