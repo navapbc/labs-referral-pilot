@@ -107,7 +107,6 @@ export default function Page() {
 
   async function findResources() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
-    const suffix = searchParams?.get("suffix") ?? undefined;
 
     setLoading(true);
     setResult(null);
@@ -119,7 +118,6 @@ export default function Page() {
         request,
         userEmail,
         prompt_version_id,
-        suffix,
       );
       setResourcesResultId(resultId);
       setErrorMessage(errorMessage);

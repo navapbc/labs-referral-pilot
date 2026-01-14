@@ -68,20 +68,14 @@ export async function fetchActionPlan(
   const timer = setTimeout(() => ac.abort(), 120_000);
 
   try {
-    const requestBody: {
-      resources: Resource[];
-      user_email: string;
-      user_query: string;
-    } = {
-      resources: resources,
-      user_email: userEmail,
-      user_query: userQuery,
-    };
-
     const upstream = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        resources: resources,
+        user_email: userEmail,
+        user_query: userQuery,
+      }),
       cache: "no-store",
       signal: ac.signal,
     });

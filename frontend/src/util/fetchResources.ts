@@ -5,7 +5,6 @@ export async function fetchResources(
   clientDescription: string,
   userEmail: string,
   prompt_version_id: string | null,
-  suffix?: string,
 ) {
   const apiDomain = await getApiDomain();
 
