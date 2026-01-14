@@ -26,9 +26,11 @@ interface LayoutProps {
 }
 
 export const metadata: Metadata = {
-  title: "Goodwill Central Texas - GenAI Referral Tool",
-  description: "AI-powered referral tool for Goodwill Central Texas",
-  generator: "v0.app",
+  title: "Goodwill - GenAI Referral Tool",
+  description: "AI-powered referral tool for Goodwill",
+  icons: {
+    icon: "/img/Goodwill_Industries_Logo.svg",
+  },
 };
 
 export default async function RootLayout({ children, params }: LayoutProps) {
