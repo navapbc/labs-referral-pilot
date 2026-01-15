@@ -2,7 +2,9 @@ import logging
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
+from fastapi import HTTPException
 from haystack import Pipeline
+from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import using_attributes
 from opentelemetry.trace import Span
@@ -118,11 +120,16 @@ class TracedPipelineRunner:
                     response_text = "".join(full_response) if full_response else ""
                     span.set_output(shorten_output(response_text))
                     span.set_status(Status(StatusCode.OK))
+                except PipelineRuntimeError as e:
+                    logger.error("PipelineRuntimeError: %s", e, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(e)))
+                    span.record_exception(e)
+                    raise HTTPException(status_code=500, detail=str(e)) from e
                 except Exception as e:
                     logger.error("Error during streaming: %s", e, exc_info=True)
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
-                    raise
+                    raise HTTPException(status_code=500, detail=str(e)) from e
 
     def return_response(
         self,
@@ -153,8 +160,13 @@ class TracedPipelineRunner:
                     span.set_output(extract_output(result))
                     span.set_status(Status(StatusCode.OK))
                     return result
+                except PipelineRuntimeError as e:
+                    logger.error("PipelineRuntimeError: %s", e, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(e)))
+                    span.record_exception(e)
+                    raise HTTPException(status_code=500, detail=str(e)) from e
                 except Exception as e:
                     logger.error("Error during pipeline run: %s", e, exc_info=True)
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
-                    raise
+                    raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
