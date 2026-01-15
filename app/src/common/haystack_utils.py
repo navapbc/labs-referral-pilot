@@ -81,11 +81,15 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
+        parent_span_name_suffix: str | None = None,
     ) -> Generator:
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.parent_span_name, openinference_span_kind="chain"
+                f"{self.parent_span_name}--{parent_span_name_suffix}"
+                if parent_span_name_suffix
+                else self.parent_span_name,
+                openinference_span_kind="chain",
             ) as span:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
@@ -129,11 +133,15 @@ class TracedPipelineRunner:
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
         extract_output: Callable[[Any], Any] = lambda resp: resp,
+        parent_span_name_suffix: str | None = None,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.parent_span_name, openinference_span_kind="chain"
+                f"{self.parent_span_name}--{parent_span_name_suffix}"
+                if parent_span_name_suffix
+                else self.parent_span_name,
+                openinference_span_kind="chain",
             ) as span:
                 try:
                     result = self.pipeline.run(
