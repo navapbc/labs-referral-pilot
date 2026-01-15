@@ -11,6 +11,7 @@ For more information, see https://docs.gunicorn.org/en/stable/configure.html
 
 import os
 import threading
+import time
 
 from src.app_config import config as app_config
 from src.ingestion import rag_utils
@@ -29,5 +30,14 @@ threads = 4
 # https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
 def when_ready(server: object) -> None:
     print("when_ready()", server)
+
+    print("populate_vector_db()")
     populate_rag_db_thread = threading.Thread(target=rag_utils.populate_vector_db)
     populate_rag_db_thread.start()
+
+    # Not sure why this is needed but without this sleep,
+    # pipelines can get stuck on "Running component retriever".
+    # Hypothesis: There's some initialization that is presenting a race condition.
+    time.sleep(4)
+
+    print("when_ready() Done")

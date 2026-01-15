@@ -46,11 +46,9 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline = Pipeline()
         pipeline.add_component("llm", create_websearch())
 
-        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                template=prompt_template,
-                required_variables=["resources", "action_plan_json", "user_query"],
+                variables=["resources", "action_plan_json", "user_query"],
             ),
             name="prompt_builder",
         )
@@ -69,7 +67,10 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate-action-plan/run` endpoint
     def run_api(
-        self, resources: list[Resource] | list[dict], user_email: str, user_query: str
+        self,
+        resources: list[Resource] | list[dict],
+        user_email: str,
+        user_query: str,
     ) -> dict:
         resource_objects = get_resources(resources)
         pipeline_run_args = self.create_pipeline_args(
@@ -102,6 +103,7 @@ class PipelineWrapper(BasePipelineWrapper):
         reasoning_effort: str | None = None,
         streaming: bool = False,
     ) -> dict:
+        prompt_template = haystack_utils.get_phoenix_prompt("generate_action_plan")
         return {
             "logger": {
                 "messages_list": [
@@ -109,6 +111,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 ],
             },
             "prompt_builder": {
+                "template": prompt_template,
                 "resources": format_resources(resource_objects),
                 "action_plan_json": action_plan_as_json,
                 "user_query": user_query,
