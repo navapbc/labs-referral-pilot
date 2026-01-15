@@ -9,10 +9,7 @@ from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
-from openinference.instrumentation import _tracers, using_attributes, using_metadata
-from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
 from src.app_config import config
@@ -63,6 +60,10 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
 
     def setup(self) -> None:
+        self.pipeline = self._create_pipeline()
+        self.runner = haystack_utils.TracedPipelineRunner(self.name, self.pipeline)
+
+    def _create_pipeline(self) -> Pipeline:
         # Do not rely on max_runs_per_component strictly, i.e., a component may run max_runs_per_component+1 times.
         # The component_visits counter for max_runs_per_component is reset with each call to pipeline.run()
         pipeline = Pipeline(max_runs_per_component=3)
@@ -96,9 +97,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.add_component("logger", components.ReadableLogger())
         pipeline.connect("output_validator.valid_replies", "logger")
-
-        self.pipeline = pipeline
-        self.runner = haystack_utils.TracedPipelineRunner(self.name, self.pipeline)
+        return pipeline
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(
@@ -116,7 +115,7 @@ class PipelineWrapper(BasePipelineWrapper):
             ) from he
         pipeline_run_args = self._run_arg_data(query, user_email, prompt_template)
 
-        def extract_output(result):
+        def extract_output(result: dict) -> list | str:
             try:
                 resp_obj = json.loads(result["llm"]["replies"][-1].text)
                 return [r["name"] for r in resp_obj["resources"]]

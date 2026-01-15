@@ -139,7 +139,7 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
-        extract_output: Callable[[Any], Any] = lambda resp: resp,
+        extract_output: Callable[[dict], Any] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
