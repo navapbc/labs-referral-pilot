@@ -2,7 +2,9 @@ import logging
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
+from fastapi import HTTPException
 from haystack import Pipeline
+from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
 from openinference.instrumentation import using_attributes
 from opentelemetry.trace import Span
@@ -81,11 +83,15 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
+        parent_span_name_suffix: str | None = None,
     ) -> Generator:
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.parent_span_name, openinference_span_kind="chain"
+                f"{self.parent_span_name}--{parent_span_name_suffix}"
+                if parent_span_name_suffix
+                else self.parent_span_name,
+                openinference_span_kind="chain",
             ) as span:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
@@ -114,11 +120,16 @@ class TracedPipelineRunner:
                     response_text = "".join(full_response) if full_response else ""
                     span.set_output(shorten_output(response_text))
                     span.set_status(Status(StatusCode.OK))
+                except PipelineRuntimeError as e:
+                    logger.error("PipelineRuntimeError: %s", e, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(e)))
+                    span.record_exception(e)
+                    raise HTTPException(status_code=500, detail=str(e)) from e
                 except Exception as e:
                     logger.error("Error during streaming: %s", e, exc_info=True)
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
-                    raise
+                    raise HTTPException(status_code=500, detail=str(e)) from e
 
     def return_response(
         self,
@@ -128,12 +139,16 @@ class TracedPipelineRunner:
         metadata: dict[str, Any],
         input_: Any | None = None,
         include_outputs_from: set[str] | None = None,
-        extract_output: Callable[[Any], Any] = lambda resp: resp,
+        extract_output: Callable[[dict], Any] = lambda resp: resp,
+        parent_span_name_suffix: str | None = None,
     ) -> dict:
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.parent_span_name, openinference_span_kind="chain"
+                f"{self.parent_span_name}--{parent_span_name_suffix}"
+                if parent_span_name_suffix
+                else self.parent_span_name,
+                openinference_span_kind="chain",
             ) as span:
                 try:
                     result = self.pipeline.run(
@@ -145,8 +160,13 @@ class TracedPipelineRunner:
                     span.set_output(extract_output(result))
                     span.set_status(Status(StatusCode.OK))
                     return result
+                except PipelineRuntimeError as e:
+                    logger.error("PipelineRuntimeError: %s", e, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(e)))
+                    span.record_exception(e)
+                    raise HTTPException(status_code=500, detail=str(e)) from e
                 except Exception as e:
                     logger.error("Error during pipeline run: %s", e, exc_info=True)
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
-                    raise
+                    raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e

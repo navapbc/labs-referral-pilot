@@ -21,7 +21,7 @@ tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 class PipelineWrapper(GenerateReferralsPipelineWrapper):
     name = "generate_referrals_rag"
 
-    def setup(self) -> None:
+    def _create_pipeline(self) -> Pipeline:
         pipeline = Pipeline(max_runs_per_component=3)
 
         # Replace LoadSupports() with retrieval from vector DB
@@ -75,7 +75,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         pipeline.connect("output_validator.valid_replies", "logger")
 
         # pipeline.draw(path="generate_referrals_rag.png")
-        self.pipeline = pipeline
+        return pipeline
 
     def _run_arg_data(
         self, query: str, user_email: str, prompt_template: list[ChatMessage]
