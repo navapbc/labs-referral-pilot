@@ -17,6 +17,11 @@ const nextConfig = {
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
+  // Exclude esbuild from standalone output - it's a devDependency (from Storybook)
+  // that shouldn't be needed at runtime and contains Go binaries with vulnerabilities
+  outputFileTracingExcludes: {
+    "*": ["node_modules/@esbuild/**", "node_modules/esbuild/**"],
+  },
   // Continue to support older browsers (ES5)
   transpilePackages: [],
 
