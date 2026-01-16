@@ -20,11 +20,13 @@ import { emailResult } from "@/util/emailResult";
 interface EmailReferralsProps {
   resultId: string;
   actionPlanResultId?: string;
+  disabled?: boolean;
 }
 
 export function EmailReferralsButton({
   resultId,
   actionPlanResultId,
+  disabled = false,
 }: EmailReferralsProps) {
   const [email, setEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -72,6 +74,7 @@ export function EmailReferralsButton({
           variant="outline"
           className="hover:bg-gray-100 hover:text-gray-900"
           data-testid="emailReferralsButton"
+          disabled={disabled}
         >
           <Mail className="w-4 h-4" />
           Email
