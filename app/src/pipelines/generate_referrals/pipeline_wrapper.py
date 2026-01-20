@@ -9,10 +9,7 @@ from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
-from openinference.instrumentation import _tracers, using_attributes, using_metadata
-from opentelemetry.trace.status import Status, StatusCode
 from pydantic import BaseModel
 
 from src.app_config import config
@@ -63,6 +60,10 @@ class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals"
 
     def setup(self) -> None:
+        self.pipeline = self._create_pipeline()
+        self.runner = haystack_utils.TracedPipelineRunner(self.name, self.pipeline)
+
+    def _create_pipeline(self) -> Pipeline:
         # Do not rely on max_runs_per_component strictly, i.e., a component may run max_runs_per_component+1 times.
         # The component_visits counter for max_runs_per_component is reset with each call to pipeline.run()
         pipeline = Pipeline(max_runs_per_component=3)
@@ -96,30 +97,10 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.add_component("logger", components.ReadableLogger())
         pipeline.connect("output_validator.valid_replies", "logger")
-
-        self.pipeline = pipeline
+        return pipeline
 
     # Called for the `generate-referrals/run` endpoint
     def run_api(
-        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
-    ) -> dict:
-        with using_attributes(user_id=user_email), using_metadata({"user_id": user_email}):
-            # Must set using_metadata context before calling tracer.start_as_current_span()
-            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"
-            ) as span:
-                result = self._run(query, user_email, prompt_version_id, suffix)
-                span.set_input(query)
-                try:
-                    resp_obj = json.loads(result["llm"]["replies"][-1].text)
-                    span.set_output([r["name"] for r in resp_obj["resources"]])
-                except (KeyError, IndexError):
-                    span.set_output(result["llm"]["replies"][-1].text)
-                span.set_status(Status(StatusCode.OK))
-                return result
-
-    def _run(
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
     ) -> dict:
         # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
@@ -132,20 +113,26 @@ class PipelineWrapper(BasePipelineWrapper):
                 status_code=422,
                 detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved due to HTTP status {he.response.status_code}",
             ) from he
+        pipeline_run_args = self._run_arg_data(query, user_email, prompt_template)
 
-        try:
-            response = self.pipeline.run(
-                self._run_arg_data(query, user_email, prompt_template),
-                include_outputs_from={"llm", "save_result"},
-            )
-            logger.debug("Results: %s", pformat(response, width=160))
-            return response
-        except PipelineRuntimeError as re:
-            logger.error("PipelineRuntimeError: %s", re, exc_info=True)
-            raise HTTPException(status_code=500, detail=str(re)) from re
-        except Exception as e:
-            logger.error("Error %s: %s", type(e), e, exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}") from e
+        def extract_output(result: dict) -> list | str:
+            try:
+                resp_obj = json.loads(result["llm"]["replies"][-1].text)
+                return [r["name"] for r in resp_obj["resources"]]
+            except (KeyError, IndexError):
+                return result["llm"]["replies"][-1].text
+
+        response = self.runner.return_response(
+            pipeline_run_args,
+            user_id=user_email,
+            metadata={"user_id": user_email},
+            include_outputs_from={"llm", "save_result"},
+            input_=query,
+            extract_output=extract_output,
+            parent_span_name_suffix=suffix,
+        )
+        logger.debug("Results: %s", pformat(response, width=160))
+        return response
 
     def _run_arg_data(
         self, query: str, user_email: str, prompt_template: list[ChatMessage]
