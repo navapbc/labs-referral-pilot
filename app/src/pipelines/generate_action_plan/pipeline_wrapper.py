@@ -154,6 +154,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_id=user_email,
             metadata={"user_id": user_email},
             input_=[r.name for r in resource_objects],
+            pregenerator_hook=haystack_utils.create_result_id_hook(self.pipeline),
         )
 
 
