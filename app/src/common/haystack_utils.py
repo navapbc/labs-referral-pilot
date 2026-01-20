@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
@@ -6,12 +7,14 @@ from fastapi import HTTPException
 from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
+from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openinference.instrumentation import using_attributes
 from opentelemetry.trace import Span
 from opentelemetry.trace.status import Status, StatusCode
 from phoenix.client.__generated__ import v1
 
 from src.common import phoenix_utils
+from src.common.components import SaveResult
 
 
 def get_phoenix_prompt(
@@ -65,6 +68,46 @@ def to_chat_messages(
     return messages
 
 
+def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
+    """Creates a pregenerator hook that generates result_id and yields it as first chunk.
+
+    This hook is specific to pipelines that use the SaveResult component and need to
+    return the result_id to the frontend for caching/reference.
+
+    Args:
+        pipeline: The Haystack pipeline to check for SaveResult component
+
+    Raises:
+        ValueError: If the pipeline does not have a SaveResult component
+    """
+    # Find the SaveResult component name in the pipeline
+    # NOTE: pipeline.walk() Visits each component in the pipeline exactly once and yields its name and instance.
+    # https://docs.haystack.deepset.ai/reference/pipeline-api#asyncpipelinewalk
+    save_result_component_name = next(
+        (name for name, comp in pipeline.walk() if isinstance(comp, SaveResult)),
+        None,
+    )
+
+    if save_result_component_name is None:
+        raise ValueError(
+            "create_result_id_hook requires a pipeline with a SaveResult component. "
+            "Do not use this hook for pipelines without SaveResult."
+        )
+
+    def hook(pipeline_run_args: dict) -> Generator:
+        result_id = str(uuid.uuid4())
+
+        # Add to pipeline args for SaveResult component
+        if save_result_component_name not in pipeline_run_args:  # checking to prevent KeyError
+            pipeline_run_args[save_result_component_name] = {}
+        pipeline_run_args[save_result_component_name]["result_id"] = result_id
+
+        # Yield as first chunk for frontend
+        yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
+
+    return hook
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,6 +127,7 @@ class TracedPipelineRunner:
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
+        pregenerator_hook: Callable[[dict], Generator] | None = None,
     ) -> Generator:
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
@@ -96,6 +140,11 @@ class TracedPipelineRunner:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
                     span.set_input(input_)
+
+                    # Call pregenerator_hook if provided (inside span, before streaming)
+                    if pregenerator_hook:
+                        for chunk in pregenerator_hook(pipeline_run_args):
+                            yield chunk
 
                     # hayhooks.streaming_generator() creates a thread that now inherits OpenTelemetry context
                     # thanks to ThreadingInstrumentor enabled in phoenix_utils.py
