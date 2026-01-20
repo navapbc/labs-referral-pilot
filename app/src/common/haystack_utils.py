@@ -67,12 +67,24 @@ def to_chat_messages(
     return messages
 
 
-def create_result_id_hook() -> Callable[[dict], Generator]:
+def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
     """Creates a pregenerator hook that generates result_id and yields it as first chunk.
 
     This hook is specific to pipelines that use the SaveResult component and need to
     return the result_id to the frontend for caching/reference.
+
+    Args:
+        pipeline: The Haystack pipeline to check for SaveResult component
+
+    Raises:
+        ValueError: If the pipeline does not have a SaveResult component
     """
+    # Validate that SaveResult component exists in the pipeline
+    if "save_result" not in pipeline.graph.nodes:
+        raise ValueError(
+            "create_result_id_hook requires a pipeline with a 'save_result' component. "
+            "Do not use this hook for pipelines without SaveResult."
+        )
 
     def hook(pipeline_run_args: dict) -> Generator:
         result_id = str(uuid.uuid4())
