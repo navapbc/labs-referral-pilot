@@ -80,20 +80,25 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
     Raises:
         ValueError: If the pipeline does not have a SaveResult component
     """
-    # Validate that SaveResult component exists in the pipeline
-    if not any(isinstance(comp_instance, SaveResult) for comp_instance in pipeline.components.values()):
+    # Find the SaveResult component name in the pipeline
+    # NOTE: pipeline.walk() Visits each component in the pipeline exactly once and yields its name and instance.
+    # https://docs.haystack.deepset.ai/reference/pipeline-api#asyncpipelinewalk
+    save_result_component_name = next(
+        (name for name, comp in pipeline.walk() if isinstance(comp, SaveResult)),
+        None,
+    )
+
+    if save_result_component_name is None:
         raise ValueError(
-            "create_result_id_hook requires a pipeline with a 'save_result' component. "
+            "create_result_id_hook requires a pipeline with a SaveResult component. "
             "Do not use this hook for pipelines without SaveResult."
         )
 
     def hook(pipeline_run_args: dict) -> Generator:
         result_id = str(uuid.uuid4())
 
-        # Add to pipeline args for SaveResult component
-        if "save_result" not in pipeline_run_args:  # checking to prevent KeyError
-            pipeline_run_args["save_result"] = {}
-        pipeline_run_args["save_result"]["result_id"] = result_id
+        # Add to pipeline args for SaveResult component, using setdefault to avoid KeyError
+        pipeline_run_args.setdefault(save_result_component_name, {})["result_id"] = result_id
 
         # Yield as first chunk for frontend
         yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
