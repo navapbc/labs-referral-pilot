@@ -62,8 +62,12 @@ def populate_vector_db() -> None:
 
     s3 = file_util.get_s3_client()
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
-    region_subfolders = get_s3_subfolders(s3, bucket, "files_to_ingest_into_vector_db")
+
+    s3_parent_folder = "files_to_ingest_into_vector_db/"
+    assert s3_parent_folder.endswith("/"), "s3_parent_folder should end with '/'"
+    region_subfolders = get_s3_subfolders(s3, bucket, s3_parent_folder)
     logger.info("Found region subfolders in S3: %s", region_subfolders)
+
     for region, s3_folder in region_subfolders.items():
         # Download files from S3
         local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
@@ -112,8 +116,6 @@ def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str) -> 
 
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
     paginator = s3.get_paginator("list_objects_v2")
-    if not s3_folder.endswith("/"):
-        s3_folder += "/"
     try:
         for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
             for obj in result.get("Contents", []):
