@@ -113,7 +113,9 @@ class PipelineWrapper(BasePipelineWrapper):
                 status_code=422,
                 detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved due to HTTP status {he.response.status_code}",
             ) from he
-        pipeline_run_args = self._run_arg_data(query, user_email, prompt_template)
+        pipeline_run_args = self._run_arg_data(
+            query, user_email, suffix or "CentralTX", prompt_template
+        )
 
         def extract_output(result: dict) -> list | str:
             try:
@@ -135,7 +137,7 @@ class PipelineWrapper(BasePipelineWrapper):
         return response
 
     def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+        self, query: str, user_email: str, suffix: str, prompt_template: list[ChatMessage]
     ) -> dict:
         return {
             "logger": {

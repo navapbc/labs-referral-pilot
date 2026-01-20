@@ -78,12 +78,15 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         return pipeline
 
     def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+        self, query: str, user_email: str, suffix: str, prompt_template: list[ChatMessage]
     ) -> dict:
-        return super()._run_arg_data(query, user_email, prompt_template) | {
+        return super()._run_arg_data(query, user_email, suffix, prompt_template) | {
             # For querying RAG DB
             "query_embedder": {"text": query},
-            "retriever": {"top_k": config.retrieval_top_k, "filters": None},
+            "retriever": {
+                "top_k": config.retrieval_top_k,
+                "filters": {"field": "region", "operator": "==", "value": suffix},
+            },
             # Override LLM config for RAG pipeline
             "llm": {
                 "model": config.generate_referrals_rag_model_version,
