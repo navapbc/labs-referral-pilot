@@ -75,13 +75,13 @@ def populate_vector_db() -> None:
         # Run the pipeline to index documents
         pipeline = _create_ingest_pipeline(doc_store, region=region)
         pipeline.run({"converter": {"sources": files_to_ingest}})
-        logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
+        logger.info(
+            "Ingested documents for region=%s doc_count=%d", region, doc_store.count_documents()
+        )
         logger.info("ChromaDB collections: %s", chroma_client.list_collections())
 
 
-def get_s3_subfolders(
-    s3: BaseClient, bucket: str, s3_folder: str = "files_to_ingest_into_vector_db/"
-) -> dict[str, str]:
+def get_s3_subfolders(s3: BaseClient, bucket: str, s3_folder: str) -> dict[str, str]:
     paginator = s3.get_paginator("list_objects_v2")
     subfolders = {}
     for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
