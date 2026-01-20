@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
@@ -6,6 +7,7 @@ from fastapi import HTTPException
 from haystack import Pipeline
 from haystack.core.errors import PipelineRuntimeError
 from haystack.dataclasses.chat_message import ChatMessage
+from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openinference.instrumentation import using_attributes
 from opentelemetry.trace import Span
 from opentelemetry.trace.status import Status, StatusCode
@@ -85,6 +87,14 @@ class TracedPipelineRunner:
         shorten_output: Callable[[str], str] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
     ) -> Generator:
+        # Generate UUID for result_id upfront
+        result_id = str(uuid.uuid4())
+
+        # Add result_id to pipeline_run_args for SaveResult component
+        if "save_result" not in pipeline_run_args:
+            pipeline_run_args["save_result"] = {}
+        pipeline_run_args["save_result"]["result_id"] = result_id
+
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
@@ -104,6 +114,10 @@ class TracedPipelineRunner:
                         pipeline=self.pipeline,
                         pipeline_run_args=pipeline_run_args,
                     )
+
+                    # Yield result_id as content in the first chunk before streaming
+                    result_id_chunk = StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
+                    yield result_id_chunk
 
                     # Stream chunks with each 'yield' call
                     chunk_count = 0

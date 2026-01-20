@@ -14,6 +14,7 @@ import logging
 from json import JSONDecodeError
 from pprint import pformat
 from typing import Any, Callable, List, Optional, TypeVar
+from uuid import UUID
 
 from fastapi import UploadFile
 from haystack import component
@@ -127,17 +128,21 @@ class SaveResult:
     """Saves LLM response to the database."""
 
     @component.output_types(result_id=str)
-    def run(self, replies: List[ChatMessage]) -> dict:
+    def run(self, replies: List[ChatMessage], result_id: str | None = None) -> dict:
         logger.info("Saving LLM result to database: %r", pformat(replies, width=160))
         assert replies, "Expected at least one reply"
         text_result = replies[0].text
         with config.db_session() as db_session, db_session.begin():
-            llm_result = LlmResponse(raw_text=text_result)
+            # Use provided result_id or let SQLAlchemy generate one
+            if result_id:
+                llm_result = LlmResponse(id=UUID(result_id), raw_text=text_result)
+            else:
+                llm_result = LlmResponse(raw_text=text_result)
             db_session.add(llm_result)
             db_session.flush()  # To get the id assigned
-            result_id = str(llm_result.id)
-            logger.info("Saved LLM result with id=%s", result_id)
-            return {"result_id": result_id}
+            result_id_str = str(llm_result.id)
+            logger.info("Saved LLM result with id=%s", result_id_str)
+            return {"result_id": result_id_str}
 
 
 @component
