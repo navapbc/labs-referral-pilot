@@ -269,12 +269,6 @@ export async function fetchActionPlanStreaming(
       };
     }
 
-    // Check for result_id in response headers
-    const headerResultId = response.headers.get("x-result-id");
-    if (headerResultId) {
-      resultId = headerResultId;
-    }
-
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
 
@@ -346,12 +340,27 @@ export async function fetchActionPlanStreaming(
             // Handle hayhooks response format: choices[0].delta.content
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
-              // Accumulate the JSON content
-              accumulatedJSON += content;
+              // Check if this is the first message containing result_id
+              if (!resultId && content.includes("result_id")) {
+                try {
+                  const resultIdData = JSON.parse(content);
+                  if (resultIdData.result_id) {
+                    resultId = resultIdData.result_id;
+                  }
+                } catch (e) {
+                  // Not a JSON object, continue processing as regular content
+                }
+              }
 
-              // Parse incrementally and pass structured data to callback
-              const partialPlan = parseStreamingJSON(accumulatedJSON);
-              onChunk(partialPlan);
+              // Only accumulate content that's not the result_id metadata
+              if (!content.includes("result_id")) {
+                // Accumulate the JSON content
+                accumulatedJSON += content;
+
+                // Parse incrementally and pass structured data to callback
+                const partialPlan = parseStreamingJSON(accumulatedJSON);
+                onChunk(partialPlan);
+              }
             }
 
             // Check for finish_reason to detect completion
