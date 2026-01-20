@@ -97,8 +97,10 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
     def hook(pipeline_run_args: dict) -> Generator:
         result_id = str(uuid.uuid4())
 
-        # Add to pipeline args for SaveResult component, using setdefault to avoid KeyError
-        pipeline_run_args.setdefault(save_result_component_name, {})["result_id"] = result_id
+        # Add to pipeline args for SaveResult component
+        if "save_result" not in pipeline_run_args:  # checking to prevent KeyError
+            pipeline_run_args["save_result"] = {}
+        pipeline_run_args["save_result"]["result_id"] = result_id
 
         # Yield as first chunk for frontend
         yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
