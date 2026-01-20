@@ -73,6 +73,9 @@ def populate_vector_db() -> None:
         local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
         files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
         logger.info("Files to ingest: %s", files_to_ingest)
+        if not files_to_ingest:
+            logger.warning("No files found to ingest for region=%s in s3://%s/%s", region, bucket, s3_folder)
+            continue
 
         # Ingest documents into ChromaDB
         logger.info("Ingesting documents into collection=%r", collection_name)
