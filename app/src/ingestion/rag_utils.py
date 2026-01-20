@@ -13,6 +13,7 @@ from haystack.document_stores.errors.errors import DocumentStoreError
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 
 from src.app_config import config
+from src.common.components import DocumentMetadataAdder
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
@@ -58,23 +59,42 @@ def populate_vector_db() -> None:
                 raise
     assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
-    # Download files from S3
-    local_folder = download_s3_folder_to_local()
-    files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
-    logger.info("Files to ingest: %s", files_to_ingest)
-
-    # Ingest documents into ChromaDB
-    logger.info("Ingesting documents into collection=%r", collection_name)
-    # Run the pipeline to index documents
-    pipeline = _create_ingest_pipeline(doc_store)
-    pipeline.run({"converter": {"sources": files_to_ingest}})
-    logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
-    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
-
-
-def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
-    """Download the contents of a folder directory from S3 to a local folder."""
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
+    region_subfolders = get_s3_subfolders(bucket, "files_to_ingest_into_vector_db")
+    logger.info("Found region subfolders in S3: %s", region_subfolders)
+    for region, s3_folder in region_subfolders.items():
+        # Download files from S3
+        local_folder = download_s3_folder_to_local(bucket, s3_folder)
+        files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
+        logger.info("Files to ingest: %s", files_to_ingest)
+
+        # Ingest documents into ChromaDB
+        logger.info("Ingesting documents into collection=%r", collection_name)
+        # Run the pipeline to index documents
+        pipeline = _create_ingest_pipeline(doc_store, region=region)
+        pipeline.run({"converter": {"sources": files_to_ingest}})
+        logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
+        logger.info("ChromaDB collections: %s", chroma_client.list_collections())
+
+
+def get_s3_subfolders(
+    bucket: str, s3_folder: str = "files_to_ingest_into_vector_db/"
+) -> dict[str, str]:
+    paginator = s3.get_paginator("list_objects_v2")
+    subfolders = {}
+    for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
+        for obj in result.get("Contents", []):
+            s3_key = obj["Key"]
+            if s3_key == s3_folder:
+                continue  # Skip the folder itself
+            if s3_key.endswith("/"):
+                region = s3_key.removeprefix(s3_folder).removesuffix("/")
+                subfolders[region] = s3_key
+    return subfolders
+
+
+def download_s3_folder_to_local(bucket: str, s3_folder: str) -> str:
+    """Download the contents of a folder directory from S3 to a local folder."""
     try:
         local_folder = s3_folder
         os.makedirs(local_folder, exist_ok=True)
@@ -109,7 +129,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         raise
 
 
-def _create_ingest_pipeline(doc_store: ChromaDocumentStore) -> Pipeline:
+def _create_ingest_pipeline(doc_store: ChromaDocumentStore, region: str) -> Pipeline:
     pipeline = Pipeline()
     pipeline.add_component("converter", MultiFileConverter())
     pipeline.add_component(
@@ -124,10 +144,18 @@ def _create_ingest_pipeline(doc_store: ChromaDocumentStore) -> Pipeline:
     pipeline.add_component(
         "embedder", SentenceTransformersDocumentEmbedder(model=config.rag_embedding_model)
     )
+    # Add metadata to each document
+    pipeline.add_component(
+        "metadata_adder",
+        DocumentMetadataAdder(
+            metadata={"region": region},
+        ),
+    )
     pipeline.add_component("writer", DocumentWriter(document_store=doc_store))
 
     # Connect the components
     pipeline.connect("converter.documents", "preprocessor.documents")
     pipeline.connect("preprocessor.documents", "embedder.documents")
-    pipeline.connect("embedder.documents", "writer.documents")
+    pipeline.connect("embedder.documents", "metadata_adder.documents")
+    pipeline.connect("metadata_adder.documents", "writer.documents")
     return pipeline
