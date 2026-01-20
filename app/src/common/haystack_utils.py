@@ -14,6 +14,7 @@ from opentelemetry.trace.status import Status, StatusCode
 from phoenix.client.__generated__ import v1
 
 from src.common import phoenix_utils
+from src.common.components import SaveResult
 
 
 def get_phoenix_prompt(
@@ -80,7 +81,7 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
         ValueError: If the pipeline does not have a SaveResult component
     """
     # Validate that SaveResult component exists in the pipeline
-    if "save_result" not in pipeline.graph.nodes:
+    if not any(isinstance(comp_instance, SaveResult) for comp_instance in pipeline.components.values()):
         raise ValueError(
             "create_result_id_hook requires a pipeline with a 'save_result' component. "
             "Do not use this hook for pipelines without SaveResult."
@@ -90,7 +91,7 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
         result_id = str(uuid.uuid4())
 
         # Add to pipeline args for SaveResult component
-        if "save_result" not in pipeline_run_args:
+        if "save_result" not in pipeline_run_args:  # checking to prevent KeyError
             pipeline_run_args["save_result"] = {}
         pipeline_run_args["save_result"]["result_id"] = result_id
 
