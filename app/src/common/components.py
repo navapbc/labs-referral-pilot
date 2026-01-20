@@ -452,7 +452,5 @@ class DocumentMetadataAdder:
     @component.output_types(documents=list[Document])
     def run(self, documents: list[Document]) -> dict:
         for doc in documents:
-            if doc.meta is None:
-                doc.meta = {}
             doc.meta.update(self.metadata)
         return {"documents": documents}
