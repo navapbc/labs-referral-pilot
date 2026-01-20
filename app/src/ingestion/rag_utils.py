@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+from botocore.client import BaseClient
 from botocore.exceptions import NoCredentialsError
 from chromadb.api import ClientAPI
 from haystack import Pipeline
@@ -59,12 +60,13 @@ def populate_vector_db() -> None:
                 raise
     assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
+    s3 = file_util.get_s3_client()
     bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
-    region_subfolders = get_s3_subfolders(bucket, "files_to_ingest_into_vector_db")
+    region_subfolders = get_s3_subfolders(s3, bucket, "files_to_ingest_into_vector_db")
     logger.info("Found region subfolders in S3: %s", region_subfolders)
     for region, s3_folder in region_subfolders.items():
         # Download files from S3
-        local_folder = download_s3_folder_to_local(bucket, s3_folder)
+        local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
         files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
         logger.info("Files to ingest: %s", files_to_ingest)
 
@@ -78,7 +80,7 @@ def populate_vector_db() -> None:
 
 
 def get_s3_subfolders(
-    bucket: str, s3_folder: str = "files_to_ingest_into_vector_db/"
+    s3: BaseClient, bucket: str, s3_folder: str = "files_to_ingest_into_vector_db/"
 ) -> dict[str, str]:
     paginator = s3.get_paginator("list_objects_v2")
     subfolders = {}
@@ -93,7 +95,7 @@ def get_s3_subfolders(
     return subfolders
 
 
-def download_s3_folder_to_local(bucket: str, s3_folder: str) -> str:
+def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str) -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     try:
         local_folder = s3_folder
@@ -109,7 +111,6 @@ def download_s3_folder_to_local(bucket: str, s3_folder: str) -> str:
         return local_folder
 
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
-    s3 = file_util.get_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
     if not s3_folder.endswith("/"):
         s3_folder += "/"
