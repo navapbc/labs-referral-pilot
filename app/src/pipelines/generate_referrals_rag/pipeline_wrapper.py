@@ -1,4 +1,5 @@
 import logging
+from typing import Generator
 
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -8,7 +9,7 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
-from src.common import components, phoenix_utils
+from src.common import components, haystack_utils, phoenix_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import (
     PipelineWrapper as GenerateReferralsPipelineWrapper,
 )
@@ -77,16 +78,76 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         return pipeline
 
-    def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    def create_pipeline_args(
+        self,
+        query: str,
+        user_email: str,
+        *,
+        prompt_template: list[ChatMessage] | None = None,
+        prompt_version_id: str = "",
+        suffix: str = "",
+        llm_model: str | None = None,
+        reasoning_effort: str | None = None,
+        streaming: bool = False,
     ) -> dict:
-        return super()._run_arg_data(query, user_email, prompt_template) | {
+        """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
+        prompt_template = haystack_utils.get_phoenix_prompt(
+            "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
+        )
+
+        # Get base args from parent class
+        base_args = super()._run_arg_data(query, user_email, prompt_template)
+
+        # Override/add RAG-specific args
+        return base_args | {
             # For querying RAG DB
             "query_embedder": {"text": query},
             "retriever": {"top_k": config.retrieval_top_k, "filters": None},
             # Override LLM config for RAG pipeline
             "llm": {
-                "model": config.generate_referrals_rag_model_version,
-                "reasoning_effort": config.generate_referrals_rag_reasoning_level,
+                "model": llm_model or config.generate_referrals_rag_model_version,
+                "reasoning_effort": reasoning_effort
+                or config.generate_referrals_rag_reasoning_level,
+                "streaming": streaming,
             },
         }
+
+    def _run_arg_data(
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    ) -> dict:
+        """Wrapper for backward compatibility with parent class's run_api method."""
+        return self.create_pipeline_args(query, user_email, prompt_template=prompt_template)
+
+    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
+    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
+        # Note: 'model' parameter is the pipeline name, not the LLM model
+        assert model == self.name, f"Unexpected model/pipeline name: {model}"
+
+        # Extract custom parameters from the body
+        query = body.get("query", "")
+        user_email = body.get("user_email", "")
+
+        if not query:
+            raise ValueError("query parameter is required")
+
+        if not user_email:
+            raise ValueError("user_email parameter is required")
+
+        pipeline_run_args = self.create_pipeline_args(
+            query,
+            user_email,
+            prompt_version_id=body.get("prompt_version_id", ""),
+            suffix=body.get("suffix", ""),
+            llm_model=body.get("llm_model", None),
+            reasoning_effort=body.get("reasoning_effort", None),
+            streaming=True,
+        )
+        logger.info("Streaming action plan: %s", pipeline_run_args)
+        return self.runner.stream_response(
+            pipeline_run_args,
+            user_id=user_email,
+            metadata={"user_id": user_email},
+            input_=[query],
+            pregenerator_hook=haystack_utils.create_result_id_hook(self.pipeline),
+        )

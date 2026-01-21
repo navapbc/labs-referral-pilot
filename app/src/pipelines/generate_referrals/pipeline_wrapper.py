@@ -2,7 +2,7 @@ import json
 import logging
 from enum import Enum
 from pprint import pformat
-from typing import Optional
+from typing import Generator, Optional
 
 import httpx
 from fastapi import HTTPException
@@ -134,9 +134,24 @@ class PipelineWrapper(BasePipelineWrapper):
         logger.debug("Results: %s", pformat(response, width=160))
         return response
 
-    def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    def create_pipeline_args(
+        self,
+        query: str,
+        user_email: str,
+        *,
+        prompt_template: list[ChatMessage] | None = None,
+        prompt_version_id: str = "",
+        suffix: str = "",
+        llm_model: str | None = None,
+        reasoning_effort: str | None = None,
+        streaming: bool = False,
     ) -> dict:
+        """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
+        if prompt_template is None:
+            prompt_template = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
+            )
+
         return {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email}],
@@ -147,7 +162,48 @@ class PipelineWrapper(BasePipelineWrapper):
                 "response_json": response_schema,
             },
             "llm": {
-                "model": config.generate_referrals_model_version,
-                "reasoning_effort": config.generate_referrals_reasoning_level,
+                "model": llm_model or config.generate_referrals_model_version,
+                "reasoning_effort": reasoning_effort or config.generate_referrals_reasoning_level,
+                "streaming": streaming,
             },
         }
+
+    def _run_arg_data(
+        self, query: str, user_email: str, prompt_template: list[ChatMessage]
+    ) -> dict:
+        """Wrapper for backward compatibility with run_api method."""
+        return self.create_pipeline_args(query, user_email, prompt_template=prompt_template)
+
+    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
+    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
+        # Note: 'model' parameter is the pipeline name, not the LLM model
+        assert model == self.name, f"Unexpected model/pipeline name: {model}"
+
+        # Extract custom parameters from the body
+        query = body.get("query", "")
+        user_email = body.get("user_email", "")
+
+        if not query:
+            raise ValueError("query parameter is required")
+
+        if not user_email:
+            raise ValueError("user_email parameter is required")
+
+        pipeline_run_args = self.create_pipeline_args(
+            query,
+            user_email,
+            prompt_version_id=body.get("prompt_version_id", ""),
+            suffix=body.get("suffix", ""),
+            llm_model=body.get("llm_model", None),
+            reasoning_effort=body.get("reasoning_effort", None),
+            streaming=True,
+        )
+        logger.info("Streaming referrals: %s", pipeline_run_args)
+        return self.runner.stream_response(
+            pipeline_run_args,
+            user_id=user_email,
+            metadata={"user_id": user_email},
+            input_=[query],
+            pregenerator_hook=haystack_utils.create_result_id_hook(self.pipeline),
+        )
