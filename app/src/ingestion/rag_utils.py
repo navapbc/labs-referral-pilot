@@ -60,23 +60,33 @@ def populate_vector_db() -> None:
                 raise
     assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
-    s3 = file_util.get_s3_client()
-    bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
+    local_folder = s3_parent_folder = "files_to_ingest_into_vector_db/"
 
-    s3_parent_folder = "files_to_ingest_into_vector_db/"
-    assert s3_parent_folder.endswith("/"), "s3_parent_folder should end with '/'"
-    region_subfolders = get_s3_subfolders(s3, bucket, s3_parent_folder)
-    logger.info("Found region subfolders in S3: %s", region_subfolders)
+    if config.environment == "local":
+        assert os.path.exists(
+            local_folder
+        ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
+    else:
+        s3 = file_util.get_s3_client()
+        bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
 
-    for region, s3_folder in region_subfolders.items():
-        # Download files from S3
-        local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
-        files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
+        assert s3_parent_folder.endswith("/"), "s3_parent_folder should end with '/'"
+        s3_subfolders = get_s3_subfolders(s3, bucket, s3_parent_folder)
+        logger.info("Region subfolders in S3: %s", s3_subfolders)
+        # Exclude certain regions if needed
+        for s3_folder in s3_subfolders.values():
+            local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
+
+    region_subfolders = {
+        entry.name: entry.path for entry in os.scandir(local_folder) if entry.is_dir()
+    }
+    logger.info("Region subfolders in local folder: %s", region_subfolders)
+
+    for region, subfolder in region_subfolders.items():
+        files_to_ingest = [str(p) for p in Path(subfolder).rglob("*") if p.is_file()]
         logger.info("Files to ingest: %s", files_to_ingest)
         if not files_to_ingest:
-            logger.warning(
-                "No files found to ingest for region=%s in s3://%s/%s", region, bucket, s3_folder
-            )
+            logger.warning("No files found to ingest for region=%s", region)
             continue
 
         # Ingest documents into ChromaDB
@@ -112,12 +122,6 @@ def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str) -> 
     except PermissionError as e:
         logger.error("Error creating directories for %s: %s", s3_folder, e)
         local_folder = f"/tmp/{s3_folder}"  # nosec B108
-
-    if config.environment == "local":
-        assert os.path.exists(
-            local_folder
-        ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
-        return local_folder
 
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
     paginator = s3.get_paginator("list_objects_v2")
