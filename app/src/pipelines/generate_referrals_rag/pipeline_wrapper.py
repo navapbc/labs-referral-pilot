@@ -8,14 +8,13 @@ from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
-from src.common import components, phoenix_utils
+from src.common import components
 from src.pipelines.generate_referrals.pipeline_wrapper import (
     PipelineWrapper as GenerateReferralsPipelineWrapper,
 )
 from src.pipelines.generate_referrals.pipeline_wrapper import ResourceList
 
 logger = logging.getLogger(__name__)
-tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(GenerateReferralsPipelineWrapper):
