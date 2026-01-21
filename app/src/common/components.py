@@ -330,8 +330,12 @@ class OpenAIWebSearchGenerator:
                 tool_call.type,
                 attributes={"openinference_span_kind": "tool"},
             ) as span:
-                span.set_attribute("tool.action", tool_call.action.to_dict())
-                span.set_attribute("tool.status", tool_call.status)
+                span.set_attribute("action", str(tool_call.action))
+                if hasattr(tool_call.action, "query"):
+                    span.set_attribute("action.query", str(tool_call.action.query))
+                if hasattr(tool_call.action, "queries"):
+                    span.set_attribute("action.queries", str(tool_call.action.queries))
+                span.set_attribute("status", tool_call.status)
 
 
 EMAIL_INTRO = """\
@@ -415,7 +419,6 @@ class LlmOutputValidator:
             output_dict = json.loads(reply.text)
             self.pydantic_model.model_validate(output_dict)
             return {"valid_replies": replies}
-
         except (ValueError, ValidationError) as e:
             logger.error(
                 (
