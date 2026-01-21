@@ -142,7 +142,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
         )
-        logger.info("Streaming action plan: %s", pipeline_run_args)
+        logger.info("Streaming referrals: %s", pipeline_run_args)
         return self.runner.stream_response(
             pipeline_run_args,
             user_id=user_email,
