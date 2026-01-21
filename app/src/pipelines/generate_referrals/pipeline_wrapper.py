@@ -13,10 +13,9 @@ from haystack.dataclasses.chat_message import ChatMessage
 from pydantic import BaseModel
 
 from src.app_config import config
-from src.common import components, haystack_utils, phoenix_utils
+from src.common import components, haystack_utils
 
 logger = logging.getLogger(__name__)
-tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class ReferralType(str, Enum):

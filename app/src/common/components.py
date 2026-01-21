@@ -23,9 +23,11 @@ from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openai import OpenAI
+from openai.types.responses.response_function_web_search import ResponseFunctionWebSearch
 from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
+from src.common import phoenix_utils
 from src.common.send_email import send_email
 from src.db.models.support_listing import LlmResponse, Support
 
@@ -238,6 +240,7 @@ class OpenAIWebSearchGenerator:
             "input": prompt,
             "reasoning": {"effort": reasoning_effort},
             "tools": [{"type": "web_search"}],
+            # Add other parameters, like temperature
         }
 
         if domain:
@@ -308,8 +311,31 @@ class OpenAIWebSearchGenerator:
         else:
             # Non-streaming response
             response = client.responses.create(**api_params)
-            logger.debug("Response: %s", pformat(response.output_text, width=160))
-            return {"replies": [ChatMessage.from_assistant(response.output_text)]}
+
+            web_search_responses = [
+                item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
+            ]
+            self._add_child_spans(web_search_responses)
+
+            return {
+                "replies": [ChatMessage.from_assistant(response.output_text)],
+                "temperature": response.temperature,
+                # Also add web_search responses to parent span attributes
+                "web_search": [str(result) for result in web_search_responses],
+            }
+
+    def _add_child_spans(self, web_search_responses: list[ResponseFunctionWebSearch]) -> None:
+        for tool_call in web_search_responses:
+            with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+                tool_call.type,
+                attributes={"openinference_span_kind": "tool"},
+            ) as span:
+                span.set_attribute("action", str(tool_call.action))
+                if hasattr(tool_call.action, "query"):
+                    span.set_attribute("action.query", str(tool_call.action.query))
+                if hasattr(tool_call.action, "queries"):
+                    span.set_attribute("action.queries", str(tool_call.action.queries))
+                span.set_attribute("status", tool_call.status)
 
 
 EMAIL_INTRO = """\
@@ -393,7 +419,6 @@ class LlmOutputValidator:
             output_dict = json.loads(reply.text)
             self.pydantic_model.model_validate(output_dict)
             return {"valid_replies": replies}
-
         except (ValueError, ValidationError) as e:
             logger.error(
                 (
