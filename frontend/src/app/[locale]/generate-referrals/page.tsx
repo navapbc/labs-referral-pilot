@@ -10,7 +10,12 @@ import "@/app/globals.css";
 import { fetchLocationFromZip } from "@/util/fetchLocation";
 
 import { PrintableReferralsReport } from "@/util/printReferrals";
-import { fetchActionPlan, ActionPlan } from "@/util/fetchActionPlan";
+import {
+  fetchActionPlan, // eslint-disable-line @typescript-eslint/no-unused-vars -- will be used for user preference between streaming/non-streaming
+  fetchActionPlanStreaming,
+  ActionPlan,
+  PartialActionPlan,
+} from "@/util/fetchActionPlan";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
@@ -46,6 +51,10 @@ export default function Page() {
   const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
   const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
+  const [streamingPlan, setStreamingPlan] = useState<PartialActionPlan | null>(
+    null,
+  );
+  const [isStreaming, setIsStreaming] = useState(false);
   const [activeTab, setActiveTab] = useState("find-referrals");
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
@@ -176,29 +185,66 @@ export default function Page() {
     if (selectedResources.length === 0) return;
 
     setIsGeneratingActionPlan(true);
+    setIsStreaming(true);
     setActionPlan(null);
+    setStreamingPlan(null);
     setErrorMessage(undefined);
 
     try {
       const {
-        actionPlan: plan,
+        actionPlan: finalPlan,
         resultId,
         errorMessage: planError,
-      } = await fetchActionPlan(
+      } = await fetchActionPlanStreaming(
         selectedResources,
         userEmail,
         clientDescription,
+        // onChunk callback - receive structured partial plan
+        (partialPlan: PartialActionPlan) => {
+          setStreamingPlan(partialPlan);
+        },
+        // onComplete callback - stop streaming UI
+        () => {
+          setIsStreaming(false);
+        },
+        // onError callback - clear content and show error
+        (error: string) => {
+          setIsStreaming(false);
+          setIsGeneratingActionPlan(false);
+          setStreamingPlan(null);
+          setActionPlan(null);
+          setErrorMessage(error);
+        },
       );
-      setActionPlan(plan);
-      setActionPlanResultId(resultId);
+
+      // Handle errors from the streaming response
       if (planError) {
         setErrorMessage(planError);
-        setActionPlanResultId(""); // set the Action PLan Id to "" so we don't email an empty or errant result
+        setActionPlanResultId(""); // set the Action Plan Id to "" so we don't email an empty or errant result
+        setStreamingPlan(null);
+        setActionPlan(null);
+        return;
+      }
+
+      // Set the final parsed action plan
+      if (finalPlan) {
+        setActionPlan(finalPlan);
+        setActionPlanResultId(resultId);
+        setStreamingPlan(null); // Clear streaming state
+      } else {
+        setErrorMessage(
+          "There was an issue streaming the Action Plan. Please try again.",
+        );
+        setActionPlanResultId("");
       }
     } catch (error) {
       console.error("Error generating action plan:", error);
+      setIsStreaming(false);
+      setIsGeneratingActionPlan(false);
+      setStreamingPlan(null);
+      setActionPlan(null);
       setErrorMessage(
-        "The server encountered an unexpected error. Please try again later.",
+        "There was an issue streaming the Action Plan. Please try again.",
       );
     } finally {
       setIsGeneratingActionPlan(false);
@@ -419,6 +465,7 @@ export default function Page() {
                     onPrint={handlePrint}
                     resourcesResultId={resourcesResultId}
                     actionPlanResultId={actionPlanResultId}
+                    disabled={isStreaming}
                   />
                 </div>
               </div>
@@ -446,6 +493,8 @@ export default function Page() {
                   selectedResources={selectedResources}
                   actionPlan={actionPlan}
                   isGeneratingActionPlan={isGeneratingActionPlan}
+                  streamingPlan={streamingPlan}
+                  isStreaming={isStreaming}
                   onResourceSelection={handleResourceSelection}
                   onSelectAllResources={handleSelectAllResources}
                   onGenerateActionPlan={() => void generateActionPlan()}
@@ -463,6 +512,7 @@ export default function Page() {
                   actionPlanResultId={actionPlanResultId}
                   className="justify-end"
                   testIdSuffix="bottom"
+                  disabled={isStreaming}
                 />
               </div>
             )}
