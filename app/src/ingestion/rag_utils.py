@@ -74,7 +74,9 @@ def populate_vector_db() -> None:
         files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
         logger.info("Files to ingest: %s", files_to_ingest)
         if not files_to_ingest:
-            logger.warning("No files found to ingest for region=%s in s3://%s/%s", region, bucket, s3_folder)
+            logger.warning(
+                "No files found to ingest for region=%s in s3://%s/%s", region, bucket, s3_folder
+            )
             continue
 
         # Ingest documents into ChromaDB
