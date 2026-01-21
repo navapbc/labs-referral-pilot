@@ -141,11 +141,6 @@ class TracedPipelineRunner:
                 try:
                     span.set_input(input_)
 
-                    # Call pregenerator_hook if provided (inside span, before streaming)
-                    if pregenerator_hook:
-                        for chunk in pregenerator_hook(pipeline_run_args):
-                            yield chunk
-
                     # hayhooks.streaming_generator() creates a thread that now inherits OpenTelemetry context
                     # thanks to ThreadingInstrumentor enabled in phoenix_utils.py
                     # streaming_generator() must be run inside the span context to inherit correctly
@@ -164,6 +159,12 @@ class TracedPipelineRunner:
                         # Must yield chunks one by one for SSE
                         # Must yield in the tracer span context to have spans linked as child spans
                         yield chunk
+
+                    # Do this after streaming all chunks so that the parent-child span relationship is established
+                    # Call pregenerator_hook if provided (inside span)
+                    if pregenerator_hook:
+                        for chunk in pregenerator_hook(pipeline_run_args):
+                            yield chunk
 
                     logger.info("Successfully streamed %d chunks", chunk_count)
                     response_text = "".join(full_response) if full_response else ""
