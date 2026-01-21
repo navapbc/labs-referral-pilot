@@ -91,12 +91,17 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
-        prompt_template = haystack_utils.get_phoenix_prompt(
-            "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
-        )
-
         # Get base args from parent class
-        base_args = super()._run_arg_data(query, user_email, prompt_template)
+        base_args = super().create_pipeline_args(
+            query,
+            user_email,
+            prompt_template=prompt_template,
+            prompt_version_id=prompt_version_id,
+            suffix=suffix,
+            llm_model=llm_model,
+            reasoning_effort=reasoning_effort,
+            streaming=streaming,
+        )
 
         # Override/add RAG-specific args
         return base_args | {
@@ -111,12 +116,6 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
                 "streaming": streaming,
             },
         }
-
-    def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
-    ) -> dict:
-        """Wrapper for backward compatibility with parent class's run_api method."""
-        return self.create_pipeline_args(query, user_email, prompt_template=prompt_template)
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
