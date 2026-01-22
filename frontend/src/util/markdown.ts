@@ -26,15 +26,18 @@ export function extractCitations(content: string): {
   // The domain text is just the domain name, URL is the full link
   const pattern = /\s*\(\[([a-z0-9.-]+\.[a-z]{2,6})\]\(([^)]+)\)\)/gi;
 
-  const modifiedContent = content.replace(pattern, (match, domain, url) => {
-    // Collect unique citations
-    if (!seenDomains.has(domain)) {
-      seenDomains.add(domain);
-      citations.push({ domain, url });
-    }
-    // Remove the citation from the body text
-    return "";
-  });
+  const modifiedContent = content.replace(
+    pattern,
+    (_match: string, domain: string, url: string) => {
+      // Collect unique citations
+      if (!seenDomains.has(domain)) {
+        seenDomains.add(domain);
+        citations.push({ domain, url });
+      }
+      // Remove the citation from the body text
+      return "";
+    },
+  );
 
   return { content: modifiedContent, citations };
 }
