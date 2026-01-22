@@ -88,7 +88,6 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         reasoning_effort: str | None = None,
         streaming: bool = False,
     ) -> dict:
-        return super()._run_arg_data(query, user_email, prompt_template, region=region) | {
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
         # Get base args from parent class
         base_args = super().create_pipeline_args(
@@ -140,6 +139,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             user_email,
             prompt_version_id=body.get("prompt_version_id", ""),
             suffix=body.get("suffix", ""),
+            region=body.get("suffix", "") or "centraltx",
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
