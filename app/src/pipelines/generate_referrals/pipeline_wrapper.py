@@ -1,10 +1,11 @@
-import httpx
 import json
 import logging
+import uuid
 from enum import Enum
 from pprint import pformat
 from typing import Generator, Optional
 
+import httpx
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
@@ -195,11 +196,16 @@ class PipelineWrapper(BasePipelineWrapper):
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
         )
+
+        # Generate result_id upfront to pass to both SaveResult and the hook
+        result_id = str(uuid.uuid4())
+        pipeline_run_args["save_result"] = {"result_id": result_id}
+
         logger.info("Streaming referrals: %s", pipeline_run_args)
         return self.runner.stream_response(
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
             input_=[query],
-            generator_hook=haystack_utils.create_result_id_hook(self.pipeline),
+            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
         )

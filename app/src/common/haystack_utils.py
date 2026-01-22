@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
@@ -68,14 +67,15 @@ def to_chat_messages(
     return messages
 
 
-def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
-    """Creates a generator hook that generates result_id and yields it as the last chunk before the "finish_reason":"stop" chunk.
+def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict], Generator]:
+    """Creates a generator hook that yields the result_id as the last chunk.
 
     This hook is specific to pipelines that use the SaveResult component and need to
     return the result_id to the frontend for caching/reference.
 
     Args:
         pipeline: The Haystack pipeline to check for SaveResult component
+        result_id: The result_id that will be used by SaveResult and yielded to frontend
 
     Raises:
         ValueError: If the pipeline does not have a SaveResult component
@@ -95,14 +95,7 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
         )
 
     def hook(pipeline_run_args: dict) -> Generator:
-        result_id = str(uuid.uuid4())
-
-        # Add to pipeline args for SaveResult component
-        if save_result_component_name not in pipeline_run_args:  # checking to prevent KeyError
-            pipeline_run_args[save_result_component_name] = {}
-        pipeline_run_args[save_result_component_name]["result_id"] = result_id
-
-        # Yield as first chunk for frontend
+        # Yield result_id as last chunk for frontend
         yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
 
     return hook
