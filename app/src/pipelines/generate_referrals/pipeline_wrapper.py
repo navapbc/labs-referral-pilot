@@ -4,12 +4,10 @@ from enum import Enum
 from pprint import pformat
 from typing import Generator, Optional
 
-import httpx
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
-from haystack.dataclasses.chat_message import ChatMessage
 from pydantic import BaseModel
 
 from src.app_config import config
@@ -103,15 +101,9 @@ class PipelineWrapper(BasePipelineWrapper):
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
     ) -> dict:
         # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
-        try:
-            pipeline_run_args = self.create_pipeline_args(
-                query, user_email, prompt_version_id=prompt_version_id, suffix=suffix
-            )
-        except httpx.HTTPStatusError as he:
-            raise HTTPException(
-                status_code=422,
-                detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved due to HTTP status {he.response.status_code}",
-            ) from he
+        pipeline_run_args = self.create_pipeline_args(
+            query, user_email, prompt_version_id=prompt_version_id, suffix=suffix
+        )
 
         def extract_output(result: dict) -> list | str:
             try:
@@ -137,7 +129,6 @@ class PipelineWrapper(BasePipelineWrapper):
         query: str,
         user_email: str,
         *,
-        prompt_template: list[ChatMessage] | None = None,
         prompt_version_id: str = "",
         suffix: str = "",
         llm_model: str | None = None,
@@ -145,10 +136,15 @@ class PipelineWrapper(BasePipelineWrapper):
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
-        if prompt_template is None:
+        try:
             prompt_template = haystack_utils.get_phoenix_prompt(
                 "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
             )
+        except Exception as e:
+            raise HTTPException(
+                status_code=422,
+                detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved",
+            ) from e
 
         return {
             "logger": {
@@ -165,12 +161,6 @@ class PipelineWrapper(BasePipelineWrapper):
                 "streaming": streaming,
             },
         }
-
-    def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage]
-    ) -> dict:
-        """Wrapper for backward compatibility with run_api method."""
-        return self.create_pipeline_args(query, user_email, prompt_template=prompt_template)
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
@@ -203,5 +193,5 @@ class PipelineWrapper(BasePipelineWrapper):
             user_id=user_email,
             metadata={"user_id": user_email},
             input_=[query],
-            pregenerator_hook=haystack_utils.create_result_id_hook(self.pipeline),
+            generator_hook=haystack_utils.create_result_id_hook(self.pipeline),
         )

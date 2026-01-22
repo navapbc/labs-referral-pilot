@@ -5,11 +5,10 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter
 from haystack.components.embedders import SentenceTransformersTextEmbedder
-from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
-from src.common import components
+from src.common import components, haystack_utils
 from src.pipelines.generate_referrals.pipeline_wrapper import (
     PipelineWrapper as GenerateReferralsPipelineWrapper,
 )
@@ -82,7 +81,6 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         query: str,
         user_email: str,
         *,
-        prompt_template: list[ChatMessage] | None = None,
         prompt_version_id: str = "",
         suffix: str = "",
         llm_model: str | None = None,
@@ -94,7 +92,6 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         base_args = super().create_pipeline_args(
             query,
             user_email,
-            prompt_template=prompt_template,
             prompt_version_id=prompt_version_id,
             suffix=suffix,
             llm_model=llm_model,
@@ -147,5 +144,5 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             user_id=user_email,
             metadata={"user_id": user_email},
             input_=[query],
-            pregenerator_hook=haystack_utils.create_result_id_hook(self.pipeline),
+            generator_hook=haystack_utils.create_result_id_hook(self.pipeline),
         )
