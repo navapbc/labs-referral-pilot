@@ -28,6 +28,9 @@ app/sentence_transformers/
 # Editor configs
 docs/.obsidian/
 
+# Claude Code local instructions
+.claude/
+
 # Local docs (not for version control)
 docs/ai-readiness-assessment-guide.*
 docs/proposals/
