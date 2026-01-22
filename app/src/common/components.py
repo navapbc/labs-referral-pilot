@@ -345,13 +345,20 @@ class OpenAIWebSearchGenerator:
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
                 openinference_span_kind="tool",
+                attributes={
+                    "action": str(tool_call.action),
+                    "status": tool_call.status,
+                    "action.query": str(getattr(tool_call.action, "query", None)),
+                    "action.queries": str(getattr(tool_call.action, "queries", None)),
+                },
             ) as span:
-                span.set_attribute("action", str(tool_call.action))
-                if hasattr(tool_call.action, "query"):
-                    span.set_attribute("action.query", str(tool_call.action.query))
-                if hasattr(tool_call.action, "queries"):
-                    span.set_attribute("action.queries", str(tool_call.action.queries))
-                span.set_attribute("status", tool_call.status)
+                span.set_tool(
+                    name="openai_web_search",
+                    parameters={
+                        "query": getattr(tool_call.action, "query", None),
+                        "queries": getattr(tool_call.action, "queries", None),
+                    },
+                )
 
 
 EMAIL_INTRO = """\
