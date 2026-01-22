@@ -344,7 +344,7 @@ class OpenAIWebSearchGenerator:
         for tool_call in web_search_responses:
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
-                attributes={"openinference_span_kind": "tool"},
+                openinference_span_kind="tool",
             ) as span:
                 span.set_attribute("action", str(tool_call.action))
                 if hasattr(tool_call.action, "query"):
