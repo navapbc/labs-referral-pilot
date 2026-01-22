@@ -285,6 +285,7 @@ export async function fetchActionPlanStreaming(
 
     let buffer = "";
     let accumulatedJSON = ""; // Accumulate the full JSON response
+    let lastChunkContent = ""; // Track the last chunk to extract result_id
 
     while (true) {
       const { done, value } = await reader.read();
@@ -340,17 +341,8 @@ export async function fetchActionPlanStreaming(
             // Handle hayhooks response format: choices[0].delta.content
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
-              // Check if this is the first message containing result_id
-              if (!resultId && content.includes("result_id")) {
-                try {
-                  const resultIdData = JSON.parse(content);
-                  if (resultIdData.result_id) {
-                    resultId = resultIdData.result_id;
-                  }
-                } catch (e) {
-                  // Not a JSON object, continue processing as regular content
-                }
-              }
+              // Store the last chunk content for result_id extraction
+              lastChunkContent = content;
 
               // Only accumulate content that's not the result_id metadata
               if (!content.includes("result_id")) {
@@ -365,6 +357,23 @@ export async function fetchActionPlanStreaming(
 
             // Check for finish_reason to detect completion
             if (parsed.choices?.[0]?.finish_reason === "stop") {
+              // Extract result_id from the last chunk (the chunk before this stop message)
+              if (!resultId && lastChunkContent.includes("result_id")) {
+                try {
+                  const resultIdData = JSON.parse(lastChunkContent) as {
+                    result_id?: string;
+                  };
+                  if (resultIdData.result_id) {
+                    resultId = resultIdData.result_id;
+                  }
+                } catch (e) {
+                  console.error(
+                    "Failed to extract result_id from last chunk:",
+                    e,
+                  );
+                }
+              }
+
               clearTimeout(timer);
               onComplete();
               break;

@@ -4,7 +4,6 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter
 from haystack.components.embedders import SentenceTransformersTextEmbedder
-from haystack.dataclasses.chat_message import ChatMessage
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
@@ -76,10 +75,33 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         return pipeline
 
-    def _run_arg_data(
-        self, query: str, user_email: str, prompt_template: list[ChatMessage], *, region: str
+    def create_pipeline_args(
+        self,
+        query: str,
+        user_email: str,
+        *,
+        prompt_version_id: str = "",
+        suffix: str = "",
+        region: str,
+        llm_model: str | None = None,
+        reasoning_effort: str | None = None,
+        streaming: bool = False,
     ) -> dict:
-        return super()._run_arg_data(query, user_email, prompt_template, region=region) | {
+        """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
+        # Get base args from parent class
+        base_args = super().create_pipeline_args(
+            query,
+            user_email,
+            prompt_version_id=prompt_version_id,
+            suffix=suffix,
+            region=region,
+            llm_model=llm_model,
+            reasoning_effort=reasoning_effort,
+            streaming=streaming,
+        )
+
+        # Override/add RAG-specific args
+        return base_args | {
             # For querying RAG DB
             "query_embedder": {"text": query},
             "retriever": {
@@ -88,7 +110,9 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             },
             # Override LLM config for RAG pipeline
             "llm": {
-                "model": config.generate_referrals_rag_model_version,
-                "reasoning_effort": config.generate_referrals_rag_reasoning_level,
+                "model": llm_model or config.generate_referrals_rag_model_version,
+                "reasoning_effort": reasoning_effort
+                or config.generate_referrals_rag_reasoning_level,
+                "streaming": streaming,
             },
         }

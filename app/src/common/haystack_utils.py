@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import Any, Callable, Generator, Sequence
 
 import hayhooks
@@ -68,14 +67,15 @@ def to_chat_messages(
     return messages
 
 
-def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
-    """Creates a pregenerator hook that generates result_id and yields it as first chunk.
+def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict], Generator]:
+    """Creates a generator hook that yields the result_id as the last chunk.
 
     This hook is specific to pipelines that use the SaveResult component and need to
     return the result_id to the frontend for caching/reference.
 
     Args:
         pipeline: The Haystack pipeline to check for SaveResult component
+        result_id: The result_id that will be used by SaveResult and yielded to frontend
 
     Raises:
         ValueError: If the pipeline does not have a SaveResult component
@@ -95,14 +95,7 @@ def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
         )
 
     def hook(pipeline_run_args: dict) -> Generator:
-        result_id = str(uuid.uuid4())
-
-        # Add to pipeline args for SaveResult component
-        if save_result_component_name not in pipeline_run_args:  # checking to prevent KeyError
-            pipeline_run_args[save_result_component_name] = {}
-        pipeline_run_args[save_result_component_name]["result_id"] = result_id
-
-        # Yield as first chunk for frontend
+        # Yield result_id as last chunk for frontend
         yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
 
     return hook
@@ -127,7 +120,7 @@ class TracedPipelineRunner:
         input_: Any | None = None,
         shorten_output: Callable[[str], str] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
-        pregenerator_hook: Callable[[dict], Generator] | None = None,
+        generator_hook: Callable[[dict], Generator] | None = None,
     ) -> Generator:
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
@@ -140,11 +133,6 @@ class TracedPipelineRunner:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
                     span.set_input(input_)
-
-                    # Call pregenerator_hook if provided (inside span, before streaming)
-                    if pregenerator_hook:
-                        for chunk in pregenerator_hook(pipeline_run_args):
-                            yield chunk
 
                     # hayhooks.streaming_generator() creates a thread that now inherits OpenTelemetry context
                     # thanks to ThreadingInstrumentor enabled in phoenix_utils.py
@@ -164,6 +152,12 @@ class TracedPipelineRunner:
                         # Must yield chunks one by one for SSE
                         # Must yield in the tracer span context to have spans linked as child spans
                         yield chunk
+
+                    # Call generator_hook if provided (inside span, after streaming)
+                    # We do this after streaming all chunks so that the parent-child span relationship is established
+                    if generator_hook:
+                        for chunk in generator_hook(pipeline_run_args):
+                            yield chunk
 
                     logger.info("Successfully streamed %d chunks", chunk_count)
                     response_text = "".join(full_response) if full_response else ""
