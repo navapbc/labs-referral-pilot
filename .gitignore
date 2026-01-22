@@ -18,3 +18,17 @@
 
 # Python testing stuff
 *__pycache__*
+
+# Model cache (large binary files)
+app/sentence_transformers/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# Editor configs
+docs/.obsidian/
+
+# Local docs (not for version control)
+docs/ai-readiness-assessment-guide.*
+docs/proposals/
+docs/transition-*
