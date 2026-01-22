@@ -83,10 +83,12 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         *,
         prompt_version_id: str = "",
         suffix: str = "",
+        region: str,
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
     ) -> dict:
+        return super()._run_arg_data(query, user_email, prompt_template, region=region) | {
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
         # Get base args from parent class
         base_args = super().create_pipeline_args(
@@ -94,6 +96,7 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
             user_email,
             prompt_version_id=prompt_version_id,
             suffix=suffix,
+            region=region,
             llm_model=llm_model,
             reasoning_effort=reasoning_effort,
             streaming=streaming,
@@ -103,7 +106,10 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         return base_args | {
             # For querying RAG DB
             "query_embedder": {"text": query},
-            "retriever": {"top_k": config.retrieval_top_k, "filters": None},
+            "retriever": {
+                "top_k": config.retrieval_top_k,
+                "filters": {"field": "region", "operator": "==", "value": region},
+            },
             # Override LLM config for RAG pipeline
             "llm": {
                 "model": llm_model or config.generate_referrals_rag_model_version,

@@ -17,7 +17,7 @@ from typing import Any, Callable, List, Optional, TypeVar
 from uuid import UUID
 
 from fastapi import UploadFile
-from haystack import component
+from haystack import Document, component
 from haystack.core.component.types import Variadic
 from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
@@ -472,3 +472,15 @@ class ReadableLogger:
                 return content.text
 
         return content
+
+
+@component
+class DocumentMetadataAdder:
+    def __init__(self, metadata: dict[str, Any]) -> None:
+        self.metadata = metadata
+
+    @component.output_types(documents=list[Document])
+    def run(self, documents: list[Document]) -> dict:
+        for doc in documents:
+            doc.meta.update(self.metadata)
+        return {"documents": documents}

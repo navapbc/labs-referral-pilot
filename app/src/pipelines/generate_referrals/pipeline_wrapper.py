@@ -101,8 +101,17 @@ class PipelineWrapper(BasePipelineWrapper):
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
     ) -> dict:
         # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
-        pipeline_run_args = self.create_pipeline_args(
-            query, user_email, prompt_version_id=prompt_version_id, suffix=suffix
+        try:
+            prompt_template = haystack_utils.get_phoenix_prompt(
+                "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
+            )
+        except httpx.HTTPStatusError as he:
+            raise HTTPException(
+                status_code=422,
+                detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved due to HTTP status {he.response.status_code}",
+            ) from he
+        pipeline_run_args = self._run_arg_data(
+            query, user_email, prompt_template, region=suffix or "centraltx"
         )
 
         def extract_output(result: dict) -> list | str:
@@ -129,6 +138,7 @@ class PipelineWrapper(BasePipelineWrapper):
         query: str,
         user_email: str,
         *,
+        region: str,
         prompt_version_id: str = "",
         suffix: str = "",
         llm_model: str | None = None,

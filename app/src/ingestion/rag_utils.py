@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+from botocore.client import BaseClient
 from botocore.exceptions import NoCredentialsError
 from chromadb.api import ClientAPI
 from haystack import Pipeline
@@ -13,6 +14,7 @@ from haystack.document_stores.errors.errors import DocumentStoreError
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 
 from src.app_config import config
+from src.common.components import DocumentMetadataAdder
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
@@ -58,23 +60,62 @@ def populate_vector_db() -> None:
                 raise
     assert doc_store.count_documents() == 0, "Documents should be deleted from collection"
 
-    # Download files from S3
-    local_folder = download_s3_folder_to_local()
-    files_to_ingest = [str(p) for p in Path(local_folder).rglob("*") if p.is_file()]
-    logger.info("Files to ingest: %s", files_to_ingest)
+    local_folder = s3_parent_folder = "files_to_ingest_into_vector_db/"
 
-    # Ingest documents into ChromaDB
-    logger.info("Ingesting documents into collection=%r", collection_name)
-    # Run the pipeline to index documents
-    pipeline = _create_ingest_pipeline(doc_store)
-    pipeline.run({"converter": {"sources": files_to_ingest}})
-    logger.info("Ingested documents doc_count=%d", doc_store.count_documents())
-    logger.info("ChromaDB collections: %s", chroma_client.list_collections())
+    if config.environment == "local":
+        assert os.path.exists(
+            local_folder
+        ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
+    else:
+        s3 = file_util.get_s3_client()
+        bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
+
+        assert s3_parent_folder.endswith("/"), "s3_parent_folder should end with '/'"
+        s3_subfolders = get_s3_subfolders(s3, bucket, s3_parent_folder)
+        logger.info("Region subfolders in S3: %s", s3_subfolders)
+        # Exclude certain regions if needed
+        for s3_folder in s3_subfolders.values():
+            local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
+
+    region_subfolders = {
+        entry.name: entry.path for entry in os.scandir(local_folder) if entry.is_dir()
+    }
+    logger.info("Region subfolders in local folder: %s", region_subfolders)
+
+    for region, subfolder in region_subfolders.items():
+        files_to_ingest = [str(p) for p in Path(subfolder).rglob("*") if p.is_file()]
+        logger.info("Files to ingest: %s", files_to_ingest)
+        if not files_to_ingest:
+            logger.warning("No files found to ingest for region=%s", region)
+            continue
+
+        # Ingest documents into ChromaDB
+        logger.info("Ingesting documents into collection=%r", collection_name)
+        # Run the pipeline to index documents
+        pipeline = _create_ingest_pipeline(doc_store, region=region)
+        pipeline.run({"converter": {"sources": files_to_ingest}})
+        logger.info(
+            "Ingested documents for region=%s doc_count=%d", region, doc_store.count_documents()
+        )
+        logger.info("ChromaDB collections: %s", chroma_client.list_collections())
 
 
-def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db") -> str:
+def get_s3_subfolders(s3: BaseClient, bucket: str, s3_folder: str) -> dict[str, str]:
+    paginator = s3.get_paginator("list_objects_v2")
+    subfolders = {}
+    for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
+        for obj in result.get("Contents", []):
+            s3_key = obj["Key"]
+            if s3_key == s3_folder:
+                continue  # Skip the folder itself
+            if s3_key.endswith("/"):
+                region = s3_key.removeprefix(s3_folder).removesuffix("/")
+                subfolders[region] = s3_key
+    return subfolders
+
+
+def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str) -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
-    bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
     try:
         local_folder = s3_folder
         os.makedirs(local_folder, exist_ok=True)
@@ -82,17 +123,8 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         logger.error("Error creating directories for %s: %s", s3_folder, e)
         local_folder = f"/tmp/{s3_folder}"  # nosec B108
 
-    if config.environment == "local":
-        assert os.path.exists(
-            local_folder
-        ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
-        return local_folder
-
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
-    s3 = file_util.get_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
-    if not s3_folder.endswith("/"):
-        s3_folder += "/"
     try:
         for result in paginator.paginate(Bucket=bucket, Prefix=s3_folder):
             for obj in result.get("Contents", []):
@@ -109,7 +141,7 @@ def download_s3_folder_to_local(s3_folder: str = "files_to_ingest_into_vector_db
         raise
 
 
-def _create_ingest_pipeline(doc_store: ChromaDocumentStore) -> Pipeline:
+def _create_ingest_pipeline(doc_store: ChromaDocumentStore, region: str) -> Pipeline:
     pipeline = Pipeline()
     pipeline.add_component("converter", MultiFileConverter())
     pipeline.add_component(
@@ -124,10 +156,18 @@ def _create_ingest_pipeline(doc_store: ChromaDocumentStore) -> Pipeline:
     pipeline.add_component(
         "embedder", SentenceTransformersDocumentEmbedder(model=config.rag_embedding_model)
     )
+    # Add metadata to each document
+    pipeline.add_component(
+        "metadata_adder",
+        DocumentMetadataAdder(
+            metadata={"region": region},
+        ),
+    )
     pipeline.add_component("writer", DocumentWriter(document_store=doc_store))
 
     # Connect the components
     pipeline.connect("converter.documents", "preprocessor.documents")
     pipeline.connect("preprocessor.documents", "embedder.documents")
-    pipeline.connect("embedder.documents", "writer.documents")
+    pipeline.connect("embedder.documents", "metadata_adder.documents")
+    pipeline.connect("metadata_adder.documents", "writer.documents")
     return pipeline
