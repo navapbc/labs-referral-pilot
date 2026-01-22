@@ -306,9 +306,7 @@ class OpenAIWebSearchGenerator:
 
                     # Capture metadata from OpenAI chunk; handle each type of Response*Event
                     if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
-                        logger.info("Output item done: %s", openai_chunk.item)
                         if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
-                            logger.info("Web search tool call: %s", openai_chunk.item)
                             self._add_child_spans([openai_chunk.item])
                     elif isinstance(openai_chunk, ResponseCreatedEvent):
                         resp = openai_chunk.response
