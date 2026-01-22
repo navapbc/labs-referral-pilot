@@ -17,6 +17,12 @@
 - Run `npm run ts:check` in frontend to verify TypeScript
 - Use Playwright for UI verification when making visual changes
 
+## Before Committing Frontend Changes
+
+- **Always run `npm run format-check`** in `frontend/` before committing
+- If it fails, run `npm run format` to auto-fix, then commit
+- CI will fail on Prettier formatting issues
+
 ## Code Style
 
 - Frontend uses Tailwind CSS for styling
