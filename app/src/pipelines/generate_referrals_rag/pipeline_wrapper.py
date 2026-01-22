@@ -135,12 +135,14 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         if not user_email:
             raise ValueError("user_email parameter is required")
 
+        suffix = body.get("suffix", "")
+
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
             prompt_version_id=body.get("prompt_version_id", ""),
-            suffix=body.get("suffix", ""),
-            region=body.get("suffix", "centraltx"),
+            suffix=suffix,
+            region=suffix or "centraltx",
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
