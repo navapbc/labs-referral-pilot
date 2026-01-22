@@ -69,7 +69,7 @@ def to_chat_messages(
 
 
 def create_result_id_hook(pipeline: Pipeline) -> Callable[[dict], Generator]:
-    """Creates a generator hook that generates result_id and yields it as first chunk.
+    """Creates a generator hook that generates result_id and yields it as the last chunk before the "finish_reason":"stop" chunk.
 
     This hook is specific to pipelines that use the SaveResult component and need to
     return the result_id to the frontend for caching/reference.
@@ -160,7 +160,8 @@ class TracedPipelineRunner:
                         # Must yield in the tracer span context to have spans linked as child spans
                         yield chunk
 
-                    # Call generator_hook if provided (inside span, before streaming)
+                    # Call generator_hook if provided (inside span, after streaming)
+                    # We do this after streaming all chunks so that the parent-child span relationship is established
                     if generator_hook:
                         for chunk in generator_hook(pipeline_run_args):
                             yield chunk

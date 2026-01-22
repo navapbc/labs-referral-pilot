@@ -1,3 +1,4 @@
+import httpx
 import json
 import logging
 from enum import Enum
@@ -146,7 +147,7 @@ class PipelineWrapper(BasePipelineWrapper):
             prompt_template = haystack_utils.get_phoenix_prompt(
                 "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
             )
-        except Exception as e:
+        except httpx.HTTPStatusError as e:
             raise HTTPException(
                 status_code=422,
                 detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved",
@@ -189,7 +190,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_email,
             prompt_version_id=body.get("prompt_version_id", ""),
             suffix=body.get("suffix", ""),
-            region=body.get("suffix", "") or "centraltx",
+            region=body.get("suffix", "centraltx"),
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
