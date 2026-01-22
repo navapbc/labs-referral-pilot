@@ -1,6 +1,4 @@
 import logging
-import uuid
-from typing import Generator
 
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -9,7 +7,7 @@ from haystack.components.embedders import SentenceTransformersTextEmbedder
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from src.app_config import config
-from src.common import components, haystack_utils
+from src.common import components
 from src.pipelines.generate_referrals.pipeline_wrapper import (
     PipelineWrapper as GenerateReferralsPipelineWrapper,
 )
@@ -118,10 +116,3 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
                 "streaming": streaming,
             },
         }
-
-    # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
-    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
-    def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
-        # Note: 'model' parameter is the pipeline name, not the LLM model
-        assert model == self.name, f"Unexpected model/pipeline name: {model}"
-

@@ -179,6 +179,7 @@ class PipelineWrapper(BasePipelineWrapper):
         # Extract custom parameters from the body
         query = body.get("query", "")
         user_email = body.get("user_email", "")
+        suffix = body.get("suffix", "")
 
         if not query:
             raise ValueError("query parameter is required")
@@ -191,7 +192,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_email,
             prompt_version_id=body.get("prompt_version_id", ""),
             suffix=body.get("suffix", ""),
-            region=body.get("suffix", "centraltx"),
+            region=suffix or "centraltx",
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
