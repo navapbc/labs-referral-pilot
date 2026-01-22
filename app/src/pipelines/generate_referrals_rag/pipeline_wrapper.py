@@ -125,38 +125,3 @@ class PipelineWrapper(GenerateReferralsPipelineWrapper):
         # Note: 'model' parameter is the pipeline name, not the LLM model
         assert model == self.name, f"Unexpected model/pipeline name: {model}"
 
-        # Extract custom parameters from the body
-        query = body.get("query", "")
-        user_email = body.get("user_email", "")
-
-        if not query:
-            raise ValueError("query parameter is required")
-
-        if not user_email:
-            raise ValueError("user_email parameter is required")
-
-        suffix = body.get("suffix", "")
-
-        pipeline_run_args = self.create_pipeline_args(
-            query,
-            user_email,
-            prompt_version_id=body.get("prompt_version_id", ""),
-            suffix=suffix,
-            region=suffix or "centraltx",
-            llm_model=body.get("llm_model", None),
-            reasoning_effort=body.get("reasoning_effort", None),
-            streaming=True,
-        )
-
-        # Generate result_id upfront to pass to both SaveResult and the hook
-        result_id = str(uuid.uuid4())
-        pipeline_run_args["save_result"] = {"result_id": result_id}
-
-        logger.info("Streaming referrals: %s", pipeline_run_args)
-        return self.runner.stream_response(
-            pipeline_run_args,
-            user_id=user_email,
-            metadata={"user_id": user_email},
-            input_=[query],
-            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
-        )
