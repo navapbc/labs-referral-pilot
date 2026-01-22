@@ -117,10 +117,7 @@ export function parseMarkdownToHTML(content: string): string {
   );
 
   // Style horizontal rules (resource section dividers) with more spacing
-  html = html.replace(
-    /<hr>/g,
-    '<hr class="my-8 border-t border-gray-300">',
-  );
+  html = html.replace(/<hr>/g, '<hr class="my-8 border-t border-gray-300">');
 
   return html;
 }
