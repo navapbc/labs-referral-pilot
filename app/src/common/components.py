@@ -23,7 +23,12 @@ from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openai import OpenAI
-from openai.types.responses.response_function_web_search import ResponseFunctionWebSearch
+from openai.types.responses import (
+    ResponseCreatedEvent,
+    ResponseFunctionWebSearch,
+    ResponseOutputItemDoneEvent,
+)
+from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
@@ -298,6 +303,19 @@ class OpenAIWebSearchGenerator:
                             self.streaming_callback is not None
                         ), "Expected streaming_callback to be set by Hayhooks"
                         self.streaming_callback(streaming_chunk)
+
+                    # Capture metadata from OpenAI chunk; handle each type of Response*Event
+                    if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
+                        logger.info("Output item done: %s", openai_chunk.item)
+                        if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
+                            logger.info("Web search tool call: %s", openai_chunk.item)
+                            self._add_child_spans([openai_chunk.item])
+                    elif isinstance(openai_chunk, ResponseCreatedEvent):
+                        resp = openai_chunk.response
+                        span = trace.get_current_span()
+                        span.set_attribute("model", str(resp.model))
+                        span.set_attribute("reasoning_effort", str(resp.reasoning))
+                        span.set_attribute("temperature", str(resp.temperature))
 
             except Exception as e:
                 logger.error("Error during streaming: %s", e, exc_info=True)
