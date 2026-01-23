@@ -11,14 +11,13 @@ from datetime import datetime
 from typing import Optional
 
 import factory
-import factory.fuzzy
 import faker
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.db.models import support_listing
+from src.db.models import api_data_models
 
 _db_session: Optional[db.Session] = None
 
@@ -89,7 +88,7 @@ class UserFactory(BaseFactory):
 
 class LlmResponseFactory(BaseFactory):
     class Meta:
-        model = support_listing.LlmResponse
+        model = api_data_models.LlmResponse
 
     id = Generators.UuidObj
     raw_text = factory.LazyFunction(lambda: fake.text(max_nb_chars=200))

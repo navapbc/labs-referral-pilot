@@ -3,7 +3,7 @@ from datetime import date, datetime
 import pytest
 
 import src.adapters.db as db
-from src.db.models.support_listing import LlmResponse
+from src.db.models.api_data_models import LlmResponse
 from src.db.models.user_models import User
 from tests.src.db.models.factories import LlmResponseFactory, RoleFactory, UserFactory
 

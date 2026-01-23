@@ -34,7 +34,7 @@ from pydantic import BaseModel, ValidationError
 from src.app_config import config
 from src.common import phoenix_utils
 from src.common.send_email import send_email
-from src.db.models.support_listing import LlmResponse
+from src.db.models.api_data_models import LlmResponse
 
 logger = logging.getLogger(__name__)
 

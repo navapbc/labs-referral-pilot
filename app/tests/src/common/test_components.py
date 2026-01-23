@@ -15,7 +15,7 @@ from src.common.components import (
     SaveResult,
     UploadFilesToByteStreams,
 )
-from src.db.models.support_listing import LlmResponse
+from src.db.models.api_data_models import LlmResponse
 from src.pipelines.generate_referrals.pipeline_wrapper import ResourceList
 
 
