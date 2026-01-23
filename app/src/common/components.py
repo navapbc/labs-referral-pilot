@@ -23,7 +23,12 @@ from haystack.dataclasses.byte_stream import ByteStream
 from haystack.dataclasses.chat_message import ChatMessage
 from haystack.dataclasses.streaming_chunk import StreamingChunk
 from openai import OpenAI
-from openai.types.responses.response_function_web_search import ResponseFunctionWebSearch
+from openai.types.responses import (
+    ResponseCreatedEvent,
+    ResponseFunctionWebSearch,
+    ResponseOutputItemDoneEvent,
+)
+from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
 from src.app_config import config
@@ -278,6 +283,17 @@ class OpenAIWebSearchGenerator:
                         ), "Expected streaming_callback to be set by Hayhooks"
                         self.streaming_callback(streaming_chunk)
 
+                    # Capture metadata from OpenAI chunk; handle each type of Response*Event
+                    if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
+                        if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
+                            self._add_child_spans([openai_chunk.item])
+                    elif isinstance(openai_chunk, ResponseCreatedEvent):
+                        resp = openai_chunk.response
+                        span = trace.get_current_span()
+                        span.set_attribute("model", str(resp.model))
+                        span.set_attribute("reasoning_effort", str(resp.reasoning))
+                        span.set_attribute("temperature", str(resp.temperature))
+
             except Exception as e:
                 logger.error("Error during streaming: %s", e, exc_info=True)
                 raise
@@ -307,14 +323,21 @@ class OpenAIWebSearchGenerator:
         for tool_call in web_search_responses:
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
-                attributes={"openinference_span_kind": "tool"},
+                openinference_span_kind="tool",
+                attributes={
+                    "action": str(tool_call.action),
+                    "status": tool_call.status,
+                    "action.query": str(getattr(tool_call.action, "query", None)),
+                    "action.queries": str(getattr(tool_call.action, "queries", None)),
+                },
             ) as span:
-                span.set_attribute("action", str(tool_call.action))
-                if hasattr(tool_call.action, "query"):
-                    span.set_attribute("action.query", str(tool_call.action.query))
-                if hasattr(tool_call.action, "queries"):
-                    span.set_attribute("action.queries", str(tool_call.action.queries))
-                span.set_attribute("status", tool_call.status)
+                span.set_tool(
+                    name="openai_web_search",
+                    parameters={
+                        "query": getattr(tool_call.action, "query", None),
+                        "queries": getattr(tool_call.action, "queries", None),
+                    },
+                )
 
 
 EMAIL_INTRO = """\
