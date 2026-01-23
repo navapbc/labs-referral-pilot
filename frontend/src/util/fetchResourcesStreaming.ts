@@ -157,9 +157,8 @@ export async function fetchResourcesStreaming(
               // Store the last chunk content for result_id extraction
               lastChunkContent = content;
 
-              // Only accumulate content that's not the result_id metadata
+              // Skip result_id metadata when accumulating content, result_id will be the last field received
               if (!content.includes("result_id")) {
-                // Accumulate the JSON content
                 accumulatedJSON += content;
 
                 // Parse incrementally and pass structured data to callback

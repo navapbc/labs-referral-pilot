@@ -4,6 +4,15 @@ import Link from "next/link";
 import React from "react";
 import { Building, Users, X } from "lucide-react";
 
+const isValidURL = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const referralTypeIndicator = (referralType: string | undefined) => {
   switch (referralType) {
     case "goodwill": {
@@ -153,7 +162,7 @@ const ResourcesList = ({
                 {r.emails.join(" | ")}
               </div>
             )}
-            {!!r.website && r.website.length > 10 && (
+            {!!r.website && isValidURL(r.website) && (
               <div className="mt-1">
                 <span className="font-semibold">Website:</span>{" "}
                 <Link
