@@ -223,7 +223,7 @@ export async function fetchResourcesStreaming(
       return {
         resultId: resultId,
         resources: [],
-        errorMessage: "The API did not return any resource recommendations.",
+        errorMessage: "No Referrals Found",
       };
     }
 

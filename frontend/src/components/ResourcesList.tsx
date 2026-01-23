@@ -165,10 +165,10 @@ const ResourcesList = ({
                 >
                   {r.website}
                 </Link>
-                {r.description && (
-                  <div className="font-medium mb-2">{r.description}</div>
-                )}
               </div>
+            )}
+            {r.description && (
+              <div className="font-medium mt-3">{r.description}</div>
             )}
           </CardContent>
         </Card>

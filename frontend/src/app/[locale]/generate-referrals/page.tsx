@@ -136,14 +136,14 @@ export default function Page() {
     setErrorMessage(undefined);
     setShowResultsView(true);
 
-    // 7-second timeout to show "No resources found" if nothing arrives
+    // 12-second timeout to show "No resources found" if nothing arrives
     const timeoutId = setTimeout(() => {
       if (!hasReceivedFirstResourceRef.current) {
         setErrorMessage("No resources found.");
         setIsStreamingResources(false);
         setLoading(false);
       }
-    }, 7000);
+    }, 12000);
 
     try {
       const request = await buildRequestWithResolvedZipCodes();
