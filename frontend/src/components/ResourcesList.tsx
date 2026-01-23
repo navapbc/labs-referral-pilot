@@ -87,20 +87,27 @@ type ResourcesListProps = {
   resources: Resource[];
   errorMessage?: string;
   handleRemoveResource: (resource: Resource) => void;
+  isSearching?: boolean;
 };
 
 const ResourcesList = ({
   resources,
   errorMessage,
   handleRemoveResource,
+  isSearching = false,
 }: ResourcesListProps) => {
-  return resources.length === 0 ? (
-    <div className="m-3">{errorMessage || "No resources found."}</div>
-  ) : (
+  if (resources.length === 0) {
+    if (isSearching) {
+      return <div className="m-3">Searching for Referrals...</div>;
+    }
+    return <div className="m-3">{errorMessage || "No resources found."}</div>;
+  }
+
+  return (
     <div className="mt-2">
       {resources.map((r, i) => (
         <Card
-          key={i}
+          key={`${i}-${r.name || "loading"}`}
           className={`relative bg-white shadow-sm mb-5 min-w-[16rem] ${getCardBorderClass(r.referral_type)}`}
           data-testid={`resource-card${r.referral_type ? `-${r.referral_type}` : ""}-${i}`}
         >
@@ -149,7 +156,7 @@ const ResourcesList = ({
                 {r.emails.join(" | ")}
               </div>
             )}
-            {!!r.website && (
+            {!!r.website && r.website.length > 10 && (
               <div className="mt-1">
                 <span className="font-semibold">Website:</span>{" "}
                 <Link
@@ -157,6 +164,7 @@ const ResourcesList = ({
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-blue-600 hover:underline"
+                  prefetch={false}
                 >
                   {r.website}
                 </Link>

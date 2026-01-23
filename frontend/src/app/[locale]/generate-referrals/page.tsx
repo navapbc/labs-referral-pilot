@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ChevronLeft, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { fetchResources } from "@/util/fetchResources";
+import { fetchResources } from "@/util/fetchResources"; // eslint-disable-line @typescript-eslint/no-unused-vars -- will be used for user preference between streaming/non-streaming
+import { fetchResourcesStreaming } from "@/util/fetchResourcesStreaming";
+import { PartialResource } from "@/util/parseStreamingResources";
 import { Resource } from "@/types/resources";
 import "@/app/globals.css";
 import { fetchLocationFromZip } from "@/util/fetchLocation";
@@ -42,7 +44,7 @@ export default function Page() {
   const [resourcesResultId, setResourcesResultId] = useState("");
   const [actionPlanResultId, setActionPlanResultId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [readyToPrint, setReadyToPrint] = useState(false);
+  const [showResultsView, setShowResultsView] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locationText, setLocationText] = useState("");
   const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
@@ -54,7 +56,14 @@ export default function Page() {
   const [streamingPlan, setStreamingPlan] = useState<PartialActionPlan | null>(
     null,
   );
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStreamingActionPlan, setIsStreamingActionPlan] = useState(false);
+  const [streamingResources, setStreamingResources] = useState<
+    PartialResource[] | null
+  >(null);
+  const [isStreamingResources, setIsStreamingResources] = useState(false);
+  const [hasReceivedFirstResource, setHasReceivedFirstResource] =
+    useState(false);
+  const hasReceivedFirstResourceRef = useRef(false);
   const [activeTab, setActiveTab] = useState("find-referrals");
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
@@ -111,7 +120,7 @@ export default function Page() {
   const onResources = (resources: Resource[]) => {
     setResult(resources);
     setRetainedResources(resources); // this creates a copy of the original list of resources, may be edited by the user
-    setReadyToPrint(true);
+    setShowResultsView(true);
   };
 
   async function findResources() {
@@ -119,24 +128,96 @@ export default function Page() {
     const suffix = searchParams?.get("suffix") ?? undefined;
 
     setLoading(true);
+    setIsStreamingResources(true);
+    setHasReceivedFirstResource(false);
+    hasReceivedFirstResourceRef.current = false;
     setResult(null);
+    setStreamingResources(null);
     setErrorMessage(undefined);
+    setShowResultsView(true);
+
+    // 7-second timeout to show "No resources found" if nothing arrives
+    const timeoutId = setTimeout(() => {
+      if (!hasReceivedFirstResourceRef.current) {
+        setErrorMessage("No resources found.");
+        setIsStreamingResources(false);
+        setLoading(false);
+      }
+    }, 7000);
+
     try {
       const request = await buildRequestWithResolvedZipCodes();
       setRequestAfterZipResolution(request);
-      const { resultId, resources, errorMessage } = await fetchResources(
+
+      const {
+        resources: finalResources,
+        resultId,
+        errorMessage: streamError,
+      } = await fetchResourcesStreaming(
         request,
         userEmail,
+        // onChunk callback - receive partial resources
+        (partialResources: PartialResource[]) => {
+          if (
+            partialResources.length > 0 &&
+            !hasReceivedFirstResourceRef.current
+          ) {
+            hasReceivedFirstResourceRef.current = true;
+            setHasReceivedFirstResource(true);
+            clearTimeout(timeoutId);
+          }
+          setStreamingResources(partialResources);
+        },
+        // onComplete callback - stop streaming UI
+        () => {
+          setIsStreamingResources(false);
+        },
+        // onError callback - clear content and show error
+        (error: string) => {
+          setIsStreamingResources(false);
+          setLoading(false);
+          setStreamingResources(null);
+          setResult(null);
+          setErrorMessage(error);
+        },
         prompt_version_id,
         suffix,
       );
-      setResourcesResultId(resultId);
-      setErrorMessage(errorMessage);
-      onResources(resources);
+
+      // Clear the timeout when streaming completes
+      clearTimeout(timeoutId);
+
+      // Handle errors from the streaming response
+      if (streamError) {
+        setErrorMessage(streamError);
+        setResourcesResultId("");
+        setStreamingResources(null);
+        setResult(null);
+        return;
+      }
+
+      // Set the final parsed resources
+      if (finalResources) {
+        setResourcesResultId(resultId);
+        setErrorMessage(undefined);
+        onResources(finalResources);
+        setStreamingResources(null); // Clear streaming state
+      } else {
+        setErrorMessage(
+          "There was an issue streaming the resources. Please try again.",
+        );
+        setResourcesResultId("");
+      }
     } catch (e: unknown) {
+      clearTimeout(timeoutId);
       const message = e instanceof Error ? e.message : "Unknown error";
       console.error(message);
-      setResult([]); // or keep null to hide area
+      setIsStreamingResources(false);
+      setStreamingResources(null);
+      setResult(null);
+      setErrorMessage(
+        "There was an issue streaming the resources. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -148,8 +229,13 @@ export default function Page() {
   }
 
   function handleReturnToSearch() {
-    setReadyToPrint(false);
-    setResult([]);
+    setShowResultsView(false);
+    setResult(null);
+    setRetainedResources(undefined);
+    setStreamingResources(null);
+    setIsStreamingResources(false);
+    setHasReceivedFirstResource(false);
+    hasReceivedFirstResourceRef.current = false;
     setResourcesResultId("");
     setActionPlanResultId("");
     setLocationText("");
@@ -158,8 +244,13 @@ export default function Page() {
     setClientDescription("");
     setSelectedResources([]);
     setActionPlan(null);
+    setStreamingPlan(null);
+    setIsStreamingActionPlan(false);
+    setIsGeneratingActionPlan(false);
     setErrorMessage(undefined);
     setRequestAfterZipResolution("");
+    setRecentlyRemoved(null);
+    setRemovedResourceIndex(null);
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -185,7 +276,7 @@ export default function Page() {
     if (selectedResources.length === 0) return;
 
     setIsGeneratingActionPlan(true);
-    setIsStreaming(true);
+    setIsStreamingActionPlan(true);
     setActionPlan(null);
     setStreamingPlan(null);
     setErrorMessage(undefined);
@@ -205,11 +296,11 @@ export default function Page() {
         },
         // onComplete callback - stop streaming UI
         () => {
-          setIsStreaming(false);
+          setIsStreamingActionPlan(false);
         },
         // onError callback - clear content and show error
         (error: string) => {
-          setIsStreaming(false);
+          setIsStreamingActionPlan(false);
           setIsGeneratingActionPlan(false);
           setStreamingPlan(null);
           setActionPlan(null);
@@ -239,7 +330,7 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Error generating action plan:", error);
-      setIsStreaming(false);
+      setIsStreamingActionPlan(false);
       setIsGeneratingActionPlan(false);
       setStreamingPlan(null);
       setActionPlan(null);
@@ -402,7 +493,7 @@ export default function Page() {
               onValueChange={setActiveTab}
               className="mb-6"
             >
-              {!readyToPrint && (
+              {!showResultsView && (
                 <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                   <TabsTrigger
                     value="find-referrals"
@@ -422,7 +513,7 @@ export default function Page() {
               )}
 
               <TabsContent value="find-referrals">
-                {!readyToPrint && (
+                {!showResultsView && (
                   <ClientDetailsInput
                     selectedCategories={selectedCategories}
                     locationText={locationText}
@@ -440,7 +531,7 @@ export default function Page() {
               </TabsContent>
 
               <TabsContent value="upload-forms">
-                {!readyToPrint && (
+                {!showResultsView && (
                   <UploadIntakeTab
                     userEmail={userEmail}
                     onResources={onResources}
@@ -449,7 +540,7 @@ export default function Page() {
               </TabsContent>
             </Tabs>
 
-            {readyToPrint && (
+            {showResultsView && (
               <div className="space-y-4" data-testid="readyToPrintSection">
                 <div className="flex items-center justify-between pt-3">
                   <Button
@@ -465,7 +556,7 @@ export default function Page() {
                     onPrint={handlePrint}
                     resourcesResultId={resourcesResultId}
                     actionPlanResultId={actionPlanResultId}
-                    disabled={isStreaming}
+                    disabled={isStreamingActionPlan || isStreamingResources}
                   />
                 </div>
               </div>
@@ -477,15 +568,18 @@ export default function Page() {
               />
             )}
 
-            {readyToPrint && (
+            {(isStreamingResources || showResultsView) && (
               <ResourcesList
-                resources={retainedResources ?? []}
+                resources={
+                  (streamingResources as Resource[]) ?? retainedResources ?? []
+                }
                 errorMessage={errorMessage}
                 handleRemoveResource={handleRemoveResource}
+                isSearching={isStreamingResources && !hasReceivedFirstResource}
               />
             )}
 
-            {readyToPrint &&
+            {showResultsView &&
               retainedResources &&
               retainedResources.length > 0 && (
                 <ActionPlanSection
@@ -494,14 +588,14 @@ export default function Page() {
                   actionPlan={actionPlan}
                   isGeneratingActionPlan={isGeneratingActionPlan}
                   streamingPlan={streamingPlan}
-                  isStreaming={isStreaming}
+                  isStreaming={isStreamingActionPlan}
                   onResourceSelection={handleResourceSelection}
                   onSelectAllResources={handleSelectAllResources}
                   onGenerateActionPlan={() => void generateActionPlan()}
                 />
               )}
 
-            {readyToPrint && (
+            {showResultsView && (
               <div className="pt-4 border-t mt-6 pb-8">
                 <h4 className="text-sm font-medium text-gray-700 mb-3 text-right">
                   Share
@@ -512,7 +606,7 @@ export default function Page() {
                   actionPlanResultId={actionPlanResultId}
                   className="justify-end"
                   testIdSuffix="bottom"
-                  disabled={isStreaming}
+                  disabled={isStreamingActionPlan || isStreamingResources}
                 />
               </div>
             )}
