@@ -104,6 +104,7 @@ export async function fetchResourcesStreaming(
 
       if (done) {
         clearTimeout(timer);
+        reader.releaseLock();
         onComplete();
         break;
       }
