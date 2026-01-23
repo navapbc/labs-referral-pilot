@@ -1,5 +1,6 @@
 import { Resource } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
+import { fixJsonControlCharacters, extractField } from "./parseStreamingUtils";
 
 export interface ActionPlan {
   title: string;
@@ -14,119 +15,16 @@ export interface PartialActionPlan {
 }
 
 /**
- * Unescapes JSON string escape sequences
- */
-function unescapeJSON(str: string): string {
-  return str
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "\r")
-    .replace(/\\t/g, "\t")
-    .replace(/\\"/g, '"')
-    .replace(/\\\\/g, "\\");
-}
-
-/**
  * Parses streaming JSON to extract title, summary, and content fields
  * Handles incomplete JSON gracefully - captures partial strings even without closing quotes
  * Properly handles escaped characters like \", \n, etc.
  */
 function parseStreamingJSON(jsonStr: string): PartialActionPlan {
-  let title = "";
-  let summary = "";
-  let content = "";
-
-  try {
-    // Pattern that matches escaped characters: (?:[^"\\]|\\.)*
-    // - [^"\\] matches any char except quote or backslash
-    // - \\. matches backslash followed by any char (handles \", \n, etc)
-
-    // Extract title - try complete first, then incomplete
-    const titleMatch = jsonStr.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-    if (titleMatch) {
-      title = unescapeJSON(titleMatch[1]);
-    } else {
-      // Match incomplete title (no closing quote yet)
-      const incompleteTitleMatch = jsonStr.match(
-        /"title"\s*:\s*"((?:[^"\\]|\\.)*)/,
-      );
-      if (incompleteTitleMatch) {
-        title = unescapeJSON(incompleteTitleMatch[1]);
-      }
-    }
-
-    // Extract summary - same approach
-    const summaryMatch = jsonStr.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-    if (summaryMatch) {
-      summary = unescapeJSON(summaryMatch[1]);
-    } else {
-      const incompleteSummaryMatch = jsonStr.match(
-        /"summary"\s*:\s*"((?:[^"\\]|\\.)*)/,
-      );
-      if (incompleteSummaryMatch) {
-        summary = unescapeJSON(incompleteSummaryMatch[1]);
-      }
-    }
-
-    // Extract content - this is where word-by-word streaming matters most
-    const contentMatch = jsonStr.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-    if (contentMatch) {
-      content = unescapeJSON(contentMatch[1]);
-    } else {
-      // Match incomplete content (no closing quote yet) - this enables word-by-word rendering
-      const incompleteContentMatch = jsonStr.match(
-        /"content"\s*:\s*"((?:[^"\\]|\\.)*)/,
-      );
-      if (incompleteContentMatch) {
-        content = unescapeJSON(incompleteContentMatch[1]);
-      }
-    }
-  } catch (e) {
-    console.error("Error parsing streaming JSON:", e);
-  }
+  const title = extractField(jsonStr, "title") || "";
+  const summary = extractField(jsonStr, "summary") || "";
+  const content = extractField(jsonStr, "content") || "";
 
   return { title, summary, content };
-}
-
-/**
- * Fixes unescaped control characters in JSON string values
- * This handles cases where the LLM returns JSON with literal newlines, tabs, etc.
- */
-function fixJsonControlCharacters(jsonString: string): string {
-  let inString = false;
-  let result = "";
-  let prevChar = "";
-
-  for (let i = 0; i < jsonString.length; i++) {
-    const currentChar = jsonString[i];
-
-    // Toggle string state when we hit an unescaped quote
-    if (currentChar === '"' && prevChar !== "\\") {
-      inString = !inString;
-      result += currentChar;
-    } else if (inString) {
-      // Inside a string value - escape control characters
-      if (currentChar === "\n") {
-        result += "\\n";
-      } else if (currentChar === "\r") {
-        result += "\\r";
-      } else if (currentChar === "\t") {
-        result += "\\t";
-      } else if (currentChar === "\b") {
-        result += "\\b";
-      } else if (currentChar === "\f") {
-        result += "\\f";
-      } else {
-        result += currentChar;
-      }
-    } else {
-      // Outside string values - keep as is
-      result += currentChar;
-    }
-
-    prevChar = currentChar;
-  }
-
-  return result;
 }
 
 export async function fetchActionPlan(
