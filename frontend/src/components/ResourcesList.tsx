@@ -162,7 +162,7 @@ const ResourcesList = ({
                 {r.emails.join(" | ")}
               </div>
             )}
-            {!!r.website && isValidURL(r.website) && (
+            {!!r.website && isValidURL(normalizeUrl(r.website)) && (
               <div className="mt-1">
                 <span className="font-semibold">Website:</span>{" "}
                 <Link
@@ -171,6 +171,7 @@ const ResourcesList = ({
                   target="_blank"
                   className="text-blue-600 hover:underline"
                   prefetch={false}
+                  data-testid={`website-link-${i}`}
                 >
                   {r.website}
                 </Link>

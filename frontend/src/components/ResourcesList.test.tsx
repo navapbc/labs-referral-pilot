@@ -262,7 +262,7 @@ describe("ResourcesList", () => {
       />,
     );
 
-    const link = screen.getByRole("link", { name: /example.com/i });
+    const link = screen.getByTestId("website-link-0");
     expect(link).toHaveAttribute("href", "https://example.com");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -281,7 +281,7 @@ describe("ResourcesList", () => {
       />,
     );
 
-    const link = screen.getByRole("link", { name: /example.com/i });
+    const link = screen.getByTestId("website-link-0");
     expect(link).toHaveAttribute("href", "https://example.com");
   });
 
