@@ -20,15 +20,22 @@ function splitIntoSections(content: string): string[] {
   return sections;
 }
 
+// Validate URL uses safe protocol (http/https only)
+function isSafeUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url);
+}
+
 // Sources section component
 function SourcesSection({ citations }: { citations: Citation[] }) {
-  if (citations.length === 0) return null;
+  // Filter to only citations with safe URLs
+  const safeCitations = citations.filter((c) => isSafeUrl(c.url));
+  if (safeCitations.length === 0) return null;
 
   return (
     <nav aria-label="Sources" className="mt-6 pt-4 border-t border-gray-200">
       <h3 className="text-sm font-semibold text-gray-700 mb-2">Sources</h3>
       <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1">
-        {citations.map((citation, index) => (
+        {safeCitations.map((citation, index) => (
           <li key={index}>
             <a
               href={citation.url}
