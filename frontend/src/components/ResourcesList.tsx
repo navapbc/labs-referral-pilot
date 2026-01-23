@@ -133,9 +133,6 @@ const ResourcesList = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="ml-9 mr-4">
-            {r.description && (
-              <div className="font-medium mb-2">{r.description}</div>
-            )}
             {r.addresses && r.addresses?.length > 0 && (
               <div className="mt-1">
                 <span className="font-semibold">
@@ -168,6 +165,9 @@ const ResourcesList = ({
                 >
                   {r.website}
                 </Link>
+                {r.description && (
+                  <div className="font-medium mb-2">{r.description}</div>
+                )}
               </div>
             )}
           </CardContent>
