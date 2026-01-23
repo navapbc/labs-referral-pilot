@@ -34,7 +34,7 @@ from pydantic import BaseModel, ValidationError
 from src.app_config import config
 from src.common import phoenix_utils
 from src.common.send_email import send_email
-from src.db.models.support_listing import LlmResponse, Support
+from src.db.models.support_listing import LlmResponse
 
 logger = logging.getLogger(__name__)
 
@@ -107,27 +107,6 @@ class UploadFilesToByteStreams:
                 for f in files
             ]
         }
-
-
-@component
-class LoadSupports:
-    """Loads support listings from the database and returns them as formatted strings."""
-
-    @component.output_types(supports=list[str])
-    def run(self) -> dict:
-        with config.db_session() as db_session, db_session.begin():
-            supports = [
-                (
-                    f"Name: {support.name}\n"
-                    f"- Description: {support.description}\n"
-                    f"- Addresses: {', '.join(support.addresses)}\n"
-                    f"- Phones: {', '.join(support.phone_numbers)}\n"
-                    f"- Website: {support.website}\n"
-                    f"- Email Addresses: {', '.join(support.email_addresses)}\n"
-                )
-                for support in db_session.query(Support).all()
-            ]
-            return {"supports": supports}
 
 
 @component
