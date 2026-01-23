@@ -144,9 +144,7 @@ const ResourcesList = ({
           <CardContent className="ml-9 mr-4">
             {r.addresses && r.addresses?.length > 0 && (
               <div className="mt-1">
-                <span className="font-semibold">
-                  Address{r.addresses.length > 1 ? "es" : ""}:
-                </span>{" "}
+                <span className="font-semibold">Address:</span>{" "}
                 {r.addresses.join(" | ")}
               </div>
             )}
