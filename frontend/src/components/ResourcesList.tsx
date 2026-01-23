@@ -157,6 +157,7 @@ const ResourcesList = ({
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-blue-600 hover:underline"
+                  data-testid={`resource-website-link-${i}`}
                 >
                   {r.website}
                 </Link>
