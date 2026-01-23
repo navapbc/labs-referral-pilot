@@ -107,7 +107,7 @@ const ResourcesList = ({
     <div className="mt-2">
       {resources.map((r, i) => (
         <Card
-          key={`${i}-${r.name || "loading"}`}
+          key={i}
           className={`relative bg-white shadow-sm mb-5 min-w-[16rem] ${getCardBorderClass(r.referral_type)}`}
           data-testid={`resource-card${r.referral_type ? `-${r.referral_type}` : ""}-${i}`}
         >
