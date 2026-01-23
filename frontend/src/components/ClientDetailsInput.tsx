@@ -337,8 +337,8 @@ export function ClientDetailsInput({
           >
             {!loading && (
               <>
-                <Sparkles className="w-5 h-5" aria-hidden="true" /> Find
-                Referrals
+                <Sparkles className="w-5 h-5" aria-hidden="true" />
+                Find Referrals
               </>
             )}
             {loading && (
