@@ -210,4 +210,5 @@ class PipelineWrapper(BasePipelineWrapper):
             metadata={"user_id": user_email},
             input_=[query],
             generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
+            parent_span_name_suffix=suffix,
         )
