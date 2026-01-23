@@ -108,8 +108,9 @@ export function extractArrayField(
 
   const arrayContent = arrayMatch[1];
 
-  // Extract individual string items from the array
-  // Pattern matches: "any content including escaped quotes" or "incomplete string
+  // Extract individual complete string items from the array.
+  // This global pattern (/.../g) is used with exec() in a loop to find all
+  // complete items whose content may include escaped quotes and other escapes.
   const itemPattern = /"((?:[^"\\]|\\.)*)"/g;
   let itemMatch;
 
