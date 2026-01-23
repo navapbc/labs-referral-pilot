@@ -216,6 +216,11 @@ export async function fetchResourcesStreaming(
           "Failed to parse the resources response. Please try again.";
         hasError = true;
         onError(errorMessage);
+        return {
+          resources: [],
+          resultId: resultId,
+          errorMessage,
+        };
       }
     }
 
