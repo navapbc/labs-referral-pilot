@@ -3,11 +3,9 @@ import os
 from pprint import pformat
 
 import httpx
-import opentelemetry.exporter.otlp.proto.http.trace_exporter as otel_trace_exporter
 import phoenix.otel
 from openinference.instrumentation import OITracer
 from opentelemetry.instrumentation.threading import ThreadingInstrumentor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import NoOpTracerProvider, TracerProvider
 
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
@@ -16,7 +14,6 @@ from phoenix.client import Client
 from phoenix.client.types import PromptVersion
 
 from src.app_config import config
-from src.logging.presidio_pii_filter import PresidioRedactionSpanProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -125,19 +122,6 @@ def configure_phoenix(only_if_alive: bool = True) -> None:
     # Suppress harmless context detach errors that occur when OpenInference instrumentation
     # tries to clean up context tokens in different threads during streaming.
     _suppress_context_detach_errors()
-
-    if config.redact_pii:
-        phoenix_api_key = os.environ.get("PHOENIX_API_KEY")
-        span_exporter = otel_trace_exporter.OTLPSpanExporter(
-            endpoint=trace_endpoint, headers={"Authorization": f"Bearer {phoenix_api_key}"}
-        )
-
-        # Create the PII redacting processor with the OTLP exporter
-        pii_processor = PresidioRedactionSpanProcessor(span_exporter)
-        # Add the pii processor to the otel instance
-        if config.batch_otel:
-            tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
-        tracer_provider.add_span_processor(pii_processor)
 
 
 _tracer: OITracer | None = None
