@@ -1,6 +1,6 @@
 # Ignore Terraform lock files
 # As of Feb 2023, Terraform lock files, while well intentioned, have a tendency
-# to get into a confusing state that requires recreating the lock file, which 
+# to get into a confusing state that requires recreating the lock file, which
 # defeats the purpose. Moreover, lock files are per environment, which can make
 # it difficult for people to upgrade dependencies (e.g. upgrade an AWS provider)
 # across environments if certain environments are locked down (e.g. production).
@@ -18,3 +18,20 @@
 
 # Python testing stuff
 *__pycache__*
+
+# Model cache (large binary files)
+app/sentence_transformers/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# Editor configs
+docs/.obsidian/
+
+# Claude Code local instructions
+.claude/
+
+# Local docs (not for version control)
+docs/ai-readiness-assessment-guide.*
+docs/proposals/
+docs/transition-*

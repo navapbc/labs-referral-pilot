@@ -5,12 +5,52 @@ import remarkRehype from "remark-rehype";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 
+export interface Citation {
+  domain: string;
+  url: string;
+}
+
+/**
+ * Extracts citation links from markdown content and removes them from the body.
+ * Citations are parenthetical domain references like ([domain.org](url))
+ * Returns the modified content (citations removed) and a list of unique citations for the sources section.
+ */
+export function extractCitations(content: string): {
+  content: string;
+  citations: Citation[];
+} {
+  const citations: Citation[] = [];
+  const seenDomains = new Set<string>();
+
+  // Pattern matches: ([domain](url)) - markdown link in parentheses
+  // The domain text is just the domain name, URL is the full link
+  const pattern = /\s*\(\[([a-z0-9.-]+\.[a-z]{2,6})\]\(([^)]+)\)\)/gi;
+
+  const modifiedContent = content.replace(
+    pattern,
+    (_match: string, domain: string, url: string) => {
+      // Collect unique citations
+      if (!seenDomains.has(domain)) {
+        seenDomains.add(domain);
+        citations.push({ domain, url });
+      }
+      // Remove the citation from the body text
+      return "";
+    },
+  );
+
+  return { content: modifiedContent, citations };
+}
+
 /**
  * Converts markdown content to HTML using remark + rehype
  * Supports GitHub Flavored Markdown (GFM) including lists, links, bold, italic, etc.
  */
 export function parseMarkdownToHTML(content: string): string {
   if (!content) return "";
+
+  // Strip OpenAI web search citation markers like 【turn0search0】 that sometimes leak through
+  content = content.replace(/【[^】]*】/g, "");
 
   const file = unified()
     .use(remarkParse) // Parse markdown to AST
@@ -25,40 +65,41 @@ export function parseMarkdownToHTML(content: string): string {
   // Apply Tailwind CSS classes to the generated HTML elements
   html = html.replace(
     /<h1>/g,
-    '<h1 class="text-2xl font-bold mb-4 text-slate-900">',
+    '<h1 class="text-2xl font-bold mb-4 text-gray-900">',
   );
   html = html.replace(
     /<h2>/g,
-    '<h2 class="text-xl font-semibold mb-3 text-slate-800">',
+    '<h2 class="text-xl font-semibold mb-3 text-gray-800">',
   );
   html = html.replace(
     /<h3>/g,
-    '<h3 class="text-lg font-semibold mb-2 text-slate-800">',
+    '<h3 class="text-lg font-semibold mb-2 text-gray-800">',
   );
   html = html.replace(
     /<h4>/g,
-    '<h4 class="text-base font-semibold mb-2 text-slate-800">',
+    '<h4 class="text-base font-semibold mb-2 text-gray-800">',
   );
   html = html.replace(
     /<h5>/g,
-    '<h5 class="text-sm font-semibold mb-2 text-slate-800">',
+    '<h5 class="text-sm font-semibold mb-2 text-gray-800">',
   );
   html = html.replace(
     /<h6>/g,
-    '<h6 class="text-xs font-semibold mb-2 text-slate-800">',
+    '<h6 class="text-xs font-semibold mb-2 text-gray-800">',
   );
 
   html = html.replace(/<p>/g, '<p class="mb-3 leading-relaxed">');
 
   html = html.replace(
     /<strong>/g,
-    '<strong class="font-semibold text-slate-900">',
+    '<strong class="font-semibold text-gray-900">',
   );
   html = html.replace(/<em>/g, '<em class="italic">');
 
+  // External links: add target blank, styling, and screen reader text for new tab
   html = html.replace(
-    /<a href="/g,
-    '<a target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline" href="',
+    /<a href="([^"]+)">([^<]+)<\/a>/g,
+    '<a target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline" href="$1">$2<span class="sr-only"> (opens in new tab)</span></a>',
   );
 
   html = html.replace(/<ul>/g, '<ul class="list-disc ml-6 mb-4 space-y-1">');
@@ -77,6 +118,9 @@ export function parseMarkdownToHTML(content: string): string {
     /<pre>/g,
     '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">',
   );
+
+  // Style horizontal rules (resource section dividers) with more spacing
+  html = html.replace(/<hr>/g, '<hr class="my-8 border-t border-gray-300">');
 
   return html;
 }

@@ -6,6 +6,7 @@ import { Resource } from "src/types/resources";
 // Mock only the markdown parser to avoid ESM module issues
 jest.mock("src/util/markdown", () => ({
   parseMarkdownToHTML: jest.fn((content: string) => `<div>${content}</div>`),
+  extractCitations: jest.fn((content: string) => ({ content, citations: [] })),
 }));
 
 describe("ActionPlanSection", () => {
