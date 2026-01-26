@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import { ChevronLeft, Sparkles } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -22,11 +22,8 @@ import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
 import { useSearchParams } from "next/navigation";
-import { UploadIntakeTab } from "@/components/UploadIntakeTab";
 import { ShareButtons } from "@/components/ShareButtons";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload } from "lucide-react";
 import WelcomeUserInputScreen from "@/components/WelcomeUserInputScreen";
 import { PilotFeedbackBanner } from "@/components/PilotFeedbackBanner";
 import { GoodwillReferralToolHeaderPilot } from "@/components/GoodwillReferralToolHeaderPilot";
@@ -64,7 +61,6 @@ export default function Page() {
   const [hasReceivedFirstResource, setHasReceivedFirstResource] =
     useState(false);
   const hasReceivedFirstResourceRef = useRef(false);
-  const [activeTab, setActiveTab] = useState("find-referrals");
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
@@ -488,57 +484,21 @@ export default function Page() {
           <PilotFeedbackBanner />
           <GoodwillReferralToolHeaderPilot />
           <div className="max-w-5xl mx-auto px-4 flex flex-col gap-2">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="mb-6"
-            >
-              {!showResultsView && (
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-                  <TabsTrigger
-                    value="find-referrals"
-                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Find Referrals
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="upload-forms"
-                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload Intake Form
-                  </TabsTrigger>
-                </TabsList>
-              )}
-
-              <TabsContent value="find-referrals">
-                {!showResultsView && (
-                  <ClientDetailsInput
-                    selectedCategories={selectedCategories}
-                    locationText={locationText}
-                    selectedResourceTypes={selectedResourceTypes}
-                    clientDescription={clientDescription}
-                    loading={loading}
-                    onToggleCategory={toggleCategory}
-                    onClearAllFilters={clearAllFilters}
-                    onToggleResourceType={toggleResourceType}
-                    onLocationChange={setLocationText}
-                    onClientDescriptionChange={setClientDescription}
-                    onFindResources={() => void findResources()}
-                  />
-                )}
-              </TabsContent>
-
-              <TabsContent value="upload-forms">
-                {!showResultsView && (
-                  <UploadIntakeTab
-                    userEmail={userEmail}
-                    onResources={onResources}
-                  />
-                )}
-              </TabsContent>
-            </Tabs>
+            {!showResultsView && (
+              <ClientDetailsInput
+                selectedCategories={selectedCategories}
+                locationText={locationText}
+                selectedResourceTypes={selectedResourceTypes}
+                clientDescription={clientDescription}
+                loading={loading}
+                onToggleCategory={toggleCategory}
+                onClearAllFilters={clearAllFilters}
+                onToggleResourceType={toggleResourceType}
+                onLocationChange={setLocationText}
+                onClientDescriptionChange={setClientDescription}
+                onFindResources={() => void findResources()}
+              />
+            )}
 
             {showResultsView && (
               <div className="space-y-4" data-testid="readyToPrintSection">
