@@ -169,6 +169,8 @@ class PipelineWrapper(BasePipelineWrapper):
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
+        assert suffix, "suffix is required"
+        assert region, "region is required"
 
         try:
             prompt_template = haystack_utils.get_phoenix_prompt(
