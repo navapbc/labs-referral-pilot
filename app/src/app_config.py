@@ -38,12 +38,9 @@ class AppConfig(PydanticBaseEnvConfig):
     # Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
-        "extract_supports": "UHJvbXB0VmVyc2lvbjo0Ng==",
         "generate_referrals": "UHJvbXB0VmVyc2lvbjo3NA==",  # if no suffix, the default Austin area prompt will be used
         "generate_referrals_keystone": "UHJvbXB0VmVyc2lvbjo3OQ==",
         "generate_action_plan": "UHJvbXB0VmVyc2lvbjo3NQ==",
-        "crawl_gcta": "UHJvbXB0VmVyc2lvbjozNg==",
-        "crawl_indeed": "UHJvbXB0VmVyc2lvbjozNA==",
     }
 
     # For RAG vector DB
@@ -67,9 +64,6 @@ class AppConfig(PydanticBaseEnvConfig):
     # LLM Model Configuration per pipeline
     default_openai_model_version: str = "gpt-5.1"
     default_openai_reasoning_level: str = "none"
-
-    generate_referrals_model_version: str = "gpt-5.1"
-    generate_referrals_reasoning_level: str = "none"
 
     generate_referrals_rag_model_version: str = "gpt-5.1"
     generate_referrals_rag_reasoning_level: str = "none"

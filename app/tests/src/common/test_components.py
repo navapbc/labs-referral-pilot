@@ -16,7 +16,7 @@ from src.common.components import (
     UploadFilesToByteStreams,
 )
 from src.db.models.api_data_models import LlmResponse
-from src.pipelines.generate_referrals.pipeline_wrapper import ResourceList
+from src.pipelines.generate_referrals_rag.pipeline_wrapper import ResourceList
 
 
 def test_UploadFilesToByteStreams():

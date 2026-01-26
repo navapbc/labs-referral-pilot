@@ -1,7 +1,7 @@
 import pytest
 
 from src.pipelines.generate_action_plan.pipeline_wrapper import format_resources
-from src.pipelines.generate_referrals.pipeline_wrapper import Resource
+from src.pipelines.generate_referrals_rag.pipeline_wrapper import Resource
 
 
 @pytest.fixture
