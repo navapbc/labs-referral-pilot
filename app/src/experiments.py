@@ -14,8 +14,8 @@ from phoenix.client.resources.datasets import Dataset
 from phoenix.client.resources.experiments.types import TaskOutput
 
 from src.common import phoenix_utils
-from src.pipelines.generate_referrals.pipeline_wrapper import (
-    PipelineWrapper as GenerateReferralsPipeline,
+from src.pipelines.generate_referrals_rag.pipeline_wrapper import (
+    PipelineWrapper as GenerateReferralsRagPipeline,
 )
 
 logger = logging.getLogger(__name__)
@@ -58,8 +58,8 @@ if url_base:
 
 PIPELINES = {
     "generate-referrals": {
-        "pipeline_class": GenerateReferralsPipeline,
-        "url_path": "generate_referrals/run",
+        "pipeline_class": GenerateReferralsRagPipeline,
+        "url_path": "generate_referrals_rag/run",
     },
 }
 pipeline_name = "generate-referrals"
@@ -177,7 +177,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", type=str)
-    parser.add_argument("pipeline", type=str, default="generate_referrals")
+    parser.add_argument("pipeline", type=str, default="generate_referrals_rag")
     parser.add_argument(
         "action",
         type=str,
