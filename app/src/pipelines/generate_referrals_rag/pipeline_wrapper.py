@@ -123,7 +123,7 @@ class PipelineWrapper(BasePipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         return pipeline
 
-    # Called for the `generate-referrals/run` endpoint
+    # Called for the `generate_referrals_rag/run` endpoint
     def run_api(
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
     ) -> dict:
@@ -169,7 +169,7 @@ class PipelineWrapper(BasePipelineWrapper):
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
-        # Get base args from parent class
+
         try:
             prompt_template = haystack_utils.get_phoenix_prompt(
                 "generate_referrals", prompt_version_id=prompt_version_id, suffix=suffix
