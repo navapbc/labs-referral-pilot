@@ -62,7 +62,7 @@ def extract_output(result: dict) -> list | str:
     try:
         resp_obj = json.loads(result["llm"]["replies"][-1].text)
         return [r["name"] for r in resp_obj["resources"]]
-    except (KeyError, IndexError):
+    except (KeyError, IndexError, json.JSONDecodeError):
         return result["llm"]["replies"][-1].text
 
 
@@ -70,7 +70,7 @@ def shorten_output(response_text: str) -> str:
     try:
         resp_obj = json.loads(response_text)
         return str([r["name"] for r in resp_obj["resources"]])
-    except (KeyError, IndexError):
+    except (KeyError, IndexError, json.JSONDecodeError):
         return response_text
 
 
