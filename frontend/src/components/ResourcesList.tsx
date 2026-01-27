@@ -107,7 +107,7 @@ const ResourcesList = ({
 }: ResourcesListProps) => {
   if (resources.length === 0) {
     if (isSearching) {
-      return <div className="m-3">Searching for Referrals...</div>;
+      return <div className="m-3">Searching for resources...</div>;
     }
     return <div className="m-3">{errorMessage || "No resources found."}</div>;
   }
@@ -175,9 +175,7 @@ const ResourcesList = ({
                 </Link>
               </div>
             )}
-            {r.description && (
-              <div className="font-medium mt-3">{r.description}</div>
-            )}
+            {r.description && <div className="mt-3">{r.description}</div>}
           </CardContent>
         </Card>
       ))}

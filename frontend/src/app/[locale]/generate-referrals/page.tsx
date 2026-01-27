@@ -27,11 +27,11 @@ import { ShareButtons } from "@/components/ShareButtons";
 import WelcomeUserInputScreen from "@/components/WelcomeUserInputScreen";
 import { PilotFeedbackBanner } from "@/components/PilotFeedbackBanner";
 import { GoodwillReferralToolHeaderPilot } from "@/components/GoodwillReferralToolHeaderPilot";
-import ClientDetailsPromptBubble from "@/components/ClientDetailsPromptBubble";
 import {
   ClientDetailsInput,
   resourceCategories,
 } from "@/components/ClientDetailsInput";
+import { RefinePromptPanel } from "@/components/RefinePromptPanel";
 import { RemoveResourceNotification } from "@/components/RemoveResourceNotification";
 
 export default function Page() {
@@ -119,7 +119,12 @@ export default function Page() {
     setShowResultsView(true);
   };
 
-  async function findResources() {
+  async function findResources(overrides?: {
+    clientDescription?: string;
+    locationText?: string;
+    selectedCategories?: string[];
+    selectedResourceTypes?: string[];
+  }) {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
     const suffix = searchParams?.get("suffix") ?? undefined;
 
@@ -142,7 +147,7 @@ export default function Page() {
     }, 12000);
 
     try {
-      const request = await buildRequestWithResolvedZipCodes();
+      const request = await buildRequestWithResolvedZipCodes(overrides);
       setRequestAfterZipResolution(request);
 
       const {
@@ -268,6 +273,34 @@ export default function Page() {
     }
   }
 
+  function handleRefineSearch(
+    newClientDescription: string,
+    newLocationText: string,
+    newSelectedCategories: string[],
+    newSelectedResourceTypes: string[],
+  ) {
+    // Update state with new values
+    setClientDescription(newClientDescription);
+    setLocationText(newLocationText);
+    setSelectedCategories(newSelectedCategories);
+    setSelectedResourceTypes(newSelectedResourceTypes);
+
+    // Clear previous results and action plan
+    setRetainedResources(undefined);
+    setSelectedResources([]);
+    setActionPlan(null);
+    setStreamingPlan(null);
+    setActionPlanResultId("");
+
+    // Trigger new search with overrides (since state updates are async)
+    void findResources({
+      clientDescription: newClientDescription,
+      locationText: newLocationText,
+      selectedCategories: newSelectedCategories,
+      selectedResourceTypes: newSelectedResourceTypes,
+    });
+  }
+
   async function generateActionPlan() {
     if (selectedResources.length === 0) return;
 
@@ -338,7 +371,21 @@ export default function Page() {
     }
   }
 
-  const buildRequestWithResolvedZipCodes = async (): Promise<string> => {
+  const buildRequestWithResolvedZipCodes = async (overrides?: {
+    clientDescription?: string;
+    locationText?: string;
+    selectedCategories?: string[];
+    selectedResourceTypes?: string[];
+  }): Promise<string> => {
+    // Use overrides if provided, otherwise use state values
+    const effectiveClientDescription =
+      overrides?.clientDescription ?? clientDescription;
+    const effectiveLocationText = overrides?.locationText ?? locationText;
+    const effectiveSelectedCategories =
+      overrides?.selectedCategories ?? selectedCategories;
+    const effectiveSelectedResourceTypes =
+      overrides?.selectedResourceTypes ?? selectedResourceTypes;
+
     // Helper function to replace zip codes with "city, state zip_code" format
     const replaceZipCodes = async (text: string): Promise<string> => {
       if (!text) return text;
@@ -378,10 +425,12 @@ export default function Page() {
     };
 
     // Process both locationText and clientDescription for zip codes
-    const processedLocationText = await replaceZipCodes(locationText);
-    const processedClientDescription = await replaceZipCodes(clientDescription);
+    const processedLocationText = await replaceZipCodes(effectiveLocationText);
+    const processedClientDescription = await replaceZipCodes(
+      effectiveClientDescription,
+    );
 
-    const resourceTypeFilters = selectedCategories
+    const resourceTypeFilters = effectiveSelectedCategories
       .map((categoryId) => {
         const category = resourceCategories.find((c) => c.id === categoryId);
         return category?.label;
@@ -394,9 +443,9 @@ export default function Page() {
         ? "\nInclude resources that support the following categories: " +
           resourceTypeFilters
         : "") +
-      (selectedResourceTypes.length > 0
+      (effectiveSelectedResourceTypes.length > 0
         ? "\nInclude the following types of providers: " +
-          selectedResourceTypes.join(", ")
+          effectiveSelectedResourceTypes.join(", ")
         : "") +
       (processedLocationText.length > 0
         ? "\nFocus on resources close to the following location: " +
@@ -510,7 +559,7 @@ export default function Page() {
                     data-testid="returnToSearchButton"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    Return To Search
+                    Start a new search
                   </Button>
                   <ShareButtons
                     onPrint={handlePrint}
@@ -522,21 +571,36 @@ export default function Page() {
               </div>
             )}
 
-            {requestAfterZipResolution && (
-              <ClientDetailsPromptBubble
-                clientDescription={requestAfterZipResolution}
+            {(isStreamingResources || showResultsView) && (
+              <RefinePromptPanel
+                clientDescription={clientDescription}
+                locationText={locationText}
+                selectedCategories={selectedCategories}
+                selectedResourceTypes={selectedResourceTypes}
+                isLoading={loading}
+                isStreamingResources={isStreamingResources}
+                onRefine={handleRefineSearch}
               />
             )}
 
             {(isStreamingResources || showResultsView) && (
-              <ResourcesList
-                resources={
-                  (streamingResources as Resource[]) ?? retainedResources ?? []
-                }
-                errorMessage={errorMessage}
-                handleRemoveResource={handleRemoveResource}
-                isSearching={isStreamingResources && !hasReceivedFirstResource}
-              />
+              <>
+                <h2 className="text-lg font-semibold text-gray-900 mt-4">
+                  Resources
+                </h2>
+                <ResourcesList
+                  resources={
+                    (streamingResources as Resource[]) ??
+                    retainedResources ??
+                    []
+                  }
+                  errorMessage={errorMessage}
+                  handleRemoveResource={handleRemoveResource}
+                  isSearching={
+                    isStreamingResources && !hasReceivedFirstResource
+                  }
+                />
+              </>
             )}
 
             {showResultsView &&
