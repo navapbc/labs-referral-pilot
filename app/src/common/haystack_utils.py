@@ -132,6 +132,7 @@ class TracedPipelineRunner:
             ) as span:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
                 try:
+                    span.set_attribute("streaming", True)
                     span.set_input(input_)
 
                     # hayhooks.streaming_generator() creates a thread that now inherits OpenTelemetry context
@@ -199,6 +200,7 @@ class TracedPipelineRunner:
                         include_outputs_from=include_outputs_from,
                     )
                     # Shorter than span.set_attribute(SpanAttributes.INPUT_VALUE, ...)
+                    span.set_attribute("streaming", False)
                     span.set_input(input_)
                     span.set_output(extract_output(result))
                     span.set_status(Status(StatusCode.OK))

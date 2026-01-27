@@ -58,6 +58,22 @@ response_schema = """
 """
 
 
+def extract_output(result: dict) -> list | str:
+    try:
+        resp_obj = json.loads(result["llm"]["replies"][-1].text)
+        return [r["name"] for r in resp_obj["resources"]]
+    except (KeyError, IndexError):
+        return result["llm"]["replies"][-1].text
+
+
+def shorten_output(response_text: str) -> str:
+    try:
+        resp_obj = json.loads(response_text)
+        return str([r["name"] for r in resp_obj["resources"]])
+    except (KeyError, IndexError):
+        return response_text
+
+
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_referrals_rag"
 
@@ -136,13 +152,6 @@ class PipelineWrapper(BasePipelineWrapper):
             region=suffix,
             prompt_version_id=prompt_version_id,
         )
-
-        def extract_output(result: dict) -> list | str:
-            try:
-                resp_obj = json.loads(result["llm"]["replies"][-1].text)
-                return [r["name"] for r in resp_obj["resources"]]
-            except (KeyError, IndexError):
-                return result["llm"]["replies"][-1].text
 
         response = self.runner.return_response(
             pipeline_run_args,
@@ -242,7 +251,8 @@ class PipelineWrapper(BasePipelineWrapper):
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
-            input_=[query],
-            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
+            input_=query,
+            shorten_output=shorten_output,
             parent_span_name_suffix=suffix,
+            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
         )
