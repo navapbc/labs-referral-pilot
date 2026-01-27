@@ -64,8 +64,6 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,
   );
-  const [requestAfterZipResolution, setRequestAfterZipResolution] =
-    useState("");
 
   const searchParams = useSearchParams();
 
@@ -148,7 +146,6 @@ export default function Page() {
 
     try {
       const request = await buildRequestWithResolvedZipCodes(overrides);
-      setRequestAfterZipResolution(request);
 
       const {
         resources: finalResources,
@@ -249,7 +246,6 @@ export default function Page() {
     setIsStreamingActionPlan(false);
     setIsGeneratingActionPlan(false);
     setErrorMessage(undefined);
-    setRequestAfterZipResolution("");
     setRecentlyRemoved(null);
     setRemovedResourceIndex(null);
   }
