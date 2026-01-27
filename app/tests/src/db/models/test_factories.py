@@ -3,17 +3,9 @@ from datetime import date, datetime
 import pytest
 
 import src.adapters.db as db
-from src.db.models.crawl_job import CrawlJob
-from src.db.models.support_listing import LlmResponse, Support, SupportListing
+from src.db.models.api_data_models import LlmResponse
 from src.db.models.user_models import User
-from tests.src.db.models.factories import (
-    CrawlJobFactory,
-    LlmResponseFactory,
-    RoleFactory,
-    SupportFactory,
-    SupportListingFactory,
-    UserFactory,
-)
+from tests.src.db.models.factories import LlmResponseFactory, RoleFactory, UserFactory
 
 user_params = {
     "first_name": "Alvin",
@@ -106,38 +98,6 @@ def test_role_factory_create(enable_factory_create):
     assert len(role.user.roles) == 1
 
 
-def test_support_listing_factory_create(enable_factory_create, db_session: db.Session):
-    db_session.query(SupportListing).delete()
-
-    support_listing = SupportListingFactory.create()
-
-    db_record = (
-        db_session.query(SupportListing)
-        .filter(SupportListing.id == support_listing.id)
-        .one_or_none()
-    )
-
-    assert db_record.id == support_listing.id
-    assert db_record.name == support_listing.name
-    assert db_record.uri == support_listing.uri
-
-
-def test_support_factory_create(enable_factory_create, db_session: db.Session):
-    db_session.query(Support).delete()
-
-    support = SupportFactory.create()
-
-    db_record = db_session.query(Support).filter(Support.id == support.id).one_or_none()
-
-    assert support.id is not None
-    assert db_record.name == support.name
-    assert db_record.addresses == support.addresses
-    assert db_record.phone_numbers == support.phone_numbers
-    assert db_record.description == support.description
-    assert db_record.website == support.website
-    assert db_record.email_addresses == support.email_addresses
-
-
 def test_llm_response_factory_create(enable_factory_create, db_session: db.Session):
     db_session.query(LlmResponse).delete()
 
@@ -149,16 +109,3 @@ def test_llm_response_factory_create(enable_factory_create, db_session: db.Sessi
 
     assert llm_response.id is not None
     assert db_record.raw_text == llm_response.raw_text
-
-
-def test_crawl_job_factory_create(enable_factory_create, db_session: db.Session):
-    db_session.query(CrawlJob).delete()
-
-    crawl_job = CrawlJobFactory.create()
-
-    db_record = db_session.query(CrawlJob).filter(CrawlJob.id == crawl_job.id).one_or_none()
-
-    assert crawl_job.id is not None
-    assert db_record.prompt_name == crawl_job.prompt_name
-    assert db_record.domain == crawl_job.domain
-    assert db_record.crawling_interval == crawl_job.crawling_interval

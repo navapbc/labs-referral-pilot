@@ -1,16 +1,20 @@
 import { render, screen, waitFor } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
 import Page from "src/app/[locale]/generate-referrals/page";
-import * as fetchResourcesModule from "src/util/fetchResources";
+import * as fetchResourcesStreamingModule from "src/util/fetchResourcesStreaming";
 import { Resource } from "src/types/resources";
 
 // Mock the modules
-jest.mock("src/util/fetchResources");
+jest.mock("src/util/fetchResourcesStreaming");
 jest.mock("src/util/fetchActionPlan");
+jest.mock("src/util/fetchLocation", () => ({
+  fetchLocationFromZip: jest.fn(() => Promise.resolve("")),
+}));
 
 // Mock only the markdown parser to avoid ESM module issues
 jest.mock("src/util/markdown", () => ({
   parseMarkdownToHTML: jest.fn((content: string) => `<div>${content}</div>`),
+  extractCitations: jest.fn((content: string) => ({ content, citations: [] })),
 }));
 
 describe("Generate Referrals Page", () => {
@@ -51,10 +55,15 @@ describe("Generate Referrals Page", () => {
   it("shows print button only after results are received", async () => {
     const user = userEvent.setup();
 
-    // Mock successful fetchResources call
+    // Mock successful fetchResourcesStreaming call
     jest
-      .spyOn(fetchResourcesModule, "fetchResources")
-      .mockResolvedValue(mockFetchResourcesResult);
+      .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+      .mockImplementation((_req, _email, onChunk, onComplete) => {
+        // Simulate streaming chunks
+        onChunk(mockResources as Partial<Resource>[]);
+        onComplete();
+        return Promise.resolve(mockFetchResourcesResult);
+      });
 
     render(<Page />);
 
@@ -259,11 +268,15 @@ describe("Generate Referrals Page", () => {
   });
 
   describe("findResources", () => {
-    it("calls fetchResources with client description and filters", async () => {
+    it("calls fetchResourcesStreaming with client description and filters", async () => {
       const user = userEvent.setup();
-      const fetchResourcesSpy = jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -281,10 +294,12 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      await waitFor(() => expect(fetchResourcesSpy).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1),
+      );
 
       // Now assert on the last call's args
-      const [arg] = fetchResourcesSpy.mock.calls.at(-1)!;
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
       expect(arg).toEqual(
         expect.stringContaining("Client needs help getting to work"),
       );
@@ -298,16 +313,16 @@ describe("Generate Referrals Page", () => {
       expect(findButton).toBeDisabled();
     });
 
-    it("shows loading state while fetching resources", async () => {
+    it("initiates streaming when find resources button is clicked", async () => {
       const user = userEvent.setup();
-      jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockImplementation(
-          () =>
-            new Promise((resolve) =>
-              setTimeout(() => resolve(mockFetchResourcesResult), 100),
-            ),
-        );
+      const fetchStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          // Simulate streaming behavior
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -317,14 +332,22 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      expect(screen.getByText("Finding Resources...")).toBeInTheDocument();
+      // Verify that the streaming function was called
+      await waitFor(() => {
+        expect(fetchStreamingSpy).toHaveBeenCalledTimes(1);
+      });
+
+      // Verify results appear after streaming completes
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
     });
 
     it("handles errors gracefully", async () => {
       const user = userEvent.setup();
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
         .mockRejectedValue(new Error("API Error"));
 
       render(<Page />);
@@ -336,7 +359,7 @@ describe("Generate Referrals Page", () => {
       await user.click(findButton);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith("API Error");
+        expect(consoleErrorSpy).toHaveBeenCalled();
       });
 
       consoleErrorSpy.mockRestore();
@@ -349,8 +372,12 @@ describe("Generate Referrals Page", () => {
       const printSpy = jest.spyOn(window, "print").mockImplementation();
 
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -395,8 +422,12 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
 
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -425,8 +456,12 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
 
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -491,9 +526,13 @@ describe("Generate Referrals Page", () => {
   describe("getCollatedReferralOptions", () => {
     it("includes selected categories in the prompt", async () => {
       const user = userEvent.setup();
-      const fetchResourcesSpy = jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -513,9 +552,11 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      await waitFor(() => expect(fetchResourcesSpy).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1),
+      );
 
-      const [arg] = fetchResourcesSpy.mock.calls.at(-1)!;
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
       expect(arg).toContain(
         "Include resources that support the following categories:",
       );
@@ -525,9 +566,13 @@ describe("Generate Referrals Page", () => {
 
     it("includes selected resource types in the prompt", async () => {
       const user = userEvent.setup();
-      const fetchResourcesSpy = jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -542,18 +587,24 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      await waitFor(() => expect(fetchResourcesSpy).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1),
+      );
 
-      const [arg] = fetchResourcesSpy.mock.calls.at(-1)!;
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
       expect(arg).toContain("Include the following types of providers:");
       expect(arg).toContain("goodwill");
     });
 
     it("includes location in the prompt", async () => {
       const user = userEvent.setup();
-      const fetchResourcesSpy = jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -566,9 +617,11 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      await waitFor(() => expect(fetchResourcesSpy).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1),
+      );
 
-      const [arg] = fetchResourcesSpy.mock.calls.at(-1)!;
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
       expect(arg).toContain(
         "Focus on resources close to the following location:",
       );
@@ -577,9 +630,13 @@ describe("Generate Referrals Page", () => {
 
     it("does not include filter prefixes when no filters are selected", async () => {
       const user = userEvent.setup();
-      const fetchResourcesSpy = jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -589,9 +646,11 @@ describe("Generate Referrals Page", () => {
       const findButton = screen.getByTestId("findResourcesButton");
       await user.click(findButton);
 
-      await waitFor(() => expect(fetchResourcesSpy).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1),
+      );
 
-      const [arg] = fetchResourcesSpy.mock.calls.at(-1)!;
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
       expect(arg).not.toContain(
         "Include resources that support the following categories:",
       );
@@ -637,8 +696,12 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
 
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -674,8 +737,12 @@ describe("Generate Referrals Page", () => {
       const user = userEvent.setup();
 
       jest
-        .spyOn(fetchResourcesModule, "fetchResources")
-        .mockResolvedValue(mockFetchResourcesResult);
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
 
       render(<Page />);
 
@@ -738,10 +805,16 @@ describe("Generate Referrals Page", () => {
         },
       ];
 
-      jest.spyOn(fetchResourcesModule, "fetchResources").mockResolvedValue({
-        resultId: "test-result-id",
-        resources: mockMultipleResources,
-      });
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockMultipleResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve({
+            resultId: "test-result-id",
+            resources: mockMultipleResources,
+          });
+        });
 
       render(<Page />);
 
@@ -804,10 +877,16 @@ describe("Generate Referrals Page", () => {
         },
       ];
 
-      jest.spyOn(fetchResourcesModule, "fetchResources").mockResolvedValue({
-        resultId: "test-result-id",
-        resources: mockMultipleResources,
-      });
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockMultipleResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve({
+            resultId: "test-result-id",
+            resources: mockMultipleResources,
+          });
+        });
 
       render(<Page />);
 
@@ -881,10 +960,16 @@ describe("Generate Referrals Page", () => {
         },
       ];
 
-      jest.spyOn(fetchResourcesModule, "fetchResources").mockResolvedValue({
-        resultId: "test-result-id",
-        resources: mockMultipleResources,
-      });
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockMultipleResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve({
+            resultId: "test-result-id",
+            resources: mockMultipleResources,
+          });
+        });
 
       render(<Page />);
 

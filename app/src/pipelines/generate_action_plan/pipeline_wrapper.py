@@ -16,7 +16,7 @@ from src.common.components import (
     ReadableLogger,
     SaveResult,
 )
-from src.pipelines.generate_referrals.pipeline_wrapper import Resource
+from src.pipelines.generate_referrals_rag.pipeline_wrapper import Resource
 
 logger = logging.getLogger(__name__)
 

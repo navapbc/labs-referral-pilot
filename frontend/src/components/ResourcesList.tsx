@@ -4,6 +4,15 @@ import Link from "next/link";
 import React from "react";
 import { Building, Users, X } from "lucide-react";
 
+const isValidURL = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const referralTypeIndicator = (referralType: string | undefined) => {
   switch (referralType) {
     case "goodwill": {
@@ -87,16 +96,23 @@ type ResourcesListProps = {
   resources: Resource[];
   errorMessage?: string;
   handleRemoveResource: (resource: Resource) => void;
+  isSearching?: boolean;
 };
 
 const ResourcesList = ({
   resources,
   errorMessage,
   handleRemoveResource,
+  isSearching = false,
 }: ResourcesListProps) => {
-  return resources.length === 0 ? (
-    <div className="m-3">{errorMessage || "No resources found."}</div>
-  ) : (
+  if (resources.length === 0) {
+    if (isSearching) {
+      return <div className="m-3">Searching for Referrals...</div>;
+    }
+    return <div className="m-3">{errorMessage || "No resources found."}</div>;
+  }
+
+  return (
     <div className="mt-2">
       {resources.map((r, i) => (
         <Card
@@ -126,14 +142,9 @@ const ResourcesList = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="ml-9 mr-4">
-            {r.description && (
-              <div className="font-medium mb-2">{r.description}</div>
-            )}
             {r.addresses && r.addresses?.length > 0 && (
               <div className="mt-1">
-                <span className="font-semibold">
-                  Address{r.addresses.length > 1 ? "es" : ""}:
-                </span>{" "}
+                <span className="font-semibold">Address:</span>{" "}
                 {r.addresses.join(" | ")}
               </div>
             )}
@@ -149,7 +160,7 @@ const ResourcesList = ({
                 {r.emails.join(" | ")}
               </div>
             )}
-            {!!r.website && (
+            {!!r.website && isValidURL(normalizeUrl(r.website)) && (
               <div className="mt-1">
                 <span className="font-semibold">Website:</span>{" "}
                 <Link
@@ -157,10 +168,15 @@ const ResourcesList = ({
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-blue-600 hover:underline"
+                  prefetch={false}
+                  data-testid={`website-link-${i}`}
                 >
                   {r.website}
                 </Link>
               </div>
+            )}
+            {r.description && (
+              <div className="font-medium mt-3">{r.description}</div>
             )}
           </CardContent>
         </Card>

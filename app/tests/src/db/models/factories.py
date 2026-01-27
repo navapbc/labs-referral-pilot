@@ -11,14 +11,13 @@ from datetime import datetime
 from typing import Optional
 
 import factory
-import factory.fuzzy
 import faker
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.db.models import crawl_job, support_listing
+from src.db.models import api_data_models
 
 _db_session: Optional[db.Session] = None
 
@@ -87,43 +86,9 @@ class UserFactory(BaseFactory):
     roles = factory.RelatedFactoryList(RoleFactory, size=2, factory_related_name="user")
 
 
-class SupportListingFactory(BaseFactory):
-    class Meta:
-        model = support_listing.SupportListing
-
-    id = Generators.UuidObj
-    name = factory.Faker("name")
-    uri = factory.Faker("uri")
-
-
-class SupportFactory(BaseFactory):
-    class Meta:
-        model = support_listing.Support
-
-    support_listing = factory.SubFactory(SupportListingFactory)
-
-    name = factory.Faker("name")
-    addresses = factory.LazyFunction(lambda: [fake.address().replace("\n", ", ")])
-    phone_numbers = factory.LazyFunction(lambda: [fake.phone_number()])
-    email_addresses = factory.LazyFunction(lambda: [fake.email()])
-
-    description = factory.LazyFunction(lambda: fake.sentence())
-    website = factory.LazyFunction(lambda: fake.url())
-
-
 class LlmResponseFactory(BaseFactory):
     class Meta:
-        model = support_listing.LlmResponse
+        model = api_data_models.LlmResponse
 
     id = Generators.UuidObj
     raw_text = factory.LazyFunction(lambda: fake.text(max_nb_chars=200))
-
-
-class CrawlJobFactory(BaseFactory):
-    class Meta:
-        model = crawl_job.CrawlJob
-
-    id = Generators.UuidObj
-    prompt_name = factory.Faker("word")
-    domain = factory.Faker("domain_name")
-    crawling_interval = factory.Faker("random_int", min=1, max=168)

@@ -1,6 +1,6 @@
 import logging
 
-from src.db.models import base, crawl_job, support_listing, user_models
+from src.db.models import api_data_models, base, user_models
 
 logger = logging.getLogger(__name__)
 
@@ -8,4 +8,4 @@ logger = logging.getLogger(__name__)
 # This is used by tests to create the test database.
 metadata = base.metadata
 
-__all__ = ["metadata", "user_models", "support_listing", "crawl_job"]
+__all__ = ["metadata", "user_models", "api_data_models"]
