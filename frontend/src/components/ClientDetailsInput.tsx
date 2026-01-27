@@ -1,25 +1,10 @@
 import {
-  Accessibility,
-  Baby,
-  Briefcase,
-  Building,
-  DollarSign,
-  Flag,
-  GraduationCap,
-  Home,
   Layers,
-  LucideIcon,
   MapPin,
   RotateCcw,
-  Scale,
   Search,
-  Shield,
   Sparkles,
-  Stethoscope,
   UserRound,
-  Users,
-  Utensils,
-  Car,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,73 +13,25 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
 export const resourceCategories = [
-  {
-    id: "employment",
-    label: "Employment & Job Training",
-    icon: Briefcase,
-  },
-  {
-    id: "housing",
-    label: "Housing & Shelter",
-    icon: Home,
-  },
-  {
-    id: "food",
-    label: "Food Assistance",
-    icon: Utensils,
-  },
-  {
-    id: "transportation",
-    label: "Transportation",
-    icon: Car,
-  },
-  {
-    id: "healthcare",
-    label: "Healthcare & Mental Health",
-    icon: Stethoscope,
-  },
-  {
-    id: "childcare",
-    label: "Childcare",
-    icon: Baby,
-  },
-  {
-    id: "financial",
-    label: "Financial Assistance",
-    icon: DollarSign,
-  },
-  {
-    id: "education",
-    label: "Education & GED",
-    icon: GraduationCap,
-  },
-  {
-    id: "legal",
-    label: "Legal Services",
-    icon: Scale,
-  },
-  {
-    id: "substance",
-    label: "Substance Abuse Treatment",
-    icon: Shield,
-  },
-  {
-    id: "disability",
-    label: "Disability Services",
-    icon: Accessibility,
-  },
-  {
-    id: "veterans",
-    label: "Veterans Services",
-    icon: Flag,
-  },
+  { id: "employment", label: "Employment & Job Training", emoji: "💼" },
+  { id: "housing", label: "Housing & Shelter", emoji: "🏠" },
+  { id: "food", label: "Food Assistance", emoji: "🍽️" },
+  { id: "transportation", label: "Transportation", emoji: "🚗" },
+  { id: "healthcare", label: "Healthcare & Mental Health", emoji: "🩺" },
+  { id: "childcare", label: "Childcare", emoji: "👶" },
+  { id: "financial", label: "Financial Assistance", emoji: "💵" },
+  { id: "education", label: "Education & GED", emoji: "🎓" },
+  { id: "legal", label: "Legal Services", emoji: "⚖️" },
+  { id: "substance", label: "Substance Abuse Treatment", emoji: "🛡️" },
+  { id: "disability", label: "Disability Services", emoji: "♿" },
+  { id: "veterans", label: "Veterans Services", emoji: "🎖️" },
 ];
 
 // Provider types for the Resource Provider Selection section
 const providerTypes: {
   id: string;
   label: string;
-  icon?: LucideIcon;
+  emoji?: string;
   logoSrc?: string;
 }[] = [
   {
@@ -102,16 +39,8 @@ const providerTypes: {
     label: "Goodwill",
     logoSrc: "/img/Goodwill_Industries_Logo.svg",
   },
-  {
-    id: "government",
-    label: "Government",
-    icon: Building,
-  },
-  {
-    id: "community",
-    label: "Community",
-    icon: Users,
-  },
+  { id: "government", label: "Government", emoji: "🏛️" },
+  { id: "community", label: "Community", emoji: "👥" },
 ];
 
 interface ClientDetailsInputProps {
@@ -220,14 +149,13 @@ export function ClientDetailsInput({
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {resourceCategories.map((category) => {
-              const Icon = category.icon;
               const isSelected = selectedCategories.includes(category.id);
               return (
                 <Button
                   key={category.id}
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
-                  className={`text-sm flex-col justify-center px-1 min-h-20 w-auto whitespace-normal break-words h-auto cursor-pointer disabled:cursor-not-allowed ${
+                  className={`text-sm flex-col justify-center px-1 min-h-28 w-auto whitespace-normal break-words h-auto cursor-pointer disabled:cursor-not-allowed ${
                     isSelected
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -237,7 +165,12 @@ export function ClientDetailsInput({
                   aria-pressed={isSelected}
                   disabled={loading}
                 >
-                  <Icon className="mr-2 w-6 h-6" aria-hidden="true" />
+                  <span
+                    className={`text-2xl flex items-center justify-center w-10 h-10 ${isSelected ? "bg-white/90 rounded-full" : ""}`}
+                    aria-hidden="true"
+                  >
+                    {category.emoji}
+                  </span>
                   {category.label}
                 </Button>
               );
@@ -282,14 +215,16 @@ export function ClientDetailsInput({
                       src={provider.logoSrc}
                       alt={`${provider.label} logo`}
                       aria-hidden="true"
-                      className="w-4 h-4 mr-2"
+                      className="w-6 h-6 mr-2"
                     />
                   ) : (
-                    provider.icon && (
-                      <provider.icon
-                        className="w-4 h-4 mr-2"
+                    provider.emoji && (
+                      <span
+                        className={`text-xl flex items-center justify-center w-8 h-8 mr-1 ${isSelected ? "bg-white/90 rounded-full" : ""}`}
                         aria-hidden="true"
-                      />
+                      >
+                        {provider.emoji}
+                      </span>
                     )
                   )}
                   {provider.label}
