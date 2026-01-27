@@ -66,6 +66,11 @@ export function RefinePromptPanel({
     .map((id) => resourceCategories.find((c) => c.id === id)?.label)
     .filter(Boolean);
 
+  // Get provider type labels from IDs for display
+  const providerLabels = selectedResourceTypes
+    .map((id) => providerTypes.find((p) => p.id === id)?.label)
+    .filter(Boolean);
+
   // Build metadata string
   const metadataParts: string[] = [];
   if (categoryLabels.length > 0) {
@@ -73,6 +78,9 @@ export function RefinePromptPanel({
   }
   if (locationText) {
     metadataParts.push(`Location: ${locationText}`);
+  }
+  if (providerLabels.length > 0) {
+    metadataParts.push(`Providers: ${providerLabels.join(", ")}`);
   }
 
   const handleToggleCategory = (categoryId: string) => {

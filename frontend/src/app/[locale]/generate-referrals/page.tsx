@@ -644,6 +644,9 @@ export default function Page() {
           resources={retainedResources ?? []}
           clientDescription={clientDescription}
           actionPlan={actionPlan}
+          selectedCategories={selectedCategories}
+          locationText={locationText}
+          selectedResourceTypes={selectedResourceTypes}
         />
       </div>
     </>

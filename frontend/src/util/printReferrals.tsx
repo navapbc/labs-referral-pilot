@@ -9,10 +9,16 @@ export function PrintableReferralsReport({
   resources,
   clientDescription,
   actionPlan,
+  selectedCategories = [],
+  locationText = "",
+  selectedResourceTypes = [],
 }: {
   resources: Resource[];
   clientDescription: string;
   actionPlan?: ActionPlan | null;
+  selectedCategories?: string[];
+  locationText?: string;
+  selectedResourceTypes?: string[];
 }) {
   const date = new Date();
   return (
@@ -27,7 +33,12 @@ export function PrintableReferralsReport({
           {date.toLocaleTimeString()}
         </p>
       </div>
-      <ClientDetailsPromptBubble clientDescription={clientDescription} />
+      <ClientDetailsPromptBubble
+        clientDescription={clientDescription}
+        selectedCategories={selectedCategories}
+        locationText={locationText}
+        selectedResourceTypes={selectedResourceTypes}
+      />
       <ResourcesList
         resources={resources ?? []}
         handleRemoveResource={() => {}}
