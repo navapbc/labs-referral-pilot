@@ -1,4 +1,3 @@
-# TODO: Rename file to llm_response.py
 import logging
 
 from sqlalchemy.orm import Mapped, mapped_column

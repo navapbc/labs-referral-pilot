@@ -125,16 +125,16 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `generate_referrals_rag/run` endpoint
     def run_api(
-        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = ""
+        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "centraltx"
     ) -> dict:
         # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
 
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
-            prompt_version_id=prompt_version_id,
             suffix=suffix,
-            region=suffix or "centraltx",
+            region=suffix,
+            prompt_version_id=prompt_version_id,
         )
 
         def extract_output(result: dict) -> list | str:
@@ -161,14 +161,16 @@ class PipelineWrapper(BasePipelineWrapper):
         query: str,
         user_email: str,
         *,
-        prompt_version_id: str = "",
-        suffix: str = "",
+        suffix: str,
         region: str,
+        prompt_version_id: str = "",
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
+        assert suffix, "suffix is required"
+        assert region, "region is required"
 
         try:
             prompt_template = haystack_utils.get_phoenix_prompt(
@@ -212,7 +214,7 @@ class PipelineWrapper(BasePipelineWrapper):
         # Extract custom parameters from the body
         query = body.get("query", "")
         user_email = body.get("user_email", "")
-        suffix = body.get("suffix", "")
+        suffix = body.get("suffix", "centraltx")
 
         if not query:
             raise ValueError("query parameter is required")
@@ -223,9 +225,9 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
+            suffix=suffix,
+            region=suffix,
             prompt_version_id=body.get("prompt_version_id", ""),
-            suffix=body.get("suffix", ""),
-            region=suffix or "centraltx",
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
