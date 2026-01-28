@@ -34,9 +34,14 @@ Configuration files:
       - These come from files in under `files_to_ingest_into_vector_db` and are ingested by `rag_utils.populate_vector_db()` automatically called in `gunicorn.conf.py` upon app startup. Repopulating the Chroma DB collection can be manually triggered via `poetry run populate-vector-db`.
    a. `app-db` Postgres DB: use a DB client with the credentials in `docker-compose.yml`
 
-5. Add prompt templates in Phoenix via `poetry run load-prompts-from-json` or `make copy-prompts`.
+5. Add prompt templates in Phoenix via `make load-prompts-from-json` or `make copy-prompts`.
    View prompts at http://localhost:6006/prompts
 
+6. Test using API using `curl` commands
+
+7. Enable Phoenix SSL/TLS
+   a. In `docker-compose.yml`, set `PHOENIX_TLS_ENABLED` to `True`
+   b. In `local.env`, set `PHOENIX_COLLECTOR_ENDPOINT` to use `https`
 
 ### Frontend
 
