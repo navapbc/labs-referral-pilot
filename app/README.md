@@ -5,7 +5,7 @@
 - Backend (in the `app` folder) provides API endpoints for the Frontend
 - Phoenix for observability, monitoring, and prompt management
 - Postgres DB for the backend and Phoenix
-- Chroma as the vertex DB for RAG
+- Chroma as the vector DB for RAG
 
 Configuration files:
 - `src/app_config.py`

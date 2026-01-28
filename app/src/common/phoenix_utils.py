@@ -246,13 +246,19 @@ def load_prompt_version(prompt_file: str) -> PromptVersion:
     return prompt_ver
 
 
-def load_prompts_from_json() -> dict[str, PromptVersion]:
-    prompts: dict[str, PromptVersion] = {}
+def load_prompts_from_json() -> None:
+    local_client = _create_client()
     for prompt_name in config.PROMPT_VERSIONS.keys():
         prompt_file = os.path.join(PROMPTS_FOLDER, f"{prompt_name}.json")
         prompt_ver = load_prompt_version(prompt_file)
-        prompts[prompt_name] = prompt_ver
-    return prompts
+
+        logger.info("Creating prompt %r in %r", prompt_name, local_client._client.base_url)
+        # If prompt_name already exists, a new prompt version will be created
+        local_client.prompts.create(
+            version=prompt_ver,
+            name=prompt_name,
+            prompt_description=prompt_ver._description,
+        )
 
 
 def list_prompt_version_ids(prompt_name: str, client: Client) -> list[str]:
