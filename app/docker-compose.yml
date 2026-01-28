@@ -76,8 +76,6 @@ services:
     depends_on:
       app-db:
         condition: service_healthy
-      # phoenix:
-      #   condition: service_started
 
 volumes:
   app-dbdata:

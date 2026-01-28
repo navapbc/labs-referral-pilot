@@ -30,8 +30,8 @@ Configuration files:
 4. `docker compose ps` to ensure all containers are running. To preview containers:
    a. `app` OpenAPI spec: browse to http://localhost:3000/docs
    a. `phoenix` traces: browse to http://localhost:6006/projects and click on `local-docker-project`.
-   a. `chroma` DB records (called "documents" but they're actually chunks of documents): `poetry run chroma browse 'referral_resources_local' --path chroma_data`. 
-      - These come from files in under `files_to_ingest_into_vector_db` and are ingested by `rag_utils.populate_vector_db()` automatically called in `gunicorn.conf.py` upon app startup. Repopulating the Chroma DB collection can be manually triggered via `poetry run populate-vector-db`.
+   a. `chroma` DB records (called "documents" but they're actually chunks of documents): `poetry run chroma browse 'referral_resources_local' --path chroma_data`.
+      - These come from files in under `files_to_ingest_into_vector_db` and are ingested by `rag_utils.populate_vector_db()` automatically called in `gunicorn.conf.py` upon app startup. Repopulating the Chroma DB collection can be manually triggered via `make populate-vector-db`.
    a. `app-db` Postgres DB: use a DB client with the credentials in `docker-compose.yml`
 
 5. Add prompt templates in Phoenix via `make load-prompts-from-json` or `make copy-prompts`.

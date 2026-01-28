@@ -230,5 +230,8 @@ copy-prompts:
 load-prompts-from-json:
 	$(PY_RUN_CMD) load-prompts-from-json
 
+populate-vector-db:
+	$(PY_RUN_CMD) populate-vector-db
+
 run-experiment:
 	$(PY_RUN_CMD) run-experiment "$(DATASET)" "$(PIPELINE)" "$(ACTION)" $(if $(PROMPT_VERSION),--prompt_version "$(PROMPT_VERSION)")
