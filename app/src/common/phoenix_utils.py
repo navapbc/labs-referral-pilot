@@ -12,6 +12,7 @@ from opentelemetry.trace import NoOpTracerProvider, TracerProvider
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
 from phoenix.client import Client
+from phoenix.client.__generated__.v1 import TextContentPart
 from phoenix.client.types import PromptVersion
 
 from src.app_config import config
@@ -225,12 +226,13 @@ def save_prompt_version(prompt_name: str, prompt_ver: PromptVersion) -> str:
     with open(prompt_file, "w", encoding="utf-8") as f:
         json.dump(prompt_ver._dumps(), f, indent=4)
 
-    # Save prompt text separately for easier viewing
+    # Also save prompt text separately for easier viewing of differences
     prompt_text_file = os.path.join(PROMPTS_FOLDER, f"{prompt_name}.md")
     with open(prompt_text_file, "w", encoding="utf-8") as f:
         for msg in prompt_ver._template["messages"]:
             for content in msg["content"]:
-                f.write("==========================\n\n" + content["text"] + "\n\n")
+                if isinstance(content, TextContentPart):
+                    f.write("==========================\n\n" + content["text"] + "\n\n")
 
     logger.info("Saved prompt %r to %r", prompt_name, prompt_file)
     return prompt_file
@@ -243,6 +245,15 @@ def load_prompt_version(prompt_file: str) -> PromptVersion:
     prompt_ver = PromptVersion._loads(prompt_json)
     logger.info("Loaded prompt from %r", prompt_file)
     return prompt_ver
+
+
+def load_prompts_from_json() -> dict[str, PromptVersion]:
+    prompts: dict[str, PromptVersion] = {}
+    for prompt_name in config.PROMPT_VERSIONS.keys():
+        prompt_file = os.path.join(PROMPTS_FOLDER, f"{prompt_name}.json")
+        prompt_ver = load_prompt_version(prompt_file)
+        prompts[prompt_name] = prompt_ver
+    return prompts
 
 
 def list_prompt_version_ids(prompt_name: str, client: Client) -> list[str]:
