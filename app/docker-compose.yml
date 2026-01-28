@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./app-dbdata:/var/lib/postgresql/data
+      - app-dbdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "app"]
       interval: 10s
@@ -54,7 +54,7 @@ services:
       # opt out of telemetry -- https://docs.trychroma.com/docs/overview/telemetry
       - ANONYMIZED_TELEMETRY=False
     volumes:
-      - ./chroma_data:/data
+      - chroma_data:/data
 
   app:
     build:
@@ -79,5 +79,6 @@ services:
       # phoenix:
       #   condition: service_started
 
-# volumes:
-#   app-dbdata:
+volumes:
+  app-dbdata:
+  chroma_data:
