@@ -960,6 +960,60 @@ describe("Generate Referrals Page", () => {
       );
       expect(refineGoodwillButton).toHaveAttribute("aria-pressed", "true");
     });
+
+    it("enables Search Again button when categories are selected but description is empty", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
+
+      render(<Page />);
+
+      // Initial search with only a category selected (no description)
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      await user.click(employmentButton);
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Expand edit panel
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      // Verify description is empty
+      const refineDescriptionInput = screen.getByTestId(
+        "refineClientDescriptionInput",
+      );
+      expect(refineDescriptionInput).toHaveValue("");
+
+      // Verify Search Again button is enabled (since category is selected)
+      const searchAgainButton = screen.getByTestId("updateSearchButton");
+      expect(searchAgainButton).toBeEnabled();
+
+      // Clear the category and verify button becomes disabled
+      const refineEmploymentButton = screen.getByTestId(
+        "refine-category-employment",
+      );
+      await user.click(refineEmploymentButton); // Deselect
+
+      expect(searchAgainButton).toBeDisabled();
+
+      // Re-select category and verify button is enabled again
+      await user.click(refineEmploymentButton);
+      expect(searchAgainButton).toBeEnabled();
+    });
   });
 
   describe("Remove Resource", () => {
