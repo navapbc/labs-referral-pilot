@@ -9,6 +9,7 @@ Attributes:
 For more information, see https://docs.gunicorn.org/en/stable/configure.html
 """
 
+import logging
 import os
 import threading
 import time
@@ -29,9 +30,13 @@ threads = 4
 # This function is called once regardless of the number of workers.
 # https://stackoverflow.com/questions/24101724/gunicorn-with-multiple-workers-is-there-an-easy-way-to-execute-certain-code-onl
 def when_ready(server: object) -> None:
-    print("when_ready()", server)
+    logging.info("Running when_ready()")
 
-    print("populate_vector_db()")
+    if os.getenv("SKIP_POPULATE_RAG_DB", "false").lower() == "true":
+        logging.info("SKIP_POPULATE_RAG_DB is set to true, skipping populate_vector_db()")
+        return
+
+    logging.info("Triggering populate_vector_db() to run in separate thread")
     populate_rag_db_thread = threading.Thread(target=rag_utils.populate_vector_db)
     populate_rag_db_thread.start()
 
@@ -40,4 +45,4 @@ def when_ready(server: object) -> None:
     # Hypothesis: There's some initialization that is presenting a race condition.
     time.sleep(4)
 
-    print("when_ready() Done")
+    logging.info("Done when_ready()")
