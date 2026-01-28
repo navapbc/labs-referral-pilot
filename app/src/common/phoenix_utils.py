@@ -12,7 +12,6 @@ from opentelemetry.trace import NoOpTracerProvider, TracerProvider
 # https://docs.arize.com/phoenix/tracing/integrations-tracing/haystack
 # Arize's Phoenix observability platform
 from phoenix.client import Client
-from phoenix.client.__generated__.v1 import TextContentPart
 from phoenix.client.types import PromptVersion
 
 from src.app_config import config
@@ -231,8 +230,8 @@ def save_prompt_version(prompt_name: str, prompt_ver: PromptVersion) -> str:
     with open(prompt_text_file, "w", encoding="utf-8") as f:
         for msg in prompt_ver._template["messages"]:
             for content in msg["content"]:
-                if isinstance(content, TextContentPart):
-                    f.write("==========================\n\n" + content["text"] + "\n\n")
+                if isinstance(content, dict) and "text" in content:
+                    f.write("==========================\n\n" + content["text"] + "\n\n")  # type: ignore
 
     logger.info("Saved prompt %r to %r", prompt_name, prompt_file)
     return prompt_file

@@ -30,7 +30,7 @@ services:
       - PHOENIX_SQL_DATABASE_URL=postgresql://app:secret123@app-db:5432/postgres
 
       # https://arize.com/docs/phoenix/release-notes/04.2025/04.28.2025-tls-support-for-phoenix-server
-      - PHOENIX_TLS_ENABLED=True
+      - PHOENIX_TLS_ENABLED=False
       # The following applies when PHOENIX_TLS_ENABLED=True
       - PHOENIX_TLS_CERT_FILE=/certs/server-fullchain.crt
       # Server's private key
