@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - app-dbdata:/var/lib/postgresql/data
+      - ./app-dbdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "app"]
       interval: 10s
@@ -21,7 +21,8 @@ services:
   phoenix:
     image: arizephoenix/phoenix:version-10.9.1-nonroot
     depends_on:
-      - app-db
+      app-db:
+        condition: service_healthy
     ports:
       - "6006:6006" # UI and OTLP HTTP collector
       # - "4317:4317" # OTLP gRPC collector
@@ -45,6 +46,16 @@ services:
     volumes:
       - ./certs:/certs
 
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8000:8000"
+    environment:
+      # opt out of telemetry -- https://docs.trychroma.com/docs/overview/telemetry
+      - ANONYMIZED_TELEMETRY=False
+    volumes:
+      - ./chroma_data:/data
+
   app:
     build:
       context: ./
@@ -65,6 +76,8 @@ services:
     depends_on:
       app-db:
         condition: service_healthy
+      # phoenix:
+      #   condition: service_started
 
-volumes:
-  app-dbdata:
+# volumes:
+#   app-dbdata:

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from pprint import pformat
@@ -201,11 +202,47 @@ def copy_prompt(src_client: Client, local_client: Client, prompt_name: str) -> N
         "Retrieved prompt with id='%s'\n%s", prompt_ver.id, pformat(prompt_ver._dumps(), width=160)
     )
 
+    prompt_file = save_prompt_version(prompt_name, prompt_ver)
+    loaded_prompt_ver = load_prompt_version(prompt_file)
+    assert prompt_ver._dumps() == loaded_prompt_ver._dumps(), "Loaded prompt does not match saved"
+
     logger.info("Creating prompt %r in %r", prompt_name, local_client._client.base_url)
     # If prompt_name already exists, a new prompt version will be created
     local_client.prompts.create(
-        version=prompt_ver, name=prompt_name, prompt_description=prompt_ver._description
+        version=loaded_prompt_ver,
+        name=prompt_name,
+        prompt_description=loaded_prompt_ver._description,
     )
+
+
+PROMPTS_FOLDER = "prompts"
+
+
+def save_prompt_version(prompt_name: str, prompt_ver: PromptVersion) -> str:
+    # Save prompt to file
+    os.makedirs(PROMPTS_FOLDER, exist_ok=True)
+    prompt_file = os.path.join(PROMPTS_FOLDER, f"{prompt_name}.json")
+    with open(prompt_file, "w", encoding="utf-8") as f:
+        json.dump(prompt_ver._dumps(), f, indent=4)
+
+    # Save prompt text separately for easier viewing
+    prompt_text_file = os.path.join(PROMPTS_FOLDER, f"{prompt_name}.md")
+    with open(prompt_text_file, "w", encoding="utf-8") as f:
+        for msg in prompt_ver._template["messages"]:
+            for content in msg["content"]:
+                f.write("==========================\n\n" + content["text"] + "\n\n")
+
+    logger.info("Saved prompt %r to %r", prompt_name, prompt_file)
+    return prompt_file
+
+
+def load_prompt_version(prompt_file: str) -> PromptVersion:
+    # Load prompt from file
+    with open(prompt_file, "r", encoding="utf-8") as f:
+        prompt_json = json.load(f)
+    prompt_ver = PromptVersion._loads(prompt_json)
+    logger.info("Loaded prompt from %r", prompt_file)
+    return prompt_ver
 
 
 def list_prompt_version_ids(prompt_name: str, client: Client) -> list[str]:

@@ -1,3 +1,48 @@
+# Architecture
+
+5 Docker containers are required to run the application:
+- Frontend (in the `frontend` folder) for the web UI
+- Backend (in the `app` folder) provides API endpoints for the Frontend
+- Phoenix for observability, monitoring, and prompt management
+- Postgres DB for the backend and Phoenix
+- Chroma as the vertex DB for RAG
+
+Configuration files:
+- `src/app_config.py`
+- `local.env`
+- `override.env`
+- `Makefile`
+
+## Local Setup
+
+### Backend
+
+1. `cd app`
+
+2. `make build` to build the container images using `docker-compose.yml`, which defines 4 containers:
+   - `app-db` (Postgres DB)
+   - `phoenix`
+   - `chromadb`
+   - `app` (backend) -- uses the `Dockerfile` to build the image
+
+3. `make start` to start the containers
+
+4. `docker compose ps` to ensure all containers are running. To preview containers:
+   a. `app` OpenAPI spec: browse to http://localhost:3000/docs
+   a. `phoenix` traces: browse to http://localhost:6006/projects and click on `local-docker-project`.
+   a. `chroma` DB records (called "documents" but they're actually chunks of documents): `poetry run chroma browse 'referral_resources_local' --path chroma_data`. 
+      - These come from files in under `files_to_ingest_into_vector_db` and are ingested by `rag_utils.populate_vector_db()` automatically called in `gunicorn.conf.py` upon app startup. Repopulating the Chroma DB collection can be manually triggered via `poetry run populate-vector-db`.
+   a. `app-db` Postgres DB: use a DB client with the credentials in `docker-compose.yml`
+
+5. Add prompt templates in Phoenix at http://localhost:6006/prompts or `make copy-prompts`
+
+
+### Frontend
+
+1. `cd frontend`
+2. `make dev` starts 1 container
+3. browse to http://localhost:3001/generate-referrals
+
 
 ### Enabling https for Phoenix
 

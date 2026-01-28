@@ -35,3 +35,5 @@ docs/.obsidian/
 docs/ai-readiness-assessment-guide.*
 docs/proposals/
 docs/transition-*
+app/app-dbdata
+app/chroma_data
