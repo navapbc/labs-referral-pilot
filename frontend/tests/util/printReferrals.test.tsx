@@ -44,8 +44,12 @@ describe("PrintableReferralsReport", () => {
       />,
     );
 
-    expect(screen.getByText("Goodwill Central Texas")).toBeInTheDocument();
-    expect(screen.getByText("Client Referral Report")).toBeInTheDocument();
+    expect(
+      screen.getByText("Your Resource Guide from Goodwill"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Personalized resources selected for you"),
+    ).toBeInTheDocument();
   });
 
   it("displays the date in the header", () => {
@@ -198,7 +202,7 @@ describe("PrintableReferralsReport", () => {
   });
 
   describe("print mode variations", () => {
-    it("displays 'Action Plan' in header when printMode is action-plan-only", () => {
+    it("displays action plan subtitle when printMode is action-plan-only", () => {
       render(
         <PrintableReferralsReport
           resources={mockResources}
@@ -209,10 +213,12 @@ describe("PrintableReferralsReport", () => {
         />,
       );
 
-      expect(screen.getByText("Action Plan")).toBeInTheDocument();
+      expect(
+        screen.getByText("Personalized action plan and resources"),
+      ).toBeInTheDocument();
     });
 
-    it("displays 'Client Referral Report' in header when printMode is full-referrals", () => {
+    it("displays resources subtitle when printMode is full-referrals", () => {
       render(
         <PrintableReferralsReport
           resources={mockResources}
@@ -222,7 +228,9 @@ describe("PrintableReferralsReport", () => {
         />,
       );
 
-      expect(screen.getByText("Client Referral Report")).toBeInTheDocument();
+      expect(
+        screen.getByText("Personalized resources selected for you"),
+      ).toBeInTheDocument();
     });
 
     it("shows compact resource list in action-plan-only mode", () => {

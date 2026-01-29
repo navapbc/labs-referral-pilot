@@ -31,18 +31,20 @@ export function PrintableReferralsReport({
 
   return (
     <div className="mx-auto max-w-[800px] p-5 text-[14px] leading-relaxed text-slate-800">
-      <div className="flex items-center justify-between border-b border-slate-300 pb-2 mb-4">
-        <div>
-          <h1 className="text-[18px] font-bold text-slate-800 m-0">
-            Goodwill Central Texas
-          </h1>
-          <p className="text-[12px] text-slate-600 m-0">
-            {isActionPlanOnly ? "Action Plan" : "Client Referral Report"}
+      <div className="border-b border-slate-300 pb-3 mb-4">
+        <h1 className="text-[24px] font-bold text-slate-900 m-0">
+          Your Resource Guide from Goodwill
+        </h1>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-[13px] text-slate-600 m-0">
+            {isActionPlanOnly
+              ? "Personalized action plan and resources"
+              : "Personalized resources selected for you"}
+          </p>
+          <p className="text-[12px] text-slate-500 m-0" suppressHydrationWarning>
+            {date.toLocaleDateString()}
           </p>
         </div>
-        <p className="text-[12px] text-slate-500 m-0" suppressHydrationWarning>
-          {date.toLocaleDateString()} at {date.toLocaleTimeString()}
-        </p>
       </div>
       <ClientDetailsPromptBubble
         clientDescription={clientDescription}
