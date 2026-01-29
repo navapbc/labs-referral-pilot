@@ -106,7 +106,7 @@ describe("CompactResourceList", () => {
   it("returns null when resources array is empty", () => {
     const { container } = render(<CompactResourceList resources={[]} />);
 
-    expect(container.firstChild).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("handles resources with missing contact info", () => {
