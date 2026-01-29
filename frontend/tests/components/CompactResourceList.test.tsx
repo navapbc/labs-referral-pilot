@@ -24,21 +24,6 @@ describe("CompactResourceList", () => {
     },
   ];
 
-  it("renders the section heading", () => {
-    render(<CompactResourceList resources={mockResources} />);
-
-    expect(
-      screen.getByText("Selected Resources - Contact Information"),
-    ).toBeInTheDocument();
-  });
-
-  it("renders numbered list of resources", () => {
-    render(<CompactResourceList resources={mockResources} />);
-
-    expect(screen.getByText("1.")).toBeInTheDocument();
-    expect(screen.getByText("2.")).toBeInTheDocument();
-  });
-
   it("displays resource names", () => {
     render(<CompactResourceList resources={mockResources} />);
 

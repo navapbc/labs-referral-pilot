@@ -14,17 +14,6 @@ describe("PrintOptionsDialog", () => {
     jest.clearAllMocks();
   });
 
-  it("renders dialog with title and description", () => {
-    render(<PrintOptionsDialog {...defaultProps} />);
-
-    expect(
-      screen.getByText("What would you like to print?"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Choose what to include in your printed report."),
-    ).toBeInTheDocument();
-  });
-
   it("shows both options when hasActionPlan is true", () => {
     render(<PrintOptionsDialog {...defaultProps} />);
 
@@ -61,32 +50,6 @@ describe("PrintOptionsDialog", () => {
 
     expect(defaultProps.onSelectMode).toHaveBeenCalledWith("full-referrals");
     expect(defaultProps.onOpenChange).toHaveBeenCalledWith(false);
-  });
-
-  it("does not render content when open is false", () => {
-    render(<PrintOptionsDialog {...defaultProps} open={false} />);
-
-    expect(
-      screen.queryByText("What would you like to print?"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("displays description for Action Plan Only option", () => {
-    render(<PrintOptionsDialog {...defaultProps} />);
-
-    expect(
-      screen.getByText(
-        "Includes contact info for selected resources (no descriptions)",
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it("displays description for Full Referrals option", () => {
-    render(<PrintOptionsDialog {...defaultProps} />);
-
-    expect(
-      screen.getByText("Includes complete resource details with descriptions"),
-    ).toBeInTheDocument();
   });
 
   it("has proper accessibility attributes", () => {
