@@ -691,6 +691,331 @@ describe("Generate Referrals Page", () => {
     });
   });
 
+  describe("Refine Search", () => {
+    it("executes new search with updated parameters when Search Again is clicked", async () => {
+      const user = userEvent.setup();
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
+
+      render(<Page />);
+
+      // Initial search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs housing");
+
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      await user.click(employmentButton);
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Clear mock to track only the refine search call
+      fetchResourcesStreamingSpy.mockClear();
+
+      // Expand edit panel
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      // Modify search parameters
+      const refineDescriptionInput = screen.getByTestId(
+        "refineClientDescriptionInput",
+      );
+      await user.clear(refineDescriptionInput);
+      await user.type(refineDescriptionInput, "Client needs job training");
+
+      // Toggle a different category in refine panel
+      const refineHousingButton = screen.getByTestId("refine-category-housing");
+      await user.click(refineHousingButton);
+
+      // Click Search Again
+      const searchAgainButton = screen.getByTestId("updateSearchButton");
+      await user.click(searchAgainButton);
+
+      // Verify new search was triggered with updated parameters
+      await waitFor(() => {
+        expect(fetchResourcesStreamingSpy).toHaveBeenCalledTimes(1);
+      });
+
+      const [arg] = fetchResourcesStreamingSpy.mock.calls.at(-1)!;
+      expect(arg).toContain("Client needs job training");
+      expect(arg).toContain("Housing & Shelter");
+    });
+
+    it("reverts all changes and closes panel when Cancel is clicked without triggering search", async () => {
+      const user = userEvent.setup();
+      const fetchResourcesStreamingSpy = jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
+
+      render(<Page />);
+
+      // Initial search with specific values
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Original client description");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Clear mock to track only subsequent calls
+      fetchResourcesStreamingSpy.mockClear();
+
+      // Expand edit panel
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      // Modify the description
+      const refineDescriptionInput = screen.getByTestId(
+        "refineClientDescriptionInput",
+      );
+      await user.clear(refineDescriptionInput);
+      await user.type(refineDescriptionInput, "Modified description");
+
+      // Click Cancel
+      const cancelButton = screen.getByTestId("cancelEditButton");
+      await user.click(cancelButton);
+
+      // Verify no new search was triggered
+      expect(fetchResourcesStreamingSpy).not.toHaveBeenCalled();
+
+      // Verify the displayed query still shows original (use getAllBy since print view duplicates it)
+      const searchQueryDisplays = screen.getAllByTestId("searchQueryDisplay");
+      expect(searchQueryDisplays[0]).toHaveTextContent(
+        "Original client description",
+      );
+
+      // Verify panel is collapsed (edit form should not be visible)
+      expect(
+        screen.queryByTestId("refineClientDescriptionInput"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("disables edit panel toggle while search is loading", async () => {
+      const user = userEvent.setup();
+
+      // Create a promise that we can control to simulate loading state
+      let resolveSearch: () => void;
+      const searchPromise = new Promise<void>((resolve) => {
+        resolveSearch = resolve;
+      });
+
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation(async (_req, _email, onChunk, onComplete) => {
+          await searchPromise;
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return mockFetchResourcesResult;
+        });
+
+      render(<Page />);
+
+      // Start initial search
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs help");
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // While loading, complete the search to get to results view
+      resolveSearch!();
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Now set up another controlled promise for the refine search
+      let resolveRefineSearch: () => void;
+      const refineSearchPromise = new Promise<void>((resolve) => {
+        resolveRefineSearch = resolve;
+      });
+
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation(async (_req, _email, onChunk, onComplete) => {
+          await refineSearchPromise;
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return mockFetchResourcesResult;
+        });
+
+      // Expand, modify, and trigger refine search
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      const searchAgainButton = screen.getByTestId("updateSearchButton");
+      await user.click(searchAgainButton);
+
+      // During loading, the toggle should be disabled
+      await waitFor(() => {
+        expect(editToggle).toBeDisabled();
+      });
+
+      // Complete the search
+      resolveRefineSearch!();
+
+      // After loading completes, toggle should be enabled again
+      await waitFor(() => {
+        expect(editToggle).toBeEnabled();
+      });
+    });
+
+    it("pre-populates form with current search values when expanded", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
+
+      render(<Page />);
+
+      // Set up initial search with specific values
+      const textarea = screen.getByTestId("clientDescriptionInput");
+      await user.type(textarea, "Client needs childcare and transportation");
+
+      const locationInput = screen.getByTestId("locationFilterInput");
+      await user.type(locationInput, "Austin, TX");
+
+      // Select specific categories
+      const childcareButton = screen.getByTestId(
+        "resourceCategoryToggle-childcare",
+      );
+      const transportationButton = screen.getByTestId(
+        "resourceCategoryToggle-transportation",
+      );
+      await user.click(childcareButton);
+      await user.click(transportationButton);
+
+      // Select provider type
+      const goodwillButton = screen.getByTestId(
+        "resourceCategoryToggle-goodwill",
+      );
+      await user.click(goodwillButton);
+
+      // Execute search
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Expand edit panel
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      // Verify form is pre-populated with original values
+      const refineDescriptionInput = screen.getByTestId(
+        "refineClientDescriptionInput",
+      );
+      expect(refineDescriptionInput).toHaveValue(
+        "Client needs childcare and transportation",
+      );
+
+      const refineLocationInput = screen.getByTestId("refineLocationInput");
+      expect(refineLocationInput).toHaveValue("Austin, TX");
+
+      // Verify categories are selected
+      const refineChildcareButton = screen.getByTestId(
+        "refine-category-childcare",
+      );
+      const refineTransportationButton = screen.getByTestId(
+        "refine-category-transportation",
+      );
+      expect(refineChildcareButton).toHaveAttribute("aria-pressed", "true");
+      expect(refineTransportationButton).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      // Verify provider type is selected
+      const refineGoodwillButton = screen.getByTestId(
+        "refine-provider-goodwill",
+      );
+      expect(refineGoodwillButton).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("enables Search Again button when categories are selected but description is empty", async () => {
+      const user = userEvent.setup();
+
+      jest
+        .spyOn(fetchResourcesStreamingModule, "fetchResourcesStreaming")
+        .mockImplementation((_req, _email, onChunk, onComplete) => {
+          onChunk(mockResources as Partial<Resource>[]);
+          onComplete();
+          return Promise.resolve(mockFetchResourcesResult);
+        });
+
+      render(<Page />);
+
+      // Initial search with only a category selected (no description)
+      const employmentButton = screen.getByTestId(
+        "resourceCategoryToggle-employment",
+      );
+      await user.click(employmentButton);
+
+      const findButton = screen.getByTestId("findResourcesButton");
+      await user.click(findButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByTestId("readyToPrintSection")).toBeInTheDocument();
+      });
+
+      // Expand edit panel
+      const editToggle = screen.getByTestId("refinePromptPanelToggle");
+      await user.click(editToggle);
+
+      // Verify description is empty
+      const refineDescriptionInput = screen.getByTestId(
+        "refineClientDescriptionInput",
+      );
+      expect(refineDescriptionInput).toHaveValue("");
+
+      // Verify Search Again button is enabled (since category is selected)
+      const searchAgainButton = screen.getByTestId("updateSearchButton");
+      expect(searchAgainButton).toBeEnabled();
+
+      // Clear the category and verify button becomes disabled
+      const refineEmploymentButton = screen.getByTestId(
+        "refine-category-employment",
+      );
+      await user.click(refineEmploymentButton); // Deselect
+
+      expect(searchAgainButton).toBeDisabled();
+
+      // Re-select category and verify button is enabled again
+      await user.click(refineEmploymentButton);
+      expect(searchAgainButton).toBeEnabled();
+    });
+  });
+
   describe("Remove Resource", () => {
     it("removes a resource when the Remove button is clicked", async () => {
       const user = userEvent.setup();

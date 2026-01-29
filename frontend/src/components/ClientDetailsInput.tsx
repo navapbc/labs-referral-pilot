@@ -28,7 +28,7 @@ export const resourceCategories = [
 ];
 
 // Provider types for the Resource Provider Selection section
-const providerTypes: {
+export const providerTypes: {
   id: string;
   label: string;
   emoji?: string;
@@ -90,13 +90,14 @@ export function ClientDetailsInput({
         data-testid="clientDescriptionInputSection"
       >
         <CardContent className="p-4">
-          <label
-            htmlFor="clientDescriptionInput"
-            className="font-medium text-gray-900 mb-3 flex items-center gap-2"
-          >
+          <h2 className="font-medium text-gray-900 mb-1 flex items-center gap-2 text-base">
             <UserRound className="w-4 h-4 text-blue-600" aria-hidden="true" />
-            Tell us about your client
-          </label>
+            What kind of resources is your client looking for?
+          </h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Include details about your client&apos;s circumstances to help find
+            better resources
+          </p>
           <Textarea
             placeholder="Example: My client is looking for medical assistant training, diapers and clothes for job interviews."
             id="clientDescriptionInput"

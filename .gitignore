@@ -25,6 +25,9 @@ app/sentence_transformers/
 # Playwright MCP screenshots
 .playwright-mcp/
 
+# PR documentation screenshots
+docs/screenshots/
+
 # Editor configs
 docs/.obsidian/
 
