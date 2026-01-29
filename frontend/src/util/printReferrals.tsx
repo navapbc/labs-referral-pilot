@@ -31,17 +31,17 @@ export function PrintableReferralsReport({
 
   return (
     <div className="mx-auto max-w-[800px] p-5 text-[14px] leading-relaxed text-slate-800">
-      <div className="text-center border-b-2 border-blue-600 pb-4 mb-5">
-        <h1 className="text-[24px] font-bold text-blue-600 m-0">
-          Goodwill Central Texas
-        </h1>
-        <p className="m-0">
-          GenAI Referral Tool -{" "}
-          {isActionPlanOnly ? "Action Plan" : "Client Referral Report"}
-        </p>
-        <p className="m-0" suppressHydrationWarning>
-          Generated on {date.toLocaleDateString()} at{" "}
-          {date.toLocaleTimeString()}
+      <div className="flex items-center justify-between border-b border-slate-300 pb-2 mb-4">
+        <div>
+          <h1 className="text-[18px] font-bold text-slate-800 m-0">
+            Goodwill Central Texas
+          </h1>
+          <p className="text-[12px] text-slate-600 m-0">
+            {isActionPlanOnly ? "Action Plan" : "Client Referral Report"}
+          </p>
+        </div>
+        <p className="text-[12px] text-slate-500 m-0" suppressHydrationWarning>
+          {date.toLocaleDateString()} at {date.toLocaleTimeString()}
         </p>
       </div>
       <ClientDetailsPromptBubble
@@ -53,14 +53,14 @@ export function PrintableReferralsReport({
 
       {isActionPlanOnly ? (
         <>
-          {/* Action Plan first */}
+          {/* Compact resource list at top (contact info only, no descriptions) */}
+          <CompactResourceList resources={selectedResources} />
+          {/* Action Plan after resources */}
           {actionPlan && (
             <div className="print:mt-3">
               <ActionPlanDisplay actionPlan={actionPlan} />
             </div>
           )}
-          {/* Compact resource list (contact info only, no descriptions) */}
-          <CompactResourceList resources={selectedResources} />
         </>
       ) : (
         <>
