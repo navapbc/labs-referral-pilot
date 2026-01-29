@@ -57,24 +57,6 @@ def format_resource(resource: dict) -> str:
     )
 
 
-def format_resource_contact_only(resource: dict) -> str:
-    """Format resource with contact info only (no description or referral type)."""
-    return "\n".join(
-        [
-            f"### {resource.get('name', 'Unnamed Resource')}",
-            f"- Website: {resource.get('website', 'None')}",
-            f"- Phone: {', '.join(resource.get('phones', ['None']))}",
-            f"- Email: {', '.join(resource.get('emails', ['None']))}",
-            f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
-        ]
-    )
-
-
-def format_resources_contact_only(resources: list[dict]) -> str:
-    """Format resources with contact info only."""
-    return "\n\n".join([format_resource_contact_only(resource) for resource in resources])
-
-
 def format_action_plan(action_plan: dict) -> str:
     """Format the action plan for email display. Returns empty string if no action plan."""
     if not action_plan:
@@ -358,22 +340,13 @@ class OpenAIWebSearchGenerator:
                 )
 
 
-EMAIL_INTRO_FULL = """\
+EMAIL_INTRO = """\
 Hello,
 
 Here is your personalized report with resources your case manager recommends to support your goals.
 You've already taken a great first step by exploring these options.
 
 **Your next step**: Look over the resources to see contact info and details about how to get started.
-"""
-
-EMAIL_INTRO_ACTION_PLAN_ONLY = """\
-Hello,
-
-Here is your personalized action plan with contact information for recommended resources.
-You've already taken a great first step by exploring these options.
-
-**Your next step**: Follow the action plan below and reach out to the resources listed to get started.
 """
 
 
@@ -384,24 +357,16 @@ class EmailFullResult:
     """
 
     @component.output_types(status=str, email=str, message=str)
-    def run(
-        self, email: str, resources_dict: dict, action_plan_dict: dict, mode: str = "full-referrals"
-    ) -> dict:
-        logger.info("Emailing result to %s (mode=%s)", email, mode)
+    def run(self, email: str, resources_dict: dict, action_plan_dict: dict) -> dict:
+        logger.info("Emailing result to %s", email)
         logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
         if action_plan_dict:
             logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
 
-        # Use contact-only format and different intro for action-plan-only mode
-        if mode == "action-plan-only":
-            formatted_resources = format_resources_contact_only(resources_dict.get("resources", []))
-            intro = EMAIL_INTRO_ACTION_PLAN_ONLY
-        else:
-            formatted_resources = format_resources(resources_dict.get("resources", []))
-            intro = EMAIL_INTRO_FULL
+        formatted_resources = format_resources(resources_dict.get("resources", []))
         formatted_action_plan = format_action_plan(action_plan_dict)
 
-        message = f"{intro}\n{formatted_resources}\n\n{formatted_action_plan}"
+        message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources and Action Plan"
@@ -422,7 +387,7 @@ class EmailResult:
         logger.info("Emailing result to %s", email)
         logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
         formatted_resources = format_resources(json_dict.get("resources", []))
-        message = f"{EMAIL_INTRO_FULL}\n{formatted_resources}"
+        message = f"{EMAIL_INTRO}\n{formatted_resources}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources"

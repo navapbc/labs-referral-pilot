@@ -13,9 +13,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { emailResult } from "@/util/emailResult";
-import { EmailOptionsDialog, EmailMode } from "@/components/EmailOptionsDialog";
 
 interface EmailReferralsProps {
   resultId: string;
@@ -30,13 +30,9 @@ export function EmailReferralsButton({
 }: EmailReferralsProps) {
   const [email, setEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [showEmailOptions, setShowEmailOptions] = useState(false);
-  const [emailMode, setEmailMode] = useState<EmailMode>("full-referrals");
   const [statusMessage, setStatusMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-
-  const hasActionPlan = Boolean(actionPlanResultId);
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,12 +44,10 @@ export function EmailReferralsButton({
     setStatusMessage("");
 
     try {
-      // Always pass actionPlanResultId when available; mode controls resource formatting
       const { emailAddr } = await emailResult(
         resultId,
         actionPlanResultId,
         email,
-        emailMode,
       );
 
       setEmailSent(true);
@@ -68,114 +62,93 @@ export function EmailReferralsButton({
     }
   };
 
-  const handleEmailButtonClick = () => {
-    if (hasActionPlan) {
-      setShowEmailOptions(true);
-    } else {
-      setIsOpen(true);
-    }
-  };
-
-  const handleEmailModeSelect = (mode: EmailMode) => {
-    setEmailMode(mode);
-    setShowEmailOptions(false);
-    setIsOpen(true);
-  };
-
   const handleClose = () => {
     setEmailSent(false);
     setStatusMessage("");
   };
 
   return (
-    <>
-      <EmailOptionsDialog
-        open={showEmailOptions}
-        onOpenChange={setShowEmailOptions}
-        onSelectMode={handleEmailModeSelect}
-        hasActionPlan={hasActionPlan}
-      />
-      <Button
-        variant="outline"
-        className="hover:bg-gray-100 hover:text-gray-900"
-        data-testid="emailReferralsButton"
-        disabled={disabled}
-        onClick={handleEmailButtonClick}
-      >
-        <Mail className="w-4 h-4" />
-        Email
-      </Button>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Email Referrals</DialogTitle>
-            <DialogDescription>
-              Enter your email address to receive the referrals.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                data-testid="emailInput"
-                className={
-                  email && !isValidEmail(email)
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : ""
-                }
-              />
-              {email && !isValidEmail(email) && (
-                <p className="text-sm text-red-500">
-                  Please enter a valid email address
-                </p>
-              )}
-            </div>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="hover:bg-gray-100 hover:text-gray-900"
+          data-testid="emailReferralsButton"
+          disabled={disabled}
+        >
+          <Mail className="w-4 h-4" />
+          Email
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Email Referrals</DialogTitle>
+          <DialogDescription>
+            Enter your email address to receive the referrals.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your.email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-testid="emailInput"
+              className={
+                email && !isValidEmail(email)
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : ""
+              }
+            />
+            {email && !isValidEmail(email) && (
+              <p className="text-sm text-red-500">
+                Please enter a valid email address
+              </p>
+            )}
           </div>
-          <DialogFooter>
-            <div className="w-full space-y-2">
-              <div className="flex gap-2 justify-end">
-                <DialogClose asChild>
-                  <Button
-                    className="cursor-pointer disabled:!cursor-not-allowed"
-                    type="button"
-                    onClick={handleClose}
-                    disabled={isLoading}
-                    variant="outline"
-                    data-testid="cancelEmailButton"
-                  >
-                    {emailSent ? "Close" : "Cancel"}
-                  </Button>
-                </DialogClose>
+        </div>
+        <DialogFooter>
+          <div className="w-full space-y-2">
+            <div className="flex gap-2 justify-end">
+              <DialogClose asChild>
                 <Button
-                  className="cursor-pointer disabled:cursor-not-allowed"
-                  type="submit"
-                  onClick={() => void handleSendEmail()}
-                  disabled={isLoading || !email.trim() || !isValidEmail(email)}
-                  data-testid="sendEmailButton"
+                  className="cursor-pointer disabled:!cursor-not-allowed"
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                  variant="outline"
+                  data-testid="cancelEmailButton"
                 >
-                  {isLoading ? "Sending..." : "Send Email"}
+                  {emailSent ? "Close" : "Cancel"}
                 </Button>
-              </div>
-              {statusMessage && (
-                <p
-                  className={`text-sm ${
-                    statusMessage.includes("error sending the email")
-                      ? "text-red-500"
-                      : "text-green-900"
-                  }`}
-                >
-                  {statusMessage}
-                </p>
-              )}
+              </DialogClose>
+              <Button
+                className="cursor-pointer disabled:cursor-not-allowed"
+                type="submit"
+                onClick={() => void handleSendEmail()}
+                disabled={isLoading || !email.trim() || !isValidEmail(email)}
+                data-testid="sendEmailButton"
+              >
+                {isLoading ? "Sending..." : "Send Email"}
+              </Button>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+            {statusMessage && (
+              <p
+                className={`text-sm ${
+                  statusMessage.includes("error sending the email")
+                    ? "text-red-500"
+                    : "text-green-900"
+                }`}
+              >
+                {statusMessage}
+              </p>
+            )}
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
