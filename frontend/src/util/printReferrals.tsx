@@ -4,6 +4,8 @@ import ResourcesList from "@/components/ResourcesList";
 import ClientDetailsPromptBubble from "@/components/ClientDetailsPromptBubble";
 import { ActionPlanDisplay } from "@/components/ActionPlanDisplay";
 import { ActionPlan } from "@/util/fetchActionPlan";
+import { CompactResourceList } from "@/components/CompactResourceList";
+import { PrintMode } from "@/components/PrintOptionsDialog";
 
 export function PrintableReferralsReport({
   resources,
@@ -12,6 +14,8 @@ export function PrintableReferralsReport({
   selectedCategories = [],
   locationText = "",
   selectedResourceTypes = [],
+  printMode = "full-referrals",
+  selectedResources = [],
 }: {
   resources: Resource[];
   clientDescription: string;
@@ -19,15 +23,22 @@ export function PrintableReferralsReport({
   selectedCategories?: string[];
   locationText?: string;
   selectedResourceTypes?: string[];
+  printMode?: PrintMode;
+  selectedResources?: Resource[];
 }) {
   const date = new Date();
+  const isActionPlanOnly = printMode === "action-plan-only";
+
   return (
     <div className="mx-auto max-w-[800px] p-5 text-[14px] leading-relaxed text-slate-800">
       <div className="text-center border-b-2 border-blue-600 pb-4 mb-5">
         <h1 className="text-[24px] font-bold text-blue-600 m-0">
           Goodwill Central Texas
         </h1>
-        <p className="m-0">GenAI Referral Tool - Client Referral Report</p>
+        <p className="m-0">
+          GenAI Referral Tool -{" "}
+          {isActionPlanOnly ? "Action Plan" : "Client Referral Report"}
+        </p>
         <p className="m-0" suppressHydrationWarning>
           Generated on {date.toLocaleDateString()} at{" "}
           {date.toLocaleTimeString()}
@@ -39,14 +50,31 @@ export function PrintableReferralsReport({
         locationText={locationText}
         selectedResourceTypes={selectedResourceTypes}
       />
-      <ResourcesList
-        resources={resources ?? []}
-        handleRemoveResource={() => {}}
-      />
-      {actionPlan && (
-        <div className="print:mt-3">
-          <ActionPlanDisplay actionPlan={actionPlan} />
-        </div>
+
+      {isActionPlanOnly ? (
+        <>
+          {/* Action Plan first */}
+          {actionPlan && (
+            <div className="print:mt-3">
+              <ActionPlanDisplay actionPlan={actionPlan} />
+            </div>
+          )}
+          {/* Compact resource list (contact info only, no descriptions) */}
+          <CompactResourceList resources={selectedResources} />
+        </>
+      ) : (
+        <>
+          {/* Full referrals with descriptions */}
+          <ResourcesList
+            resources={resources ?? []}
+            handleRemoveResource={() => {}}
+          />
+          {actionPlan && (
+            <div className="print:mt-3">
+              <ActionPlanDisplay actionPlan={actionPlan} />
+            </div>
+          )}
+        </>
       )}
 
       <div className="text-center text-slate-500 text-[12px] mt-5 pt-4 border-t border-slate-200">
