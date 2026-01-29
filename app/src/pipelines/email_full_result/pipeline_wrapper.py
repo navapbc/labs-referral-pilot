@@ -30,7 +30,11 @@ class PipelineWrapper(BasePipelineWrapper):
         self.pipeline = pipeline
 
     def run_api(
-        self, resources_result_id: str, action_plan_result_id: str, email: str, mode: str = "full-referrals"
+        self,
+        resources_result_id: str,
+        action_plan_result_id: str,
+        email: str,
+        mode: str = "full-referrals",
     ) -> dict:
         with using_metadata({"email": email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
@@ -51,7 +55,11 @@ class PipelineWrapper(BasePipelineWrapper):
                 return result
 
     def _run(
-        self, resources_result_id: str, action_plan_result_id: str, email: str, mode: str = "full-referrals"
+        self,
+        resources_result_id: str,
+        action_plan_result_id: str,
+        email: str,
+        mode: str = "full-referrals",
     ) -> dict:
         try:
             run_data = {
