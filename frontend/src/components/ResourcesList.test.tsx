@@ -209,12 +209,13 @@ describe("ResourcesList", () => {
       );
 
       const expectedClasses = getCardBorderClass(undefined);
-      expect(expectedClasses).toBe("");
+      expect(expectedClasses).toBe("border-t-4 border-t-gray-300 rounded-t-lg");
 
       const card = screen.getByTestId("resource-card-0");
       expect(card).toBeInTheDocument();
 
-      // Verify no colored border classes are applied
+      // Verify loading state border is applied (gray-300), not the typed borders
+      expect(card).toHaveClass("border-t-gray-300");
       expect(card).not.toHaveClass("border-t-blue-600");
       expect(card).not.toHaveClass("border-t-gray-600");
       expect(card).not.toHaveClass("border-t-green-600");

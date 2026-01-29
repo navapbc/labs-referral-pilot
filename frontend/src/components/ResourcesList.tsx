@@ -53,7 +53,16 @@ const referralTypeIndicator = (referralType: string | undefined) => {
       );
     }
     default: {
-      return null;
+      // Loading placeholder - maintains spacing while streaming
+      return (
+        <span
+          data-testid="loading_referral"
+          className="inline-flex items-center gap-1.5 bg-transparent text-gray-400 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
+        >
+          <span className="h-4 w-4 shrink-0 bg-gray-200 rounded animate-pulse" />
+          <span className="truncate bg-gray-200 rounded animate-pulse w-16 h-4" />
+        </span>
+      );
     }
   }
 };
@@ -67,7 +76,8 @@ export const getCardBorderClass = (referralType: string | undefined) => {
     case "external":
       return "border-t-4 border-t-green-600 rounded-t-lg";
     default:
-      return "";
+      // Loading state - gray border maintains spacing while streaming
+      return "border-t-4 border-t-gray-300 rounded-t-lg";
   }
 };
 
