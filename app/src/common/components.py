@@ -358,13 +358,22 @@ class OpenAIWebSearchGenerator:
                 )
 
 
-EMAIL_INTRO = """\
+EMAIL_INTRO_FULL = """\
 Hello,
 
 Here is your personalized report with resources your case manager recommends to support your goals.
 You've already taken a great first step by exploring these options.
 
 **Your next step**: Look over the resources to see contact info and details about how to get started.
+"""
+
+EMAIL_INTRO_ACTION_PLAN_ONLY = """\
+Hello,
+
+Here is your personalized action plan with contact information for recommended resources.
+You've already taken a great first step by exploring these options.
+
+**Your next step**: Follow the action plan below and reach out to the resources listed to get started.
 """
 
 
@@ -383,14 +392,16 @@ class EmailFullResult:
         if action_plan_dict:
             logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
 
-        # Use contact-only format for action-plan-only mode
+        # Use contact-only format and different intro for action-plan-only mode
         if mode == "action-plan-only":
             formatted_resources = format_resources_contact_only(resources_dict.get("resources", []))
+            intro = EMAIL_INTRO_ACTION_PLAN_ONLY
         else:
             formatted_resources = format_resources(resources_dict.get("resources", []))
+            intro = EMAIL_INTRO_FULL
         formatted_action_plan = format_action_plan(action_plan_dict)
 
-        message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
+        message = f"{intro}\n{formatted_resources}\n\n{formatted_action_plan}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources and Action Plan"
@@ -411,7 +422,7 @@ class EmailResult:
         logger.info("Emailing result to %s", email)
         logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
         formatted_resources = format_resources(json_dict.get("resources", []))
-        message = f"{EMAIL_INTRO}\n{formatted_resources}"
+        message = f"{EMAIL_INTRO_FULL}\n{formatted_resources}"
 
         # Send email via AWS SES
         subject = "Your Requested Resources"
