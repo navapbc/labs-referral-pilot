@@ -57,6 +57,24 @@ def format_resource(resource: dict) -> str:
     )
 
 
+def format_resource_contact_only(resource: dict) -> str:
+    """Format resource with contact info only (no description or referral type)."""
+    return "\n".join(
+        [
+            f"### {resource.get('name', 'Unnamed Resource')}",
+            f"- Website: {resource.get('website', 'None')}",
+            f"- Phone: {', '.join(resource.get('phones', ['None']))}",
+            f"- Email: {', '.join(resource.get('emails', ['None']))}",
+            f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
+        ]
+    )
+
+
+def format_resources_contact_only(resources: list[dict]) -> str:
+    """Format resources with contact info only."""
+    return "\n\n".join([format_resource_contact_only(resource) for resource in resources])
+
+
 def format_action_plan(action_plan: dict) -> str:
     """Format the action plan for email display. Returns empty string if no action plan."""
     if not action_plan:
@@ -357,13 +375,19 @@ class EmailFullResult:
     """
 
     @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, resources_dict: dict, action_plan_dict: dict) -> dict:
-        logger.info("Emailing result to %s", email)
+    def run(
+        self, email: str, resources_dict: dict, action_plan_dict: dict, mode: str = "full-referrals"
+    ) -> dict:
+        logger.info("Emailing result to %s (mode=%s)", email, mode)
         logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
         if action_plan_dict:
             logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
 
-        formatted_resources = format_resources(resources_dict.get("resources", []))
+        # Use contact-only format for action-plan-only mode
+        if mode == "action-plan-only":
+            formatted_resources = format_resources_contact_only(resources_dict.get("resources", []))
+        else:
+            formatted_resources = format_resources(resources_dict.get("resources", []))
         formatted_action_plan = format_action_plan(action_plan_dict)
 
         message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"

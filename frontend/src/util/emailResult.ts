@@ -4,6 +4,7 @@ export async function emailResult(
   resultId: string,
   actionPlanResultId: string | undefined,
   email: string,
+  mode: "full-referrals" | "action-plan-only" = "full-referrals",
 ) {
   const apiDomain = await getApiDomain();
 
@@ -21,6 +22,7 @@ export async function emailResult(
         resources_result_id: resultId,
         action_plan_result_id: actionPlanResultId,
         email: email,
+        mode: mode,
       }
     : {
         resources_result_id: resultId,

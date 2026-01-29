@@ -29,25 +29,30 @@ class PipelineWrapper(BasePipelineWrapper):
 
         self.pipeline = pipeline
 
-    def run_api(self, resources_result_id: str, action_plan_result_id: str, email: str) -> dict:
+    def run_api(
+        self, resources_result_id: str, action_plan_result_id: str, email: str, mode: str = "full-referrals"
+    ) -> dict:
         with using_metadata({"email": email}):
             # Must set using_metadata context before calling tracer.start_as_current_span()
             assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
             with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 self.name, openinference_span_kind="chain"
             ) as span:
-                result = self._run(resources_result_id, action_plan_result_id, email)
+                result = self._run(resources_result_id, action_plan_result_id, email, mode)
                 span.set_input(
                     {
                         "resources_result_id": resources_result_id,
                         "action_plan_result_id": action_plan_result_id,
+                        "mode": mode,
                     }
                 )
                 span.set_output(result["email_full_result"]["status"])
                 span.set_status(Status(StatusCode.OK))
                 return result
 
-    def _run(self, resources_result_id: str, action_plan_result_id: str, email: str) -> dict:
+    def _run(
+        self, resources_result_id: str, action_plan_result_id: str, email: str, mode: str = "full-referrals"
+    ) -> dict:
         try:
             run_data = {
                 "logger": {
@@ -56,6 +61,7 @@ class PipelineWrapper(BasePipelineWrapper):
                             "resources_result_id": resources_result_id,
                             "action_plan_result_id": action_plan_result_id,
                             "email": email,
+                            "mode": mode,
                         }
                     ],
                 },
@@ -64,6 +70,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 },
                 "email_full_result": {
                     "email": email,
+                    "mode": mode,
                 },
             }
 

@@ -48,10 +48,13 @@ export function EmailReferralsButton({
     setStatusMessage("");
 
     try {
-      // Only pass actionPlanResultId if mode is full-referrals and we have one
-      const planId =
-        emailMode === "full-referrals" ? actionPlanResultId : undefined;
-      const { emailAddr } = await emailResult(resultId, planId, email);
+      // Always pass actionPlanResultId when available; mode controls resource formatting
+      const { emailAddr } = await emailResult(
+        resultId,
+        actionPlanResultId,
+        email,
+        emailMode,
+      );
 
       setEmailSent(true);
       setStatusMessage(`Email sent successfully to ${emailAddr}`);
