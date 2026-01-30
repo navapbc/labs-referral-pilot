@@ -109,6 +109,38 @@ type ResourcesListProps = {
   isSearching?: boolean;
 };
 
+// NOTE: If you change the card layout below, update this placeholder to match
+const PlaceholderCard = ({ index }: { index: number }) => (
+  <Card
+    className="relative bg-white shadow-sm mb-5 min-w-[16rem] border-t-4 border-t-gray-300 rounded-t-lg"
+    data-testid={`resource-card-placeholder-${index}`}
+    aria-hidden="true"
+  >
+    {/* Placeholder referral type indicator */}
+    <span className="inline-flex items-center gap-1.5 bg-transparent ml-4 mt-3 px-2.5 py-1 max-w-[15rem]">
+      <span className="h-4 w-4 shrink-0 bg-gray-200 rounded animate-pulse" />
+      <span className="bg-gray-200 rounded animate-pulse w-16 h-4" />
+    </span>
+    <CardHeader className="p-3 ml-3">
+      <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <span className="flex-shrink-0 w-7 h-7 bg-gray-300 text-white rounded-full flex items-center justify-center text-m font-medium animate-pulse">
+          {index + 1}
+        </span>
+        <div className="h-6 bg-gray-200 rounded animate-pulse w-48" />
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="ml-9 mr-4 space-y-2">
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-64" />
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-40" />
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-56" />
+      <div className="mt-3 space-y-1">
+        <div className="h-4 bg-gray-200 rounded animate-pulse w-full" />
+        <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const ResourcesList = ({
   resources,
   errorMessage,
@@ -117,7 +149,14 @@ const ResourcesList = ({
 }: ResourcesListProps) => {
   if (resources.length === 0) {
     if (isSearching) {
-      return <div className="m-3">Searching for resources...</div>;
+      return (
+        <div className="mt-2" role="status" aria-label="Loading resources">
+          <span className="sr-only">Loading resources, please wait...</span>
+          <PlaceholderCard index={0} />
+          <PlaceholderCard index={1} />
+          <PlaceholderCard index={2} />
+        </div>
+      );
     }
     return <div className="m-3">{errorMessage || "No resources found."}</div>;
   }
@@ -177,7 +216,7 @@ const ResourcesList = ({
                   href={normalizeUrl(r.website)}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline break-all"
                   prefetch={false}
                   data-testid={`website-link-${i}`}
                 >
