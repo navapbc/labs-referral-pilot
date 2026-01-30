@@ -67,6 +67,19 @@ def populate_vector_db() -> None:
             local_folder
         ), f"Local folder {local_folder} should exist with manually downloaded files from S3"
     else:
+        try:
+            # Try to create the local folder to make sure we have write permissions
+            os.makedirs(local_folder, exist_ok=True)
+        except PermissionError as e:
+            logger.error("Error creating directory for %s: %s", local_folder, e)
+            fallback_folder = f"/tmp/{local_folder}"  # nosec B108
+            try:
+                os.makedirs(fallback_folder, exist_ok=True)
+            except OSError as e2:
+                logger.error("Error creating fallback directory for %s: %s", fallback_folder, e2)
+                raise
+            local_folder = fallback_folder
+
         s3 = file_util.get_s3_client()
         bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
 
@@ -75,7 +88,7 @@ def populate_vector_db() -> None:
         logger.info("Region subfolders in S3: %s", s3_subfolders)
         # Exclude certain regions if needed
         for s3_folder in s3_subfolders.values():
-            download_s3_folder_to_local(s3, bucket, s3_folder)
+            download_s3_folder_to_local(s3, bucket, s3_folder, local_folder)
 
     region_subfolders = {
         entry.name: entry.path for entry in os.scandir(local_folder) if entry.is_dir()
@@ -114,15 +127,10 @@ def get_s3_subfolders(s3: BaseClient, bucket: str, s3_folder: str) -> dict[str, 
     return subfolders
 
 
-def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str) -> str:
+def download_s3_folder_to_local(
+    s3: BaseClient, bucket: str, s3_folder: str, local_folder: str
+) -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
-    try:
-        local_folder = s3_folder
-        os.makedirs(local_folder, exist_ok=True)
-    except PermissionError as e:
-        logger.error("Error creating directories for %s: %s", s3_folder, e)
-        local_folder = f"/tmp/{s3_folder}"  # nosec B108
-
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
     paginator = s3.get_paginator("list_objects_v2")
     try:
