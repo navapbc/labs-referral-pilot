@@ -1,5 +1,6 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
+import { GenerateReferralsFromDocResponse } from "@/types/api";
 
 /**
  * Extracts JSON from text that may contain a prefix or suffix
@@ -62,16 +63,15 @@ export async function uploadPdfDocument(
       throw new Error(`HTTP error! status: ${upstream.status}`);
     }
 
-    /* eslint-disable */
-    const responseData = await upstream.json();
+    const responseData =
+      (await upstream.json()) as GenerateReferralsFromDocResponse;
     const responseText = responseData.result.llm.replies[0]._content[0].text;
     console.log("Response text:", responseText);
     const jsonString = extractJSON(responseText);
-    const resourcesJson = JSON.parse(jsonString);
+    const resourcesJson: unknown = JSON.parse(jsonString);
     console.log("Parsed resources JSON:", resourcesJson);
     const resources = ResourcesSchema.parse(resourcesJson);
     const resourcesAsArray: Resource[] = resources.resources;
-    /* eslint-enable */
 
     return resourcesAsArray;
   } catch (error) {
