@@ -4,6 +4,8 @@ import ResourcesList from "@/components/ResourcesList";
 import ClientDetailsPromptBubble from "@/components/ClientDetailsPromptBubble";
 import { ActionPlanDisplay } from "@/components/ActionPlanDisplay";
 import { ActionPlan } from "@/util/fetchActionPlan";
+import { CompactResourceList } from "@/components/CompactResourceList";
+import { PrintMode } from "@/components/PrintOptionsDialog";
 
 export function PrintableReferralsReport({
   resources,
@@ -12,6 +14,8 @@ export function PrintableReferralsReport({
   selectedCategories = [],
   locationText = "",
   selectedResourceTypes = [],
+  printMode = "full-referrals",
+  selectedResources = [],
 }: {
   resources: Resource[];
   clientDescription: string;
@@ -19,19 +23,31 @@ export function PrintableReferralsReport({
   selectedCategories?: string[];
   locationText?: string;
   selectedResourceTypes?: string[];
+  printMode?: PrintMode;
+  selectedResources?: Resource[];
 }) {
   const date = new Date();
+  const isActionPlanOnly = printMode === "action-plan-only";
+
   return (
     <div className="mx-auto max-w-[800px] p-5 text-[14px] leading-relaxed text-slate-800">
-      <div className="text-center border-b-2 border-blue-600 pb-4 mb-5">
-        <h1 className="text-[24px] font-bold text-blue-600 m-0">
-          Goodwill Central Texas
+      <div className="border-b border-slate-300 pb-3 mb-4">
+        <h1 className="text-[24px] font-bold text-slate-900 m-0">
+          Your Resource Guide from Goodwill
         </h1>
-        <p className="m-0">GenAI Referral Tool - Client Referral Report</p>
-        <p className="m-0" suppressHydrationWarning>
-          Generated on {date.toLocaleDateString()} at{" "}
-          {date.toLocaleTimeString()}
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-[13px] text-slate-600 m-0">
+            {isActionPlanOnly
+              ? "Personalized action plan and resources"
+              : "Personalized resources selected for you"}
+          </p>
+          <p
+            className="text-[12px] text-slate-500 m-0"
+            suppressHydrationWarning
+          >
+            {date.toLocaleDateString()}
+          </p>
+        </div>
       </div>
       <ClientDetailsPromptBubble
         clientDescription={clientDescription}
@@ -39,14 +55,31 @@ export function PrintableReferralsReport({
         locationText={locationText}
         selectedResourceTypes={selectedResourceTypes}
       />
-      <ResourcesList
-        resources={resources ?? []}
-        handleRemoveResource={() => {}}
-      />
-      {actionPlan && (
-        <div className="print:mt-3">
-          <ActionPlanDisplay actionPlan={actionPlan} />
-        </div>
+
+      {isActionPlanOnly ? (
+        <>
+          {/* Compact resource list at top (contact info only, no descriptions) */}
+          <CompactResourceList resources={selectedResources} />
+          {/* Action Plan after resources */}
+          {actionPlan && (
+            <div className="print:mt-3">
+              <ActionPlanDisplay actionPlan={actionPlan} />
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Full referrals with descriptions */}
+          <ResourcesList
+            resources={resources ?? []}
+            handleRemoveResource={() => {}}
+          />
+          {actionPlan && (
+            <div className="print:mt-3">
+              <ActionPlanDisplay actionPlan={actionPlan} />
+            </div>
+          )}
+        </>
       )}
 
       <div className="text-center text-slate-500 text-[12px] mt-5 pt-4 border-t border-slate-200">

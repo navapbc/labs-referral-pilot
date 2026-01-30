@@ -18,6 +18,7 @@ import {
   ActionPlan,
   PartialActionPlan,
 } from "@/util/fetchActionPlan";
+import { PrintOptionsDialog, PrintMode } from "@/components/PrintOptionsDialog";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
 import ResourcesList from "@/components/ResourcesList";
@@ -78,6 +79,10 @@ export default function Page() {
   const [removedResourceIndex, setRemovedResourceIndex] = useState<
     number | null
   >(null);
+
+  // Print options state
+  const [showPrintOptions, setShowPrintOptions] = useState(false);
+  const [printMode, setPrintMode] = useState<PrintMode>("full-referrals");
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -222,8 +227,23 @@ export default function Page() {
   }
 
   function handlePrint() {
-    // App chrome will hide; print-only section will show
-    window.print();
+    // Show print options dialog if there's an action plan (to let user choose)
+    // Otherwise, just print the full referrals directly
+    if (actionPlan) {
+      setShowPrintOptions(true);
+    } else {
+      setPrintMode("full-referrals");
+      window.print();
+    }
+  }
+
+  function handlePrintModeSelect(mode: PrintMode) {
+    setPrintMode(mode);
+    setShowPrintOptions(false);
+    // Wait for dialog to fully close before printing
+    setTimeout(() => {
+      window.print();
+    }, 300);
   }
 
   function handleReturnToSearch() {
@@ -638,6 +658,14 @@ export default function Page() {
         <RemoveResourceNotification handleUndoRemove={handleUndoRemove} />
       )}
 
+      {/* Print options dialog */}
+      <PrintOptionsDialog
+        open={showPrintOptions}
+        onOpenChange={setShowPrintOptions}
+        onSelectMode={handlePrintModeSelect}
+        hasActionPlan={!!actionPlan}
+      />
+
       {/* ----- Print-only section ----- */}
       <div className="hidden print:block">
         <PrintableReferralsReport
@@ -647,6 +675,8 @@ export default function Page() {
           selectedCategories={selectedCategories}
           locationText={locationText}
           selectedResourceTypes={selectedResourceTypes}
+          printMode={printMode}
+          selectedResources={selectedResources}
         />
       </div>
     </>

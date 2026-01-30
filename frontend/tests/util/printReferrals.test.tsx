@@ -44,13 +44,15 @@ describe("PrintableReferralsReport", () => {
       />,
     );
 
-    expect(screen.getByText("Goodwill Central Texas")).toBeInTheDocument();
     expect(
-      screen.getByText("GenAI Referral Tool - Client Referral Report"),
+      screen.getByText("Your Resource Guide from Goodwill"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Personalized resources selected for you"),
     ).toBeInTheDocument();
   });
 
-  it("displays the generated date in the header", () => {
+  it("displays the date in the header", () => {
     render(
       <PrintableReferralsReport
         resources={mockResources}
@@ -58,7 +60,8 @@ describe("PrintableReferralsReport", () => {
       />,
     );
 
-    expect(screen.getByText(/Generated on/)).toBeInTheDocument();
+    // Date is now displayed in a compact format (e.g., "1/29/2026 at 2:05:07 PM")
+    expect(screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}/)).toBeInTheDocument();
   });
 
   it("displays all resources from the array", () => {
@@ -196,5 +199,103 @@ describe("PrintableReferralsReport", () => {
     );
 
     expect(screen.queryByText(sampleActionPlan.title)).not.toBeInTheDocument();
+  });
+
+  describe("print mode variations", () => {
+    it("displays action plan subtitle when printMode is action-plan-only", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="action-plan-only"
+          selectedResources={mockResources}
+        />,
+      );
+
+      expect(
+        screen.getByText("Personalized action plan and resources"),
+      ).toBeInTheDocument();
+    });
+
+    it("displays resources subtitle when printMode is full-referrals", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="full-referrals"
+        />,
+      );
+
+      expect(
+        screen.getByText("Personalized resources selected for you"),
+      ).toBeInTheDocument();
+    });
+
+    it("shows compact resource list in action-plan-only mode", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="action-plan-only"
+          selectedResources={mockResources}
+        />,
+      );
+
+      // CompactResourceList should show "Selected Resources - Contact Information"
+      expect(
+        screen.getByText("Selected Resources - Contact Information"),
+      ).toBeInTheDocument();
+    });
+
+    it("does not show resource descriptions in action-plan-only mode", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="action-plan-only"
+          selectedResources={mockResources}
+        />,
+      );
+
+      // Descriptions should not appear in compact mode
+      expect(
+        screen.queryByText("Provides food assistance to families in need"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows full resource details in full-referrals mode", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="full-referrals"
+        />,
+      );
+
+      // Descriptions should appear in full mode
+      expect(
+        screen.getByText("Provides food assistance to families in need"),
+      ).toBeInTheDocument();
+    });
+
+    it("shows action plan in action-plan-only mode", () => {
+      render(
+        <PrintableReferralsReport
+          resources={mockResources}
+          clientDescription={"client needs help"}
+          actionPlan={sampleActionPlan}
+          printMode="action-plan-only"
+          selectedResources={mockResources}
+        />,
+      );
+
+      expect(screen.getByText(sampleActionPlan.title)).toBeInTheDocument();
+      expect(screen.getByText(sampleActionPlan.summary)).toBeInTheDocument();
+    });
   });
 });
