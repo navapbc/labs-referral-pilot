@@ -41,7 +41,10 @@ export function PrintableReferralsReport({
               ? "Personalized action plan and resources"
               : "Personalized resources selected for you"}
           </p>
-          <p className="text-[12px] text-slate-500 m-0" suppressHydrationWarning>
+          <p
+            className="text-[12px] text-slate-500 m-0"
+            suppressHydrationWarning
+          >
             {date.toLocaleDateString()}
           </p>
         </div>
