@@ -72,7 +72,13 @@ def populate_vector_db() -> None:
             os.makedirs(local_folder, exist_ok=True)
         except PermissionError as e:
             logger.error("Error creating directory for %s: %s", local_folder, e)
-            local_folder = f"/tmp/{local_folder}"  # nosec B108
+            fallback_folder = f"/tmp/{local_folder}"  # nosec B108
+            try:
+                os.makedirs(fallback_folder, exist_ok=True)
+            except OSError as e2:
+                logger.error("Error creating fallback directory for %s: %s", fallback_folder, e2)
+                raise
+            local_folder = fallback_folder
 
         s3 = file_util.get_s3_client()
         bucket = os.environ.get("BUCKET_NAME", f"labs-referral-pilot-app-{config.environment}")
