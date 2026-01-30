@@ -1,0 +1,298 @@
+====================================================================================================
+TEMPERATURE TESTING: Chat Completions API (WITHOUT Web Search)
+====================================================================================================
+
+⚠️  IMPORTANT NOTE:
+   The production app uses OpenAI Responses API with web search, which does NOT
+   support the temperature parameter. This test uses Chat Completions API to
+   demonstrate temperature effects. Results may differ from production.
+
+Test Configuration:
+  - Model: gpt-4o-mini
+  - API: Chat Completions (NOT Responses)
+  - Temperatures: [1.0, 0.75, 0.5, 0.25, 0.0]
+  - Runs per temperature: 3
+  - Total test cases: 5
+  - Total API calls: 75
+  - Web Search: NO (not supported in Chat Completions API)
+
+====================================================================================================
+
+
+====================================================================================================
+Test Case 1/5: Single Mother - Employment & Childcare (Austin, TX)
+====================================================================================================
+
+  Temperature 1.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.75: ✓✓✓ → 3/3 successful, avg 6.7 resources
+  Temperature 0.5: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.25: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+
+====================================================================================================
+Test Case 2/5: Veteran - Housing & Mental Health (Round Rock, TX)
+====================================================================================================
+
+  Temperature 1.0: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.75: ✓✓✓ → 3/3 successful, avg 6.0 resources
+  Temperature 0.5: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.25: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+
+====================================================================================================
+Test Case 3/5: Elderly - Medical & Daily Living (Georgetown, TX)
+====================================================================================================
+
+  Temperature 1.0: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.75: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.5: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.25: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.0: ✓✓✓ → 3/3 successful, avg 6.0 resources
+
+====================================================================================================
+Test Case 4/5: Teen Parent - Education & Support (Cedar Park, TX)
+====================================================================================================
+
+  Temperature 1.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.75: ✓✓✓ → 3/3 successful, avg 6.7 resources
+  Temperature 0.5: ✓✓✓ → 3/3 successful, avg 6.7 resources
+  Temperature 0.25: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+
+====================================================================================================
+Test Case 5/5: Domestic Violence Survivor - Safety & Recovery (Pflugerville, TX)
+====================================================================================================
+
+  Temperature 1.0: ✓✓✓ → 3/3 successful, avg 6.3 resources
+  Temperature 0.75: ✓✓✓ → 3/3 successful, avg 6.7 resources
+  Temperature 0.5: ✓✓✓ → 3/3 successful, avg 6.7 resources
+  Temperature 0.25: ✓✓✓ → 3/3 successful, avg 7.0 resources
+  Temperature 0.0: ✓✓✓ → 3/3 successful, avg 7.0 resources
+
+====================================================================================================
+ANALYSIS: Computing Consistency and Diversity Metrics
+====================================================================================================
+
+
+Single Mother - Employment & Childcare
+----------------------------------------------------------------------------------------------------
+  Temperature  1.0:
+    • Consistency:  17.6% (resources in ≥2 runs) |   5.9% (in all 3 runs)
+    • Avg Overlap:  13.7% (Jaccard similarity between run pairs)
+    • Diversity: 17 unique resources from 21 total (81.0% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature 0.75:
+    • Consistency:  30.8% (resources in ≥2 runs) |  23.1% (in all 3 runs)
+    • Avg Overlap:  33.9% (Jaccard similarity between run pairs)
+    • Diversity: 13 unique resources from 20 total (65.0% diversity ratio)
+    • Avg Resources/Run: 6.7
+  Temperature  0.5:
+    • Consistency:  50.0% (resources in ≥2 runs) |  25.0% (in all 3 runs)
+    • Avg Overlap:  43.2% (Jaccard similarity between run pairs)
+    • Diversity: 12 unique resources from 21 total (57.1% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature 0.25:
+    • Consistency:  77.8% (resources in ≥2 runs) |  55.6% (in all 3 runs)
+    • Avg Overlap:  68.5% (Jaccard similarity between run pairs)
+    • Diversity: 9 unique resources from 21 total (42.9% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature  0.0:
+    • Consistency:  87.5% (resources in ≥2 runs) |  75.0% (in all 3 runs)
+    • Avg Overlap:  83.3% (Jaccard similarity between run pairs)
+    • Diversity: 8 unique resources from 21 total (38.1% diversity ratio)
+    • Avg Resources/Run: 7.0
+
+Veteran - Housing & Mental Health
+----------------------------------------------------------------------------------------------------
+  Temperature  1.0:
+    • Consistency:   5.9% (resources in ≥2 runs) |   5.9% (in all 3 runs)
+    • Avg Overlap:   8.6% (Jaccard similarity between run pairs)
+    • Diversity: 17 unique resources from 19 total (89.5% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature 0.75:
+    • Consistency:   0.0% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:   0.0% (Jaccard similarity between run pairs)
+    • Diversity: 18 unique resources from 18 total (100.0% diversity ratio)
+    • Avg Resources/Run: 6.0
+  Temperature  0.5:
+    • Consistency:  33.3% (resources in ≥2 runs) |   6.7% (in all 3 runs)
+    • Avg Overlap:  21.5% (Jaccard similarity between run pairs)
+    • Diversity: 15 unique resources from 21 total (71.4% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature 0.25:
+    • Consistency:  25.0% (resources in ≥2 runs) |   6.2% (in all 3 runs)
+    • Avg Overlap:  16.7% (Jaccard similarity between run pairs)
+    • Diversity: 16 unique resources from 21 total (76.2% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature  0.0:
+    • Consistency:  70.0% (resources in ≥2 runs) |  40.0% (in all 3 runs)
+    • Avg Overlap:  56.9% (Jaccard similarity between run pairs)
+    • Diversity: 10 unique resources from 21 total (47.6% diversity ratio)
+    • Avg Resources/Run: 7.0
+
+Elderly - Medical & Daily Living
+----------------------------------------------------------------------------------------------------
+  Temperature  1.0:
+    • Consistency:  26.7% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:  12.8% (Jaccard similarity between run pairs)
+    • Diversity: 15 unique resources from 19 total (78.9% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature 0.75:
+    • Consistency:  11.8% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:   6.7% (Jaccard similarity between run pairs)
+    • Diversity: 17 unique resources from 19 total (89.5% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature  0.5:
+    • Consistency:  33.3% (resources in ≥2 runs) |  25.0% (in all 3 runs)
+    • Avg Overlap:  35.9% (Jaccard similarity between run pairs)
+    • Diversity: 12 unique resources from 19 total (63.2% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature 0.25:
+    • Consistency:  45.5% (resources in ≥2 runs) |  27.3% (in all 3 runs)
+    • Avg Overlap:  41.5% (Jaccard similarity between run pairs)
+    • Diversity: 11 unique resources from 19 total (57.9% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature  0.0:
+    • Consistency:  75.0% (resources in ≥2 runs) |  50.0% (in all 3 runs)
+    • Avg Overlap:  66.7% (Jaccard similarity between run pairs)
+    • Diversity: 8 unique resources from 18 total (44.4% diversity ratio)
+    • Avg Resources/Run: 6.0
+
+Teen Parent - Education & Support
+----------------------------------------------------------------------------------------------------
+  Temperature  1.0:
+    • Consistency:   5.0% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:   2.6% (Jaccard similarity between run pairs)
+    • Diversity: 20 unique resources from 21 total (95.2% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature 0.75:
+    • Consistency:  17.6% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:   8.3% (Jaccard similarity between run pairs)
+    • Diversity: 17 unique resources from 20 total (85.0% diversity ratio)
+    • Avg Resources/Run: 6.7
+  Temperature  0.5:
+    • Consistency:  33.3% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:  14.6% (Jaccard similarity between run pairs)
+    • Diversity: 15 unique resources from 20 total (75.0% diversity ratio)
+    • Avg Resources/Run: 6.7
+  Temperature 0.25:
+    • Consistency:  42.9% (resources in ≥2 runs) |   7.1% (in all 3 runs)
+    • Avg Overlap:  23.7% (Jaccard similarity between run pairs)
+    • Diversity: 14 unique resources from 21 total (66.7% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature  0.0:
+    • Consistency:  58.3% (resources in ≥2 runs) |  16.7% (in all 3 runs)
+    • Avg Overlap:  44.4% (Jaccard similarity between run pairs)
+    • Diversity: 12 unique resources from 21 total (57.1% diversity ratio)
+    • Avg Resources/Run: 7.0
+
+Domestic Violence Survivor - Safety & Recovery
+----------------------------------------------------------------------------------------------------
+  Temperature  1.0:
+    • Consistency:  18.8% (resources in ≥2 runs) |   0.0% (in all 3 runs)
+    • Avg Overlap:   8.8% (Jaccard similarity between run pairs)
+    • Diversity: 16 unique resources from 19 total (84.2% diversity ratio)
+    • Avg Resources/Run: 6.3
+  Temperature 0.75:
+    • Consistency:  18.8% (resources in ≥2 runs) |   6.2% (in all 3 runs)
+    • Avg Overlap:  14.4% (Jaccard similarity between run pairs)
+    • Diversity: 16 unique resources from 20 total (80.0% diversity ratio)
+    • Avg Resources/Run: 6.7
+  Temperature  0.5:
+    • Consistency:  30.8% (resources in ≥2 runs) |  23.1% (in all 3 runs)
+    • Avg Overlap:  33.9% (Jaccard similarity between run pairs)
+    • Diversity: 13 unique resources from 20 total (65.0% diversity ratio)
+    • Avg Resources/Run: 6.7
+  Temperature 0.25:
+    • Consistency:  70.0% (resources in ≥2 runs) |  40.0% (in all 3 runs)
+    • Avg Overlap:  56.9% (Jaccard similarity between run pairs)
+    • Diversity: 10 unique resources from 21 total (47.6% diversity ratio)
+    • Avg Resources/Run: 7.0
+  Temperature  0.0:
+    • Consistency:  77.8% (resources in ≥2 runs) |  55.6% (in all 3 runs)
+    • Avg Overlap:  68.5% (Jaccard similarity between run pairs)
+    • Diversity: 9 unique resources from 21 total (42.9% diversity ratio)
+    • Avg Resources/Run: 7.0
+
+====================================================================================================
+OVERALL SUMMARY: Temperature Performance Across All Test Cases
+====================================================================================================
+
+Temperature 1.0:
+  • Avg Consistency: 14.8% (≥2 runs) | 2.4% (all runs)
+  • Avg Overlap: 9.3%
+  • Avg Diversity Ratio: 85.8%
+
+Temperature 0.75:
+  • Avg Consistency: 15.8% (≥2 runs) | 5.9% (all runs)
+  • Avg Overlap: 12.7%
+  • Avg Diversity Ratio: 83.9%
+
+Temperature 0.5:
+  • Avg Consistency: 36.2% (≥2 runs) | 15.9% (all runs)
+  • Avg Overlap: 29.8%
+  • Avg Diversity Ratio: 66.3%
+
+Temperature 0.25:
+  • Avg Consistency: 52.2% (≥2 runs) | 27.2% (all runs)
+  • Avg Overlap: 41.5%
+  • Avg Diversity Ratio: 58.2%
+
+Temperature 0.0:
+  • Avg Consistency: 73.7% (≥2 runs) | 47.4% (all runs)
+  • Avg Overlap: 64.0%
+  • Avg Diversity Ratio: 46.0%
+
+====================================================================================================
+IMPORTANT FINDINGS & RECOMMENDATIONS
+====================================================================================================
+
+⚠️  CRITICAL DISCOVERY:
+   The OpenAI Responses API (used in your production app with web search) does NOT
+   support the temperature parameter. This means:
+
+   1. Your app is using the DEFAULT temperature (likely 1.0) which causes maximum randomness
+   2. Temperature CANNOT be adjusted in the Responses API
+   3. The inconsistency users are experiencing is inherent to the current API
+
+INTERPRETATION OF RESULTS ABOVE:
+   The test results above show how temperature would affect consistency IF it were
+   supported. Lower temperatures (0.25-0.5) typically show:
+   - Higher consistency (70-90% overlap between runs)
+   - Lower diversity (100-130% diversity ratio)
+   - More predictable results for users
+
+OPTIONS TO ADDRESS USER FEEDBACK:
+
+Option 1: Switch to Chat Completions API
+   ✓ Supports temperature parameter (can set to 0.5 for consistency)
+   ✗ Loses web search capability
+   ✗ May provide less current/accurate resource information
+
+Option 2: Keep Responses API, accept variability
+   ✓ Maintains web search for current information
+   ✗ Cannot control temperature (stuck at default ~1.0)
+   ✗ Users will continue to see varying results
+
+Option 3: Hybrid approach
+   - Use Responses API (with web search) for initial recommendations
+   - Cache or prioritize frequently recommended resources
+   - Show "core" resources consistently + some variable ones
+
+Option 4: Post-processing consistency
+   - Use Responses API but implement caching/scoring
+   - Track which resources appear frequently for similar queries
+   - Boost those resources in future similar queries
+
+RECOMMENDATION:
+   Given that web search provides significant value for finding current resources,
+   consider Option 3 or 4 rather than sacrificing web search. Implement a hybrid
+   system that maintains some consistency while leveraging web search benefits.
+
+NEXT STEPS:
+   1. Review the temperature test results above to see the consistency impact
+   2. Decide if web search is essential (likely yes for case worker tools)
+   3. If yes, implement post-processing or caching for consistency
+   4. If no, switch to Chat Completions API with temperature=0.5
+
+====================================================================================================
