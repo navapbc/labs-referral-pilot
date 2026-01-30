@@ -38,3 +38,6 @@ docker-compose.override.yml
 
 # Files related to experiments
 dataset.csv
+
+# ChromaDB data
+chroma_data

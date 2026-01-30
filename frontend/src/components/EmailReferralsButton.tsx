@@ -82,9 +82,15 @@ export function EmailReferralsButton({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Email Referrals</DialogTitle>
+          <DialogTitle>
+            {actionPlanResultId
+              ? "Email Resources and Action Plan"
+              : "Email Resources"}
+          </DialogTitle>
           <DialogDescription>
-            Enter your email address to receive the referrals.
+            {actionPlanResultId
+              ? "Send to yourself or your client. Includes the selected resources and personalized action plan with next steps."
+              : "Send to yourself or your client. Includes the selected resources with descriptions and contact information."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -115,7 +121,7 @@ export function EmailReferralsButton({
             <div className="flex gap-2 justify-end">
               <DialogClose asChild>
                 <Button
-                  className="cursor-pointer disabled:!cursor-not-allowed"
+                  className="bg-white border-gray-300 text-gray-900 hover:bg-gray-100 hover:text-gray-900 cursor-pointer disabled:!cursor-not-allowed"
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
@@ -126,7 +132,7 @@ export function EmailReferralsButton({
                 </Button>
               </DialogClose>
               <Button
-                className="cursor-pointer disabled:cursor-not-allowed"
+                className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:cursor-not-allowed"
                 type="submit"
                 onClick={() => void handleSendEmail()}
                 disabled={isLoading || !email.trim() || !isValidEmail(email)}
