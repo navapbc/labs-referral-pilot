@@ -1,0 +1,85 @@
+====================================================================================================
+PRODUCTION-REALISTIC TEMPERATURE TEST
+====================================================================================================
+
+Configuration (matching production app):
+  - Model: gpt-5-mini
+  - API: OpenAI Responses API
+  - Web Search: ENABLED (production setting)
+  - Reasoning Effort: low
+  - Temperatures: [1.0, 0.75, 0.5, 0.25, 0.0]
+  - Runs per temperature: 3
+  - Test case: Single Mother - Employment & Childcare
+
+====================================================================================================
+
+PHASE 1: Testing if Responses API accepts temperature parameter
+----------------------------------------------------------------------------------------------------
+
+Testing temperature=1.0... ✅ ACCEPTED! API returned temperature=1.0
+
+Testing temperature=0.75... ❌ REJECTED: Error code: 400 - {'error': {'message': "Unsupported parameter: 'temperature' is
+
+Testing temperature=0.5... ❌ REJECTED: Error code: 400 - {'error': {'message': "Unsupported parameter: 'temperature' is
+
+Testing temperature=0.25... ❌ REJECTED: Error code: 400 - {'error': {'message': "Unsupported parameter: 'temperature' is
+
+Testing temperature=0.0... ❌ REJECTED: Error code: 400 - {'error': {'message': "Unsupported parameter: 'temperature' is
+
+====================================================================================================
+PHASE 2: Consistency Testing (if temperature is supported)
+====================================================================================================
+
+
+Temperature 1.0:
+  ✓✓✓ → 3/3 successful, avg 6.0 resources, 31.6s
+
+Temperature 0.75:
+  ✗✗✗ → 0/3 successful
+
+Temperature 0.5:
+  ✗✗✗ → 0/3 successful
+
+Temperature 0.25:
+  ✗✗✗ → 0/3 successful
+
+Temperature 0.0:
+  ✗✗✗ → 0/3 successful
+
+====================================================================================================
+CONSISTENCY ANALYSIS
+====================================================================================================
+
+Temperature  1.0:
+  • Consistency:  20.0% (resources in ≥2 runs) |   0.0% (in all runs)
+  • Avg Overlap:   9.7% (Jaccard similarity)
+  • Diversity: 15 unique from 18 total (83.3% ratio)
+  • Resources: 6.0 per run
+
+  Resources that appeared in all 3 runs:
+    (none)
+
+Temperature 0.75: Insufficient data
+Temperature 0.5: Insufficient data
+Temperature 0.25: Insufficient data
+Temperature 0.0: Insufficient data
+====================================================================================================
+CONCLUSIONS
+====================================================================================================
+
+This test uses your EXACT production setup:
+- OpenAI Responses API (not Chat Completions)
+- gpt-5-mini model
+- Web search enabled
+- Reasoning effort: low
+
+Key Questions Answered:
+1. Does Responses API accept temperature parameter? (See Phase 1)
+2. If yes, does it actually affect consistency? (See Phase 2 & Analysis)
+3. What temperature gives best balance? (See consistency scores)
+
+Next Steps:
+- If temperature IS supported: Update src/common/components.py to add temperature parameter
+- If temperature is NOT supported: Consider hybrid caching approach from previous report
+
+====================================================================================================
