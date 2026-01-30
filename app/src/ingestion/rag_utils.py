@@ -121,7 +121,9 @@ def get_s3_subfolders(s3: BaseClient, bucket: str, s3_folder: str) -> dict[str, 
     return subfolders
 
 
-def download_s3_folder_to_local(s3: BaseClient, bucket: str, s3_folder: str, local_folder: str) -> str:
+def download_s3_folder_to_local(
+    s3: BaseClient, bucket: str, s3_folder: str, local_folder: str
+) -> str:
     """Download the contents of a folder directory from S3 to a local folder."""
     logger.info("Downloading s3://%s/%s to local folder %s", bucket, s3_folder, local_folder)
     paginator = s3.get_paginator("list_objects_v2")
