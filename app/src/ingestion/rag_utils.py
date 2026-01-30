@@ -75,7 +75,7 @@ def populate_vector_db() -> None:
         logger.info("Region subfolders in S3: %s", s3_subfolders)
         # Exclude certain regions if needed
         for s3_folder in s3_subfolders.values():
-            local_folder = download_s3_folder_to_local(s3, bucket, s3_folder)
+            download_s3_folder_to_local(s3, bucket, s3_folder)
 
     region_subfolders = {
         entry.name: entry.path for entry in os.scandir(local_folder) if entry.is_dir()
