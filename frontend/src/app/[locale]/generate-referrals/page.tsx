@@ -1,23 +1,13 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { fetchResources } from "@/util/fetchResources"; // eslint-disable-line @typescript-eslint/no-unused-vars -- will be used for user preference between streaming/non-streaming
-import { fetchResourcesStreaming } from "@/util/fetchResourcesStreaming";
-import { PartialResource } from "@/util/parseStreamingResources";
 import { Resource } from "@/types/resources";
 import "@/app/globals.css";
-import { fetchLocationFromZip } from "@/util/fetchLocation";
 
 import { PrintableReferralsReport } from "@/util/printReferrals";
-import {
-  fetchActionPlan, // eslint-disable-line @typescript-eslint/no-unused-vars -- will be used for user preference between streaming/non-streaming
-  fetchActionPlanStreaming,
-  ActionPlan,
-  PartialActionPlan,
-} from "@/util/fetchActionPlan";
 import { PrintOptionsDialog, PrintMode } from "@/components/PrintOptionsDialog";
 import { ActionPlanSection } from "@/components/ActionPlanSection";
 
@@ -28,61 +18,76 @@ import { ShareButtons } from "@/components/ShareButtons";
 import WelcomeUserInputScreen from "@/components/WelcomeUserInputScreen";
 import { PilotFeedbackBanner } from "@/components/PilotFeedbackBanner";
 import { GoodwillReferralToolHeaderPilot } from "@/components/GoodwillReferralToolHeaderPilot";
-import {
-  ClientDetailsInput,
-  resourceCategories,
-} from "@/components/ClientDetailsInput";
+import { ClientDetailsInput } from "@/components/ClientDetailsInput";
 import { RefinePromptPanel } from "@/components/RefinePromptPanel";
 import { RemoveResourceNotification } from "@/components/RemoveResourceNotification";
 
-export default function Page() {
-  const [clientDescription, setClientDescription] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [result, setResult] = useState<Resource[] | null>(null);
-  const [resourcesResultId, setResourcesResultId] = useState("");
-  const [actionPlanResultId, setActionPlanResultId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showResultsView, setShowResultsView] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [locationText, setLocationText] = useState("");
-  const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
-    [],
-  );
-  const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
-  const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
-  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
-  const [streamingPlan, setStreamingPlan] = useState<PartialActionPlan | null>(
-    null,
-  );
-  const [isStreamingActionPlan, setIsStreamingActionPlan] = useState(false);
-  const [streamingResources, setStreamingResources] = useState<
-    PartialResource[] | null
-  >(null);
-  const [isStreamingResources, setIsStreamingResources] = useState(false);
-  const [hasReceivedFirstResource, setHasReceivedFirstResource] =
-    useState(false);
-  const hasReceivedFirstResourceRef = useRef(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined,
-  );
+// Custom hooks
+import { useResourcesStreaming } from "@/hooks/useResourcesStreaming";
+import { useActionPlanStreaming } from "@/hooks/useActionPlanStreaming";
+import { useResourceRemoval } from "@/hooks/useResourceRemoval";
 
+export default function Page() {
   const searchParams = useSearchParams();
 
-  // User info state
+  // ========== User State ==========
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCheckingUser, setIsCheckingUser] = useState(true);
 
-  // Remove functionality state
-  const [retainedResources, setRetainedResources] = useState<Resource[]>();
-  const [recentlyRemoved, setRecentlyRemoved] = useState<Resource | null>(null);
-  const [removedResourceIndex, setRemovedResourceIndex] = useState<
-    number | null
-  >(null);
+  // ========== Form/Input State ==========
+  const [clientDescription, setClientDescription] = useState("");
+  const [locationText, setLocationText] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>(
+    [],
+  );
 
-  // Print options state
+  // ========== Results State ==========
+  const [retainedResources, setRetainedResources] = useState<Resource[]>();
+  const [resourcesResultId, setResourcesResultId] = useState("");
+  const [showResultsView, setShowResultsView] = useState(false);
+
+  // ========== Resources Streaming (Custom Hook) ==========
+  const {
+    loading,
+    isStreamingResources,
+    hasReceivedFirstResource,
+    streamingResources,
+    errorMessage: resourcesError,
+    findResources: findResourcesFromHook,
+    setErrorMessage: setResourcesError,
+  } = useResourcesStreaming();
+
+  // ========== Action Plan State ==========
+  const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
+  const [actionPlanResultId, setActionPlanResultId] = useState("");
+
+  // ========== Action Plan Streaming (Custom Hook) ==========
+  const {
+    isGeneratingActionPlan,
+    isStreamingActionPlan,
+    streamingPlan,
+    actionPlan,
+    errorMessage: actionPlanError,
+    generateActionPlan: generateActionPlanFromHook,
+    setErrorMessage: setActionPlanError,
+    clearActionPlan,
+  } = useActionPlanStreaming();
+
+  // ========== Resource Removal (Custom Hook) ==========
+  const {
+    recentlyRemoved,
+    handleRemoveResource: handleRemoveFromHook,
+    handleUndoRemove: handleUndoFromHook,
+  } = useResourceRemoval();
+
+  // ========== UI State ==========
   const [showPrintOptions, setShowPrintOptions] = useState(false);
   const [printMode, setPrintMode] = useState<PrintMode>("full-referrals");
+
+  // Combine error messages from both hooks
+  const errorMessage = resourcesError || actionPlanError;
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -117,7 +122,6 @@ export default function Page() {
   };
 
   const onResources = (resources: Resource[]) => {
-    setResult(resources);
     setRetainedResources(resources); // this creates a copy of the original list of resources, may be edited by the user
     setShowResultsView(true);
   };
@@ -131,98 +135,48 @@ export default function Page() {
     const prompt_version_id = searchParams?.get("prompt_version_id") ?? null;
     const suffix = searchParams?.get("suffix") ?? undefined;
 
-    setLoading(true);
-    setIsStreamingResources(true);
-    setHasReceivedFirstResource(false);
-    hasReceivedFirstResourceRef.current = false;
-    setResult(null);
-    setStreamingResources(null);
-    setErrorMessage(undefined);
+    // Use overrides if provided, otherwise use state values
+    const effectiveClientDescription =
+      overrides?.clientDescription ?? clientDescription;
+    const effectiveLocationText = overrides?.locationText ?? locationText;
+    const effectiveSelectedCategories =
+      overrides?.selectedCategories ?? selectedCategories;
+    const effectiveSelectedResourceTypes =
+      overrides?.selectedResourceTypes ?? selectedResourceTypes;
+
+    setResourcesError(undefined);
     setShowResultsView(true);
 
-    // 12-second timeout to show "No resources found" if nothing arrives
-    const timeoutId = setTimeout(() => {
-      if (!hasReceivedFirstResourceRef.current) {
-        setErrorMessage("No resources found.");
-        setIsStreamingResources(false);
-        setLoading(false);
-      }
-    }, 12000);
-
-    try {
-      const request = await buildRequestWithResolvedZipCodes(overrides);
-
-      const {
-        resources: finalResources,
-        resultId,
-        errorMessage: streamError,
-      } = await fetchResourcesStreaming(
-        request,
-        userEmail,
-        // onChunk callback - receive partial resources
-        (partialResources: PartialResource[]) => {
-          if (
-            partialResources.length > 0 &&
-            !hasReceivedFirstResourceRef.current
-          ) {
-            hasReceivedFirstResourceRef.current = true;
-            setHasReceivedFirstResource(true);
-            clearTimeout(timeoutId);
-          }
-          setStreamingResources(partialResources);
-        },
-        // onComplete callback - stop streaming UI
-        () => {
-          setIsStreamingResources(false);
-        },
-        // onError callback - clear content and show error
-        (error: string) => {
-          setIsStreamingResources(false);
-          setLoading(false);
-          setStreamingResources(null);
-          setResult(null);
-          setErrorMessage(error);
-        },
+    const {
+      resources,
+      resultId,
+      errorMessage: streamError,
+    } = await findResourcesFromHook(
+      {
+        clientDescription: effectiveClientDescription,
+        locationText: effectiveLocationText,
+        selectedCategories: effectiveSelectedCategories,
+        selectedResourceTypes: effectiveSelectedResourceTypes,
+      },
+      userEmail,
+      {
         prompt_version_id,
         suffix,
-      );
+      },
+    );
 
-      // Clear the timeout when streaming completes
-      clearTimeout(timeoutId);
+    // Handle errors from the streaming response
+    if (streamError) {
+      setResourcesResultId("");
+      return;
+    }
 
-      // Handle errors from the streaming response
-      if (streamError) {
-        setErrorMessage(streamError);
-        setResourcesResultId("");
-        setStreamingResources(null);
-        setResult(null);
-        return;
-      }
-
-      // Set the final parsed resources
-      if (finalResources) {
-        setResourcesResultId(resultId);
-        setErrorMessage(undefined);
-        onResources(finalResources);
-        setStreamingResources(null); // Clear streaming state
-      } else {
-        setErrorMessage(
-          "There was an issue streaming the resources. Please try again.",
-        );
-        setResourcesResultId("");
-      }
-    } catch (e: unknown) {
-      clearTimeout(timeoutId);
-      const message = e instanceof Error ? e.message : "Unknown error";
-      console.error(message);
-      setIsStreamingResources(false);
-      setStreamingResources(null);
-      setResult(null);
-      setErrorMessage(
-        "There was an issue streaming the resources. Please try again.",
-      );
-    } finally {
-      setLoading(false);
+    // Set the final parsed resources
+    if (resources && resources.length > 0) {
+      setResourcesResultId(resultId);
+      onResources(resources);
+    } else {
+      setResourcesResultId("");
     }
   }
 
@@ -248,12 +202,7 @@ export default function Page() {
 
   function handleReturnToSearch() {
     setShowResultsView(false);
-    setResult(null);
     setRetainedResources(undefined);
-    setStreamingResources(null);
-    setIsStreamingResources(false);
-    setHasReceivedFirstResource(false);
-    hasReceivedFirstResourceRef.current = false;
     setResourcesResultId("");
     setActionPlanResultId("");
     setLocationText("");
@@ -261,13 +210,9 @@ export default function Page() {
     setSelectedResourceTypes([]);
     setClientDescription("");
     setSelectedResources([]);
-    setActionPlan(null);
-    setStreamingPlan(null);
-    setIsStreamingActionPlan(false);
-    setIsGeneratingActionPlan(false);
-    setErrorMessage(undefined);
-    setRecentlyRemoved(null);
-    setRemovedResourceIndex(null);
+    clearActionPlan();
+    setResourcesError(undefined);
+    setActionPlanError(undefined);
   }
 
   function handleResourceSelection(resource: Resource, checked: boolean) {
@@ -304,8 +249,7 @@ export default function Page() {
     // Clear previous results and action plan
     setRetainedResources(undefined);
     setSelectedResources([]);
-    setActionPlan(null);
-    setStreamingPlan(null);
+    clearActionPlan();
     setActionPlanResultId("");
 
     // Trigger new search with overrides (since state updates are async)
@@ -320,173 +264,40 @@ export default function Page() {
   async function generateActionPlan() {
     if (selectedResources.length === 0) return;
 
-    setIsGeneratingActionPlan(true);
-    setIsStreamingActionPlan(true);
-    setActionPlan(null);
-    setStreamingPlan(null);
-    setErrorMessage(undefined);
+    setActionPlanError(undefined);
 
-    try {
-      const {
-        actionPlan: finalPlan,
-        resultId,
-        errorMessage: planError,
-      } = await fetchActionPlanStreaming(
-        selectedResources,
-        userEmail,
-        clientDescription,
-        // onChunk callback - receive structured partial plan
-        (partialPlan: PartialActionPlan) => {
-          setStreamingPlan(partialPlan);
-        },
-        // onComplete callback - stop streaming UI
-        () => {
-          setIsStreamingActionPlan(false);
-        },
-        // onError callback - clear content and show error
-        (error: string) => {
-          setIsStreamingActionPlan(false);
-          setIsGeneratingActionPlan(false);
-          setStreamingPlan(null);
-          setActionPlan(null);
-          setErrorMessage(error);
-        },
-      );
-
-      // Handle errors from the streaming response
-      if (planError) {
-        setErrorMessage(planError);
-        setActionPlanResultId(""); // set the Action Plan Id to "" so we don't email an empty or errant result
-        setStreamingPlan(null);
-        setActionPlan(null);
-        return;
-      }
-
-      // Set the final parsed action plan
-      if (finalPlan) {
-        setActionPlan(finalPlan);
-        setActionPlanResultId(resultId);
-        setStreamingPlan(null); // Clear streaming state
-      } else {
-        setErrorMessage(
-          "There was an issue streaming the Action Plan. Please try again.",
-        );
-        setActionPlanResultId("");
-      }
-    } catch (error) {
-      console.error("Error generating action plan:", error);
-      setIsStreamingActionPlan(false);
-      setIsGeneratingActionPlan(false);
-      setStreamingPlan(null);
-      setActionPlan(null);
-      setErrorMessage(
-        "There was an issue streaming the Action Plan. Please try again.",
-      );
-    } finally {
-      setIsGeneratingActionPlan(false);
-    }
-  }
-
-  const buildRequestWithResolvedZipCodes = async (overrides?: {
-    clientDescription?: string;
-    locationText?: string;
-    selectedCategories?: string[];
-    selectedResourceTypes?: string[];
-  }): Promise<string> => {
-    // Use overrides if provided, otherwise use state values
-    const effectiveClientDescription =
-      overrides?.clientDescription ?? clientDescription;
-    const effectiveLocationText = overrides?.locationText ?? locationText;
-    const effectiveSelectedCategories =
-      overrides?.selectedCategories ?? selectedCategories;
-    const effectiveSelectedResourceTypes =
-      overrides?.selectedResourceTypes ?? selectedResourceTypes;
-
-    // Helper function to replace zip codes with "city, state zip_code" format
-    const replaceZipCodes = async (text: string): Promise<string> => {
-      if (!text) return text;
-
-      const zipCodeRegex = /\b\d{5}(?:-\d{4})?\b/g;
-      const matches = Array.from(text.matchAll(zipCodeRegex));
-
-      if (matches.length === 0) return text;
-
-      // Collect unique zip codes to avoid duplicate API calls
-      const uniqueZipCodes = Array.from(new Set(matches.map((m) => m[0])));
-
-      // Fetch locations for all unique zip codes
-      const zipToLocation = new Map<string, string>();
-      const locationPromises = uniqueZipCodes.map(async (zipCode) => {
-        // For zip+4 format, only use the 5-digit part for lookup
-        const zipForLookup = zipCode.split("-")[0];
-        const location = await fetchLocationFromZip(zipForLookup);
-        zipToLocation.set(zipCode, location);
-      });
-      await Promise.all(locationPromises);
-
-      // Replace all zip codes with their city, state prepended
-      let result = text;
-      for (const [zipCode, location] of zipToLocation.entries()) {
-        if (location) {
-          // Use a global replace to handle all occurrences of this zip code
-          const zipRegex = new RegExp(
-            `\\b${zipCode.replace(/-/g, "\\-")}\\b`,
-            "g",
-          );
-          result = result.replace(zipRegex, `${location} ${zipCode}`);
-        }
-      }
-
-      return result;
-    };
-
-    // Process both locationText and clientDescription for zip codes
-    const processedLocationText = await replaceZipCodes(effectiveLocationText);
-    const processedClientDescription = await replaceZipCodes(
-      effectiveClientDescription,
+    const {
+      actionPlan: finalPlan,
+      resultId,
+      errorMessage: planError,
+    } = await generateActionPlanFromHook(
+      selectedResources,
+      userEmail,
+      clientDescription,
     );
 
-    const resourceTypeFilters = effectiveSelectedCategories
-      .map((categoryId) => {
-        const category = resourceCategories.find((c) => c.id === categoryId);
-        return category?.label;
-      })
-      .filter(Boolean)
-      .join(", ");
+    // Handle errors from the streaming response
+    if (planError) {
+      setActionPlanResultId(""); // set the Action Plan Id to "" so we don't email an empty or errant result
+      return;
+    }
 
-    const options =
-      (resourceTypeFilters.length > 0
-        ? "\nInclude resources that support the following categories: " +
-          resourceTypeFilters
-        : "") +
-      (effectiveSelectedResourceTypes.length > 0
-        ? "\nInclude the following types of providers: " +
-          effectiveSelectedResourceTypes.join(", ")
-        : "") +
-      (processedLocationText.length > 0
-        ? "\nFocus on resources close to the following location: " +
-          processedLocationText
-        : "");
-
-    return processedClientDescription + options;
-  };
+    // Set the final parsed action plan
+    if (finalPlan) {
+      setActionPlanResultId(resultId);
+    } else {
+      setActionPlanResultId("");
+    }
+  }
 
   // Show nothing while checking localStorage to prevent flash
   if (isCheckingUser) {
     return null;
   }
 
-  // Remove resource handler
+  // Remove resource handler - wrapper around hook
   const handleRemoveResource = (resourceToRemove: Resource) => {
-    // Find and store the index before removing
-    const index = retainedResources?.findIndex(
-      (r) => r.name === resourceToRemove.name,
-    );
-    if (index !== undefined && index !== -1) {
-      setRemovedResourceIndex(index);
-    }
-
-    setRecentlyRemoved(resourceToRemove);
+    handleRemoveFromHook(resourceToRemove, retainedResources);
 
     // Immediately remove from retainedResources
     setRetainedResources((current) =>
@@ -497,44 +308,28 @@ export default function Page() {
     setSelectedResources((current) =>
       current.filter((r) => r.name !== resourceToRemove.name),
     );
-
-    // Auto-clear the undo notification after 7.5 seconds
-    setTimeout(() => {
-      setRecentlyRemoved((current) => {
-        // If the resource is still marked as recently removed, clear it
-        if (current === resourceToRemove) {
-          return null;
-        }
-        return current;
-      });
-      setRemovedResourceIndex(null);
-    }, 7500);
   };
 
-  // Undo remove handler
+  // Undo remove handler - wrapper around hook
   const handleUndoRemove = () => {
-    if (recentlyRemoved) {
+    handleUndoFromHook((resource, index) => {
       // Add the resource back to retainedResources at its original index
       setRetainedResources((current) => {
         if (!current) {
-          return [recentlyRemoved];
+          return [resource];
         }
 
         // If we have a stored index, insert at that position
-        if (removedResourceIndex !== null && removedResourceIndex >= 0) {
+        if (index !== null && index >= 0) {
           const newArray = [...current];
-          newArray.splice(removedResourceIndex, 0, recentlyRemoved);
+          newArray.splice(index, 0, resource);
           return newArray;
         }
 
         // Fallback: append to the end
-        return [...current, recentlyRemoved];
+        return [...current, resource];
       });
-
-      // Clear the recently removed state
-      setRecentlyRemoved(null);
-      setRemovedResourceIndex(null);
-    }
+    });
   };
 
   return (

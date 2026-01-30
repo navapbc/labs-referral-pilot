@@ -1,4 +1,9 @@
 import { getApiDomain } from "./apiDomain";
+import {
+  ApiErrorResponse,
+  EmailResultResponse,
+  EmailFullResultResponse,
+} from "@/types/api";
 
 export async function emailResult(
   resultId: string,
@@ -45,8 +50,7 @@ export async function emailResult(
       let errorMessage = response.statusText || "Unknown error";
 
       try {
-        /* eslint-disable */
-        const errorData = await response.json();
+        const errorData = (await response.json()) as ApiErrorResponse;
         // Try multiple possible error message fields
         errorMessage =
           errorData.message ||
@@ -55,7 +59,6 @@ export async function emailResult(
           errorData.result?.error ||
           errorData.result?.message ||
           `HTTP ${response.status}: ${response.statusText}`;
-        /* eslint-enable */
       } catch (e) {
         // If JSON parsing fails, use status text
         const errorStr = e instanceof Error ? e.message : String(e);
@@ -65,12 +68,14 @@ export async function emailResult(
       throw new Error(errorMessage);
     }
 
-    /* eslint-disable */
-    const responseData = await response.json();
-    const emailAddress: string = actionPlanResultId
-      ? responseData.result.email_full_result.email
-      : responseData.result.email_result.email;
-    /* eslint-enable */
+    let emailAddress: string;
+    if (actionPlanResultId) {
+      const responseData = (await response.json()) as EmailFullResultResponse;
+      emailAddress = responseData.result.email_full_result.email;
+    } else {
+      const responseData = (await response.json()) as EmailResultResponse;
+      emailAddress = responseData.result.email_result.email;
+    }
     return { emailAddr: emailAddress };
   } catch (error) {
     if (error instanceof Error) {
