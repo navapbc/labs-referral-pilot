@@ -21,7 +21,8 @@ services:
   phoenix:
     image: arizephoenix/phoenix:version-10.9.1-nonroot
     depends_on:
-      - app-db
+      app-db:
+        condition: service_healthy
     ports:
       - "6006:6006" # UI and OTLP HTTP collector
       # - "4317:4317" # OTLP gRPC collector
@@ -29,7 +30,7 @@ services:
       - PHOENIX_SQL_DATABASE_URL=postgresql://app:secret123@app-db:5432/postgres
 
       # https://arize.com/docs/phoenix/release-notes/04.2025/04.28.2025-tls-support-for-phoenix-server
-      - PHOENIX_TLS_ENABLED=True
+      - PHOENIX_TLS_ENABLED=False
       # The following applies when PHOENIX_TLS_ENABLED=True
       - PHOENIX_TLS_CERT_FILE=/certs/server-fullchain.crt
       # Server's private key
@@ -44,6 +45,16 @@ services:
       # - PHOENIX_SECRET=ThisSecretIsForLocalDevOnly202508251033
     volumes:
       - ./certs:/certs
+
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8000:8000"
+    environment:
+      # opt out of telemetry -- https://docs.trychroma.com/docs/overview/telemetry
+      - ANONYMIZED_TELEMETRY=False
+    volumes:
+      - chroma_data:/data
 
   app:
     build:
@@ -68,3 +79,4 @@ services:
 
 volumes:
   app-dbdata:
+  chroma_data:
