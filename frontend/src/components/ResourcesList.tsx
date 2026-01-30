@@ -216,7 +216,7 @@ const ResourcesList = ({
                   href={normalizeUrl(r.website)}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline break-all"
                   prefetch={false}
                   data-testid={`website-link-${i}`}
                 >
