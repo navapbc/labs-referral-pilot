@@ -1,5 +1,6 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
+import { GenerateReferralsResponse } from "@/types/api";
 
 export async function fetchResources(
   clientDescription: string,
@@ -53,13 +54,12 @@ export async function fetchResources(
 
     clearTimeout(timer);
 
-    /* eslint-disable */
-    const responseData = await upstream.json(); // bypassing type enforcement due to heavy nesting within the API response
-    const resultUuid: string = responseData.result.save_result.result_id;
+    const responseData = (await upstream.json()) as GenerateReferralsResponse;
+    const resultUuid = responseData.result.save_result.result_id;
 
     console.log(responseData);
 
-    const resourcesJson = JSON.parse(
+    const resourcesJson: unknown = JSON.parse(
       responseData.result.llm.replies[0]._content[0].text,
     );
 
@@ -69,8 +69,6 @@ export async function fetchResources(
     const resourcesAsArray: Resource[] = resources.resources || [];
 
     console.log(resourcesAsArray);
-
-    /* eslint-enable */
 
     // Check if resources array is empty
     if (resourcesAsArray.length === 0) {

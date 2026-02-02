@@ -1,6 +1,8 @@
 import { Resource } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
 import { fixJsonControlCharacters, extractField } from "./parseStreamingUtils";
+import { createStreamingFetcher } from "./createStreamingFetcher";
+import { GenerateActionPlanResponse } from "@/types/api";
 
 export interface ActionPlan {
   title: string;
@@ -76,10 +78,9 @@ export async function fetchActionPlan(
       };
     }
 
-    /* eslint-disable */
-    const responseData = await upstream.json();
+    const responseData = (await upstream.json()) as GenerateActionPlanResponse;
     // Extract the result ID from the API response
-    const resultUuid: string = responseData.result.save_result.result_id;
+    const resultUuid = responseData.result.save_result.result_id;
     // Extract the action plan from the API response
     const actionPlanText = responseData.result.response;
     console.log("Raw action plan text:", actionPlanText);
@@ -87,10 +88,9 @@ export async function fetchActionPlan(
     // The LLM likes to return a multi-line JSON string, so
     // escape these characters or JSON.parse will fail
     const fixedJson = fixJsonControlCharacters(actionPlanText);
-    const actionPlan = JSON.parse(fixedJson);
-    /* eslint-enable */
+    const actionPlan = JSON.parse(fixedJson) as ActionPlan;
 
-    return { actionPlan: actionPlan as ActionPlan, resultId: resultUuid };
+    return { actionPlan, resultId: resultUuid };
   } catch (error) {
     clearTimeout(timer);
     // Check if the error is due to timeout
@@ -131,201 +131,45 @@ export async function fetchActionPlanStreaming(
   errorMessage?: string;
 }> {
   const apiDomain = await getApiDomain();
-  // Use the standard chat completions endpoint with pipeline name as model
   const url = `${apiDomain}chat/completions`;
 
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 600_000); // 10 minutes timeout
+  const result = await createStreamingFetcher<ActionPlan, PartialActionPlan>({
+    url,
+    timeout: 600_000, // 10 minutes
+    requestBody: {
+      model: "generate_action_plan", // Pipeline name as model
+      messages: [{ role: "user", content: userQuery }],
+      stream: true,
+      resources: resources,
+      user_email: userEmail,
+      user_query: userQuery,
+    },
+    onChunk,
+    onComplete,
+    onError: (error: string) => {
+      // Customize error message for action plan
+      const customError =
+        error ===
+        "The server encountered an unexpected error. Please try again later."
+          ? "There was an issue streaming the Action Plan. Please try again."
+          : error === "Request timed out, please try again."
+            ? "Request timed out. Please try again."
+            : error;
+      onError(customError);
+    },
+    shouldAccumulateContent: (content) => !content.includes("result_id"),
+    parsePartial: (accumulatedJson) => {
+      return parseStreamingJSON(accumulatedJson);
+    },
+    parseFinal: (accumulatedJson) => {
+      const fixedJson = fixJsonControlCharacters(accumulatedJson);
+      return JSON.parse(fixedJson) as ActionPlan;
+    },
+  });
 
-  let resultId = "";
-  let hasError = false;
-  let errorMessage: string | undefined;
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "generate_action_plan", // Pipeline name as model
-        messages: [{ role: "user", content: userQuery }],
-        stream: true,
-        resources: resources,
-        user_email: userEmail,
-        user_query: userQuery,
-      }),
-      signal: ac.signal,
-    });
-
-    if (!response.ok) {
-      clearTimeout(timer);
-      const errMsg = `Request failed with status ${response.status}`;
-      onError(errMsg);
-      return {
-        actionPlan: null,
-        resultId: "",
-        errorMessage: errMsg,
-      };
-    }
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-
-    if (!reader) {
-      clearTimeout(timer);
-      const errMsg = "Response body is null";
-      onError(errMsg);
-      return {
-        actionPlan: null,
-        resultId: "",
-        errorMessage: errMsg,
-      };
-    }
-
-    let buffer = "";
-    let accumulatedJSON = ""; // Accumulate the full JSON response
-    let lastChunkContent = ""; // Track the last chunk to extract result_id
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        clearTimeout(timer);
-        onComplete();
-        break;
-      }
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-
-      // Keep last incomplete line in buffer
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6).trim();
-
-          if (data === "[DONE]" || !data) {
-            continue;
-          }
-
-          try {
-            const parsed = JSON.parse(data) as {
-              error?: string;
-              result_id?: string;
-              choices?: Array<{
-                delta?: { content?: string };
-                finish_reason?: string;
-              }>;
-            };
-
-            // Check for error in the response
-            if (parsed.error) {
-              clearTimeout(timer);
-              hasError = true;
-              errorMessage = parsed.error;
-              onError(parsed.error);
-              return {
-                actionPlan: null,
-                resultId: "",
-                errorMessage: parsed.error,
-              };
-            }
-
-            // Extract result_id if present (may come in metadata)
-            if (parsed.result_id) {
-              resultId = parsed.result_id;
-            }
-
-            // Handle hayhooks response format: choices[0].delta.content
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              // Store the last chunk content for result_id extraction
-              lastChunkContent = content;
-
-              // Only accumulate content that's not the result_id metadata
-              if (!content.includes("result_id")) {
-                // Accumulate the JSON content
-                accumulatedJSON += content;
-
-                // Parse incrementally and pass structured data to callback
-                const partialPlan = parseStreamingJSON(accumulatedJSON);
-                onChunk(partialPlan);
-              }
-            }
-
-            // Check for finish_reason to detect completion
-            if (parsed.choices?.[0]?.finish_reason === "stop") {
-              // Extract result_id from the last chunk (the chunk before this stop message)
-              if (!resultId && lastChunkContent.includes("result_id")) {
-                try {
-                  const resultIdData = JSON.parse(lastChunkContent) as {
-                    result_id?: string;
-                  };
-                  if (resultIdData.result_id) {
-                    resultId = resultIdData.result_id;
-                  }
-                } catch (e) {
-                  console.error(
-                    "Failed to extract result_id from last chunk:",
-                    e,
-                  );
-                }
-              }
-
-              clearTimeout(timer);
-              onComplete();
-              break;
-            }
-          } catch (e) {
-            console.error("Failed to parse SSE data:", e, data);
-          }
-        }
-      }
-    }
-
-    // Parse the final accumulated JSON to get complete ActionPlan
-    let finalActionPlan: ActionPlan | null = null;
-
-    if (!hasError && accumulatedJSON) {
-      try {
-        // Try to parse the complete JSON response
-        const fixedJson = fixJsonControlCharacters(accumulatedJSON);
-        finalActionPlan = JSON.parse(fixedJson) as ActionPlan;
-      } catch (e) {
-        console.error("Failed to parse final action plan JSON:", e);
-        console.error("Raw accumulated JSON:", accumulatedJSON);
-        errorMessage =
-          "Failed to parse the action plan response. Please try again.";
-        hasError = true;
-        onError(errorMessage);
-      }
-    }
-
-    // Return success with result_id and parsed action plan
-    return {
-      actionPlan: finalActionPlan,
-      resultId: resultId,
-      errorMessage: hasError ? errorMessage : undefined,
-    };
-  } catch (error) {
-    clearTimeout(timer);
-    let errMsg =
-      "There was an issue streaming the Action Plan. Please try again.";
-
-    if (error instanceof Error) {
-      if (error.name === "AbortError") {
-        errMsg = "Request timed out. Please try again.";
-      } else {
-        errMsg =
-          "There was an issue streaming the Action Plan. Please try again.";
-      }
-    }
-
-    onError(errMsg);
-    return {
-      actionPlan: null,
-      resultId: "",
-      errorMessage: errMsg,
-    };
-  }
+  return {
+    actionPlan: result.data,
+    resultId: result.resultId,
+    errorMessage: result.errorMessage,
+  };
 }
