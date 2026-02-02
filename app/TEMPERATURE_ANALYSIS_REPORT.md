@@ -8,25 +8,75 @@
 
 ## Executive Summary
 
-**Critical Finding:** The production app uses OpenAI's Responses API with web search, which does **not support the `temperature` parameter**. This means the app is operating at the default temperature (~1.0), causing maximum randomness and inconsistency in resource recommendations.
+**Critical Finding:** We tested the **actual production model (gpt-5.1, no reasoning)** with the Responses API and web search enabled. The API **does NOT support the `temperature` parameter** except for the default value of 1.0.
 
-**Impact:** Users running the same query see only **9.3% overlap** in recommended resources, leading to confusion and reduced trust in the system.
+**Production Model Test Results (gpt-5.1):**
+- Only temperature=1.0 is accepted
+- All other temperature values (0.75, 0.5, 0.25, 0.0) are **REJECTED** with error: "Unsupported parameter: 'temperature'"
+- Current consistency at temperature 1.0: **8.6% overlap** between runs
+- Only **1 resource** (Central Texas Food Bank) appeared consistently across all 3 test runs
+
+**Impact:** Users running the same query see minimal overlap in recommended resources, leading to confusion and reduced trust in the system.
 
 **Solution Required:** Since temperature cannot be adjusted with the Responses API, alternative approaches are needed to improve consistency while maintaining web search capabilities.
 
 ---
 
-## Test Methodology
+## Production Model Testing (gpt-5.1, no reasoning)
 
 ### Test Configuration
-- **Model Tested:** GPT-4o-mini (Chat Completions API)
+- **Model:** gpt-5.1 (NO reasoning)
+- **API:** OpenAI Responses API
+- **Web Search:** ENABLED (production setting)
+- **Reasoning Effort:** low
+- **Temperature Values Tested:** 1.0, 0.75, 0.5, 0.25, 0.0
+- **Test Case:** Single Mother - Employment & Childcare (Austin, TX)
+- **Runs Per Temperature:** 3
+
+### Phase 1: Temperature Parameter Support Test
+
+**Testing if Responses API accepts temperature parameter with gpt-5.1:**
+
+| Temperature | Result | Details |
+|-------------|---------|---------|
+| **1.0** | ✅ **ACCEPTED** | API returned temperature=1.0 |
+| 0.75 | ❌ REJECTED | Error: "Unsupported parameter: 'temperature'" |
+| 0.5 | ❌ REJECTED | Error: "Unsupported parameter: 'temperature'" |
+| 0.25 | ❌ REJECTED | Error: "Unsupported parameter: 'temperature'" |
+| 0.0 | ❌ REJECTED | Error: "Unsupported parameter: 'temperature'" |
+
+**Conclusion:** The Responses API with gpt-5.1 **only accepts temperature=1.0** (the default). Custom temperature values are not supported.
+
+### Phase 2: Consistency Analysis at Temperature 1.0
+
+**Results from 3 test runs with production model:**
+
+- **Consistency:** 5.9% of resources appeared in ≥2 runs
+- **Full Consistency:** 5.9% of resources appeared in all 3 runs
+- **Avg Overlap:** 8.6% (Jaccard similarity)
+- **Diversity:** 17 unique resources from 19 total (89.5% diversity ratio)
+- **Resources per run:** 6.3 average
+
+**Resource that appeared in all 3 runs:**
+- Central Texas Food Bank (only 1 out of 17 unique resources)
+
+**Key Insight:** With the production model at temperature 1.0, there is **very low consistency** (only 8.6% overlap between runs), confirming user complaints about inconsistent results.
+
+---
+
+## Demonstration: What Temperature WOULD Do (If Supported)
+
+**Note:** Since the production API doesn't support temperature adjustment, we ran a **demonstration test** using Chat Completions API (which does support temperature) to show what the effect would be if temperature were adjustable. This is **NOT** using the production model, but demonstrates the concept.
+
+### Demonstration Test Configuration
+- **Model:** GPT-4o-mini (Chat Completions API) - for demonstration only
 - **Temperature Values:** 1.0, 0.75, 0.5, 0.25, 0.0
 - **Test Cases:** 5 diverse Central Texas case worker scenarios
-- **Runs Per Temperature:** 3 (to measure consistency)
+- **Runs Per Temperature:** 3
 - **Total API Calls:** 75
-- **Note:** Production uses Responses API (with web search), which does NOT support temperature
+- **Important:** This does NOT use web search and does NOT reflect production performance
 
-### Test Scenarios
+### Demonstration Test Scenarios
 1. Single Mother - Employment & Childcare (Austin, TX)
 2. Veteran - Housing & Mental Health (Round Rock, TX)
 3. Elderly - Medical & Daily Living (Georgetown, TX)
@@ -41,9 +91,14 @@
 
 ---
 
-## Test Results
+## Demonstration Results (Chat Completions API - GPT-4o-mini)
 
-### Overall Temperature Performance
+**⚠️ IMPORTANT:** These results show what temperature adjustment WOULD accomplish, but cannot be used in production because:
+1. Production uses gpt-5.1 (not GPT-4o-mini)
+2. Production uses Responses API (which doesn't support temperature)
+3. Production requires web search (not available in Chat Completions)
+
+### Overall Temperature Performance (Demonstration)
 
 | Temperature | Avg Overlap | Consistency (≥2 runs) | Full Consistency (all runs) | Diversity Ratio |
 |-------------|-------------|----------------------|----------------------------|-----------------|
