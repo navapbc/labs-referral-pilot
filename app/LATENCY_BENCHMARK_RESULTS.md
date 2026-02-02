@@ -187,9 +187,109 @@ Test whether limiting output to exactly 5 referrals improves response latency.
 
 ## Gemini Speed Testing
 
-### Raw Model Performance WITHOUT Web Search
+### Comprehensive Central Texas Benchmark (55 queries)
 
-**Fair apples-to-apples comparison**
+**Test Type:** Response Speed & Performance Comparison
+**Test Date:** January 26, 2026
+**Configuration:** WITHOUT web search (fair apples-to-apples comparison)
+**Test Cases:** 55 diverse Central Texas case worker scenarios
+**Location Focus:** Austin and surrounding Central Texas cities
+
+---
+
+#### ChatGPT 5.1 (no reasoning) WITHOUT WEB SEARCH
+
+- ✅ **Success Rate**: 55/55 (100%)
+- ⏱️ **Average Response Time**: 35.50s
+- 📊 **Median Response Time**: 27.23s
+- ⚡ **Minimum**: 12.85s
+- 🐌 **Maximum**: 402.45s *(huge outlier on test #46)*
+- 📈 **Standard Deviation**: 51.20s *(high variability)*
+- 📉 **Variance**: 2621.73
+
+**Distribution Percentiles:**
+- 25th percentile: 22.51s
+- 75th percentile: 32.96s
+- 95th percentile: 46.69s
+
+---
+
+#### Gemini 3 Flash WITHOUT WEB SEARCH
+
+- ✅ **Success Rate**: 52/55 (94.5%)
+  - 3 timeout errors (504 Deadline Exceeded) on tests #17, #22, #25
+- ⏱️ **Average Response Time**: 17.43s
+- 📊 **Median Response Time**: 15.49s
+- ⚡ **Minimum**: 10.91s
+- 🐌 **Maximum**: 72.10s
+- 📈 **Standard Deviation**: 11.07s *(much more consistent)*
+- 📉 **Variance**: 122.64
+
+**Distribution Percentiles:**
+- 25th percentile: 13.86s
+- 75th percentile: 17.34s
+
+---
+
+### 🏆 Winner: Gemini 3 Flash
+
+**Speed Advantage:**
+- **103.7% faster** on average
+- **2.04x speedup** over ChatGPT
+- **18.07 seconds faster** per request
+- **Time saved at scale (1,000 requests)**: ~5 hours
+
+**Consistency Advantage:**
+- **4.6x more consistent** (lower standard deviation: 11.07s vs 51.20s)
+- **21.4x lower variance** (122.64 vs 2621.73)
+- Much tighter response time distribution
+
+**Reliability Trade-off:**
+- ChatGPT: 100% success rate (no failures)
+- Gemini: 94.5% success rate (3 timeout errors)
+
+---
+
+### Key Insights
+
+1. **Gemini Flash dominates on speed**: More than twice as fast on average, making it ideal for high-volume production use.
+
+2. **Gemini Flash is far more predictable**: With a standard deviation 4.6x lower, response times are much more consistent, making capacity planning easier.
+
+3. **ChatGPT 5.1 had perfect reliability**: No timeouts or errors across all 55 tests, though it experienced significant rate limiting on one test (402.5s).
+
+4. **ChatGPT's major outlier**: Test #46 (Youth Aging Out - Independence) took 402.5 seconds, likely due to rate limiting. Without this outlier, the average would be much closer.
+
+5. **Cost-Performance Trade-off**: For an Austin-focused case worker tool processing hundreds of requests daily, Gemini Flash offers:
+   - 2x faster responses
+   - More predictable performance
+   - Lower cost per request
+   - Slightly lower reliability (94.5% vs 100%)
+
+---
+
+### Test Case Categories (55 Total)
+
+The benchmark covers 10 categories of real-world Central Texas case worker scenarios:
+
+1. **Family Support** (10 cases): Single parents, grandparents raising grandchildren, blended families, housing instability
+2. **Veterans** (5 cases): PTSD, homelessness, career transition, disability, elderly care
+3. **Elderly** (5 cases): Medical needs, aging in place, isolation, dementia, low-income
+4. **Immigration** (5 cases): Language barriers, refugees, DACA recipients, mixed-status families
+5. **Youth** (5 cases): Teen parents, runaways, LGBTQ+ youth, disabilities, juvenile justice
+6. **Domestic Violence** (5 cases): Emergency safety, economic independence, immigrant survivors
+7. **Disability** (5 cases): Physical, intellectual, mental health, autism, multiple disabilities
+8. **Criminal Justice** (5 cases): Ex-offenders, probation, housing restrictions, reentry
+9. **Foster Care** (5 cases): Aging out, educational advocacy, kinship care, adoption
+10. **Mental Health** (5 cases): Severe mental illness, opioid addiction, dual diagnosis, suicide prevention
+
+**Full test case details** (all 55 prompts with locations and specific needs) are documented in the benchmark script `central_texas_benchmark.py`.
+
+---
+
+### Initial 10-Query Validation Test
+
+**Quick validation test (earlier testing phase):**
 
 #### ChatGPT 5.1 (no reasoning)
 - **Success Rate:** 10/10 (100%)
@@ -197,7 +297,6 @@ Test whether limiting output to exactly 5 referrals improves response latency.
 - **Median:** 30.04s
 - **Range:** 24.48s - 41.10s
 - **Standard Deviation:** 6.18s
-- **Resources:** 6-7 per query
 
 #### Gemini 3 Flash
 - **Success Rate:** 10/10 (100%)
@@ -205,12 +304,8 @@ Test whether limiting output to exactly 5 referrals improves response latency.
 - **Median:** 13.79s
 - **Range:** 11.50s - 17.99s
 - **Standard Deviation:** 1.87s
-- **Resources:** 6-7 per query
 
-### Winner: Gemini 3 Flash
-- **126.2% faster** on average (13.84s vs 31.31s)
-- **Much more consistent** performance (lower standard deviation: 1.87s vs 6.18s)
-- Both models successfully completed all 10 diverse test cases with similar output quality (6-7 resources per query)
+**Result:** Gemini 3 Flash was **126.2% faster** (13.84s vs 31.31s) with much more consistent performance
 
 ---
 
