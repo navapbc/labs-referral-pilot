@@ -3,6 +3,7 @@ import { getApiDomain } from "./apiDomain";
 import { fixJsonControlCharacters, extractField } from "./parseStreamingUtils";
 import { createStreamingFetcher } from "./createStreamingFetcher";
 import { GenerateActionPlanResponse } from "@/types/api";
+import { ACTION_PLAN_TIMEOUT, STREAMING_TIMEOUT } from "@/config/timeouts";
 
 export interface ActionPlan {
   title: string;
@@ -45,7 +46,7 @@ export async function fetchActionPlan(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 120_000);
+  const timer = setTimeout(() => ac.abort(), ACTION_PLAN_TIMEOUT); //120_000
 
   try {
     const requestBody: {
@@ -135,7 +136,7 @@ export async function fetchActionPlanStreaming(
 
   const result = await createStreamingFetcher<ActionPlan, PartialActionPlan>({
     url,
-    timeout: 600_000, // 10 minutes
+    timeout: STREAMING_TIMEOUT, // 10 minutes
     requestBody: {
       model: "generate_action_plan", // Pipeline name as model
       messages: [{ role: "user", content: userQuery }],

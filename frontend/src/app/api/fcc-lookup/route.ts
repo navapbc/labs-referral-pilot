@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LOCATION_FETCH_TIMEOUT } from "@/config/timeouts";
 
 interface FCCCounty {
   FIPS: string;
@@ -45,8 +46,7 @@ export async function GET(request: Request) {
     const fccUrl = `https://geo.fcc.gov/api/census/block/find?${params.toString()}`;
 
     const fccResponse = await fetch(fccUrl, {
-      // Add a timeout
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(LOCATION_FETCH_TIMEOUT), //5000
     });
     if (!fccResponse.ok) {
       return NextResponse.json(
