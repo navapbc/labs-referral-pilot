@@ -87,6 +87,15 @@ export interface EmailFullResultResponse {
 }
 
 /**
+ * Response from email_action_plan/run endpoint
+ */
+export interface EmailActionPlanResponse {
+  result: {
+    email_action_plan: EmailResultData;
+  };
+}
+
+/**
  * Generic error response structure
  */
 export interface ApiErrorResponse {

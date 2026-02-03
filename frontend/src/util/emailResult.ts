@@ -3,34 +3,51 @@ import {
   ApiErrorResponse,
   EmailResultResponse,
   EmailFullResultResponse,
+  EmailActionPlanResponse,
 } from "@/types/api";
+import { ShareMode } from "@/components/ShareOptionsDialog";
 
 export async function emailResult(
   resultId: string,
   actionPlanResultId: string | undefined,
   email: string,
+  mode?: ShareMode,
 ) {
   const apiDomain = await getApiDomain();
 
-  // Use email_full_result if actionPlanResultId is provided, otherwise use email_result
-  const endpoint = actionPlanResultId ? "email_full_result" : "email_result";
+  // Determine endpoint and body based on mode
+  let endpoint: string;
+  let body: Record<string, string>;
+
+  if (mode === "action-plan-only" && actionPlanResultId) {
+    // Action plan only mode - use new endpoint
+    endpoint = "email_action_plan";
+    body = {
+      action_plan_result_id: actionPlanResultId,
+      email: email,
+    };
+  } else if (actionPlanResultId && mode !== "action-plan-only") {
+    // Full referrals mode with action plan - use email_full_result
+    endpoint = "email_full_result";
+    body = {
+      resources_result_id: resultId,
+      action_plan_result_id: actionPlanResultId,
+      email: email,
+    };
+  } else {
+    // Resources only (no action plan)
+    endpoint = "email_result";
+    body = {
+      resources_result_id: resultId,
+      email: email,
+    };
+  }
+
   const url = `${apiDomain}${endpoint}/run`;
 
   const headers = {
     "Content-Type": "application/json",
   };
-
-  // Build request body conditionally
-  const body = actionPlanResultId
-    ? {
-        resources_result_id: resultId,
-        action_plan_result_id: actionPlanResultId,
-        email: email,
-      }
-    : {
-        resources_result_id: resultId,
-        email: email,
-      };
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 300_000);
@@ -68,8 +85,12 @@ export async function emailResult(
       throw new Error(errorMessage);
     }
 
+    // Parse response based on endpoint
     let emailAddress: string;
-    if (actionPlanResultId) {
+    if (endpoint === "email_action_plan") {
+      const responseData = (await response.json()) as EmailActionPlanResponse;
+      emailAddress = responseData.result.email_action_plan.email;
+    } else if (endpoint === "email_full_result") {
       const responseData = (await response.json()) as EmailFullResultResponse;
       emailAddress = responseData.result.email_full_result.email;
     } else {
