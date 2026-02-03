@@ -1,46 +1,46 @@
 import { getApiDomain } from "./apiDomain";
-import {
-  ApiErrorResponse,
-  EmailResultResponse,
-  EmailFullResultResponse,
-  EmailActionPlanResponse,
-} from "@/types/api";
+import { ApiErrorResponse, EmailResponsesResponse } from "@/types/api";
 import { ShareMode } from "@/components/ShareOptionsDialog";
 
+/**
+ * Sends an email with resources, action plan, or both using the consolidated email_responses endpoint.
+ *
+ * @param resultId - ID of the resources result (optional if action plan provided)
+ * @param actionPlanResultId - ID of the action plan result (optional if resources provided)
+ * @param email - Recipient email address
+ * @param mode - Share mode determining what content to include
+ * @returns Promise with email address confirmation
+ *
+ * Scenarios:
+ * - action-plan-only: Sends only the action plan
+ * - full-referrals: Sends both resources and action plan
+ * - default: Sends only resources
+ */
 export async function emailResult(
   resultId: string,
   actionPlanResultId: string | undefined,
   email: string,
   mode?: ShareMode,
 ) {
-  const apiDomain = await getApiDomain();
+  const apiDomain =
+    "https://p-179-app-dev-1778298227.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
 
-  // Determine endpoint and body based on mode
-  let endpoint: string;
-  let body: Record<string, string>;
+  // Use consolidated endpoint for all scenarios
+  const endpoint = "email_responses";
+
+  // Build request body based on mode - include only the relevant result IDs
+  const body: Record<string, string> = { email };
 
   if (mode === "action-plan-only" && actionPlanResultId) {
-    // Action plan only mode - use new endpoint
-    endpoint = "email_action_plan";
-    body = {
-      action_plan_result_id: actionPlanResultId,
-      email: email,
-    };
+    // Action plan only - don't include resources_result_id
+    body.action_plan_result_id = actionPlanResultId;
   } else if (actionPlanResultId && mode !== "action-plan-only") {
-    // Full referrals mode with action plan - use email_full_result
-    endpoint = "email_full_result";
-    body = {
-      resources_result_id: resultId,
-      action_plan_result_id: actionPlanResultId,
-      email: email,
-    };
+    // Full referrals mode - include both IDs
+    body.resources_result_id = resultId;
+    body.action_plan_result_id = actionPlanResultId;
   } else {
-    // Resources only (no action plan)
-    endpoint = "email_result";
-    body = {
-      resources_result_id: resultId,
-      email: email,
-    };
+    // Resources only - don't include action_plan_result_id
+    body.resources_result_id = resultId;
   }
 
   const url = `${apiDomain}${endpoint}/run`;
@@ -85,18 +85,9 @@ export async function emailResult(
       throw new Error(errorMessage);
     }
 
-    // Parse response based on endpoint
-    let emailAddress: string;
-    if (endpoint === "email_action_plan") {
-      const responseData = (await response.json()) as EmailActionPlanResponse;
-      emailAddress = responseData.result.email_action_plan.email;
-    } else if (endpoint === "email_full_result") {
-      const responseData = (await response.json()) as EmailFullResultResponse;
-      emailAddress = responseData.result.email_full_result.email;
-    } else {
-      const responseData = (await response.json()) as EmailResultResponse;
-      emailAddress = responseData.result.email_result.email;
-    }
+    // Parse unified response from email_responses endpoint
+    const responseData = (await response.json()) as EmailResponsesResponse;
+    const emailAddress = responseData.result.email_responses.email;
     return { emailAddr: emailAddress };
   } catch (error) {
     if (error instanceof Error) {

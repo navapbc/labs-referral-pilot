@@ -96,6 +96,16 @@ export interface EmailActionPlanResponse {
 }
 
 /**
+ * Response from email_responses/run endpoint (consolidated email pipeline)
+ * Replaces email_result, email_full_result, and email_action_plan
+ */
+export interface EmailResponsesResponse {
+  result: {
+    email_responses: EmailResultData;
+  };
+}
+
+/**
  * Generic error response structure
  */
 export interface ApiErrorResponse {
