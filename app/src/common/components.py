@@ -176,6 +176,47 @@ class LoadResult:
 
 
 @component
+class LoadResultOptional:
+    """
+    Loads result from database with optional result_id.
+
+    If result_id is None or empty string, returns an empty dict instead of raising an error.
+    This allows pipelines to gracefully handle optional inputs.
+
+    Returns:
+        dict: {"result_json": dict} where dict is either the loaded JSON or empty dict
+    """
+
+    @component.output_types(result_json=dict)
+    def run(self, result_id: Optional[str]) -> dict:
+        # Return empty dict if no result_id provided
+        if not result_id:
+            logger.debug("No result_id provided, returning empty dict")
+            return {"result_json": {}}
+
+        # Otherwise, load from database like LoadResult
+        with config.db_session() as db_session, db_session.begin():
+            db_record = (
+                db_session.query(LlmResponse).filter(LlmResponse.id == result_id).one_or_none()
+            )
+
+            if not db_record:
+                raise ValueError(f"No result found with id={result_id}")
+
+            logger.info("Loaded LlmResponse:\n%s", db_record.raw_text)
+            text = db_record.raw_text
+
+        # Extract JSON object from raw_text string by searching for the first '{' and last '}'
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1:
+            raise ValueError(f"Invalid JSON format in result with id={result_id}: {text!r}")
+
+        json_dict = json.loads(text[start : end + 1])
+        return {"result_json": json_dict}
+
+
+@component
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
@@ -351,49 +392,87 @@ You've already taken a great first step by exploring these options.
 
 
 @component
-class EmailFullResult:
+class EmailResponses:
     """
-    Formats JSON object (representing a list of resources and action plan) and sends it to email address.
+    Unified email component that handles sending resources, action plans, or both.
+
+    This component consolidates the functionality of EmailResult, EmailActionPlan, and
+    EmailFullResult into a single component that dynamically formats and sends emails
+    based on what content is provided.
+
+    Scenarios handled:
+        1. Resources only: resources_dict provided, action_plan_dict empty
+        2. Action plan only: action_plan_dict provided, resources_dict empty
+        3. Both: both dicts provided
+
+    Args:
+        email: Recipient email address
+        resources_dict: Dict containing resources data (empty dict if not provided)
+        action_plan_dict: Dict containing action plan data (empty dict if not provided)
+
+    Returns:
+        dict: Contains status ("success" or "failed"), email, and message content
+
+    Raises:
+        ValueError: If neither resources_dict nor action_plan_dict has content
     """
 
     @component.output_types(status=str, email=str, message=str)
     def run(self, email: str, resources_dict: dict, action_plan_dict: dict) -> dict:
-        logger.info("Emailing result to %s", email)
-        logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
-        if action_plan_dict:
+        # Determine what content we have
+        # Check if resources dict has a non-empty "resources" list
+        has_resources = bool(resources_dict and resources_dict.get("resources"))
+        # Check if action plan dict has content (title, summary, or content fields)
+        has_action_plan = bool(
+            action_plan_dict
+            and (
+                action_plan_dict.get("title")
+                or action_plan_dict.get("summary")
+                or action_plan_dict.get("content")
+            )
+        )
+
+        # Validate that at least one type of content is provided
+        if not has_resources and not has_action_plan:
+            raise ValueError(
+                "At least one of resources_dict or action_plan_dict must contain valid data. "
+                f"Received resources_dict={bool(resources_dict)}, action_plan_dict={bool(action_plan_dict)}"
+            )
+
+        logger.info("Emailing to %s (resources=%s, action_plan=%s)", email, has_resources, has_action_plan)
+
+        # Log the content we're working with
+        if has_resources:
+            logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
+        if has_action_plan:
             logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
 
-        formatted_resources = format_resources(resources_dict.get("resources", []))
-        formatted_action_plan = format_action_plan(action_plan_dict)
+        # Format content based on what's available
+        message_parts = [EMAIL_INTRO]
 
-        message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
+        if has_resources:
+            formatted_resources = format_resources(resources_dict.get("resources", []))
+            message_parts.append(formatted_resources)
+
+        if has_action_plan:
+            formatted_action_plan = format_action_plan(action_plan_dict)
+            message_parts.append(formatted_action_plan)
+
+        message = "\n\n".join(message_parts)
+
+        # Set subject based on what's included
+        if has_resources and has_action_plan:
+            subject = "Your Requested Resources and Action Plan"
+        elif has_resources:
+            subject = "Your Requested Resources"
+        else:  # has_action_plan only
+            subject = "Your Personalized Action Plan"
 
         # Send email via AWS SES
-        subject = "Your Requested Resources and Action Plan"
         success = send_email(recipient=email, subject=subject, body=message)
         status = "success" if success else "failed"
 
-        return {"status": status, "email": email, "message": message}
-
-
-@component
-class EmailResult:
-    """
-    Formats JSON object (representing a list of resources) and sends it to email address.
-    """
-
-    @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, json_dict: dict) -> dict:
-        logger.info("Emailing result to %s", email)
-        logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
-        formatted_resources = format_resources(json_dict.get("resources", []))
-        message = f"{EMAIL_INTRO}\n{formatted_resources}"
-
-        # Send email via AWS SES
-        subject = "Your Requested Resources"
-        success = send_email(recipient=email, subject=subject, body=message)
-        status = "success" if success else "failed"
-
+        logger.info("Email send status: %s", status)
         return {"status": status, "email": email, "message": message}
 
 
