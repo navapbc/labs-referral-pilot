@@ -439,7 +439,9 @@ class EmailResponses:
                 f"Received resources_dict={bool(resources_dict)}, action_plan_dict={bool(action_plan_dict)}"
             )
 
-        logger.info("Emailing to %s (resources=%s, action_plan=%s)", email, has_resources, has_action_plan)
+        logger.info(
+            "Emailing to %s (resources=%s, action_plan=%s)", email, has_resources, has_action_plan
+        )
 
         # Log the content we're working with
         if has_resources:
