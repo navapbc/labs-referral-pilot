@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Resource } from "@/types/resources";
+import { UNDO_NOTIFICATION_TIMEOUT } from "@/config/timeouts";
 
 export interface UseResourceRemovalReturn {
   recentlyRemoved: Resource | null;
@@ -34,7 +35,7 @@ export function useResourceRemoval(): UseResourceRemovalReturn {
 
       setRecentlyRemoved(resourceToRemove);
 
-      // Auto-clear the undo notification after 7.5 seconds
+      // Auto-clear the undo notification after timeout period
       setTimeout(() => {
         setRecentlyRemoved((current) => {
           // If the resource is still marked as recently removed, clear it
@@ -44,7 +45,7 @@ export function useResourceRemoval(): UseResourceRemovalReturn {
           return current;
         });
         setRemovedResourceIndex(null);
-      }, 7500);
+      }, UNDO_NOTIFICATION_TIMEOUT); //7500
     },
     [],
   );

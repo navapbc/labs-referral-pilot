@@ -1,6 +1,12 @@
 import { getApiDomain } from "./apiDomain";
-import { ApiErrorResponse, EmailResponsesResponse } from "@/types/api";
 import { ShareMode } from "@/components/ShareOptionsDialog";
+import {
+  ApiErrorResponse,
+  EmailResultResponse,
+  EmailFullResultResponse,
+} from "@/types/api";
+import { EMAIL_TIMEOUT } from "@/config/timeouts";
+
 
 /**
  * Sends an email with resources, action plan, or both using the consolidated email_responses endpoint.
@@ -50,7 +56,7 @@ export async function emailResult(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 300_000);
+  const timer = setTimeout(() => ac.abort(), EMAIL_TIMEOUT); //300_000
 
   try {
     const response = await fetch(url, {

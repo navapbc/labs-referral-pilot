@@ -27,7 +27,27 @@ export function parseStreamingResources(jsonStr: string): PartialResource[] {
     const arrayStartPos =
       resourcesKeyMatch.index! + resourcesKeyMatch[0].length;
 
-    // Manually find the matching closing bracket by tracking depth
+    /**
+     * BRACKET DEPTH TRACKING ALGORITHM
+     *
+     * This section finds the matching closing bracket for the "resources" array
+     * by maintaining a depth counter. This is necessary because:
+     * 1. The array may contain nested arrays (e.g., addresses, phones)
+     * 2. We need to handle incomplete streaming JSON (no closing bracket yet)
+     * 3. We must ignore brackets inside string values
+     *
+     * Algorithm:
+     * - bracketDepth starts at 1 (we're already inside the resources array)
+     * - For each '[', increment depth (entering nested array)
+     * - For each ']', decrement depth (exiting nested array)
+     * - When depth reaches 0, we've found the matching closing bracket
+     * - If we reach end of string with depth > 0, the array is incomplete (streaming)
+     *
+     * String state tracking (inString flag):
+     * - Prevents counting brackets that appear inside string values
+     * - Example: "address": "123 Main St [Apt 4]" should not affect depth
+     * - Toggles on/off when encountering unescaped quotes (not preceded by \)
+     */
     let bracketDepth = 1; // We're already inside the resources array
     let inString = false;
     let prevChar = "";
@@ -61,8 +81,29 @@ export function parseStreamingResources(jsonStr: string): PartialResource[] {
     // the closing bracket or the end of the string for incomplete streams)
     const arrayContent = jsonStr.substring(arrayStartPos, arrayEndPos);
 
-    // Find all resource object boundaries by tracking brace depth
-    // We want to identify each `{...}` at the top level of the array
+    /**
+     * RESOURCE OBJECT BOUNDARY DETECTION
+     *
+     * This section identifies individual resource objects within the array by
+     * tracking brace depth. Similar to bracket tracking above, but for objects.
+     *
+     * We want to identify each top-level `{...}` in the array:
+     * Example: [{"name": "A"}, {"name": "B", "addresses": ["X", "Y"]}, {"name"
+     *           ^-- resource 1 --^ ^-- resource 2 (has nested array) ----^ ^-- incomplete
+     *
+     * Algorithm:
+     * - braceDepth = 0 means we're between objects
+     * - When braceDepth goes from 0→1, we mark the start of a new resource
+     * - When braceDepth goes from 1→0, we mark the end of that resource
+     * - Nested objects (e.g., in a field value) don't trigger new resources
+     *   because we only care about 0→1 transitions
+     *
+     * Handling incomplete resources:
+     * - If we reach end of array content with braceDepth > 0, the last resource
+     *   is incomplete (still streaming from server)
+     * - We include it anyway so users see partial data during streaming
+     * - parsePartialResource handles incomplete JSON gracefully
+     */
     const resourceRanges: Array<{ start: number; end: number }> = [];
     let braceDepth = 0;
     inString = false; // Reset the string tracking flag

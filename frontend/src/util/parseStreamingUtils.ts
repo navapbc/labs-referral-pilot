@@ -58,9 +58,38 @@ export function fixJsonControlCharacters(jsonString: string): string {
 
 /**
  * Extracts a field value from partial JSON, handling incomplete strings
- * Pattern matches escaped characters: (?:[^"\\]|\\.)*
- * - [^"\\] matches any char except quote or backslash
- * - \\. matches backslash followed by any char (handles \", \n, etc)
+ *
+ * Uses regex to find string field values in streaming JSON, even when the closing
+ * quote hasn't arrived yet. Handles escaped characters properly.
+ *
+ * **Pattern explanation:** `(?:[^"\\]|\\.)*`
+ * - `[^"\\]` matches any char except quote or backslash
+ * - `\\.` matches backslash followed by any char (handles \", \n, etc)
+ * - `(?:...)` non-capturing group
+ * - `*` matches zero or more times
+ *
+ * **Examples:**
+ * ```typescript
+ * // Complete field
+ * extractField('{"name": "John Doe"}', 'name')
+ * // → "John Doe"
+ *
+ * // Incomplete field (no closing quote yet)
+ * extractField('{"name": "John Do', 'name')
+ * // → "John Do"
+ *
+ * // Escaped characters
+ * extractField('{"description": "Line 1\\nLine 2"}', 'description')
+ * // → "Line 1\nLine 2" (unescaped)
+ *
+ * // Escaped quotes in value
+ * extractField('{"text": "He said \\"Hello\\""}', 'text')
+ * // → "He said \"Hello\""
+ *
+ * // Field not found
+ * extractField('{"name": "John"}', 'age')
+ * // → undefined
+ * ```
  */
 export function extractField(
   jsonStr: string,
@@ -87,7 +116,40 @@ export function extractField(
 
 /**
  * Extracts array items from partial JSON
- * Handles both complete and incomplete array strings
+ *
+ * Handles both complete and incomplete array strings, finding all complete items
+ * and optionally the incomplete last item (string without closing quote).
+ *
+ * Uses two regex patterns:
+ * 1. Global pattern to find all complete items: `/"((?:[^"\\]|\\.)*)"/g`
+ * 2. Anchored pattern to find incomplete last item: `/"((?:[^"\\]|\\.)*?)$/`
+ *
+ * **Examples:**
+ * ```typescript
+ * // Complete array
+ * extractArrayField('{"phones": ["555-1234", "555-5678"]}', 'phones')
+ * // → ["555-1234", "555-5678"]
+ *
+ * // Incomplete array (no closing bracket)
+ * extractArrayField('{"phones": ["555-1234", "555-5678"', 'phones')
+ * // → ["555-1234", "555-5678"]
+ *
+ * // Incomplete last item (no closing quote)
+ * extractArrayField('{"phones": ["555-1234", "555-56', 'phones')
+ * // → ["555-1234", "555-56"]
+ *
+ * // Escaped characters in items
+ * extractArrayField('{"lines": ["Line 1\\nLine 2", "Line 3"]}', 'lines')
+ * // → ["Line 1\nLine 2", "Line 3"]
+ *
+ * // Empty array
+ * extractArrayField('{"phones": []}', 'phones')
+ * // → []
+ *
+ * // Array not found
+ * extractArrayField('{"name": "John"}', 'phones')
+ * // → []
+ * ```
  */
 export function extractArrayField(
   jsonStr: string,
