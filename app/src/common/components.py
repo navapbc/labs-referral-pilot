@@ -397,6 +397,27 @@ class EmailResult:
         return {"status": status, "email": email, "message": message}
 
 
+@component
+class EmailActionPlan:
+    """
+    Formats action plan JSON and sends it to email address (without full resource descriptions).
+    """
+
+    @component.output_types(status=str, email=str, message=str)
+    def run(self, email: str, action_plan_dict: dict) -> dict:
+        logger.info("Emailing action plan to %s", email)
+        logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
+
+        formatted_action_plan = format_action_plan(action_plan_dict)
+        message = f"{EMAIL_INTRO}\n{formatted_action_plan}"
+
+        subject = "Your Personalized Action Plan"
+        success = send_email(recipient=email, subject=subject, body=message)
+        status = "success" if success else "failed"
+
+        return {"status": status, "email": email, "message": message}
+
+
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
