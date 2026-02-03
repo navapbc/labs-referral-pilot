@@ -69,20 +69,12 @@ export interface EmailResultData {
 }
 
 /**
- * Response from email_result/run endpoint
+ * Response from email_responses/run endpoint (consolidated email pipeline)
+ * Replaces the deprecated email_result, email_full_result, and email_action_plan endpoints
  */
-export interface EmailResultResponse {
+export interface EmailResponsesResponse {
   result: {
-    email_result: EmailResultData;
-  };
-}
-
-/**
- * Response from email_full_result/run endpoint
- */
-export interface EmailFullResultResponse {
-  result: {
-    email_full_result: EmailResultData;
+    email_responses: EmailResultData;
   };
 }
 
