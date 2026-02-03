@@ -7,6 +7,7 @@ import {
 import { fixJsonControlCharacters } from "./parseStreamingUtils";
 import { ResourcesSchema } from "@/types/resources";
 import { createStreamingFetcher } from "./createStreamingFetcher";
+import { STREAMING_TIMEOUT } from "@/config/timeouts";
 
 /**
  * Fetches resources with streaming support using Server-Sent Events (SSE).
@@ -58,7 +59,7 @@ export async function fetchResourcesStreaming(
 
   const result = await createStreamingFetcher<Resource[], PartialResource[]>({
     url,
-    timeout: 600_000, // 10 minutes
+    timeout: STREAMING_TIMEOUT, // 10 minutes
     requestBody,
     onChunk,
     onComplete,

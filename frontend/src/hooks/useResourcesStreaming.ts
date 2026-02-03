@@ -6,6 +6,7 @@ import {
   buildRequestWithResolvedZipCodes,
   RequestParams,
 } from "@/util/resolveZipCodes";
+import { NO_RESOURCES_TIMEOUT } from "@/config/timeouts";
 
 export interface UseResourcesStreamingReturn {
   loading: boolean;
@@ -62,14 +63,14 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
       setStreamingResources(null);
       setErrorMessage(undefined);
 
-      // 12-second timeout to show "No resources found" if nothing arrives
+      // Show "No resources found" if nothing arrives within timeout period - 12 seconds
       const timeoutId = setTimeout(() => {
         if (!hasReceivedFirstResourceRef.current) {
           setErrorMessage("No resources found.");
           setIsStreamingResources(false);
           setLoading(false);
         }
-      }, 12000);
+      }, NO_RESOURCES_TIMEOUT);
 
       try {
         const request = await buildRequestWithResolvedZipCodes(params);

@@ -3,10 +3,12 @@
  * Handles abort controllers, timeouts, and SSE parsing.
  */
 
+import { STREAMING_TIMEOUT } from "@/config/timeouts";
+
 export interface StreamingConfig<T, TPartial> {
   /** The API endpoint URL */
   url: string;
-  /** Timeout in milliseconds (default: 600000 = 10 minutes) */
+  /** Timeout in milliseconds (default: STREAMING_TIMEOUT = 10 minutes) */
   timeout?: number;
   /** Request body to send */
   requestBody: Record<string, unknown>;
@@ -39,7 +41,7 @@ export async function createStreamingFetcher<T, TPartial>(
 ): Promise<StreamingResult<T>> {
   const {
     url,
-    timeout = 600_000,
+    timeout = STREAMING_TIMEOUT,
     requestBody,
     onChunk,
     onComplete,
