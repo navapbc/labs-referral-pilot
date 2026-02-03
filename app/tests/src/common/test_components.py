@@ -7,10 +7,10 @@ from haystack.dataclasses.chat_message import ChatMessage
 
 from src.adapters import db
 from src.common.components import (
-    EmailFullResult,
-    EmailResult,
+    EmailResponses,
     LlmOutputValidator,
     LoadResult,
+    LoadResultOptional,
     ReadableLogger,
     SaveResult,
     UploadFilesToByteStreams,
@@ -59,7 +59,41 @@ def test_SaveResult_and_LoadResult(enable_factory_create, db_session: db.Session
     assert result_json == {"somekey": "somevalue"}
 
 
-def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch):
+def test_LoadResultOptional_with_valid_id(enable_factory_create, db_session: db.Session):
+    """Test LoadResultOptional with a valid result_id."""
+    db_session.query(LlmResponse).delete()
+
+    llm_response = 'This is a test response with JSON: {"somekey": "somevalue"}'
+    replies = [ChatMessage.from_assistant(llm_response)]
+    save_component = SaveResult()
+    save_output = save_component.run(replies=replies)
+    result_id = save_output["result_id"]
+
+    # Test loading with LoadResultOptional
+    load_component = LoadResultOptional()
+    output = load_component.run(result_id=result_id)
+
+    assert output["result_json"] == {"somekey": "somevalue"}
+
+
+def test_LoadResultOptional_with_none_id():
+    """Test LoadResultOptional with None result_id returns empty dict."""
+    component = LoadResultOptional()
+    output = component.run(result_id=None)
+
+    assert output["result_json"] == {}
+
+
+def test_LoadResultOptional_with_empty_string():
+    """Test LoadResultOptional with empty string result_id returns empty dict."""
+    component = LoadResultOptional()
+    output = component.run(result_id="")
+
+    assert output["result_json"] == {}
+
+
+def test_EmailResponses_resources_only(enable_factory_create, db_session: db.Session, monkeypatch):
+    """Test EmailResponses with only resources (no action plan)."""
     resources = {
         "resources": [
             {
@@ -81,8 +115,8 @@ def test_EmailResult(enable_factory_create, db_session: db.Session, monkeypatch)
     # Mock send_email to always return success
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailResult()
-    output = component.run(email="test@example.com", json_dict=resources)
+    component = EmailResponses()
+    output = component.run(email="test@example.com", resources_dict=resources, action_plan_dict={})
 
     assert output["status"] == "success"
     assert output["email"] == "test@example.com"
@@ -168,8 +202,8 @@ def test_ReadableLogger():
     ]
 
 
-def test_EmailFullResult_with_resources_and_action_plan(monkeypatch):
-    """Test EmailFullResult with both resources and action plan."""
+def test_EmailResponses_with_resources_and_action_plan(monkeypatch):
+    """Test EmailResponses with both resources and action plan."""
     resources_dict = {
         "resources": [
             {
@@ -208,7 +242,7 @@ def test_EmailFullResult_with_resources_and_action_plan(monkeypatch):
 
     monkeypatch.setattr("src.common.components.send_email", mock_send_email)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -227,8 +261,8 @@ def test_EmailFullResult_with_resources_and_action_plan(monkeypatch):
     assert email_calls[0]["subject"] == "Your Requested Resources and Action Plan"
 
 
-def test_EmailFullResult_with_empty_resources(monkeypatch):
-    """Test EmailFullResult with empty resources list."""
+def test_EmailResponses_action_plan_only(monkeypatch):
+    """Test EmailResponses with only action plan (no resources)."""
     resources_dict = {"resources": []}
 
     action_plan_dict = {
@@ -240,7 +274,7 @@ def test_EmailFullResult_with_empty_resources(monkeypatch):
     # Mock send_email
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -251,8 +285,8 @@ def test_EmailFullResult_with_empty_resources(monkeypatch):
     assert "###" not in output["message"]
 
 
-def test_EmailFullResult_with_missing_resource_fields(monkeypatch):
-    """Test EmailFullResult with resources missing optional fields."""
+def test_EmailResponses_with_missing_resource_fields(monkeypatch):
+    """Test EmailResponses with resources missing optional fields."""
     resources_dict = {
         "resources": [
             {
@@ -267,7 +301,7 @@ def test_EmailFullResult_with_missing_resource_fields(monkeypatch):
     # Mock send_email
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -282,8 +316,8 @@ def test_EmailFullResult_with_missing_resource_fields(monkeypatch):
     assert "- Addresses: None" in output["message"]
 
 
-def test_EmailFullResult_send_email_failure(monkeypatch):
-    """Test EmailFullResult when send_email fails."""
+def test_EmailResponses_send_email_failure(monkeypatch):
+    """Test EmailResponses when send_email fails."""
     resources_dict = {
         "resources": [
             {
@@ -307,7 +341,7 @@ def test_EmailFullResult_send_email_failure(monkeypatch):
     # Mock send_email to return failure
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: False)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -318,8 +352,8 @@ def test_EmailFullResult_send_email_failure(monkeypatch):
     assert "Your Action Plan" in output["message"]
 
 
-def test_EmailFullResult_with_action_plan_missing_fields(monkeypatch):
-    """Test EmailFullResult with action plan missing optional fields."""
+def test_EmailResponses_with_action_plan_missing_fields(monkeypatch):
+    """Test EmailResponses with action plan missing optional fields."""
     resources_dict = {"resources": []}
 
     # Test with missing summary
@@ -330,7 +364,7 @@ def test_EmailFullResult_with_action_plan_missing_fields(monkeypatch):
 
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -340,8 +374,8 @@ def test_EmailFullResult_with_action_plan_missing_fields(monkeypatch):
     assert "Some content" in output["message"]
 
 
-def test_EmailFullResult_with_action_plan_only_title(monkeypatch):
-    """Test EmailFullResult with action plan containing only title."""
+def test_EmailResponses_with_action_plan_only_title(monkeypatch):
+    """Test EmailResponses with action plan containing only title."""
     resources_dict = {"resources": []}
 
     action_plan_dict = {
@@ -350,7 +384,7 @@ def test_EmailFullResult_with_action_plan_only_title(monkeypatch):
 
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )
@@ -359,8 +393,8 @@ def test_EmailFullResult_with_action_plan_only_title(monkeypatch):
     assert "Just A Title" in output["message"]
 
 
-def test_EmailFullResult_message_format(monkeypatch):
-    """Test that EmailFullResult formats the message correctly."""
+def test_EmailResponses_message_format(monkeypatch):
+    """Test that EmailResponses formats the message correctly."""
     resources_dict = {
         "resources": [
             {
@@ -383,7 +417,7 @@ def test_EmailFullResult_message_format(monkeypatch):
 
     monkeypatch.setattr("src.common.components.send_email", lambda **kwargs: True)
 
-    component = EmailFullResult()
+    component = EmailResponses()
     output = component.run(
         email="test@example.com", resources_dict=resources_dict, action_plan_dict=action_plan_dict
     )

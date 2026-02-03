@@ -69,35 +69,8 @@ export interface EmailResultData {
 }
 
 /**
- * Response from email_result/run endpoint
- */
-export interface EmailResultResponse {
-  result: {
-    email_result: EmailResultData;
-  };
-}
-
-/**
- * Response from email_full_result/run endpoint
- */
-export interface EmailFullResultResponse {
-  result: {
-    email_full_result: EmailResultData;
-  };
-}
-
-/**
- * Response from email_action_plan/run endpoint
- */
-export interface EmailActionPlanResponse {
-  result: {
-    email_action_plan: EmailResultData;
-  };
-}
-
-/**
  * Response from email_responses/run endpoint (consolidated email pipeline)
- * Replaces email_result, email_full_result, and email_action_plan
+ * Replaces the deprecated email_result, email_full_result, and email_action_plan endpoints
  */
 export interface EmailResponsesResponse {
   result: {

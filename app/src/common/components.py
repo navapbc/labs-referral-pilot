@@ -392,74 +392,6 @@ You've already taken a great first step by exploring these options.
 
 
 @component
-class EmailFullResult:
-    """
-    Formats JSON object (representing a list of resources and action plan) and sends it to email address.
-    """
-
-    @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, resources_dict: dict, action_plan_dict: dict) -> dict:
-        logger.info("Emailing result to %s", email)
-        logger.debug("Resources JSON content:\n%s", json.dumps(resources_dict, indent=2))
-        if action_plan_dict:
-            logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
-
-        formatted_resources = format_resources(resources_dict.get("resources", []))
-        formatted_action_plan = format_action_plan(action_plan_dict)
-
-        message = f"{EMAIL_INTRO}\n{formatted_resources}\n\n{formatted_action_plan}"
-
-        # Send email via AWS SES
-        subject = "Your Requested Resources and Action Plan"
-        success = send_email(recipient=email, subject=subject, body=message)
-        status = "success" if success else "failed"
-
-        return {"status": status, "email": email, "message": message}
-
-
-@component
-class EmailResult:
-    """
-    Formats JSON object (representing a list of resources) and sends it to email address.
-    """
-
-    @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, json_dict: dict) -> dict:
-        logger.info("Emailing result to %s", email)
-        logger.debug("JSON content:\n%s", json.dumps(json_dict, indent=2))
-        formatted_resources = format_resources(json_dict.get("resources", []))
-        message = f"{EMAIL_INTRO}\n{formatted_resources}"
-
-        # Send email via AWS SES
-        subject = "Your Requested Resources"
-        success = send_email(recipient=email, subject=subject, body=message)
-        status = "success" if success else "failed"
-
-        return {"status": status, "email": email, "message": message}
-
-
-@component
-class EmailActionPlan:
-    """
-    Formats action plan JSON and sends it to email address (without full resource descriptions).
-    """
-
-    @component.output_types(status=str, email=str, message=str)
-    def run(self, email: str, action_plan_dict: dict) -> dict:
-        logger.info("Emailing action plan to %s", email)
-        logger.debug("Action plan JSON content:\n%s", json.dumps(action_plan_dict, indent=2))
-
-        formatted_action_plan = format_action_plan(action_plan_dict)
-        message = f"{EMAIL_INTRO}\n{formatted_action_plan}"
-
-        subject = "Your Personalized Action Plan"
-        success = send_email(recipient=email, subject=subject, body=message)
-        status = "success" if success else "failed"
-
-        return {"status": status, "email": email, "message": message}
-
-
-@component
 class EmailResponses:
     """
     Unified email component that handles sending resources, action plans, or both.
@@ -488,13 +420,23 @@ class EmailResponses:
     @component.output_types(status=str, email=str, message=str)
     def run(self, email: str, resources_dict: dict, action_plan_dict: dict) -> dict:
         # Determine what content we have
+        # Check if resources dict has a non-empty "resources" list
         has_resources = bool(resources_dict and resources_dict.get("resources"))
-        has_action_plan = bool(action_plan_dict)
+        # Check if action plan dict has content (title, summary, or content fields)
+        has_action_plan = bool(
+            action_plan_dict
+            and (
+                action_plan_dict.get("title")
+                or action_plan_dict.get("summary")
+                or action_plan_dict.get("content")
+            )
+        )
 
         # Validate that at least one type of content is provided
         if not has_resources and not has_action_plan:
             raise ValueError(
-                "At least one of resources_dict or action_plan_dict must contain valid data"
+                "At least one of resources_dict or action_plan_dict must contain valid data. "
+                f"Received resources_dict={bool(resources_dict)}, action_plan_dict={bool(action_plan_dict)}"
             )
 
         logger.info("Emailing to %s (resources=%s, action_plan=%s)", email, has_resources, has_action_plan)
