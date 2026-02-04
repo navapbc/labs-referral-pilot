@@ -205,6 +205,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "reasoning_effort": reasoning_effort
                 or config.generate_referrals_rag_reasoning_level,
                 "streaming": streaming,
+                "temperature": 1.0,
             },
             # For querying RAG DB
             "query_embedder": {"text": query},

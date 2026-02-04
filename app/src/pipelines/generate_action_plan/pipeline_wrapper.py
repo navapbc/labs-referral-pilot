@@ -36,16 +36,12 @@ action_plan_as_json = """
 """
 
 
-def create_websearch() -> OpenAIWebSearchGenerator:
-    return OpenAIWebSearchGenerator()
-
-
 class PipelineWrapper(BasePipelineWrapper):
     name = "generate_action_plan"
 
     def setup(self) -> None:
         pipeline = Pipeline()
-        pipeline.add_component("llm", create_websearch())
+        pipeline.add_component("llm", OpenAIWebSearchGenerator())
 
         pipeline.add_component(
             instance=ChatPromptBuilder(
@@ -121,6 +117,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "model": llm_model or config.generate_action_plan_model_version,
                 "reasoning_effort": reasoning_effort or config.generate_action_plan_reasoning_level,
                 "streaming": streaming,
+                "temperature": 1.0,
             },
         }
 

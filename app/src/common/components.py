@@ -195,6 +195,7 @@ class OpenAIWebSearchGenerator:
         model: str = config.default_openai_model_version,
         reasoning_effort: str = config.default_openai_reasoning_level,
         streaming: bool = False,
+        temperature: float = 1.0,
     ) -> dict:
         """
         Run the OpenAI web search generator.
@@ -224,7 +225,7 @@ class OpenAIWebSearchGenerator:
             "input": prompt,
             "reasoning": {"effort": reasoning_effort},
             "tools": [{"type": "web_search"}],
-            # Add other parameters, like temperature
+            "temperature": temperature,
         }
 
         if domain:
