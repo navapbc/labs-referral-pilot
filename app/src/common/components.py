@@ -146,38 +146,6 @@ class DummyChatGenerator:
         return {"replies": [ChatMessage.from_assistant("\n\n".join(reply))]}
 
 
-def _load_and_parse_result(result_id: str) -> dict:
-    """
-    Helper function to load result from database and parse JSON.
-
-    Args:
-        result_id: The UUID of the result to load
-
-    Returns:
-        dict: The parsed JSON result
-
-    Raises:
-        ValueError: If result not found or JSON parsing fails
-    """
-    with config.db_session() as db_session, db_session.begin():
-        db_record = db_session.query(LlmResponse).filter(LlmResponse.id == result_id).one_or_none()
-
-        if not db_record:
-            raise ValueError(f"No result found with id={result_id}")
-
-        logger.info("Loaded LlmResponse:\n%s", db_record.raw_text)
-        text = db_record.raw_text
-
-    # Extract JSON object from raw_text string by searching for the first '{' and last '}'
-    start = text.find("{")
-    end = text.rfind("}")
-    if start == -1 or end == -1:
-        raise ValueError(f"Invalid JSON format in result with id={result_id}: {text!r}")
-
-    json_dict = json.loads(text[start : end + 1])
-    return json_dict
-
-
 @component
 class LoadResultOptional:
     """
@@ -190,6 +158,40 @@ class LoadResultOptional:
         dict: {"result_json": dict} where dict is either the loaded JSON or empty dict
     """
 
+    @staticmethod
+    def _load_and_parse_result(result_id: str) -> dict:
+        """
+        Helper function to load result from database and parse JSON.
+
+        Args:
+            result_id: The UUID of the result to load
+
+        Returns:
+            dict: The parsed JSON result
+
+        Raises:
+            ValueError: If result not found or JSON parsing fails
+        """
+        with config.db_session() as db_session, db_session.begin():
+            db_record = (
+                db_session.query(LlmResponse).filter(LlmResponse.id == result_id).one_or_none()
+            )
+
+            if not db_record:
+                raise ValueError(f"No result found with id={result_id}")
+
+            logger.info("Loaded LlmResponse:\n%s", db_record.raw_text)
+            text = db_record.raw_text
+
+        # Extract JSON object from raw_text string by searching for the first '{' and last '}'
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1:
+            raise ValueError(f"Invalid JSON format in result with id={result_id}: {text!r}")
+
+        json_dict = json.loads(text[start : end + 1])
+        return json_dict
+
     @component.output_types(result_json=dict)
     def run(self, result_id: Optional[str]) -> dict:
         # Return empty dict if no result_id provided
@@ -198,7 +200,7 @@ class LoadResultOptional:
             return {"result_json": {}}
 
         # Otherwise, use shared helper to load and parse result
-        json_dict = _load_and_parse_result(result_id)
+        json_dict = self._load_and_parse_result(result_id)
         return {"result_json": json_dict}
 
 
