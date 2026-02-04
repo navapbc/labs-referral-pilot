@@ -34,7 +34,7 @@ export async function emailResult(
       };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), EMAIL_TIMEOUT); //300_000
+  const timer = setTimeout(() => ac.abort(), EMAIL_TIMEOUT);
 
   try {
     const response = await fetch(url, {

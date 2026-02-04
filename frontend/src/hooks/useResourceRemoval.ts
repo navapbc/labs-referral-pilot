@@ -45,7 +45,7 @@ export function useResourceRemoval(): UseResourceRemovalReturn {
           return current;
         });
         setRemovedResourceIndex(null);
-      }, UNDO_NOTIFICATION_TIMEOUT); //7500
+      }, UNDO_NOTIFICATION_TIMEOUT);
     },
     [],
   );
