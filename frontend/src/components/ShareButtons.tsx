@@ -25,7 +25,7 @@ export function ShareButtons({
       <Button
         onClick={onPrint}
         variant="outline"
-        className="hover:bg-gray-100 hover:text-gray-900"
+        className="text-gray-900 border-gray-400 hover:bg-gray-100 hover:text-gray-900"
         data-testid={`printReferralsButton${testIdSuffix ? `-${testIdSuffix}` : ""}`}
         disabled={disabled}
       >
