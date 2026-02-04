@@ -150,6 +150,8 @@ class DummyChatGenerator:
 class LoadResult:
     """
     Loads result from database.
+    If the record text contains a JSON object, extract JSON contents and return it.
+    Otherwise, raise an error.
     """
 
     @component.output_types(result_json=dict)
