@@ -1,5 +1,4 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
-import { getApiDomain } from "./apiDomain";
 import { GenerateReferralsResponse } from "@/types/api";
 
 export async function fetchResources(

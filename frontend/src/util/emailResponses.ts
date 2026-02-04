@@ -1,4 +1,3 @@
-import { getApiDomain } from "./apiDomain";
 import { ApiErrorResponse, EmailResponsesResponse } from "@/types/api";
 import { ShareMode } from "@/components/ShareOptionsDialog";
 
