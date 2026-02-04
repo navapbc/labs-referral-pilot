@@ -1,3 +1,9 @@
+"""
+This application uses Hayhooks to create an API service.
+API requests are handled by Hayhooks and triggers specific Haystack pipelines (defined in pipeline_wrapper.py files).
+Phoenix is used for prompt templates and OpenTelemetry-based tracing of API requests.
+"""
+
 import logging
 from typing import Dict
 

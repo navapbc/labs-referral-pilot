@@ -91,6 +91,7 @@ class PipelineWrapper(BasePipelineWrapper):
             "query_embedder", SentenceTransformersTextEmbedder(model=config.rag_embedding_model)
         )
         pipeline.add_component(
+            # The DocumentStore is populated by rag_utils.populate_vector_db(), called in gunicorn.conf.py
             "retriever", ChromaEmbeddingRetriever(config.chroma_document_store())
         )
         pipeline.add_component(
@@ -139,7 +140,7 @@ class PipelineWrapper(BasePipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         return pipeline
 
-    # Called for the `generate_referrals_rag/run` endpoint
+    # This function is called for the `generate_referrals_rag/run` API endpoint (non-streaming)
     def run_api(
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "centraltx"
     ) -> dict:
@@ -216,7 +217,7 @@ class PipelineWrapper(BasePipelineWrapper):
         }
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
-    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    # This function is called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
     def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
         # Note: 'model' parameter is the pipeline name, not the LLM model
         assert model == self.name, f"Unexpected model/pipeline name: {model}"

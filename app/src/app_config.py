@@ -10,6 +10,11 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 
 class AppConfig(PydanticBaseEnvConfig):
+    """
+    Application configuration settings, overridable by environment variables of the same name.
+    See docker-compose.yml, local.env, and override.env for environment variable being set.
+    """
+
     environment: str = "local"
     # Preview environment bucket names look like 'p-###-labs-referral-pilot-app-dev'
     bucket_name: str = "local"
@@ -33,7 +38,7 @@ class AppConfig(PydanticBaseEnvConfig):
         return self.db_client.get_session()
 
     # These versions should only be used for the deployed Phoenix instance.
-    # Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
+    # Be aware: Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "generate_referrals_centraltx": "UHJvbXB0VmVyc2lvbjoxNDM=",
