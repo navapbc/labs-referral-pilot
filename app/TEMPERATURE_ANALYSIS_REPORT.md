@@ -174,6 +174,11 @@
 
 ## Problem: Responses API Limitation
 
+### Why Temperature Isn't Configurable in the Current App Code
+1. **No temperature parameter is passed anywhere** - the OpenAI payload is built with `model`, `input`, `tools`, and optional `reasoning` only.
+2. **Pipeline overrides only expose model/reasoning** - callers can set `model` and `reasoning_effort`, but not temperature.
+3. **Links cited internally point to logging/email** - `ReadableLogger` and `EmailResult` only format or log data and do not affect LLM parameters.
+
 ### Current Production Setup
 ```python
 # Current implementation in src/common/components.py
