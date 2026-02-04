@@ -74,9 +74,6 @@ class AppConfig(PydanticBaseEnvConfig):
     generate_action_plan_model_version: str = "gpt-5.1"
     generate_action_plan_reasoning_level: str = "none"
 
-    generate_referrals_from_doc_model_version: str = "gpt-5.1"
-    generate_referrals_from_doc_reasoning_level: str = "none"
-
     def chroma_client(self) -> ClientAPI:
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)
 
