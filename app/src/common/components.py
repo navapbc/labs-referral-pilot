@@ -184,6 +184,7 @@ class OpenAIWebSearchGenerator:
         Initialize the OpenAI web search generator.
         """
 
+        self.client = OpenAI()
         # Declare this attribute so it can be set when streaming_generator() is called
         self.streaming_callback: Callable | None = None
 
@@ -235,9 +236,6 @@ class OpenAIWebSearchGenerator:
         if domain:
             api_params["tools"][0]["filters"] = {"allowed_domains": [domain]}
 
-        client = OpenAI()
-
-        # Use streaming if callback is provided
         if streaming:
             logger.info(
                 "Starting OpenAI streaming request (model=%s, reasoning_effort=%s)",
@@ -247,70 +245,15 @@ class OpenAIWebSearchGenerator:
             api_params["stream"] = True
 
             try:
-                response = client.responses.create(**api_params)
+                response = self.client.responses.create(**api_params)
+                full_text = self._stream_response(response)
+                return {"replies": [ChatMessage.from_assistant(full_text)]}
             except Exception as e:
-                logger.error("Failed to create OpenAI stream: %s", e, exc_info=True)
+                logger.error("Failed to stream response: %s", e, exc_info=True)
                 raise
-
-            # Collect full response while streaming
-            full_text = ""
-            chunk_count = 0
-
-            try:
-                for openai_chunk in response:
-                    chunk_count += 1
-                    chunk_text = ""
-
-                    # Extract text from OpenAI Responses API events
-                    if hasattr(openai_chunk, "type"):
-                        # Check delta attribute (for text delta events)
-                        if not chunk_text and hasattr(openai_chunk, "delta"):
-                            delta = openai_chunk.delta
-                            if isinstance(delta, str):
-                                chunk_text = delta
-                            elif isinstance(delta, list):
-                                chunk_text = "".join(str(item) for item in delta)
-                            elif hasattr(delta, "content"):
-                                chunk_text = delta.content or ""
-                            elif hasattr(delta, "text"):
-                                chunk_text = delta.text or ""
-
-                    # Fallback for non-Responses API format
-                    if not chunk_text and hasattr(openai_chunk, "output_text"):
-                        chunk_text = openai_chunk.output_text or ""
-
-                    if chunk_text:
-                        full_text += chunk_text
-                        # Convert to Haystack StreamingChunk and call the callback
-                        streaming_chunk = StreamingChunk(content=chunk_text)
-                        assert (
-                            self.streaming_callback is not None
-                        ), "Expected streaming_callback to be set by Hayhooks"
-                        self.streaming_callback(streaming_chunk)
-
-                    # Capture metadata from OpenAI chunk; handle each type of Response*Event
-                    if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
-                        if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
-                            self._add_child_spans([openai_chunk.item])
-                    elif isinstance(openai_chunk, ResponseCreatedEvent):
-                        resp = openai_chunk.response
-                        span = trace.get_current_span()
-                        span.set_attribute("model", str(resp.model))
-                        span.set_attribute("reasoning_effort", str(resp.reasoning))
-                        span.set_attribute("temperature", str(resp.temperature))
-
-            except Exception as e:
-                logger.error("Error during streaming: %s", e, exc_info=True)
-                raise
-
-            logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
-            if not full_text:
-                logger.warning("No text collected during streaming")
-
-            return {"replies": [ChatMessage.from_assistant(full_text)]}
         else:
             # Non-streaming response
-            response = client.responses.create(**api_params)
+            response = self.client.responses.create(**api_params)
 
             web_search_responses = [
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
@@ -323,6 +266,58 @@ class OpenAIWebSearchGenerator:
                 # Also add web_search responses to parent span attributes
                 "web_search": [str(result) for result in web_search_responses],
             }
+
+    def _stream_response(self, response: Any) -> str:
+        # Collect full response while streaming
+        full_text = ""
+        chunk_count = 0
+
+        for openai_chunk in response:
+            chunk_count += 1
+            chunk_text = ""
+
+            # Extract text from OpenAI Responses API events
+            if hasattr(openai_chunk, "type"):
+                # Check delta attribute (for text delta events)
+                if not chunk_text and hasattr(openai_chunk, "delta"):
+                    delta = openai_chunk.delta
+                    if isinstance(delta, str):
+                        chunk_text = delta
+                    elif isinstance(delta, list):
+                        chunk_text = "".join(str(item) for item in delta)
+                    elif hasattr(delta, "content"):
+                        chunk_text = delta.content or ""
+                    elif hasattr(delta, "text"):
+                        chunk_text = delta.text or ""
+
+            # Fallback for non-Responses API format
+            if not chunk_text and hasattr(openai_chunk, "output_text"):
+                chunk_text = openai_chunk.output_text or ""
+
+            if chunk_text:
+                full_text += chunk_text
+                # Convert to Haystack StreamingChunk and call the callback
+                streaming_chunk = StreamingChunk(content=chunk_text)
+                assert (
+                    self.streaming_callback is not None
+                ), "Expected streaming_callback to be set by Hayhooks"
+                self.streaming_callback(streaming_chunk)
+
+            # Capture metadata from OpenAI chunk; handle each type of Response*Event
+            if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
+                if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
+                    self._add_child_spans([openai_chunk.item])
+            elif isinstance(openai_chunk, ResponseCreatedEvent):
+                resp = openai_chunk.response
+                span = trace.get_current_span()
+                span.set_attribute("model", str(resp.model))
+                span.set_attribute("reasoning_effort", str(resp.reasoning))
+                span.set_attribute("temperature", str(resp.temperature))
+
+        logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
+        if not full_text:
+            logger.warning("No text collected during streaming")
+        return full_text
 
     def _add_child_spans(self, web_search_responses: list[ResponseFunctionWebSearch]) -> None:
         for tool_call in web_search_responses:
