@@ -179,18 +179,6 @@ def _load_and_parse_result(result_id: str) -> dict:
 
 
 @component
-class LoadResult:
-    """
-    Loads result from database.
-    """
-
-    @component.output_types(result_json=dict)
-    def run(self, result_id: str) -> dict:
-        json_dict = _load_and_parse_result(result_id)
-        return {"result_json": json_dict}
-
-
-@component
 class LoadResultOptional:
     """
     Loads result from database with optional result_id.

@@ -9,7 +9,6 @@ from src.adapters import db
 from src.common.components import (
     EmailResponses,
     LlmOutputValidator,
-    LoadResult,
     LoadResultOptional,
     ReadableLogger,
     SaveResult,
@@ -51,8 +50,8 @@ def test_SaveResult_and_LoadResult(enable_factory_create, db_session: db.Session
     assert db_record is not None
     assert db_record.raw_text == llm_response
 
-    # Now test loading it via the LoadResult component
-    component = LoadResult()
+    # Now test loading it via the LoadResultOptional component
+    component = LoadResultOptional()
     output = component.run(result_id=str(result_id))
 
     result_json = output["result_json"]
