@@ -40,7 +40,7 @@ services:
       # For verifying client certificates
       - PHOENIX_TLS_VERIFY_CLIENT=False
 
-      # See README.md to enable authentication locally
+      # See README.md to enable authentication (sign-in screen) locally
       # - PHOENIX_ENABLE_AUTH=True
       # - PHOENIX_SECRET=ThisSecretIsForLocalDevOnly202508251033
     volumes:

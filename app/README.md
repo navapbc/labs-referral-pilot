@@ -1,19 +1,28 @@
 # Architecture
 
 5 Docker containers are required to run the application:
-- Frontend (in the `frontend` folder) for the web UI
-- Backend (in the `app` folder) provides API endpoints for the Frontend
-- Phoenix for observability, monitoring, and prompt management
+- Frontend for the web UI
+- Backend provides API endpoints for the Frontend
+- Phoenix for observability, monitoring, and prompt management supporting the backend
 - Postgres DB for the backend and Phoenix
 - Chroma as the vector DB for RAG
 
 Configuration files:
-- `src/app_config.py`
-- `local.env`
-- `override.env`
-- `Makefile`
+- `src/app_config.py` - default settings
+- `local.env` - non-secret settings; overrides those in `src/app-config.py`
+- `override.env` - put API keys and secrets here; overrides those in `local.env`.
+  This is ignored by git so personalized settings can go in here.
 
 ## Local Setup
+
+1 container for the frontend (in the `frontend` folder) and 4 containers for the backend (in the `app` folder) .
+
+### Frontend
+
+1. `cd frontend`
+2. `make dev` starts 1 container
+3. browse to http://localhost:3001/generate-referrals
+4. To stop the container: `make stop`
 
 ### Backend
 
@@ -25,32 +34,78 @@ Configuration files:
    - `chromadb`
    - `app` (backend) -- uses the `Dockerfile` to build the image
 
-3. `make start` to start the containers
+3. Set configurations in `override.env` based on settings in `local.env` that state `DO_NOT_SET_HERE` (like `OPENAI_API_KEY`).
 
-4. `docker compose ps` to ensure all containers are running. To preview containers:
+4. (Optional) See **Populating vector database for RAG** section below.
+
+5. `make start` to start the containers
+
+6. `docker compose ps` to ensure all containers are running. To preview containers:
    a. `app` OpenAPI spec: browse to http://localhost:3000/docs
    a. `phoenix` traces: browse to http://localhost:6006/projects and click on `local-docker-project`.
    a. `chroma` DB records (called "documents" but they're actually chunks of documents): `poetry run chroma browse 'referral_resources_local' --path chroma_data`.
-      - These come from files in under `files_to_ingest_into_vector_db` and are ingested by `rag_utils.populate_vector_db()` automatically called in `gunicorn.conf.py` upon app startup. Repopulating the Chroma DB collection can be manually triggered via `make populate-vector-db`.
    a. `app-db` Postgres DB: use a DB client with the credentials in `docker-compose.yml`
 
-5. Add prompt templates in Phoenix via `make load-prompts-from-json` or `make copy-prompts`.
+7. Add prompt templates in Phoenix via `make load-prompts-from-json`.
    View prompts at http://localhost:6006/prompts
+   (If prompts in the deployed Phoenix have changed, run `make copy-prompts` to update them locally and commit those changes to git.)
 
-6. Test using API using `curl` commands
+8. Test using API using `curl` commands. For example:
+```sh
+BASE_URL="http://localhost:3000"
+PAYLOAD='{
+  "model": "generate_referrals_rag",
+  "suffix": "keystone"
 
-7. Enable Phoenix SSL/TLS
+  "user_email": "curl_test@cli.dev",
+  "query": "Help with day care services"
+}'
+echo "Testing streaming generate_referrals_rag endpoints at $BASE_URL"
+curl -k -X 'POST' $BASE_URL'/generate_referrals_rag/chat' -H 'accept: application/json' -H 'Content-Type: application/json' -d "$PAYLOAD"
+
+echo "Testing non-streaming generate_referrals_rag/run endpoint"
+curl -k -X 'POST' $BASE_URL'/generate_referrals_rag/run' -H 'accept: application/json' -H 'Content-Type: application/json' -d "$PAYLOAD"
+```
+
+9. To stop the containers: `make stop`
+
+### Populating vector database for RAG
+
+In the `files_to_ingest_into_vector_db` subfolder, create a subfolder representing a region like `keystone` or `centraltx`. Within that region subfolder, put files that will be ingested into the vector database (Chroma DB), which is needed for RAG.  These files are ingested by `rag_utils.populate_vector_db()`, which is automatically called in `gunicorn.conf.py` upon app startup. (After startup, repopulating the Chroma DB collection can be manually triggered via `make populate-vector-db`.)
+
+Supported file types include: `md` (Markdown files are preferred), `txt`, `pdf`, `csv`, `json`, ... -- refer to [MultiFileConverter](https://docs.haystack.deepset.ai/docs/multifileconverter).
+
+### Copying prompts from the deployed Phoenix
+
+If prompts in the deployed Phoenix have changed, run `make copy-prompts` to update them locally and commit those changes to git. `make copy-prompts` will copy the prompts in the deployed Phoenix instance into your local Phoenix instance.
+   a. To enable it, add the `DEPLOYED_PHOENIX_URL` and `DEPLOYED_PHOENIX_API_KEY` environment variables to `override.env`.
+   a. Create a system API key at `$DEPLOYED_PHOENIX_URL/settings/general`.
+   a. Then run `make copy-prompts`. This will copy the prompt versions specified in `app_config.py`, which are the ones used in the deployed app.
+   a. Remember to do this every time the prompt version is updated in `app_config.py`. When running locally, the latest version of the prompt is used.
+
+### Enabling authentication to log into Phoenix
+
+Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/authentication), update `docker-compose.yaml` as follows.
+* Add these environment variables to the `phoenix` service:
+```
+      - PHOENIX_ENABLE_AUTH=True
+      - PHOENIX_SECRET=SomeLongSecretThatIsUsedToSignJWTsForTheDeployment
+```
+* Restart and log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
+* Add PHOENIX_API_KEY environment variable in `override.env` for the Haystack pipelines to authenticate to (sign into) Phoenix:
+```
+      - PHOENIX_API_KEY=<paste API key>
+```
+
+### To enable Phoenix SSL/TLS
+
+Make the following changes, then restart (`make stop` then `make start`).
    a. In `docker-compose.yml`, set `PHOENIX_TLS_ENABLED` to `True`
-   b. In `local.env`, set `PHOENIX_COLLECTOR_ENDPOINT` to use `https`
+   b. In `override.env`, set `PHOENIX_COLLECTOR_ENDPOINT` to use `https` and uncomment `PHOENIX_API_KEY`
 
-### Frontend
+For details, see the next section.
 
-1. `cd frontend`
-2. `make dev` starts 1 container
-3. browse to http://localhost:3001/generate-referrals
-
-
-### Enabling https for Phoenix
+#### Enabling https for Phoenix
 
 Based on [this documentation](https://arize.com/docs/phoenix/release-notes/04.2025/04.28.2025-tls-support-for-phoenix-server).
 
@@ -117,36 +172,3 @@ cat server.crt rootCA.crt > server-fullchain.crt
      (Use the contents of `rootCA.crt` created in step 1 above.)
 
 5. Restart Phoenix client
-
-
-### Enabling authentication in Phoenix
-
-Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/authentication), set `PHOENIX_SECRET` in `docker-compose.yaml` as follows.
-* Add these environment variables to the `phoenix` service:
-```
-      - PHOENIX_ENABLE_AUTH=True
-      - PHOENIX_SECRET=SomeLongSecretThatIsUsedToSignJWTsForTheDeployment
-```
-* Restart and log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
-* Add PHOENIX_API_KEY environment variable in `override.env` for the Haystack service to authenticate to Phoenix:
-```
-      - PHOENIX_API_KEY=<paste API key>
-```
-
-### Copying prompts from the deployed Phoenix
-
-For local development, you'll likely want to replicate the prompts in the deployed Phoenix instance onto your local Phoenix instance.
-To do so, add the `DEPLOYED_PHOENIX_URL` and `DEPLOYED_PHOENIX_API_KEY` environment variables to `override.env`.
-Create a system API key at `$DEPLOYED_PHOENIX_URL/settings/general`.
-Then run `make copy-prompts`. This will copy the prompt versions specified in `app_config.py`, which are the ones used in the deployed app.
-Remember to do this every time the prompt version is updated in `app_config.py`. When running locally, the latest version of the prompt is used.
-
-
-### Enabling OpenAI for generate action plan
-
-1. Go to 1Password and retrieve the OpenAI API Key.
-
-1. Add an OPENAI_API_KEY environment variable in `override.env` to allow the app to connect to OpenAI:
-```
-OPENAI_API_KEY=<paste API key>
-```
