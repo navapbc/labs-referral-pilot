@@ -203,6 +203,10 @@ class OpenAIWebSearchGenerator:
         Args:
             messages: List of ChatMessage objects to send to the API
             domain: Domain to restrict web search to
+            model: LLM model to use
+            reasoning_effort: Reasoning effort level
+            streaming: Whether to use streaming response
+            temperature: temperature for the LLM
 
         Returns:
             Dictionary with response key containing string of response

@@ -92,7 +92,8 @@ class PipelineWrapper(BasePipelineWrapper):
         )
         pipeline.add_component(
             # The DocumentStore is populated by rag_utils.populate_vector_db(), called in gunicorn.conf.py
-            "retriever", ChromaEmbeddingRetriever(config.chroma_document_store())
+            "retriever",
+            ChromaEmbeddingRetriever(config.chroma_document_store()),
         )
         pipeline.add_component(
             "output_adapter",
