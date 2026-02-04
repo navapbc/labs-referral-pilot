@@ -117,7 +117,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "model": llm_model or config.generate_action_plan_model_version,
                 "reasoning_effort": reasoning_effort or config.generate_action_plan_reasoning_level,
                 "streaming": streaming,
-                "temperature": 1.0,
+                "temperature": config.generate_action_plan_temperature,
             },
         }
 
