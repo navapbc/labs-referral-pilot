@@ -1,3 +1,4 @@
+import { getApiDomain } from "./apiDomain";
 import { ApiErrorResponse, EmailResponsesResponse } from "@/types/api";
 import { ShareMode } from "@/components/ShareOptionsDialog";
 
@@ -21,8 +22,7 @@ export async function emailResponses(
   email: string,
   mode?: ShareMode,
 ) {
-  const apiDomain =
-    "https://p-179-app-dev-1778298227.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
+  const apiDomain = await getApiDomain();
 
   // Use consolidated endpoint for all scenarios
   const endpoint = "email_responses";
@@ -46,11 +46,11 @@ export async function emailResponses(
         "Action plan result ID is required for full-referrals mode",
       );
     }
-    body.resources_result_id = resultId;
+    body.resources_result_id = resultId ?? "";
     body.action_plan_result_id = actionPlanResultId;
   } else {
     // Resources only (default) - send ONLY resources_result_id
-    body.resources_result_id = resultId;
+    body.resources_result_id = resultId ?? "";
   }
 
   const url = `${apiDomain}${endpoint}/run`;

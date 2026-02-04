@@ -39,8 +39,7 @@ export async function fetchActionPlan(
   resultId: string;
   errorMessage?: string;
 }> {
-  const apiDomain =
-    "https://p-179-app-dev-1778298227.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
+  const apiDomain = await getApiDomain();
   const url = apiDomain + "generate_action_plan/run";
   const headers = {
     "Content-Type": "application/json",
