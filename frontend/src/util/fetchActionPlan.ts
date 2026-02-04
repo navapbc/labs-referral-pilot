@@ -46,7 +46,7 @@ export async function fetchActionPlan(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), ACTION_PLAN_TIMEOUT); //120_000
+  const timer = setTimeout(() => ac.abort(), ACTION_PLAN_TIMEOUT);
 
   try {
     const requestBody: {

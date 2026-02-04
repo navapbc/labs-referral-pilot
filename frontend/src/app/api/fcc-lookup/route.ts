@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     const fccUrl = `https://geo.fcc.gov/api/census/block/find?${params.toString()}`;
 
     const fccResponse = await fetch(fccUrl, {
-      signal: AbortSignal.timeout(LOCATION_FETCH_TIMEOUT), //5000
+      signal: AbortSignal.timeout(LOCATION_FETCH_TIMEOUT),
     });
     if (!fccResponse.ok) {
       return NextResponse.json(

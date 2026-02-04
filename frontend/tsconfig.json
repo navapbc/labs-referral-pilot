@@ -29,6 +29,7 @@
   "include": [
     "next-env.d.ts",
     "src/**/*",
+    "components/**/*",
     "stories/**/*",
     "tests/**/*",
     "__mocks__/**/*",
