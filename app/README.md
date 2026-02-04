@@ -9,7 +9,7 @@
 
 Configuration files:
 - `src/app_config.py` - default settings
-- `local.env` - non-secret settings; overrides those in `src/app-config.py`
+- `local.env` - non-secret settings; overrides those in `src/app_config.py`
 - `override.env` - put API keys and secrets here; overrides those in `local.env`.
   This is ignored by git so personalized settings can go in here.
 
@@ -89,7 +89,7 @@ Based on [documentation](https://arize.com/docs/phoenix/self-hosting/features/au
 * Add these environment variables to the `phoenix` service:
 ```
       - PHOENIX_ENABLE_AUTH=True
-      - PHOENIX_SECRET=SomeLongSecretThatIsUsedToSignJWTsForTheDeployment
+      - PHOENIX_SECRET=TypeSomeLongSecretThatWillBeUsedToSignJWTsForTheDeployment
 ```
 * Restart and log into the Phoenix UI at http://localhost:6006 and create a system API key; copy the API key
 * Add PHOENIX_API_KEY environment variable in `override.env` for the Haystack pipelines to authenticate to (sign into) Phoenix:
