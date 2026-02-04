@@ -49,6 +49,46 @@ export default function Page() {
   const [showResultsView, setShowResultsView] = useState(false);
 
   // ========== Resources Streaming (Custom Hook) ==========
+  /**
+   * STREAMING STATE LIFECYCLE:
+   *
+   * The streaming process follows these state transitions:
+   *
+   * 1. INITIAL STATE (before search):
+   *    - loading: false
+   *    - isStreamingResources: false
+   *    - hasReceivedFirstResource: false
+   *    - streamingResources: null
+   *    - retainedResources: undefined
+   *
+   * 2. LOADING STATE (search initiated):
+   *    - loading: true (triggers loading UI)
+   *    - isStreamingResources: true
+   *    - showResultsView: true
+   *    - Starts 12-second timeout to show "No resources found" if nothing arrives
+   *
+   * 3. STREAMING STATE (first chunk arrives):
+   *    - hasReceivedFirstResource: true (clears "No resources found" timeout)
+   *    - streamingResources: PartialResource[] (updates with each chunk)
+   *    - ResourcesList displays streamingResources with loading skeleton for incomplete data
+   *
+   * 4. STREAM COMPLETE STATE:
+   *    - isStreamingResources: false
+   *    - streamingResources: null (cleared)
+   *    - retainedResources: Resource[] (final validated resources)
+   *    - ResourcesList switches to displaying retainedResources
+   *
+   * 5. ERROR STATE (at any point):
+   *    - isStreamingResources: false
+   *    - loading: false
+   *    - streamingResources: null
+   *    - errorMessage: string (displayed in ResourcesList)
+   *
+   * State management notes:
+   * - streamingResources are partial/incomplete, retainedResources are final/complete
+   * - retainedResources is user-editable (can remove items), streamingResources is read-only
+   * - The hook manages streaming lifecycle, this component manages retained results
+   */
   const {
     loading,
     isStreamingResources,

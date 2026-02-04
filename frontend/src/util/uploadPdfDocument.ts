@@ -1,6 +1,7 @@
 import { Resource, ResourcesSchema } from "@/types/resources";
 import { getApiDomain } from "./apiDomain";
 import { GenerateReferralsFromDocResponse } from "@/types/api";
+import { STREAMING_TIMEOUT } from "@/config/timeouts";
 
 /**
  * Extracts JSON from text that may contain a prefix or suffix
@@ -47,7 +48,7 @@ export async function uploadPdfDocument(
   formData.append("user_email", userEmail);
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 600_000); // 60 seconds timeout for file upload
+  const timer = setTimeout(() => ac.abort(), STREAMING_TIMEOUT); // 10 minutes timeout for LLM processing
 
   try {
     const upstream = await fetch(url, {

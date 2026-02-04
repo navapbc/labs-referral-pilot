@@ -47,6 +47,39 @@ export interface RequestParams {
 
 /**
  * Builds a request string with resolved zip codes and filters
+ *
+ * This function processes user input to enrich zip codes with location data before
+ * sending to the LLM. It uses two complementary APIs:
+ *
+ * 1. **Zippopotam.us API** (via fetchLocationFromZip): Converts 5-digit zip codes
+ *    to "city, state" format (e.g., "90210" → "Beverly Hills, CA")
+ *
+ * 2. **FCC Block API** (via fcc-lookup route): Used elsewhere in the app to get
+ *    precise coordinates and county data from lat/long for mapping features
+ *
+ * **Why two APIs?**
+ * - Zippopotam provides simple, fast zip-to-city lookups without coordinates
+ * - FCC API requires coordinates as input, used for reverse geocoding (coordinates → county)
+ * - Both serve different purposes: text enrichment (Zippopotam) vs. precise location
+ *   data (FCC) for map-based features
+ *
+ * **Processing flow:**
+ * 1. Detects all 5-digit and ZIP+4 codes in both locationText and clientDescription
+ * 2. Fetches city/state for each unique zip code (Zippopotam API)
+ * 3. Replaces zip codes with "city, state zip_code" format in-place
+ * 4. Appends resource type filters and location constraints to the request
+ *
+ * **Example transformation:**
+ * ```
+ * Input:  "Client near 90210 needs help"
+ * Output: "Client near Beverly Hills, CA 90210 needs help"
+ * ```
+ *
+ * This enrichment improves LLM understanding of geographic context without
+ * requiring users to manually type city names.
+ *
+ * @param params - Request parameters containing client description, location, and filters
+ * @returns Formatted request string with enriched location data
  */
 export async function buildRequestWithResolvedZipCodes(
   params: RequestParams,

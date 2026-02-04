@@ -4,6 +4,7 @@ import {
   EmailResultResponse,
   EmailFullResultResponse,
 } from "@/types/api";
+import { EMAIL_TIMEOUT } from "@/config/timeouts";
 
 export async function emailResult(
   resultId: string,
@@ -33,7 +34,7 @@ export async function emailResult(
       };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 300_000);
+  const timer = setTimeout(() => ac.abort(), EMAIL_TIMEOUT); //300_000
 
   try {
     const response = await fetch(url, {
