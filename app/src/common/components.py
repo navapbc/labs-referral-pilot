@@ -39,42 +39,6 @@ from src.db.models.api_data_models import LlmResponse
 logger = logging.getLogger(__name__)
 
 
-def format_resources(resources: list[dict]) -> str:
-    return "\n\n".join([format_resource(resource) for resource in resources])
-
-
-def format_resource(resource: dict) -> str:
-    return "\n".join(
-        [
-            f"### {resource.get('name', 'Unnamed Resource')}",
-            f"- Referral Type: {resource.get('referral_type', 'None')}",
-            f"- Description: {resource.get('description', 'None')}",
-            f"- Website: {resource.get('website', 'None')}",
-            f"- Phone: {', '.join(resource.get('phones', ['None']))}",
-            f"- Email: {', '.join(resource.get('emails', ['None']))}",
-            f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
-        ]
-    )
-
-
-def format_action_plan(action_plan: dict) -> str:
-    """Format the action plan for email display. Returns empty string if no action plan."""
-    if not action_plan:
-        return ""
-
-    title = action_plan.get("title", "Your Action Plan")
-    summary = action_plan.get("summary", "")
-    content = action_plan.get("content", "")
-
-    parts = [f"## {title}"]
-    if summary:
-        parts.append(f"\n{summary}")
-    if content:
-        parts.append(f"\n{content}")
-
-    return "\n".join(parts)
-
-
 @component
 class EchoNode:
     """
@@ -446,11 +410,16 @@ class EmailResponses:
         message_parts = [EMAIL_INTRO]
 
         if has_resources:
-            formatted_resources = format_resources(resources_dict.get("resources", []))
+            formatted_resources = "\n\n".join(
+                [
+                    self._format_resource(resource)
+                    for resource in resources_dict.get("resources", [])
+                ]
+            )
             message_parts.append(formatted_resources)
 
         if has_action_plan:
-            formatted_action_plan = format_action_plan(action_plan_dict)
+            formatted_action_plan = self._format_action_plan(action_plan_dict)
             message_parts.append(formatted_action_plan)
 
         message = "\n\n".join(message_parts)
@@ -469,6 +438,36 @@ class EmailResponses:
 
         logger.info("Email send status: %s", status)
         return {"status": status, "email": email, "message": message}
+
+    def _format_resource(self, resource: dict) -> str:
+        return "\n".join(
+            [
+                f"### {resource.get('name', 'Unnamed Resource')}",
+                f"- Referral Type: {resource.get('referral_type', 'None')}",
+                f"- Description: {resource.get('description', 'None')}",
+                f"- Website: {resource.get('website', 'None')}",
+                f"- Phone: {', '.join(resource.get('phones', ['None']))}",
+                f"- Email: {', '.join(resource.get('emails', ['None']))}",
+                f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
+            ]
+        )
+
+    def _format_action_plan(self, action_plan: dict) -> str:
+        """Format the action plan for email display. Returns empty string if no action plan."""
+        if not action_plan:
+            return ""
+
+        title = action_plan.get("title", "Your Action Plan")
+        summary = action_plan.get("summary", "")
+        content = action_plan.get("content", "")
+
+        parts = [f"## {title}"]
+        if summary:
+            parts.append(f"\n{summary}")
+        if content:
+            parts.append(f"\n{content}")
+
+        return "\n".join(parts)
 
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
