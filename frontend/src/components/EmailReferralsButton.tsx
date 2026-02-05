@@ -20,15 +20,17 @@ import { ShareOptionsDialog, ShareMode } from "./ShareOptionsDialog";
 interface EmailReferralsProps {
   resultId: string;
   actionPlanResultId?: string;
+  requestorEmail: string;
   disabled?: boolean;
 }
 
 export function EmailReferralsButton({
   resultId,
   actionPlanResultId,
+  requestorEmail,
   disabled = false,
 }: EmailReferralsProps) {
-  const [email, setEmail] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [showModeOptions, setShowModeOptions] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<ShareMode | undefined>(
@@ -69,7 +71,8 @@ export function EmailReferralsButton({
       const { emailAddr } = await emailResponses(
         resultId,
         actionPlanResultId,
-        email,
+        recipientEmail,
+        requestorEmail,
         selectedMode,
       );
 
@@ -88,7 +91,7 @@ export function EmailReferralsButton({
   const handleClose = () => {
     setEmailSent(false);
     setStatusMessage("");
-    setEmail("");
+    setRecipientEmail("");
   };
 
   const handleEmailDialogChange = (open: boolean) => {
@@ -148,16 +151,16 @@ export function EmailReferralsButton({
                 id="email"
                 type="email"
                 placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={recipientEmail}
+                onChange={(e) => setRecipientEmail(e.target.value)}
                 data-testid="emailInput"
                 className={
-                  email && !isValidEmail(email)
+                  recipientEmail && !isValidEmail(recipientEmail)
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                     : ""
                 }
               />
-              {email && !isValidEmail(email) && (
+              {recipientEmail && !isValidEmail(recipientEmail) && (
                 <p className="text-sm text-red-500">
                   Please enter a valid email address
                 </p>
@@ -183,7 +186,11 @@ export function EmailReferralsButton({
                   className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:cursor-not-allowed"
                   type="submit"
                   onClick={() => void handleSendEmail()}
-                  disabled={isLoading || !email.trim() || !isValidEmail(email)}
+                  disabled={
+                    isLoading ||
+                    !recipientEmail.trim() ||
+                    !isValidEmail(recipientEmail)
+                  }
                   data-testid="sendEmailButton"
                 >
                   {isLoading ? "Sending..." : "Send Email"}

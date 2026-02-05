@@ -7,6 +7,7 @@ interface ShareButtonsProps {
   onPrint: () => void;
   resourcesResultId: string;
   actionPlanResultId: string;
+  userEmail: string;
   className?: string;
   testIdSuffix?: string;
   disabled?: boolean;
@@ -16,6 +17,7 @@ export function ShareButtons({
   onPrint,
   resourcesResultId,
   actionPlanResultId,
+  userEmail,
   className,
   testIdSuffix,
   disabled = false,
@@ -36,6 +38,7 @@ export function ShareButtons({
         <EmailReferralsButton
           resultId={resourcesResultId}
           actionPlanResultId={actionPlanResultId || undefined}
+          requestorEmail={userEmail}
           disabled={disabled}
         />
       )}

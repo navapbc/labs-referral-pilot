@@ -19,7 +19,8 @@ import { ShareMode } from "@/components/ShareOptionsDialog";
 export async function emailResponses(
   resultId: string | undefined,
   actionPlanResultId: string | undefined,
-  email: string,
+  recipient_email: string,
+  requestor_email: string,
   mode?: ShareMode,
 ) {
   const apiDomain = await getApiDomain();
@@ -28,7 +29,8 @@ export async function emailResponses(
   const endpoint = "email_responses";
 
   // Build request body based on mode - include only the relevant result IDs
-  const body: Record<string, string> = { email };
+  const body: Record<string, string> = { recipient_email };
+  body.requestor_email = requestor_email;
 
   // Explicitly handle each scenario
   if (mode === "action-plan-only") {
