@@ -1,13 +1,15 @@
 import { getApiDomain } from "./apiDomain";
 import { ApiErrorResponse, EmailResponsesResponse } from "@/types/api";
 import { ShareMode } from "@/components/ShareOptionsDialog";
+import { EMAIL_TIMEOUT } from "@/config/timeouts";
 
 /**
  * Sends an email with resources, action plan, or both using the consolidated email_responses endpoint.
  *
  * @param resultId - ID of the resources result (optional if action plan provided)
  * @param actionPlanResultId - ID of the action plan result (optional if resources provided)
- * @param email - Recipient email address
+ * @param recipient_email - Recipient email address
+ * @param requestor_email - Email address of the person requesting the share
  * @param mode - Share mode determining what content to include
  * @returns Promise with email address confirmation
  *
@@ -19,8 +21,8 @@ import { ShareMode } from "@/components/ShareOptionsDialog";
 export async function emailResponses(
   resultId: string | undefined,
   actionPlanResultId: string | undefined,
-  recipient_email: string,
-  requestor_email: string,
+  recipientEmail: string,
+  requestorEmail: string,
   mode?: ShareMode,
 ) {
   const apiDomain = await getApiDomain();
@@ -29,8 +31,8 @@ export async function emailResponses(
   const endpoint = "email_responses";
 
   // Build request body based on mode - include only the relevant result IDs
-  const body: Record<string, string> = { recipient_email };
-  body.requestor_email = requestor_email;
+  const body: Record<string, string> = { recipientEmail: recipientEmail };
+  body.requestorEmail = requestorEmail;
 
   // Explicitly handle each scenario
   if (mode === "action-plan-only") {
@@ -72,7 +74,7 @@ export async function emailResponses(
   };
 
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 300_000);
+  const timer = setTimeout(() => ac.abort(), EMAIL_TIMEOUT);
 
   try {
     const response = await fetch(url, {
@@ -86,7 +88,7 @@ export async function emailResponses(
     clearTimeout(timer);
 
     if (!response.ok) {
-      let errorMessage = response.statusText || "Unknown error";
+      let errorMessage: string;
 
       try {
         const errorData = (await response.json()) as ApiErrorResponse;

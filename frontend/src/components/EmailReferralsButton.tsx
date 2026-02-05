@@ -215,7 +215,7 @@ export function EmailReferralsButton({
       {/* Email button trigger */}
       <Button
         variant="outline"
-        className="hover:bg-gray-100 hover:text-gray-900"
+        className="text-gray-900 border-gray-400 hover:bg-gray-100 hover:text-gray-900"
         data-testid="emailReferralsButton"
         disabled={disabled}
         onClick={handleEmailButtonClick}
