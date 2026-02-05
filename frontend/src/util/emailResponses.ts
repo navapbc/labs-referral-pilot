@@ -48,7 +48,12 @@ export async function emailResponses(
         "Action plan result ID is required for full-referrals mode",
       );
     }
-    body.resources_result_id = resultId ?? "";
+    if (!resultId) {
+      throw new Error(
+        "Resource result ID is required for full-referrals mode",
+      );
+    }
+    body.resources_result_id = resultId;
     body.action_plan_result_id = actionPlanResultId;
   } else {
     // Resources only (default) - send ONLY resources_result_id
