@@ -1,3 +1,12 @@
+"""
+Utility functions for document ingestion to populate ChromaDB for RAG.
+
+The expected folder structure for `files_to_ingest_into_vector_db/` is
+subfolders representing a region like `keystone` or `centraltx`.
+Within that region subfolder, put files that will be ingested into
+the vector database (Chroma DB), which is used for RAG.
+"""
+
 import logging
 import os
 from pathlib import Path
@@ -88,7 +97,9 @@ def populate_vector_db() -> None:
         logger.info("Region subfolders in S3: %s", s3_subfolders)
         # Exclude certain regions if needed
         for s3_folder in s3_subfolders.values():
-            download_s3_folder_to_local(s3, bucket, s3_folder, local_folder)
+            download_s3_folder_to_local(
+                s3, bucket, s3_folder, os.path.join(local_folder, s3_folder)
+            )
 
     region_subfolders = {
         entry.name: entry.path for entry in os.scandir(local_folder) if entry.is_dir()

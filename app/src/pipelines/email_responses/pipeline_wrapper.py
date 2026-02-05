@@ -11,7 +11,8 @@ This pipeline replaces three previous separate pipelines:
 The pipeline dynamically handles all three scenarios based on which result IDs are provided.
 
 API Parameters:
-    email (str): Recipient email address (required)
+    recipient_email (str): Recipient email address (required)
+    requestor_email (str): Email of the person requesting the send (required)
     resources_result_id (str, optional): ID of resources result to load and email
     action_plan_result_id (str, optional): ID of action plan result to load and email
 
@@ -21,41 +22,39 @@ Examples:
     # Email only resources
     POST /email_responses
     {
-        "email": "user@example.com",
+        "recipient_email": "user@example.com",
+        "requestor_email": "admin@example.com",
         "resources_result_id": "abc123"
     }
 
     # Email only action plan
     POST /email_responses
     {
-        "email": "user@example.com",
+        "recipient_email": "user@example.com",
+        "requestor_email": "admin@example.com",
         "action_plan_result_id": "xyz789"
     }
 
     # Email both resources and action plan
     POST /email_responses
     {
-        "email": "user@example.com",
+        "recipient_email": "user@example.com",
+        "requestor_email": "admin@example.com",
         "resources_result_id": "abc123",
         "action_plan_result_id": "xyz789"
     }
 """
 
 import logging
-from pprint import pformat
 from typing import Optional
 
 from fastapi import HTTPException
 from hayhooks import BasePipelineWrapper
 from haystack import Pipeline
-from haystack.core.errors import PipelineRuntimeError
-from openinference.instrumentation import _tracers, using_metadata
-from opentelemetry.trace.status import Status, StatusCode
 
-from src.common import components, phoenix_utils
+from src.common import components, haystack_utils
 
 logger = logging.getLogger(__name__)
-tracer = phoenix_utils.tracer_provider.get_tracer(__name__)
 
 
 class PipelineWrapper(BasePipelineWrapper):
@@ -98,18 +97,21 @@ class PipelineWrapper(BasePipelineWrapper):
         pipeline.add_component("logger", components.ReadableLogger())
 
         self.pipeline = pipeline
+        self.runner = haystack_utils.TracedPipelineRunner(self.name, self.pipeline)
 
     def run_api(
         self,
-        email: str,
+        recipient_email: str,
+        requestor_email: str,
         resources_result_id: Optional[str] = None,
         action_plan_result_id: Optional[str] = None,
     ) -> dict:
         """
-        Execute the email pipeline with tracing and metadata.
+        Send an email with resources, action plan, or both based on provided result IDs.
 
         Args:
-            email: Recipient email address (required)
+            recipient_email: Recipient email address (required)
+            requestor_email: Email of the person requesting the send (required)
             resources_result_id: ID of resources result to load (optional)
             action_plan_result_id: ID of action plan result to load (optional)
 
@@ -126,91 +128,48 @@ class PipelineWrapper(BasePipelineWrapper):
                 detail="At least one of resources_result_id or action_plan_result_id must be provided",
             )
 
-        with using_metadata({"email": email}):
-            # Must set using_metadata context before calling tracer.start_as_current_span()
-            assert isinstance(tracer, _tracers.OITracer), f"Got unexpected {type(tracer)}"
-            with tracer.start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                self.name, openinference_span_kind="chain"
-            ) as span:
-                result = self._run(resources_result_id, action_plan_result_id, email)
-                span.set_input(
-                    {
-                        "resources_result_id": resources_result_id,
-                        "action_plan_result_id": action_plan_result_id,
-                        "email": email,
-                    }
-                )
-                span.set_output(result["email_responses"]["status"])
-                span.set_status(Status(StatusCode.OK))
-                return result
+        pipeline_run_args = self.create_pipeline_args(
+            resources_result_id, action_plan_result_id, recipient_email
+        )
 
-    def _run(
+        return self.runner.return_response(
+            pipeline_run_args,
+            user_id="requestor_email",
+            metadata={"requestor_email": requestor_email},
+            input_={
+                "recipient_email": recipient_email,
+                "requestor_email": requestor_email,
+                "resources_result_id": resources_result_id,
+                "action_plan_result_id": action_plan_result_id,
+            },
+            include_outputs_from={"email_responses"},
+            extract_output=lambda result: result["email_responses"]["status"],
+        )
+
+    def create_pipeline_args(
         self,
         resources_result_id: Optional[str],
         action_plan_result_id: Optional[str],
-        email: str,
+        recipient_email: str,
     ) -> dict:
-        """
-        Internal method to execute the pipeline.
-
-        Args:
-            resources_result_id: ID of resources result to load (optional)
-            action_plan_result_id: ID of action plan result to load (optional)
-            email: Recipient email address
-
-        Returns:
-            dict: Pipeline execution results
-
-        Raises:
-            HTTPException: If pipeline execution fails with appropriate status code
-        """
-        try:
-            # Build run data with optional result IDs
-            # LoadResultOptional will handle None values gracefully
-            run_data = {
-                "logger": {
-                    "messages_list": [
-                        {
-                            "resources_result_id": resources_result_id or "none",
-                            "action_plan_result_id": action_plan_result_id or "none",
-                            "email": email,
-                        }
-                    ],
-                },
-                "load_resources": {
-                    "result_id": resources_result_id,
-                },
-                "load_action_plan": {
-                    "result_id": action_plan_result_id,
-                },
-                "email_responses": {
-                    "email": email,
-                },
-            }
-
-            response = self.pipeline.run(
-                run_data,
-                include_outputs_from={"email_responses"},
-            )
-            logger.debug("Results: %s", pformat(response, width=160))
-            return response
-
-        except PipelineRuntimeError as re:
-            # Handle pipeline errors with appropriate status codes
-            error_msg = str(re)
-
-            # Determine if this is a user error (bad input) or server error
-            if re.component_type == components.LoadResultOptional:
-                if "Invalid JSON format in result" in error_msg:
-                    status_code = 500  # Internal error - bad data in database
-                elif "No result found" in error_msg:
-                    status_code = 400  # User error - invalid result_id
-                else:
-                    status_code = 400  # User error - likely bad result_id
-            else:
-                status_code = 500  # Internal error - email sending or other component failure
-
-            raise HTTPException(
-                status_code=status_code,
-                detail=f"Error occurred: {error_msg}",
-            ) from re
+        """Common args for pipeline execution"""
+        return {
+            "logger": {
+                "messages_list": [
+                    {
+                        "resources_result_id": resources_result_id or "none",
+                        "action_plan_result_id": action_plan_result_id or "none",
+                        "recipient_email": recipient_email,
+                    }
+                ],
+            },
+            "load_resources": {
+                "result_id": resources_result_id,
+            },
+            "load_action_plan": {
+                "result_id": action_plan_result_id,
+            },
+            "email_responses": {
+                "email": recipient_email,
+            },
+        }

@@ -39,42 +39,6 @@ from src.db.models.api_data_models import LlmResponse
 logger = logging.getLogger(__name__)
 
 
-def format_resources(resources: list[dict]) -> str:
-    return "\n\n".join([format_resource(resource) for resource in resources])
-
-
-def format_resource(resource: dict) -> str:
-    return "\n".join(
-        [
-            f"### {resource.get('name', 'Unnamed Resource')}",
-            f"- Referral Type: {resource.get('referral_type', 'None')}",
-            f"- Description: {resource.get('description', 'None')}",
-            f"- Website: {resource.get('website', 'None')}",
-            f"- Phone: {', '.join(resource.get('phones', ['None']))}",
-            f"- Email: {', '.join(resource.get('emails', ['None']))}",
-            f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
-        ]
-    )
-
-
-def format_action_plan(action_plan: dict) -> str:
-    """Format the action plan for email display. Returns empty string if no action plan."""
-    if not action_plan:
-        return ""
-
-    title = action_plan.get("title", "Your Action Plan")
-    summary = action_plan.get("summary", "")
-    content = action_plan.get("content", "")
-
-    parts = [f"## {title}"]
-    if summary:
-        parts.append(f"\n{summary}")
-    if content:
-        parts.append(f"\n{content}")
-
-    return "\n".join(parts)
-
-
 @component
 class EchoNode:
     """
@@ -213,6 +177,7 @@ class OpenAIWebSearchGenerator:
         Initialize the OpenAI web search generator.
         """
 
+        self.client = OpenAI()
         # Declare this attribute so it can be set when streaming_generator() is called
         self.streaming_callback: Callable | None = None
 
@@ -224,6 +189,7 @@ class OpenAIWebSearchGenerator:
         model: str = config.default_openai_model_version,
         reasoning_effort: str = config.default_openai_reasoning_level,
         streaming: bool = False,
+        temperature: float = 1.0,
     ) -> dict:
         """
         Run the OpenAI web search generator.
@@ -231,6 +197,10 @@ class OpenAIWebSearchGenerator:
         Args:
             messages: List of ChatMessage objects to send to the API
             domain: Domain to restrict web search to
+            model: LLM model to use
+            reasoning_effort: Reasoning effort level
+            streaming: Whether to use streaming response
+            temperature: temperature for the LLM
 
         Returns:
             Dictionary with response key containing string of response
@@ -253,15 +223,12 @@ class OpenAIWebSearchGenerator:
             "input": prompt,
             "reasoning": {"effort": reasoning_effort},
             "tools": [{"type": "web_search"}],
-            # Add other parameters, like temperature
+            "temperature": temperature,
         }
 
         if domain:
             api_params["tools"][0]["filters"] = {"allowed_domains": [domain]}
 
-        client = OpenAI()
-
-        # Use streaming if callback is provided
         if streaming:
             logger.info(
                 "Starting OpenAI streaming request (model=%s, reasoning_effort=%s)",
@@ -271,70 +238,15 @@ class OpenAIWebSearchGenerator:
             api_params["stream"] = True
 
             try:
-                response = client.responses.create(**api_params)
+                response = self.client.responses.create(**api_params)
+                full_text = self._stream_response(response)
+                return {"replies": [ChatMessage.from_assistant(full_text)]}
             except Exception as e:
-                logger.error("Failed to create OpenAI stream: %s", e, exc_info=True)
+                logger.error("Failed to stream response: %s", e, exc_info=True)
                 raise
-
-            # Collect full response while streaming
-            full_text = ""
-            chunk_count = 0
-
-            try:
-                for openai_chunk in response:
-                    chunk_count += 1
-                    chunk_text = ""
-
-                    # Extract text from OpenAI Responses API events
-                    if hasattr(openai_chunk, "type"):
-                        # Check delta attribute (for text delta events)
-                        if not chunk_text and hasattr(openai_chunk, "delta"):
-                            delta = openai_chunk.delta
-                            if isinstance(delta, str):
-                                chunk_text = delta
-                            elif isinstance(delta, list):
-                                chunk_text = "".join(str(item) for item in delta)
-                            elif hasattr(delta, "content"):
-                                chunk_text = delta.content or ""
-                            elif hasattr(delta, "text"):
-                                chunk_text = delta.text or ""
-
-                    # Fallback for non-Responses API format
-                    if not chunk_text and hasattr(openai_chunk, "output_text"):
-                        chunk_text = openai_chunk.output_text or ""
-
-                    if chunk_text:
-                        full_text += chunk_text
-                        # Convert to Haystack StreamingChunk and call the callback
-                        streaming_chunk = StreamingChunk(content=chunk_text)
-                        assert (
-                            self.streaming_callback is not None
-                        ), "Expected streaming_callback to be set by Hayhooks"
-                        self.streaming_callback(streaming_chunk)
-
-                    # Capture metadata from OpenAI chunk; handle each type of Response*Event
-                    if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
-                        if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
-                            self._add_child_spans([openai_chunk.item])
-                    elif isinstance(openai_chunk, ResponseCreatedEvent):
-                        resp = openai_chunk.response
-                        span = trace.get_current_span()
-                        span.set_attribute("model", str(resp.model))
-                        span.set_attribute("reasoning_effort", str(resp.reasoning))
-                        span.set_attribute("temperature", str(resp.temperature))
-
-            except Exception as e:
-                logger.error("Error during streaming: %s", e, exc_info=True)
-                raise
-
-            logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
-            if not full_text:
-                logger.warning("No text collected during streaming")
-
-            return {"replies": [ChatMessage.from_assistant(full_text)]}
         else:
             # Non-streaming response
-            response = client.responses.create(**api_params)
+            response = self.client.responses.create(**api_params)
 
             web_search_responses = [
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
@@ -347,6 +259,58 @@ class OpenAIWebSearchGenerator:
                 # Also add web_search responses to parent span attributes
                 "web_search": [str(result) for result in web_search_responses],
             }
+
+    def _stream_response(self, response: Any) -> str:
+        # Collect full response while streaming
+        full_text = ""
+        chunk_count = 0
+
+        for openai_chunk in response:
+            chunk_count += 1
+            chunk_text = ""
+
+            # Extract text from OpenAI Responses API events
+            if hasattr(openai_chunk, "type"):
+                # Check delta attribute (for text delta events)
+                if not chunk_text and hasattr(openai_chunk, "delta"):
+                    delta = openai_chunk.delta
+                    if isinstance(delta, str):
+                        chunk_text = delta
+                    elif isinstance(delta, list):
+                        chunk_text = "".join(str(item) for item in delta)
+                    elif hasattr(delta, "content"):
+                        chunk_text = delta.content or ""
+                    elif hasattr(delta, "text"):
+                        chunk_text = delta.text or ""
+
+            # Fallback for non-Responses API format
+            if not chunk_text and hasattr(openai_chunk, "output_text"):
+                chunk_text = openai_chunk.output_text or ""
+
+            if chunk_text:
+                full_text += chunk_text
+                # Convert to Haystack StreamingChunk and call the callback
+                streaming_chunk = StreamingChunk(content=chunk_text)
+                assert (
+                    self.streaming_callback is not None
+                ), "Expected streaming_callback to be set by Hayhooks"
+                self.streaming_callback(streaming_chunk)
+
+            # Capture metadata from OpenAI chunk; handle each type of Response*Event
+            if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
+                if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
+                    self._add_child_spans([openai_chunk.item])
+            elif isinstance(openai_chunk, ResponseCreatedEvent):
+                resp = openai_chunk.response
+                span = trace.get_current_span()
+                span.set_attribute("model", str(resp.model))
+                span.set_attribute("reasoning_effort", str(resp.reasoning))
+                span.set_attribute("temperature", str(resp.temperature))
+
+        logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
+        if not full_text:
+            logger.warning("No text collected during streaming")
+        return full_text
 
     def _add_child_spans(self, web_search_responses: list[ResponseFunctionWebSearch]) -> None:
         for tool_call in web_search_responses:
@@ -422,6 +386,11 @@ class EmailResponses:
 
         # Validate that at least one type of content is provided
         if not has_resources and not has_action_plan:
+            logger.error(
+                "EmailResponses: No content to email resources_dict=%r, action_plan_dict=%r",
+                resources_dict,
+                action_plan_dict,
+            )
             raise ValueError(
                 "At least one of resources_dict or action_plan_dict must contain valid data. "
                 f"Received resources_dict={bool(resources_dict)}, action_plan_dict={bool(action_plan_dict)}"
@@ -441,11 +410,16 @@ class EmailResponses:
         message_parts = [EMAIL_INTRO]
 
         if has_resources:
-            formatted_resources = format_resources(resources_dict.get("resources", []))
+            formatted_resources = "\n\n".join(
+                [
+                    self._format_resource(resource)
+                    for resource in resources_dict.get("resources", [])
+                ]
+            )
             message_parts.append(formatted_resources)
 
         if has_action_plan:
-            formatted_action_plan = format_action_plan(action_plan_dict)
+            formatted_action_plan = self._format_action_plan(action_plan_dict)
             message_parts.append(formatted_action_plan)
 
         message = "\n\n".join(message_parts)
@@ -465,11 +439,41 @@ class EmailResponses:
         logger.info("Email send status: %s", status)
         return {"status": status, "email": email, "message": message}
 
+    def _format_resource(self, resource: dict) -> str:
+        return "\n".join(
+            [
+                f"### {resource.get('name', 'Unnamed Resource')}",
+                f"- Referral Type: {resource.get('referral_type', 'None')}",
+                f"- Description: {resource.get('description', 'None')}",
+                f"- Website: {resource.get('website', 'None')}",
+                f"- Phone: {', '.join(resource.get('phones', ['None']))}",
+                f"- Email: {', '.join(resource.get('emails', ['None']))}",
+                f"- Addresses: {', '.join(resource.get('addresses', ['None']))}",
+            ]
+        )
+
+    def _format_action_plan(self, action_plan: dict) -> str:
+        """Format the action plan for email display. Returns empty string if no action plan."""
+        if not action_plan:
+            return ""
+
+        title = action_plan.get("title", "Your Action Plan")
+        summary = action_plan.get("summary", "")
+        content = action_plan.get("content", "")
+
+        parts = [f"## {title}"]
+        if summary:
+            parts.append(f"\n{summary}")
+        if content:
+            parts.append(f"\n{content}")
+
+        return "\n".join(parts)
+
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
-# TODO: Replace with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
+# Consider replacing this with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
 @component
 class LlmOutputValidator:
     def __init__(self, pydantic_model: type[BaseModelT]):
