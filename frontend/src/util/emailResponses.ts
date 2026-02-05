@@ -51,18 +51,14 @@ export async function emailResponses(
       );
     }
     if (!resultId) {
-      throw new Error(
-        "Resource result ID is required for full-referrals mode",
-      );
+      throw new Error("Resource result ID is required for full-referrals mode");
     }
     body.resources_result_id = resultId;
     body.action_plan_result_id = actionPlanResultId;
   } else {
     // Resources only (default) - send ONLY resources_result_id
     if (!resultId) {
-      throw new Error(
-        "Resource result ID is required for resources-only mode",
-      );
+      throw new Error("Resource result ID is required for resources-only mode");
     }
     body.resources_result_id = resultId;
   }

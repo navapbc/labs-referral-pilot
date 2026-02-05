@@ -92,6 +92,7 @@ export function EmailReferralsButton({
     setEmailSent(false);
     setStatusMessage("");
     setRecipientEmail("");
+    setSelectedMode(undefined);
   };
 
   const handleEmailDialogChange = (open: boolean) => {
