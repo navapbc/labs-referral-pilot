@@ -28,6 +28,9 @@ class AppConfig(PydanticBaseEnvConfig):
     phoenix_collector_endpoint: str = "https://phoenix:6006"
     batch_otel: bool = True
 
+    # For sending emails, AWS SES region configuration where email address is verified.
+    aws_ses_region: str = "us-east-1"
+    # From field of the email sent via AWS SES. This email address needs to be verified in SES.
     aws_ses_from_email: str = "no-reply@test.com"
 
     @cached_property

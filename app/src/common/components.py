@@ -469,7 +469,7 @@ class EmailResponses:
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
-# TODO: Replace with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
+# Consider replacing this with https://docs.haystack.deepset.ai/docs/jsonschemavalidator
 @component
 class LlmOutputValidator:
     def __init__(self, pydantic_model: type[BaseModelT]):

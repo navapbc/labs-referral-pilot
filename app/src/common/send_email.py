@@ -21,7 +21,7 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
     Returns:
         True if email was sent successfully, False otherwise
     """
-    ses_client = boto3.client("sesv2", region_name="us-east-1")
+    ses_client = boto3.client("sesv2", region_name=config.aws_ses_region)
 
     logger.debug("Preparing to send email to %s with subject '%s'", recipient, subject)
 
