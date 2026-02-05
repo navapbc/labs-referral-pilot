@@ -98,7 +98,7 @@ def populate_vector_db() -> None:
         # Exclude certain regions if needed
         for s3_folder in s3_subfolders.values():
             download_s3_folder_to_local(
-                s3, bucket, s3_folder, os.path.join(local_folder, s3_folder)
+                s3, bucket, s3_folder, os.path.join(local_folder, s3_folder.removeprefix(s3_parent_folder))
             )
 
     region_subfolders = {
