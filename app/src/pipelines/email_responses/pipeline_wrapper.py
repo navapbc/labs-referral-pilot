@@ -106,7 +106,7 @@ class PipelineWrapper(BasePipelineWrapper):
         action_plan_result_id: Optional[str] = None,
     ) -> dict:
         """
-        Execute the email pipeline with tracing and metadata.
+        Send an email with resources, action plan, or both based on provided result IDs.
 
         Args:
             email: Recipient email address (required)

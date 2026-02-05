@@ -145,7 +145,12 @@ class PipelineWrapper(BasePipelineWrapper):
     def run_api(
         self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "centraltx"
     ) -> dict:
-        # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
+        """
+        Generate referrals based on given query using RAG.
+        The suffix refers to the region and is used for both prompt selection
+        and filtering retrieved documents from the vector DB.
+        The suffix defaults to "centraltx".
+        """
 
         pipeline_run_args = self.create_pipeline_args(
             query,

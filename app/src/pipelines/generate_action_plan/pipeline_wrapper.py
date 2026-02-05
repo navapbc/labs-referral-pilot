@@ -69,6 +69,10 @@ class PipelineWrapper(BasePipelineWrapper):
         user_email: str,
         user_query: str,
     ) -> dict:
+        """
+        Generate an action plan based on the given resources.
+        The user query provides more context to the generation process.
+        """
         resource_objects = get_resources(resources)
         pipeline_run_args = self.create_pipeline_args(
             user_email,

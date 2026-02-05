@@ -133,6 +133,14 @@ class TracedPipelineRunner:
         parent_span_name_suffix: str | None = None,
         generator_hook: Callable[[dict], Generator] | None = None,
     ) -> Generator:
+        """
+        Run the pipeline with tracing and return a streaming response using hayhooks.streaming_generator().
+
+        The shorten_output is used to shorten the span output attribute to make it readable in Phoenix.
+        The parent_span_name_suffix is appended to the parent span name for easier region identification in Phoenix.
+        The generator_hook can be used to yield additional chunks after the main pipeline.run() completes,
+        such as yielding the result_id for reference by the frontend.
+        """
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
@@ -164,7 +172,7 @@ class TracedPipelineRunner:
                         yield chunk
 
                     # Call generator_hook if provided (inside span, after streaming)
-                    # We do this after streaming all chunks so that the parent-child span relationship is established
+                    # Do this after streaming all chunks so that the parent-child span relationship is established
                     if generator_hook:
                         for chunk in generator_hook(pipeline_run_args):
                             yield chunk
@@ -195,6 +203,12 @@ class TracedPipelineRunner:
         extract_output: Callable[[dict], Any] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
     ) -> dict:
+        """
+        Run the pipeline with tracing and return the full response as a dict.
+        The include_outputs_from is used to specify which component outputs to include in the final response dict.
+        The extract_output is used to extract a specific part of the response for setting as the span output for readability in Phoenix.
+        The parent_span_name_suffix is appended to the parent span name for easier region identification in Phoenix.
+        """
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
