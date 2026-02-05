@@ -1,3 +1,12 @@
+"""
+Utility functions for document ingestion to populate ChromaDB for RAG.
+
+The expected folder structure for `files_to_ingest_into_vector_db/` is
+subfolders representing a region like `keystone` or `centraltx`.
+Within that region subfolder, put files that will be ingested into
+the vector database (Chroma DB), which is used for RAG.
+"""
+
 import logging
 import os
 from pathlib import Path

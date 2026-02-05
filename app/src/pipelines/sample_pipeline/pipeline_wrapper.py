@@ -42,6 +42,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `sample_pipeline/run` endpoint
     def run_api(self, question: str) -> dict:
+        """Sample pipeline that uses Haystack's OpenAI component; useful for comparison against our OpenAIWebSearchGenerator component."""
         user_id = "someone@example.com"
         messages = [
             ChatMessage.from_system(system_msg),

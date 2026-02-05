@@ -10,6 +10,11 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 
 class AppConfig(PydanticBaseEnvConfig):
+    """
+    Application configuration settings, overridable by environment variables of the same name.
+    See docker-compose.yml, local.env, and override.env for environment variable being set.
+    """
+
     environment: str = "local"
     # Preview environment bucket names look like 'p-###-labs-referral-pilot-app-dev'
     bucket_name: str = "local"
@@ -23,6 +28,9 @@ class AppConfig(PydanticBaseEnvConfig):
     phoenix_collector_endpoint: str = "https://phoenix:6006"
     batch_otel: bool = True
 
+    # For sending emails, AWS SES region configuration where email address is verified.
+    aws_ses_region: str = "us-east-1"
+    # From field of the email sent via AWS SES. This email address needs to be verified in SES.
     aws_ses_from_email: str = "no-reply@test.com"
 
     @cached_property
@@ -33,7 +41,7 @@ class AppConfig(PydanticBaseEnvConfig):
         return self.db_client.get_session()
 
     # These versions should only be used for the deployed Phoenix instance.
-    # Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
+    # Be aware: Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
         "generate_referrals_centraltx": "UHJvbXB0VmVyc2lvbjoxNDM=",
@@ -65,12 +73,11 @@ class AppConfig(PydanticBaseEnvConfig):
 
     generate_referrals_rag_model_version: str = "gpt-5.1"
     generate_referrals_rag_reasoning_level: str = "none"
+    generate_referrals_rag_temperature: float = 0.9
 
     generate_action_plan_model_version: str = "gpt-5.1"
     generate_action_plan_reasoning_level: str = "none"
-
-    generate_referrals_from_doc_model_version: str = "gpt-5.1"
-    generate_referrals_from_doc_reasoning_level: str = "none"
+    generate_action_plan_temperature: float = 0.9
 
     def chroma_client(self) -> ClientAPI:
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)

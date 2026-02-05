@@ -91,7 +91,9 @@ class PipelineWrapper(BasePipelineWrapper):
             "query_embedder", SentenceTransformersTextEmbedder(model=config.rag_embedding_model)
         )
         pipeline.add_component(
-            "retriever", ChromaEmbeddingRetriever(config.chroma_document_store())
+            # The DocumentStore is populated by rag_utils.populate_vector_db(), called in gunicorn.conf.py
+            "retriever",
+            ChromaEmbeddingRetriever(config.chroma_document_store()),
         )
         pipeline.add_component(
             "output_adapter",
@@ -139,17 +141,31 @@ class PipelineWrapper(BasePipelineWrapper):
         # pipeline.draw(path="generate_referrals_rag.png")
         return pipeline
 
-    # Called for the `generate_referrals_rag/run` endpoint
+    # This function is called for the `generate_referrals_rag/run` API endpoint (non-streaming)
     def run_api(
-        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "centraltx"
+        self,
+        query: str,
+        user_email: str,
+        prompt_version_id: str = "",
+        suffix: str = "centraltx",
+        region: str | None = None,
     ) -> dict:
-        # Retrieve the requested prompt (with optional prompt_version_id and/or suffix)
+        """
+        Generate referrals based on given query using RAG.
+        The suffix is used for prompt selection. The suffix defaults to "centraltx".
+        The region is used for filtering retrieved documents from the vector DB. The region defaults to suffix.
+
+        For internal experimentation, suffix could be "centraltx-ryan" and the region="centraltx".
+        """
+
+        if not region:
+            region = suffix
 
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
             suffix=suffix,
-            region=suffix,
+            region=region,
             prompt_version_id=prompt_version_id,
         )
 
@@ -205,6 +221,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "reasoning_effort": reasoning_effort
                 or config.generate_referrals_rag_reasoning_level,
                 "streaming": streaming,
+                "temperature": config.generate_referrals_rag_temperature,
             },
             # For querying RAG DB
             "query_embedder": {"text": query},
@@ -215,7 +232,7 @@ class PipelineWrapper(BasePipelineWrapper):
         }
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
-    # Called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
+    # This function is called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
     def run_chat_completion(self, model: str, messages: list, body: dict) -> Generator:
         # Note: 'model' parameter is the pipeline name, not the LLM model
         assert model == self.name, f"Unexpected model/pipeline name: {model}"
@@ -224,6 +241,7 @@ class PipelineWrapper(BasePipelineWrapper):
         query = body.get("query", "")
         user_email = body.get("user_email", "")
         suffix = body.get("suffix", "centraltx")
+        region = body.get("region", suffix)
 
         if not query:
             raise ValueError("query parameter is required")
@@ -235,7 +253,7 @@ class PipelineWrapper(BasePipelineWrapper):
             query,
             user_email,
             suffix=suffix,
-            region=suffix,
+            region=region,
             prompt_version_id=body.get("prompt_version_id", ""),
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),

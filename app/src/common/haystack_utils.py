@@ -68,7 +68,8 @@ def to_chat_messages(
 
 
 def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict], Generator]:
-    """Creates a generator hook that yields the result_id as the last chunk.
+    """Creates a generator hook that yields the result_id as the last chunk in a streaming response,
+    i.e., TracedPipelineRunner.stream_response() calls a generator_hook() after pipeline.run() completes.
 
     This hook is specific to pipelines that use the SaveResult component and need to
     return the result_id to the frontend for caching/reference.
@@ -81,7 +82,7 @@ def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict]
         ValueError: If the pipeline does not have a SaveResult component
     """
     # Find the SaveResult component name in the pipeline
-    # NOTE: pipeline.walk() Visits each component in the pipeline exactly once and yields its name and instance.
+    # pipeline.walk() Visits each component in the pipeline exactly once and yields its name and instance.
     # https://docs.haystack.deepset.ai/reference/pipeline-api#asyncpipelinewalk
     save_result_component_name = next(
         (name for name, comp in pipeline.walk() if isinstance(comp, SaveResult)),
@@ -105,11 +106,21 @@ logger = logging.getLogger(__name__)
 
 
 class TracedPipelineRunner:
-    """Helper class to run Haystack pipelines with OpenInference tracing."""
+    """
+    Helper class to run Haystack pipelines with OpenInference tracing.
+    It wraps pipeline.run() calls under a parent OpenTelemetry spans and
+    handles streaming and non-streaming responses.
+    The parent span contains attributes and metadata for easy viewing in the Phoenix UI.
+
+    It also provides boilerplate features like handling error logging and setting span status on exceptions.
+    """
 
     def __init__(self, parent_span_name: str, pipeline: Pipeline) -> None:
         self.parent_span_name = parent_span_name
         self.pipeline = pipeline
+
+    def _parent_span_name(self, suffix: str | None) -> str:
+        return f"{self.parent_span_name}--{suffix}" if suffix else self.parent_span_name
 
     def stream_response(
         self,
@@ -122,12 +133,18 @@ class TracedPipelineRunner:
         parent_span_name_suffix: str | None = None,
         generator_hook: Callable[[dict], Generator] | None = None,
     ) -> Generator:
+        """
+        Run the pipeline with tracing and return a streaming response using hayhooks.streaming_generator().
+
+        The shorten_output is used to shorten the span output attribute to make it readable in Phoenix.
+        The parent_span_name_suffix is appended to the parent span name for easier region identification in Phoenix.
+        The generator_hook can be used to yield additional chunks after the main pipeline.run() completes,
+        such as yielding the result_id for reference by the frontend.
+        """
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                f"{self.parent_span_name}--{parent_span_name_suffix}"
-                if parent_span_name_suffix
-                else self.parent_span_name,
+                self._parent_span_name(parent_span_name_suffix),
                 openinference_span_kind="chain",
             ) as span:
                 assert isinstance(span, Span), f"Got unexpected {type(span)}"
@@ -155,7 +172,7 @@ class TracedPipelineRunner:
                         yield chunk
 
                     # Call generator_hook if provided (inside span, after streaming)
-                    # We do this after streaming all chunks so that the parent-child span relationship is established
+                    # Do this after streaming all chunks so that the parent-child span relationship is established
                     if generator_hook:
                         for chunk in generator_hook(pipeline_run_args):
                             yield chunk
@@ -186,12 +203,16 @@ class TracedPipelineRunner:
         extract_output: Callable[[dict], Any] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
     ) -> dict:
+        """
+        Run the pipeline with tracing and return the full response as a dict.
+        The include_outputs_from is used to specify which component outputs to include in the final response dict.
+        The extract_output is used to extract a specific part of the response for setting as the span output for readability in Phoenix.
+        The parent_span_name_suffix is appended to the parent span name for easier region identification in Phoenix.
+        """
         # Must set using_metadata context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-                f"{self.parent_span_name}--{parent_span_name_suffix}"
-                if parent_span_name_suffix
-                else self.parent_span_name,
+                self._parent_span_name(parent_span_name_suffix),
                 openinference_span_kind="chain",
             ) as span:
                 try:

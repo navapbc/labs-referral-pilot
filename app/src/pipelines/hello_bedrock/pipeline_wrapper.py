@@ -29,6 +29,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # Called for the `hello_bedrock/run` endpoint
     def run_api(self, name: str) -> dict:
+        """Sample pipeline that uses Amazon Bedrock; useful for testing"""
         messages = [
             ChatMessage.from_system(system_prompt),
             ChatMessage.from_user(name),
