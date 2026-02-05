@@ -143,20 +143,29 @@ class PipelineWrapper(BasePipelineWrapper):
 
     # This function is called for the `generate_referrals_rag/run` API endpoint (non-streaming)
     def run_api(
-        self, query: str, user_email: str, prompt_version_id: str = "", suffix: str = "centraltx"
+        self,
+        query: str,
+        user_email: str,
+        prompt_version_id: str = "",
+        suffix: str = "centraltx",
+        region: str | None = None,
     ) -> dict:
         """
         Generate referrals based on given query using RAG.
-        The suffix refers to the region and is used for both prompt selection
-        and filtering retrieved documents from the vector DB.
-        The suffix defaults to "centraltx".
+        The suffix is used for prompt selection. The suffix defaults to "centraltx".
+        The region is used for filtering retrieved documents from the vector DB. The region defaults to suffix.
+
+        For internal experimentation, suffix could be "centraltx-ryan" and the region="centraltx".
         """
+
+        if not region:
+            region = suffix
 
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
             suffix=suffix,
-            region=suffix,
+            region=region,
             prompt_version_id=prompt_version_id,
         )
 
@@ -232,6 +241,7 @@ class PipelineWrapper(BasePipelineWrapper):
         query = body.get("query", "")
         user_email = body.get("user_email", "")
         suffix = body.get("suffix", "centraltx")
+        region = body.get("region", suffix)
 
         if not query:
             raise ValueError("query parameter is required")
@@ -243,7 +253,7 @@ class PipelineWrapper(BasePipelineWrapper):
             query,
             user_email,
             suffix=suffix,
-            region=suffix,
+            region=region,
             prompt_version_id=body.get("prompt_version_id", ""),
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),

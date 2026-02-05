@@ -422,6 +422,11 @@ class EmailResponses:
 
         # Validate that at least one type of content is provided
         if not has_resources and not has_action_plan:
+            logger.error(
+                "EmailResponses: No content to email resources_dict=%r, action_plan_dict=%r",
+                resources_dict,
+                action_plan_dict,
+            )
             raise ValueError(
                 "At least one of resources_dict or action_plan_dict must contain valid data. "
                 f"Received resources_dict={bool(resources_dict)}, action_plan_dict={bool(action_plan_dict)}"
