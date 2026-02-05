@@ -134,7 +134,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         return self.runner.return_response(
             pipeline_run_args,
-            user_id="SYSTEM",
+            user_id="requestor_email",
             metadata={"requestor_email": requestor_email},
             input_={
                 "recipient_email": recipient_email,
