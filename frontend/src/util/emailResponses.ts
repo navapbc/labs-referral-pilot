@@ -57,7 +57,12 @@ export async function emailResponses(
     body.action_plan_result_id = actionPlanResultId;
   } else {
     // Resources only (default) - send ONLY resources_result_id
-    body.resources_result_id = resultId ?? "";
+    if (!resultId) {
+      throw new Error(
+        "Resource result ID is required for resources-only mode",
+      );
+    }
+    body.resources_result_id = resultId;
   }
 
   const url = `${apiDomain}${endpoint}/run`;
