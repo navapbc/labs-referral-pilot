@@ -27,15 +27,8 @@ from openai.types.responses import (
     ResponseCreatedEvent,
     ResponseFunctionWebSearch,
     ResponseOutputItemDoneEvent,
-    ResponseOutputMessage,
-    ResponseOutputText,
 )
-from openai.types.responses.response_function_web_search import (
-    ActionFind,
-    ActionOpenPage,
-    ActionSearch,
-)
-from openai.types.responses.response_output_text import AnnotationURLCitation
+from openai.types.responses.response_function_web_search import ActionSearch
 from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
@@ -249,7 +242,7 @@ class OpenAIWebSearchGenerator:
 
             try:
                 response = self.client.responses.create(**api_params)
-                full_text = self._stream_response(response)
+                full_text = self._stream_response(response, temperature)
                 return {"replies": [ChatMessage.from_assistant(full_text)]}
             except Exception as e:
                 logger.error("Failed to stream response: %s", e, exc_info=True)
@@ -258,17 +251,17 @@ class OpenAIWebSearchGenerator:
             # Non-streaming response
             response = self.client.responses.create(**api_params)
 
+            # Log model params to Phoenix span
+            span = trace.get_current_span()
+            span.set_attribute("model", str(response.model))
+            span.set_attribute("reasoning_effort", reasoning_effort)
+            span.set_attribute("temperature", str(response.temperature))
+            span.set_attribute("temperature_requested", str(temperature))
+
             web_search_responses = [
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
             ]
             self._add_child_spans(web_search_responses)
-
-            # Extract URL citations from message output items
-            message_items = [
-                item for item in response.output if isinstance(item, ResponseOutputMessage)
-            ]
-            for message in message_items:
-                self._add_citation_span(message)
 
             return {
                 "replies": [ChatMessage.from_assistant(response.output_text)],
@@ -277,7 +270,7 @@ class OpenAIWebSearchGenerator:
                 "web_search": [str(result) for result in web_search_responses],
             }
 
-    def _stream_response(self, response: Any) -> str:
+    def _stream_response(self, response: Any, temperature: float) -> str:
         # Collect full response while streaming
         full_text = ""
         chunk_count = 0
@@ -317,14 +310,13 @@ class OpenAIWebSearchGenerator:
             if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
                 if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
                     self._add_child_spans([openai_chunk.item])
-                elif isinstance(openai_chunk.item, ResponseOutputMessage):
-                    self._add_citation_span(openai_chunk.item)
             elif isinstance(openai_chunk, ResponseCreatedEvent):
                 resp = openai_chunk.response
                 span = trace.get_current_span()
                 span.set_attribute("model", str(resp.model))
                 span.set_attribute("reasoning_effort", str(resp.reasoning))
                 span.set_attribute("temperature", str(resp.temperature))
+                span.set_attribute("temperature_requested", str(temperature))
 
         logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
         if not full_text:
@@ -337,83 +329,34 @@ class OpenAIWebSearchGenerator:
     ) -> None:
         for tool_call in web_search_responses:
             action = tool_call.action
-            action_type = action.type
 
             # Skip internal OpenAI warmup searches (e.g. "calculator: 0")
-            # that don't contain real web search context.
             if isinstance(action, ActionSearch) and action.query.startswith("calculator:"):
                 continue
 
-            attrs: dict[str, str] = {
-                "status": tool_call.status,
-                "action.type": action_type,
-            }
-            tool_params: dict[str, Any] = {
-                "action_type": action_type,
-            }
-
+            # Build a single dict used for both span attributes and tool parameters.
+            # For ActionSearch, extract the query, expanded sub-queries, and source URLs.
+            # The 'queries' field is undocumented (extra field via Pydantic extra='allow')
+            # containing the expanded sub-queries the model actually searched for.
+            params: dict[str, Any] = {"action_type": action.type}
             if isinstance(action, ActionSearch):
-                attrs["action.query"] = action.query
-                tool_params["query"] = action.query
-                # 'queries' is an extra field returned by the API
-                # (not declared in the SDK model) containing expanded
-                # sub-queries the model actually searched for.
+                params["query"] = action.query
                 queries = getattr(action, "queries", None)
                 if queries:
-                    attrs["action.queries"] = json.dumps(queries)
-                    tool_params["queries"] = queries
+                    params["queries"] = queries
                 if action.sources:
-                    source_urls = [s.url for s in action.sources if s and s.url]
-                    if source_urls:
-                        attrs["action.source_urls"] = json.dumps(source_urls)
-                        tool_params["source_urls"] = source_urls
-            elif isinstance(action, ActionOpenPage):
-                attrs["action.url"] = action.url
-                tool_params["url"] = action.url
-            elif isinstance(action, ActionFind):
-                attrs["action.pattern"] = action.pattern
-                attrs["action.url"] = action.url
-                tool_params["pattern"] = action.pattern
-                tool_params["url"] = action.url
+                    urls = [s.url for s in action.sources if s and s.url]
+                    if urls:
+                        params["source_urls"] = urls
 
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
                 openinference_span_kind="tool",
-                attributes=attrs,
-            ) as span:
-                span.set_tool(
-                    name="openai_web_search",
-                    parameters=tool_params,
-                )
-
-    def _add_citation_span(self, message: ResponseOutputMessage) -> None:
-        """Extract URL citations from the response message and log them as a span."""
-        citations: list[dict[str, str]] = []
-        for content_part in message.content:
-            if not isinstance(content_part, ResponseOutputText):
-                continue
-            for annotation in content_part.annotations:
-                if isinstance(annotation, AnnotationURLCitation):
-                    citations.append({"url": annotation.url, "title": annotation.title})
-
-        if not citations:
-            return
-
-        with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
-            "web_search_citations",
-            openinference_span_kind="tool",
-            attributes={
-                "citation_count": str(len(citations)),
-                "citations": json.dumps(citations, indent=2),
-            },
-        ) as span:
-            span.set_tool(
-                name="web_search_citations",
-                parameters={
-                    "citation_count": len(citations),
-                    "citations": citations,
+                attributes={
+                    k: json.dumps(v) if isinstance(v, list) else str(v) for k, v in params.items()
                 },
-            )
+            ) as span:
+                span.set_tool(name="openai_web_search", parameters=params)
 
 
 EMAIL_INTRO = """\
