@@ -28,6 +28,11 @@ from openai.types.responses import (
     ResponseFunctionWebSearch,
     ResponseOutputItemDoneEvent,
 )
+from openai.types.responses.response_function_web_search import (
+    ActionFind,
+    ActionOpenPage,
+    ActionSearch,
+)
 from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
@@ -312,24 +317,53 @@ class OpenAIWebSearchGenerator:
             logger.warning("No text collected during streaming")
         return full_text
 
-    def _add_child_spans(self, web_search_responses: list[ResponseFunctionWebSearch]) -> None:
+    def _add_child_spans(
+        self,
+        web_search_responses: list[ResponseFunctionWebSearch],
+    ) -> None:
         for tool_call in web_search_responses:
+            action = tool_call.action
+            action_type = action.type
+
+            attrs: dict[str, str] = {
+                "status": tool_call.status,
+                "action.type": action_type,
+            }
+            tool_params: dict[str, Any] = {
+                "action_type": action_type,
+            }
+
+            if isinstance(action, ActionSearch):
+                attrs["action.query"] = action.query
+                tool_params["query"] = action.query
+                # 'queries' is an extra field returned by the API
+                # (not declared in the SDK model) containing expanded
+                # sub-queries the model actually searched for.
+                queries = getattr(action, "queries", None)
+                if queries:
+                    attrs["action.queries"] = json.dumps(queries)
+                    tool_params["queries"] = queries
+                if action.sources:
+                    source_urls = [s.url for s in action.sources]
+                    attrs["action.source_urls"] = json.dumps(source_urls)
+                    tool_params["source_urls"] = source_urls
+            elif isinstance(action, ActionOpenPage):
+                attrs["action.url"] = action.url
+                tool_params["url"] = action.url
+            elif isinstance(action, ActionFind):
+                attrs["action.pattern"] = action.pattern
+                attrs["action.url"] = action.url
+                tool_params["pattern"] = action.pattern
+                tool_params["url"] = action.url
+
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
                 openinference_span_kind="tool",
-                attributes={
-                    "action": str(tool_call.action),
-                    "status": tool_call.status,
-                    "action.query": str(getattr(tool_call.action, "query", None)),
-                    "action.queries": str(getattr(tool_call.action, "queries", None)),
-                },
+                attributes=attrs,
             ) as span:
                 span.set_tool(
                     name="openai_web_search",
-                    parameters={
-                        "query": getattr(tool_call.action, "query", None),
-                        "queries": getattr(tool_call.action, "queries", None),
-                    },
+                    parameters=tool_params,
                 )
 
 
