@@ -1,0 +1,207 @@
+================================================================================
+Testing GPT-5.1 with reasoning='none' for temperature support
+================================================================================
+Model: gpt-5.1
+Reasoning: none (KEY DIFFERENCE from earlier test!)
+Web Search: ENABLED
+Temperature values: 1.0, 0.75, 0.5, 0.25, 0.0
+Runs per temperature: 3 (to measure consistency)
+================================================================================
+
+================================================================================
+TESTING TEMPERATURE = 1.0
+================================================================================
+
+Run 1/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 14.71s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, 2-1-1 Texas / United Way for Greater Austin Navigation Center...
+
+Run 2/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 18.60s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, 2-1-1 Texas / United Way for Greater Austin Navigation Center, Central Texas Food Bank...
+
+Run 3/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 23.06s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area – Career Centers, Workforce Solutions Capital Area – Child Care Services, 2-1-1 Texas / United Way for Greater Austin Navigation Center...
+
+================================================================================
+TESTING TEMPERATURE = 0.75
+================================================================================
+
+Run 1/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 22.12s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Texas Child Care Connection – Child Care Scholarships (CCS)...
+
+Run 2/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 22.81s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank...
+
+Run 3/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 15.98s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, United Way for Greater Austin 2-1-1 Navigation Center...
+
+================================================================================
+TESTING TEMPERATURE = 0.5
+================================================================================
+
+Run 1/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 17.20s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 15.79s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area – Career Centers, Workforce Solutions Capital Area – Child Care Services, Central Texas Food Bank...
+
+Run 3/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 17.67s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Austin ISD Head Start / Pre-K3 Program...
+
+================================================================================
+TESTING TEMPERATURE = 0.25
+================================================================================
+
+Run 1/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 17.31s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 13.54s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank...
+
+Run 3/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 13.18s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area – Child Care Services, 2-1-1 Texas / United Way for Greater Austin Navigation Center...
+
+================================================================================
+TESTING TEMPERATURE = 0.0
+================================================================================
+
+Run 1/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 19.05s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Texas Workforce Commission – Child Care & Early Learning / Job Search, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 18.56s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank...
+
+Run 3/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 15.50s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Austin ISD Head Start / Pre-K3 Program...
+
+================================================================================
+SUMMARY: Temperature Parameter Support
+================================================================================
+Temperature 1.0: ✅ ACCEPTED (3 successful runs)
+Temperature 0.75: ✅ ACCEPTED (3 successful runs)
+Temperature 0.5: ✅ ACCEPTED (3 successful runs)
+Temperature 0.25: ✅ ACCEPTED (3 successful runs)
+Temperature 0.0: ✅ ACCEPTED (3 successful runs)
+
+================================================================================
+CONSISTENCY ANALYSIS
+================================================================================
+
+Temperature 1.0:
+  Runs: 3
+  Avg response time: 18.79s
+  Total unique resources: 14
+  Resources in ≥2 runs: 5 (35.7%)
+  Resources in ALL runs: 2 (14.3%)
+  Avg overlap (Jaccard): 27.3%
+  Fully consistent resources: 2-1-1 Texas / United Way for Greater Austin Navigation Center, Central Texas Food Bank
+
+Temperature 0.75:
+  Runs: 3
+  Avg response time: 20.30s
+  Total unique resources: 15
+  Resources in ≥2 runs: 3 (20.0%)
+  Resources in ALL runs: 3 (20.0%)
+  Avg overlap (Jaccard): 27.3%
+  Fully consistent resources: Workforce Solutions Capital Area, Workforce Solutions Capital Area Child Care Services, Central Texas Food Bank
+
+Temperature 0.5:
+  Runs: 3
+  Avg response time: 16.89s
+  Total unique resources: 15
+  Resources in ≥2 runs: 3 (20.0%)
+  Resources in ALL runs: 1 (6.7%)
+  Avg overlap (Jaccard): 15.8%
+  Fully consistent resources: Central Texas Food Bank
+
+Temperature 0.25:
+  Runs: 3
+  Avg response time: 14.68s
+  Total unique resources: 12
+  Resources in ≥2 runs: 6 (50.0%)
+  Resources in ALL runs: 3 (25.0%)
+  Avg overlap (Jaccard): 40.9%
+  Fully consistent resources: Workforce Solutions Capital Area, Central Texas Food Bank, 2-1-1 Texas / United Way for Greater Austin Navigation Center
+
+Temperature 0.0:
+  Runs: 3
+  Avg response time: 17.70s
+  Total unique resources: 14
+  Resources in ≥2 runs: 5 (35.7%)
+  Resources in ALL runs: 2 (14.3%)
+  Avg overlap (Jaccard): 29.6%
+  Fully consistent resources: Workforce Solutions Capital Area, Central Texas Food Bank
+
+================================================================================
+SPEED COMPARISON
+================================================================================
+Temperature 1.0: 18.79s average
+Temperature 0.75: 20.30s average
+Temperature 0.5: 16.89s average
+Temperature 0.25: 14.68s average
+Temperature 0.0: 17.70s average
+
+================================================================================
+CONCLUSION
+================================================================================
+✅ SUCCESS! GPT-5.1 with reasoning='none' SUPPORTS custom temperature values!
+   Accepted temperatures: [1.0, 0.75, 0.5, 0.25, 0.0]
+
+🎯 HUGE WIN: Your production config can enable temperature WITHOUT changing model!
+   - Keep GPT-5.1 (fast speed)
+   - Just ensure reasoning={'effort': 'none'}
+   - Set temperature=[any value 0.0-1.0]
+
+📊 Benefits vs GPT-5.2:
+   - No 60% speed penalty
+   - Temperature control still works
+   - Drop-in configuration change
+
+🏆 Recommended temperature: 0.25 (best consistency: 40.9% overlap)
+================================================================================
+
+💾 Detailed results saved to: gpt51_temperature_none_verification_results.json

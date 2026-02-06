@@ -1,0 +1,260 @@
+{
+  "1.0": {
+    "temperature": 1.0,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 14.71,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Central Texas Food Bank",
+          "City of Austin \u2013 Get Help with Food Access",
+          "Texas Health and Human Services \u2013 SNAP & TANF",
+          "Texas Child Care Availability Portal"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 18.6,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Central Texas Food Bank",
+          "Your Texas Benefits (SNAP, TANF, Medicaid, CHIP)",
+          "Texas Workforce Commission Child Care Services (via Workforce Solutions Capital Area)",
+          "Raising Travis County (County-funded Child Care Scholarships)",
+          "Hope Food Pantry Austin"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 23.06,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area \u2013 Career Centers",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Central Texas Food Bank",
+          "Texas Child Care Availability Portal",
+          "Texas Health and Human Services \u2013 Your Texas Benefits (SNAP & TANF)",
+          "Hope Food Pantry Austin"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.75": {
+    "temperature": 0.75,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 22.12,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Texas Child Care Connection \u2013 Child Care Scholarships (CCS)",
+          "Central Texas Food Bank",
+          "Travis County Community Centers",
+          "United Way for Greater Austin \u2013 ConnectATX",
+          "Hope Food Pantry Austin"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 22.81,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Austin Public Health Neighborhood Centers",
+          "City of Austin Child Care Programs",
+          "Texas Health and Human Services \u2013 SNAP & TANF"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 15.98,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "United Way for Greater Austin 2-1-1 Navigation Center",
+          "Central Texas Food Bank",
+          "City of Austin / Travis County Resource Referral (3-1-1 & Online Get Help Portal)",
+          "Texas Child Care Availability Portal",
+          "Texas Health and Human Services \u2013 SNAP (Food Stamps) and TANF"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.5": {
+    "temperature": 0.5,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 17.2,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin",
+          "Austin Public Health Neighborhood Centers",
+          "ConnectATX (City of Austin & Community Resource Finder)",
+          "Texas Workforce Commission \u2013 WorkInTexas.com"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 15.79,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area \u2013 Career Centers",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "Central Texas Food Bank",
+          "City of Austin/Travis County Neighborhood Centers (Example: East Austin Neighborhood Center)",
+          "Austin ISD Head Start Pre-K3",
+          "Early Head Start and Head Start \u2013 Texas Child Care Connection"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 17.67,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Austin ISD Head Start / Pre-K3 Program",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (Statewide Social Services Helpline)",
+          "City of Austin / Travis County Social Services & 3-1-1"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.25": {
+    "temperature": 0.25,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 17.31,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "City of Austin \u2013 Get Help & Neighborhood Centers",
+          "City of Austin \u2013 Child Care Resources",
+          "ConnectATX (United Way for Greater Austin)"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 13.54,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Austin ISD Head Start & Pre-K3 Program",
+          "Texas Health and Human Services \u2013 SNAP & TANF",
+          "Hope Food Pantry Austin"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 13.18,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Central Texas Food Bank",
+          "Austin ISD Head Start Pre-K3 Program",
+          "Texas Health and Human Services \u2013 SNAP & TANF",
+          "Hope Food Pantry Austin"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.0": {
+    "temperature": 0.0,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 19.05,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Texas Workforce Commission \u2013 Child Care & Early Learning / Job Search",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin",
+          "Austin ISD Head Start Pre-K3 Program",
+          "Texas Child Care Connection \u2013 Early Head Start and Head Start Locator",
+          "SNAP (Supplemental Nutrition Assistance Program) \u2013 Texas Health and Human Services"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 18.56,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Austin ISD Head Start / Pre-K3 Program",
+          "Texas Early Head Start and Head Start (Statewide Locator)",
+          "City of Austin / United Way Find Food & Support"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 15.5,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area",
+          "Workforce Solutions Capital Area Child Care Services",
+          "Austin ISD Head Start / Pre-K3 Program",
+          "Early Head Start and Head Start (Texas Child Care Connection)",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Texas Child Care Availability Portal"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  }
+}
