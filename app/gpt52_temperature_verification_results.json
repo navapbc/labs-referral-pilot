@@ -1,0 +1,250 @@
+{
+  "1.0": {
+    "temperature": 1.0,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 22.14,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers & Job Search Support)",
+          "Workforce Solutions Capital Area \u2014 Child Care Services (Child Care Scholarships/Waitlist)",
+          "Central Texas Food Bank (Food Distributions + SNAP/Benefits Help)",
+          "Caritas of Austin (Food + Stability Services)",
+          "Texas Workforce Commission (Unemployment/Workforce Programs Ombudsman Contact)",
+          "Texas Health and Human Services (YourTexasBenefits / SNAP Programs)",
+          "Austin Diaper Bank (Diapers/Wipes via Partner Agencies)"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 19.71,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (North Career Center)",
+          "Workforce Solutions Capital Area Child Care Services (Child Care Scholarships)",
+          "Central Texas Food Bank",
+          "United Way for Greater Austin \u2013 2-1-1 Navigation Center",
+          "Austin Public Health \u2013 WIC (Women, Infants and Children)",
+          "Texas Workforce Commission (Statewide Employment Services / Agency Contact)"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 18.31,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers + Employment Services)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services (Child Care Scholarships/Assistance)",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (United Way / Health and Human Services Resource Hotline)",
+          "Austin ISD Head Start (Early Childhood / Pre-K3 for Eligible Families)",
+          "Texas Workforce Commission (TWC) \u2013 Ombudsman / Agency Contact"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.75": {
+    "temperature": 0.75,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 23.65,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area (Austin/Travis County)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (Texas Information & Referral Network)",
+          "Goodwill Central Texas \u2013 Career Services (Goodwill Community Center / Resource Center)",
+          "Austin Area Urban League",
+          "Texas Workforce Commission (TWC) \u2013 Unemployment & Employment Services"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 27.68,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers) \u2014 Employment & Job Search Help",
+          "Workforce Solutions Capital Area \u2014 Child Care Services (Child Care Scholarships)",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (United Way for Greater Austin / Central Texas Information & Referral)",
+          "Texas WIC (Women, Infants, and Children) \u2014 Texas Health & Human Services",
+          "Texas Workforce Commission (TWC) \u2014 Vocational Rehabilitation Services"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 20.01,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Austin Career Centers)",
+          "Workforce Solutions Capital Area \u2014 Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (Health & Human Services Information and Referral)",
+          "Texas WIC (Women, Infants, and Children) \u2014 Austin Clinics",
+          "Texas Workforce Commission (TWC)"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.5": {
+    "temperature": 0.5,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 19.59,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services (Child Care Scholarships)",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (United Way for Greater Austin Area Information Center)",
+          "United Way for Greater Austin",
+          "Austin ISD Head Start (Pre-K3)"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 18.96,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Austin Career Centers)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "Austin ISD Head Start",
+          "Central Texas Food Bank",
+          "Texas WIC (Austin clinics via Texas WIC Office Locator)",
+          "2-1-1 Texas (Texas Health & Human Services Commission)"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 17.26,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Austin-Travis County) \u2014 Career Centers",
+          "Workforce Solutions Capital Area \u2014 Child Care Services",
+          "United Way for Greater Austin \u2014 2-1-1 Navigation Center / ConnectATX",
+          "Central Texas Food Bank",
+          "Texas WIC (Women, Infants, and Children) \u2014 Texas Health & Human Services",
+          "Austin Diaper Bank"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.25": {
+    "temperature": 0.25,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 17.82,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "Central Texas Food Bank",
+          "2-1-1 Texas / United Way for Greater Austin Navigation Center",
+          "Texas WIC (Women, Infants, and Children)",
+          "Texas Workforce Commission (TWC)"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 19.91,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers + Job Search Help)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services (CCS)",
+          "Central Texas Food Bank (Food Assistance + SNAP/Benefits Help)",
+          "YourTexasBenefits (Texas HHSC) \u2013 Apply for SNAP/Medicaid/TANF",
+          "2-1-1 Texas (Information & Referral Hotline)",
+          "Austin Diaper Bank (Diapers/Wipes & Hygiene Support via Partner Agencies)"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 14.65,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services (CCS)",
+          "Central Texas Food Bank",
+          "2-1-1 Texas (Texas Health and Human Services Commission)",
+          "Texas WIC (Women, Infants, and Children)",
+          "Texas Health and Human Services / YourTexasBenefits (SNAP, Medicaid, TANF)"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  },
+  "0.0": {
+    "temperature": 0.0,
+    "runs": [
+      {
+        "run": 1,
+        "success": true,
+        "response_time": 19.75,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers \u2013 Austin)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services",
+          "Central Texas Food Bank",
+          "Texas WIC (Women, Infants, and Children) \u2013 Austin Clinics",
+          "Texas Workforce Commission (TWC)",
+          "Travis County Health & Human Services \u2013 Social Work & Case Management Services"
+        ]
+      },
+      {
+        "run": 2,
+        "success": true,
+        "response_time": 16.95,
+        "resource_count": 7,
+        "resources": [
+          "Workforce Solutions Capital Area (Austin Career Centers)",
+          "Workforce Solutions Capital Area \u2013 Child Care Services (CCS)",
+          "Austin ISD Head Start / Pre-K3 (Travis County)",
+          "Central Texas Food Bank",
+          "Manos de Cristo (Food Pantry & Basic Needs Support)",
+          "Texas WIC (Women, Infants, and Children) \u2013 Austin Clinics",
+          "YourTexasBenefits / Texas Health and Human Services (SNAP, TANF, Medicaid)"
+        ]
+      },
+      {
+        "run": 3,
+        "success": true,
+        "response_time": 22.29,
+        "resource_count": 6,
+        "resources": [
+          "Workforce Solutions Capital Area (Career Centers + Child Care Services/CCS)",
+          "WorkInTexas.com (Texas Workforce Commission job search system)",
+          "Austin ISD Head Start (Free full-day Pre-K3 for eligible 3-year-olds)",
+          "Central Texas Food Bank",
+          "Texas WIC (Austin WIC Clinic \u2013 Blessing Ave)",
+          "2-1-1 Texas (Texas Health and Human Services information & referral)"
+        ]
+      }
+    ],
+    "accepted": true,
+    "error": null
+  }
+}

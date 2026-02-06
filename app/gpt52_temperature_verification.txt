@@ -1,0 +1,190 @@
+================================================================================
+Testing GPT-5.2 with reasoning='none' for temperature support
+================================================================================
+Model: gpt-5.2
+Reasoning: none
+Web Search: ENABLED
+Temperature values: 1.0, 0.75, 0.5, 0.25, 0.0
+Runs per temperature: 3 (to measure consistency)
+================================================================================
+
+================================================================================
+TESTING TEMPERATURE = 1.0
+================================================================================
+
+Run 1/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 22.14s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers & Job Search Support), Workforce Solutions Capital Area — Child Care Services (Child Care Scholarships/Waitlist), Central Texas Food Bank (Food Distributions + SNAP/Benefits Help)...
+
+Run 2/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 19.71s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (North Career Center), Workforce Solutions Capital Area Child Care Services (Child Care Scholarships), Central Texas Food Bank...
+
+Run 3/3 at temperature 1.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 18.31s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers + Employment Services), Workforce Solutions Capital Area – Child Care Services (Child Care Scholarships/Assistance), Central Texas Food Bank...
+
+================================================================================
+TESTING TEMPERATURE = 0.75
+================================================================================
+
+Run 1/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 23.65s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area (Austin/Travis County), Workforce Solutions Capital Area – Child Care Services, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 27.68s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers) — Employment & Job Search Help, Workforce Solutions Capital Area — Child Care Services (Child Care Scholarships), Central Texas Food Bank...
+
+Run 3/3 at temperature 0.75...
+  ✅ SUCCESS!
+  ⏱️  Response time: 20.01s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Austin Career Centers), Workforce Solutions Capital Area — Child Care Services, Central Texas Food Bank...
+
+================================================================================
+TESTING TEMPERATURE = 0.5
+================================================================================
+
+Run 1/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 19.59s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers), Workforce Solutions Capital Area – Child Care Services (Child Care Scholarships), Central Texas Food Bank...
+
+Run 2/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 18.96s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Austin Career Centers), Workforce Solutions Capital Area – Child Care Services, Austin ISD Head Start...
+
+Run 3/3 at temperature 0.5...
+  ✅ SUCCESS!
+  ⏱️  Response time: 17.26s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Austin-Travis County) — Career Centers, Workforce Solutions Capital Area — Child Care Services, United Way for Greater Austin — 2-1-1 Navigation Center / ConnectATX...
+
+================================================================================
+TESTING TEMPERATURE = 0.25
+================================================================================
+
+Run 1/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 17.82s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers), Workforce Solutions Capital Area – Child Care Services, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 19.91s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers + Job Search Help), Workforce Solutions Capital Area – Child Care Services (CCS), Central Texas Food Bank (Food Assistance + SNAP/Benefits Help)...
+
+Run 3/3 at temperature 0.25...
+  ✅ SUCCESS!
+  ⏱️  Response time: 14.65s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers), Workforce Solutions Capital Area – Child Care Services (CCS), Central Texas Food Bank...
+
+================================================================================
+TESTING TEMPERATURE = 0.0
+================================================================================
+
+Run 1/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 19.75s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers – Austin), Workforce Solutions Capital Area – Child Care Services, Central Texas Food Bank...
+
+Run 2/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 16.95s
+  📊 Resources found: 7
+  📝 Resource names: Workforce Solutions Capital Area (Austin Career Centers), Workforce Solutions Capital Area – Child Care Services (CCS), Austin ISD Head Start / Pre-K3 (Travis County)...
+
+Run 3/3 at temperature 0.0...
+  ✅ SUCCESS!
+  ⏱️  Response time: 22.29s
+  📊 Resources found: 6
+  📝 Resource names: Workforce Solutions Capital Area (Career Centers + Child Care Services/CCS), WorkInTexas.com (Texas Workforce Commission job search system), Austin ISD Head Start (Free full-day Pre-K3 for eligible 3-year-olds)...
+
+================================================================================
+SUMMARY: Temperature Parameter Support
+================================================================================
+Temperature 1.0: ✅ ACCEPTED (3 successful runs)
+Temperature 0.75: ✅ ACCEPTED (3 successful runs)
+Temperature 0.5: ✅ ACCEPTED (3 successful runs)
+Temperature 0.25: ✅ ACCEPTED (3 successful runs)
+Temperature 0.0: ✅ ACCEPTED (3 successful runs)
+
+================================================================================
+CONSISTENCY ANALYSIS
+================================================================================
+
+Temperature 1.0:
+  Runs: 3
+  Total unique resources: 18
+  Resources in ≥2 runs: 1 (5.6%)
+  Resources in ALL runs: 0 (0.0%)
+  Avg overlap (Jaccard): 3.0%
+
+Temperature 0.75:
+  Runs: 3
+  Total unique resources: 17
+  Resources in ≥2 runs: 1 (5.9%)
+  Resources in ALL runs: 1 (5.9%)
+  Avg overlap (Jaccard): 8.6%
+  Fully consistent resources: Central Texas Food Bank
+
+Temperature 0.5:
+  Runs: 3
+  Total unique resources: 16
+  Resources in ≥2 runs: 1 (6.2%)
+  Resources in ALL runs: 1 (6.2%)
+  Avg overlap (Jaccard): 9.1%
+  Fully consistent resources: Central Texas Food Bank
+
+Temperature 0.25:
+  Runs: 3
+  Total unique resources: 14
+  Resources in ≥2 runs: 4 (28.6%)
+  Resources in ALL runs: 0 (0.0%)
+  Avg overlap (Jaccard): 14.1%
+
+Temperature 0.0:
+  Runs: 3
+  Total unique resources: 16
+  Resources in ≥2 runs: 2 (12.5%)
+  Resources in ALL runs: 1 (6.2%)
+  Avg overlap (Jaccard): 11.9%
+  Fully consistent resources: Central Texas Food Bank
+
+================================================================================
+CONCLUSION
+================================================================================
+✅ SUCCESS! GPT-5.2 with reasoning='none' SUPPORTS custom temperature values!
+   Accepted temperatures: [1.0, 0.75, 0.5, 0.25, 0.0]
+
+🎯 Your engineer's component WILL WORK with this configuration:
+   - model='gpt-5.2'
+   - reasoning={'effort': 'none'}
+   - temperature=[any value 0.0-1.0]
+
+📊 Next steps:
+   1. Update production config to use GPT-5.2 with reasoning='none'
+   2. Enable temperature parameter in component
+   3. Test with temperature=0.5 or 0.25 for better consistency
+   4. Measure speed impact (GPT-5.2 is ~1.4x slower than 5.1)
+================================================================================
+
+💾 Detailed results saved to: gpt52_temperature_verification_results.json
