@@ -416,6 +416,7 @@ export default function Page() {
                     onPrint={handlePrint}
                     resourcesResultId={resourcesResultId}
                     actionPlanResultId={actionPlanResultId}
+                    userEmail={userEmail}
                     disabled={isStreamingActionPlan || isStreamingResources}
                   />
                 </div>
@@ -479,6 +480,7 @@ export default function Page() {
                   onPrint={handlePrint}
                   resourcesResultId={resourcesResultId}
                   actionPlanResultId={actionPlanResultId}
+                  userEmail={userEmail}
                   className="justify-end"
                   testIdSuffix="bottom"
                   disabled={isStreamingActionPlan || isStreamingResources}
