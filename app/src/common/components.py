@@ -242,7 +242,7 @@ class OpenAIWebSearchGenerator:
 
             try:
                 response = self.client.responses.create(**api_params)
-                full_text = self._stream_response(response, temperature)
+                full_text = self._stream_response(response)
                 return {"replies": [ChatMessage.from_assistant(full_text)]}
             except Exception as e:
                 logger.error("Failed to stream response: %s", e, exc_info=True)
@@ -256,7 +256,6 @@ class OpenAIWebSearchGenerator:
             span.set_attribute("model", str(response.model))
             span.set_attribute("reasoning_effort", reasoning_effort)
             span.set_attribute("temperature", str(response.temperature))
-            span.set_attribute("temperature_requested", str(temperature))
 
             web_search_responses = [
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
@@ -270,7 +269,7 @@ class OpenAIWebSearchGenerator:
                 "web_search": [str(result) for result in web_search_responses],
             }
 
-    def _stream_response(self, response: Any, temperature: float) -> str:
+    def _stream_response(self, response: Any) -> str:
         # Collect full response while streaming
         full_text = ""
         chunk_count = 0
@@ -316,7 +315,6 @@ class OpenAIWebSearchGenerator:
                 span.set_attribute("model", str(resp.model))
                 span.set_attribute("reasoning_effort", str(resp.reasoning))
                 span.set_attribute("temperature", str(resp.temperature))
-                span.set_attribute("temperature_requested", str(temperature))
 
         logger.info("Streaming complete: %d chunks, %d characters", chunk_count, len(full_text))
         if not full_text:
