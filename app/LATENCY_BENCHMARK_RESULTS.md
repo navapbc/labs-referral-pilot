@@ -309,6 +309,240 @@ The benchmark covers 10 categories of real-world Central Texas case worker scena
 
 ---
 
+### Why Gemini Wasn't Tested WITH Web Search
+
+#### The Challenge
+
+All Gemini speed tests above were conducted **WITHOUT web search enabled** to ensure a fair apples-to-apples comparison with ChatGPT 5.1 (also without web search). However, our **production application relies on web search** to provide current, accurate resource recommendations.
+
+**Why we couldn't test Gemini with web search:**
+
+1. **Different API Architecture:**
+   - OpenAI: Uses Responses API with built-in `tools=[{"type": "web_search"}]`
+   - Gemini: Uses separate "grounding with Google Search" feature that works differently
+
+2. **No Direct Equivalent:**
+   - OpenAI's Responses API is specifically designed for web-grounded responses
+   - Gemini's grounding feature uses a different model and configuration approach
+   - Cannot do a direct performance comparison without implementing both
+
+3. **Implementation Required:**
+   - Current codebase uses `OpenAIWebSearchGenerator` component
+   - Would need to build a parallel `GeminiWebSearchGenerator` component
+   - Requires understanding Gemini's grounding API patterns and behavior
+
+4. **Fair Comparison Needed:**
+   - Testing Gemini without web search vs ChatGPT with web search would be misleading
+   - Speed differences could be due to web search overhead, not model performance
+   - For accurate benchmarking, both must use the same configuration
+
+---
+
+### What It Would Take to Implement Gemini with Web Search
+
+#### Technical Requirements
+
+**1. API Integration - Gemini's Grounding with Google Search**
+
+Gemini uses the "grounding" feature to connect responses to Google Search results:
+
+```python
+import google.generativeai as genai
+from google.generativeai import types
+
+# Configure grounding with Google Search
+model = genai.GenerativeModel('gemini-3-flash-preview')
+
+response = model.generate_content(
+    prompt,
+    tools=[types.Tool(
+        google_search=types.GoogleSearchRetrieval()
+    )]
+)
+```
+
+**Key differences from OpenAI:**
+- Uses `google_search` tool instead of generic `web_search`
+- May return grounding metadata and source citations
+- Different response structure and parsing requirements
+
+**2. New Component Implementation**
+
+Create `GeminiWebSearchGenerator` component in `src/common/components.py`:
+
+```python
+@component
+class GeminiWebSearchGenerator:
+    """Searches the web using Google's grounding feature and generates a response."""
+
+    @component.output_types(replies=List[ChatMessage])
+    def run(
+        self,
+        messages: list[ChatMessage],
+        model: str = "gemini-3-flash-preview",
+        temperature: float | None = None,  # Gemini DOES support temperature!
+    ) -> dict:
+        """
+        Run the Gemini web search generator.
+
+        Args:
+            messages: List of ChatMessage objects to send to the API
+            model: Gemini model to use
+            temperature: Temperature for response randomness (0.0-1.0)
+
+        Returns:
+            Dictionary with replies key containing ChatMessage response
+        """
+        import google.generativeai as genai
+        from google.generativeai import types
+
+        assert len(messages) == 1
+        prompt = messages[0].text
+
+        # Initialize Gemini client
+        genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+        model_instance = genai.GenerativeModel(model)
+
+        # Configure generation parameters
+        generation_config = {}
+        if temperature is not None:
+            generation_config["temperature"] = temperature
+
+        # Generate with grounding
+        response = model_instance.generate_content(
+            prompt,
+            tools=[types.Tool(
+                google_search=types.GoogleSearchRetrieval()
+            )],
+            generation_config=generation_config if generation_config else None
+        )
+
+        # Extract text from response
+        response_text = response.text
+
+        return {"replies": [ChatMessage.from_assistant(response_text)]}
+```
+
+**3. Pipeline Integration**
+
+Update pipeline to support both OpenAI and Gemini generators:
+
+```python
+# In pipeline configuration
+if config.llm_provider == "openai":
+    generator = OpenAIWebSearchGenerator()
+elif config.llm_provider == "gemini":
+    generator = GeminiWebSearchGenerator()
+else:
+    raise ValueError(f"Unknown LLM provider: {config.llm_provider}")
+```
+
+**4. Configuration Management**
+
+Add environment variables and configuration:
+
+```python
+# In app_config.py
+class Config:
+    # Existing OpenAI config
+    openai_api_key: str = os.environ.get("OPENAI_API_KEY")
+
+    # New Gemini config
+    google_api_key: str = os.environ.get("GOOGLE_API_KEY")
+    llm_provider: str = os.environ.get("LLM_PROVIDER", "openai")  # "openai" or "gemini"
+    gemini_model: str = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
+```
+
+---
+
+#### Development Effort Estimate
+
+**Implementation Time: 2-3 days**
+
+| Task | Effort | Priority |
+|------|--------|----------|
+| Research Gemini grounding API | 2 hours | High |
+| Implement `GeminiWebSearchGenerator` component | 4 hours | High |
+| Add configuration and environment setup | 2 hours | High |
+| Update pipeline to support both providers | 3 hours | High |
+| Write unit tests | 4 hours | Medium |
+| Integration testing and debugging | 6 hours | High |
+| Performance benchmarking (with web search) | 4 hours | High |
+| Documentation | 2 hours | Medium |
+| **Total** | **~27 hours (~3-4 days)** | |
+
+---
+
+#### Benefits of Implementing Gemini with Web Search
+
+**Potential Advantages:**
+
+1. **Speed:** Based on tests without web search, Gemini is 2x faster than ChatGPT
+   - Expected improvement even with web search enabled
+   - Better user experience with faster response times
+
+2. **Cost:** Gemini Flash is typically more cost-effective than GPT-5.1
+   - Lower cost per 1M tokens
+   - Significant savings at scale (thousands of daily requests)
+
+3. **Temperature Control:** Gemini **DOES support temperature** parameter
+   - Could address user concerns about consistency
+   - Enables fine-tuning of response variability
+   - No API limitation like OpenAI's Responses API
+
+4. **Google Search Integration:** Native Google Search grounding
+   - Direct access to Google's search results
+   - Potentially more current information
+   - Better integration with Google's knowledge graph
+
+5. **Provider Diversity:** Reduces dependency on single vendor
+   - Enables A/B testing between providers
+   - Fallback option if one provider has issues
+   - Negotiating leverage with vendors
+
+**Trade-offs to Consider:**
+
+1. **Additional Complexity:** Maintaining two separate LLM integrations
+2. **Testing Burden:** Need to test both providers for each change
+3. **Response Format Differences:** May need to handle different output structures
+4. **Grounding Metadata:** Gemini returns source citations that need handling
+5. **Unknown Performance:** Speed with web search hasn't been validated yet
+
+---
+
+#### Recommended Next Steps
+
+**If you want to pursue Gemini with web search:**
+
+1. **Proof of Concept (1 day)**
+   - Create simple standalone script testing Gemini grounding
+   - Verify API works as expected
+   - Measure speed with web search on 10 sample queries
+
+2. **Component Implementation (2 days)**
+   - Build `GeminiWebSearchGenerator` component
+   - Integrate with existing pipeline
+   - Add configuration switching
+
+3. **Benchmark Testing (1 day)**
+   - Run same 55-query Central Texas benchmark WITH web search
+   - Compare speed, quality, and reliability vs ChatGPT 5.1
+   - Analyze cost implications
+
+4. **Production Decision**
+   - If Gemini with web search is faster AND maintains quality: Consider migration
+   - If only marginally better: May not be worth the complexity
+   - If quality suffers: Stick with ChatGPT 5.1
+
+**Priority Assessment:** ⚠️ **Medium Priority**
+
+- Current production (ChatGPT 5.1 + web search) works reliably
+- Speed improvements would be beneficial but not critical
+- Temperature control with Gemini is attractive but hybrid caching (from temperature report) is an alternative
+- Consider implementing after addressing consistency issues with caching approach
+
+---
+
 ## Key Findings & Recommendations
 
 ### Model Selection
