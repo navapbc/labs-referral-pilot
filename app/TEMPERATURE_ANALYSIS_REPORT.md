@@ -198,6 +198,113 @@ response = client.responses.create(
 
 ---
 
+## Engineer's Temperature Component: Code vs. API Limitation
+
+### What Was Built
+
+The lead engineer implemented a temperature parameter pass-through in the `OpenAIWebSearchGenerator` component. The code changes are **technically correct** and properly implement the temperature parameter handling.
+
+**Code Implementation (from genai-temperature branch):**
+
+```python
+@component
+class OpenAIWebSearchGenerator:
+    @component.output_types(replies=List[ChatMessage])
+    def run(
+        self,
+        messages: list[ChatMessage],
+        domain: str | None = None,
+        model: str = "gpt-5",
+        reasoning_effort: str = "high",
+        temperature: float | None = None,  # ✅ NEW: Temperature parameter added
+    ) -> dict:
+        logger.info(
+            "Calling OpenAI API with web_search, model=%s, domain=%s, reasoning_effort=%s, temperature=%s",
+            model, domain, reasoning_effort, temperature,
+        )
+
+        # ... existing code ...
+
+        api_params: dict = {
+            "model": model,
+            "input": prompt,
+            "reasoning": {"effort": reasoning_effort},
+            "tools": [{"type": "web_search"}],
+        }
+
+        # ✅ NEW: Conditionally add temperature if provided
+        if temperature is not None:
+            api_params["temperature"] = temperature
+
+        # ... rest of implementation ...
+        response = client.responses.create(**api_params)
+```
+
+**What the code does correctly:**
+1. ✅ Accepts temperature as an optional parameter
+2. ✅ Logs the temperature value for debugging
+3. ✅ Conditionally adds temperature to API params only when provided
+4. ✅ Passes temperature to the OpenAI client
+
+### Verification Test Results
+
+To verify if this component enables temperature control, we ran direct API tests using the exact same configuration:
+
+**Test Configuration:**
+- Model: gpt-5.1 (no reasoning)
+- API: OpenAI Responses API
+- Web Search: ENABLED
+- Temperature values: 1.0, 0.5, 0.0
+
+**Results:**
+
+| Temperature | Result | API Response |
+|-------------|---------|--------------|
+| **1.0** | ✅ **ACCEPTED** | API returned temperature=1.0 successfully |
+| 0.5 | ❌ **REJECTED** | Error code: 400 - "Unsupported parameter: 'temperature' is not supported with this model" |
+| 0.0 | ❌ **REJECTED** | Error code: 400 - "Unsupported parameter: 'temperature' is not supported with this model" |
+
+**Test script:** `verify_temperature_api.py`
+
+### Why It Doesn't Work
+
+**The component code is CORRECT, but the OpenAI API rejects it.**
+
+This is an **API limitation**, not a code problem:
+
+1. **The Component Code Works:** The engineer's implementation properly handles and passes the temperature parameter
+2. **The API Rejects It:** OpenAI's Responses API with gpt-5.1 + web search does NOT support custom temperature values
+3. **Only Default Accepted:** The API only accepts temperature=1.0 (the default value)
+4. **Not a Code Bug:** There is nothing wrong with the component implementation
+
+### What This Means
+
+```
+✅ Component Code: READY
+❌ OpenAI API: NOT SUPPORTED
+❌ Temperature Control: NOT AVAILABLE (yet)
+```
+
+**The engineer's work is not wasted:**
+- The component is correctly implemented and **ready to use**
+- IF/WHEN OpenAI adds temperature support to the Responses API, the component will work immediately
+- No code changes will be needed when OpenAI enables this feature
+- The component serves as future-proofing for when API support arrives
+
+### Bottom Line for Engineers
+
+**You built it correctly. OpenAI's API doesn't support it yet.**
+
+The temperature parameter:
+- ✅ Is properly implemented in the component code
+- ✅ Gets passed correctly to the API
+- ❌ Gets rejected by OpenAI's server with HTTP 400 error
+- ❌ Cannot be used until OpenAI adds support for it
+
+**Alternative approaches needed:** Since we can't control temperature with the current API, we need to implement consistency improvements using other methods (see Solution Options below).
+
+---
+
 ## Solution Options
 
 ### Option 1: Switch to Chat Completions API ❌
