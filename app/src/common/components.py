@@ -339,6 +339,11 @@ class OpenAIWebSearchGenerator:
             action = tool_call.action
             action_type = action.type
 
+            # Skip internal OpenAI warmup searches (e.g. "calculator: 0")
+            # that don't contain real web search context.
+            if isinstance(action, ActionSearch) and action.query.startswith("calculator:"):
+                continue
+
             attrs: dict[str, str] = {
                 "status": tool_call.status,
                 "action.type": action_type,
@@ -358,9 +363,10 @@ class OpenAIWebSearchGenerator:
                     attrs["action.queries"] = json.dumps(queries)
                     tool_params["queries"] = queries
                 if action.sources:
-                    source_urls = [s.url for s in action.sources]
-                    attrs["action.source_urls"] = json.dumps(source_urls)
-                    tool_params["source_urls"] = source_urls
+                    source_urls = [s.url for s in action.sources if s and s.url]
+                    if source_urls:
+                        attrs["action.source_urls"] = json.dumps(source_urls)
+                        tool_params["source_urls"] = source_urls
             elif isinstance(action, ActionOpenPage):
                 attrs["action.url"] = action.url
                 tool_params["url"] = action.url
