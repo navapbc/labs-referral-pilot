@@ -27,12 +27,15 @@ from openai.types.responses import (
     ResponseCreatedEvent,
     ResponseFunctionWebSearch,
     ResponseOutputItemDoneEvent,
+    ResponseOutputMessage,
+    ResponseOutputText,
 )
 from openai.types.responses.response_function_web_search import (
     ActionFind,
     ActionOpenPage,
     ActionSearch,
 )
+from openai.types.responses.response_output_text import AnnotationURLCitation
 from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
@@ -229,6 +232,8 @@ class OpenAIWebSearchGenerator:
             "reasoning": {"effort": reasoning_effort},
             "tools": [{"type": "web_search"}],
             "temperature": temperature,
+            # Request full source URLs consulted during web search
+            "include": ["web_search_call.action.sources"],
         }
 
         if domain:
@@ -257,6 +262,13 @@ class OpenAIWebSearchGenerator:
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
             ]
             self._add_child_spans(web_search_responses)
+
+            # Extract URL citations from message output items
+            message_items = [
+                item for item in response.output if isinstance(item, ResponseOutputMessage)
+            ]
+            for message in message_items:
+                self._add_citation_span(message)
 
             return {
                 "replies": [ChatMessage.from_assistant(response.output_text)],
@@ -305,6 +317,8 @@ class OpenAIWebSearchGenerator:
             if isinstance(openai_chunk, ResponseOutputItemDoneEvent):
                 if isinstance(openai_chunk.item, ResponseFunctionWebSearch):
                     self._add_child_spans([openai_chunk.item])
+                elif isinstance(openai_chunk.item, ResponseOutputMessage):
+                    self._add_citation_span(openai_chunk.item)
             elif isinstance(openai_chunk, ResponseCreatedEvent):
                 resp = openai_chunk.response
                 span = trace.get_current_span()
@@ -365,6 +379,35 @@ class OpenAIWebSearchGenerator:
                     name="openai_web_search",
                     parameters=tool_params,
                 )
+
+    def _add_citation_span(self, message: ResponseOutputMessage) -> None:
+        """Extract URL citations from the response message and log them as a span."""
+        citations: list[dict[str, str]] = []
+        for content_part in message.content:
+            if not isinstance(content_part, ResponseOutputText):
+                continue
+            for annotation in content_part.annotations:
+                if isinstance(annotation, AnnotationURLCitation):
+                    citations.append({"url": annotation.url, "title": annotation.title})
+
+        if not citations:
+            return
+
+        with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
+            "web_search_citations",
+            openinference_span_kind="tool",
+            attributes={
+                "citation_count": str(len(citations)),
+                "citations": json.dumps(citations, indent=2),
+            },
+        ) as span:
+            span.set_tool(
+                name="web_search_citations",
+                parameters={
+                    "citation_count": len(citations),
+                    "citations": citations,
+                },
+            )
 
 
 EMAIL_INTRO = """\
