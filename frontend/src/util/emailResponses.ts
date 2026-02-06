@@ -31,8 +31,8 @@ export async function emailResponses(
   const endpoint = "email_responses";
 
   // Build request body based on mode - include only the relevant result IDs
-  const body: Record<string, string> = { recipientEmail: recipientEmail };
-  body.requestorEmail = requestorEmail;
+  const body: Record<string, string> = { recipient_email: recipientEmail };
+  body.requestor_email = requestorEmail;
 
   // Explicitly handle each scenario
   if (mode === "action-plan-only") {
@@ -56,7 +56,11 @@ export async function emailResponses(
     body.resources_result_id = resultId;
     body.action_plan_result_id = actionPlanResultId;
   } else {
-    body.resources_result_id = resultId ?? "";
+    // Resources only (default) - send ONLY resources_result_id
+    if (!resultId) {
+      throw new Error("Resource result ID is required for resources-only mode");
+    }
+    body.resources_result_id = resultId;
   }
 
   const url = `${apiDomain}${endpoint}/run`;
