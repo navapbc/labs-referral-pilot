@@ -143,7 +143,9 @@ export function EmailReferralsButton({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{dialogContent.title}</DialogTitle>
-            <DialogDescription>{dialogContent.description}</DialogDescription>
+            <DialogDescription className="text-base">
+              {dialogContent.description}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
