@@ -28,6 +28,7 @@ from openai.types.responses import (
     ResponseFunctionWebSearch,
     ResponseOutputItemDoneEvent,
 )
+from openai.types.responses.response_function_web_search import ActionSearch
 from opentelemetry import trace
 from pydantic import BaseModel, ValidationError
 
@@ -224,6 +225,8 @@ class OpenAIWebSearchGenerator:
             "reasoning": {"effort": reasoning_effort},
             "tools": [{"type": "web_search"}],
             "temperature": temperature,
+            # Request full source URLs consulted during web search
+            "include": ["web_search_call.action.sources"],
         }
 
         if domain:
@@ -247,6 +250,12 @@ class OpenAIWebSearchGenerator:
         else:
             # Non-streaming response
             response = self.client.responses.create(**api_params)
+
+            # Log model params to Phoenix span
+            span = trace.get_current_span()
+            span.set_attribute("model", str(response.model))
+            span.set_attribute("reasoning_effort", reasoning_effort)
+            span.set_attribute("temperature", str(response.temperature))
 
             web_search_responses = [
                 item for item in response.output if isinstance(item, ResponseFunctionWebSearch)
@@ -312,25 +321,40 @@ class OpenAIWebSearchGenerator:
             logger.warning("No text collected during streaming")
         return full_text
 
-    def _add_child_spans(self, web_search_responses: list[ResponseFunctionWebSearch]) -> None:
+    def _add_child_spans(
+        self,
+        web_search_responses: list[ResponseFunctionWebSearch],
+    ) -> None:
         for tool_call in web_search_responses:
+            action = tool_call.action
+
+            # Skip internal OpenAI warmup searches (e.g. "calculator: 0")
+            if isinstance(action, ActionSearch) and action.query.startswith("calculator:"):
+                continue
+
+            # Build a single dict used for both span attributes and tool parameters.
+            # For ActionSearch, extract the query, expanded sub-queries, and source URLs.
+            # The 'queries' field is undocumented (extra field via Pydantic extra='allow')
+            # containing the expanded sub-queries the model actually searched for.
+            params: dict[str, Any] = {"action_type": action.type}
+            if isinstance(action, ActionSearch):
+                params["query"] = action.query
+                queries = getattr(action, "queries", None)
+                if queries:
+                    params["queries"] = queries
+                if action.sources:
+                    urls = [s.url for s in action.sources if s and s.url]
+                    if urls:
+                        params["source_urls"] = urls
+
             with phoenix_utils.tracer().start_as_current_span(  # pylint: disable=not-context-manager,unexpected-keyword-arg
                 tool_call.type,
                 openinference_span_kind="tool",
                 attributes={
-                    "action": str(tool_call.action),
-                    "status": tool_call.status,
-                    "action.query": str(getattr(tool_call.action, "query", None)),
-                    "action.queries": str(getattr(tool_call.action, "queries", None)),
+                    k: json.dumps(v) if isinstance(v, list) else str(v) for k, v in params.items()
                 },
             ) as span:
-                span.set_tool(
-                    name="openai_web_search",
-                    parameters={
-                        "query": getattr(tool_call.action, "query", None),
-                        "queries": getattr(tool_call.action, "queries", None),
-                    },
-                )
+                span.set_tool(name="openai_web_search", parameters=params)
 
 
 EMAIL_INTRO = """\
