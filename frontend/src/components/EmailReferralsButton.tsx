@@ -30,7 +30,7 @@ export function EmailReferralsButton({
   requestorEmail,
   disabled = false,
 }: EmailReferralsProps) {
-  const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState(requestorEmail);
   const [showModeOptions, setShowModeOptions] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<ShareMode | undefined>(
@@ -91,7 +91,7 @@ export function EmailReferralsButton({
   const handleClose = () => {
     setEmailSent(false);
     setStatusMessage("");
-    setRecipientEmail("");
+    setRecipientEmail(requestorEmail);
     setSelectedMode(undefined);
   };
 
@@ -108,19 +108,19 @@ export function EmailReferralsButton({
       return {
         title: "Email Action Plan",
         description:
-          "Send to yourself or your client. Includes the personalized action plan with next steps.",
+          "Your email is pre-filled below. Change it to send to someone else. Includes the personalized action plan with next steps.",
       };
     } else if (hasActionPlan) {
       return {
         title: "Email Resources and Action Plan",
         description:
-          "Send to yourself or your client. Includes the selected resources and personalized action plan with next steps.",
+          "Your email is pre-filled below. Change it to send to someone else. Includes the selected resources and personalized action plan with next steps.",
       };
     } else {
       return {
         title: "Email Resources",
         description:
-          "Send to yourself or your client. Includes the selected resources with descriptions and contact information.",
+          "Your email is pre-filled below. Change it to send to someone else. Includes the selected resources with descriptions and contact information.",
       };
     }
   };
@@ -143,7 +143,9 @@ export function EmailReferralsButton({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{dialogContent.title}</DialogTitle>
-            <DialogDescription>{dialogContent.description}</DialogDescription>
+            <DialogDescription className="text-base">
+              {dialogContent.description}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
