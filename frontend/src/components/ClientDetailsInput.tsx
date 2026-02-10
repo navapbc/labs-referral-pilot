@@ -268,7 +268,7 @@ export function ClientDetailsInput({
               loading ||
               (selectedCategories.length === 0 && !clientDescription.trim())
             }
-            className="w-full generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
+            className="w-full text-lg pt-6 pb-6"
             data-testid="findResourcesButton"
           >
             {!loading && (
