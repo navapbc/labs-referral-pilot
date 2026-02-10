@@ -406,7 +406,6 @@ export default function Page() {
                   <Button
                     onClick={handleReturnToSearch}
                     variant="outline"
-                    className=""
                     data-testid="returnToSearchButton"
                   >
                     <ChevronLeft className="w-4 h-4" />

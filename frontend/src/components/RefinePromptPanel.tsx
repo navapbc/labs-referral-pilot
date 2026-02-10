@@ -319,7 +319,6 @@ export function RefinePromptPanel({
                   !localClientDescription.trim() &&
                   localSelectedCategories.length === 0
                 }
-                className=""
                 data-testid="updateSearchButton"
               >
                 <Search className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -328,7 +327,6 @@ export function RefinePromptPanel({
               <Button
                 variant="outline"
                 onClick={handleCancel}
-                className=""
                 data-testid="cancelEditButton"
               >
                 Cancel

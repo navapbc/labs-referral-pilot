@@ -175,7 +175,6 @@ export function EmailReferralsButton({
               <div className="flex gap-2 justify-end">
                 <DialogClose asChild>
                   <Button
-                    className=""
                     type="button"
                     onClick={handleClose}
                     disabled={isLoading}
@@ -186,7 +185,6 @@ export function EmailReferralsButton({
                   </Button>
                 </DialogClose>
                 <Button
-                  className=""
                   type="submit"
                   onClick={() => void handleSendEmail()}
                   disabled={

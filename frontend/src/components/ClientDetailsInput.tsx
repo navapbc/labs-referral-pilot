@@ -237,7 +237,6 @@ export function ClientDetailsInput({
             variant="outline"
             size="sm"
             onClick={onClearAllFilters}
-            className=""
             data-testid="clearFiltersButton"
             disabled={loading}
           >

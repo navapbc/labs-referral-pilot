@@ -80,7 +80,6 @@ export function ActionPlanSection({
               <Button
                 onClick={onGenerateActionPlan}
                 disabled={isGeneratingActionPlan}
-                className=""
               >
                 {!isGeneratingActionPlan && (
                   <>
