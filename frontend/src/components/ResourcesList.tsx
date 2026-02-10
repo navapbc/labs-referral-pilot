@@ -1,5 +1,6 @@
 import { Resource } from "@/types/resources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getResourceTypeColors } from "@/lib/styles";
 import Link from "next/link";
 import React from "react";
 import { Building, Users, X } from "lucide-react";
@@ -13,85 +14,68 @@ const isValidURL = (url: string) => {
   }
 };
 
+const REFERRAL_TYPE_CONFIG = {
+  goodwill: {
+    testId: "goodwill_referral",
+    label: "Goodwill",
+    icon: (
+      <img
+        src="/img/Goodwill_Industries_Logo.svg"
+        alt="Goodwill"
+        className="h-5 w-5 shrink-0"
+      />
+    ),
+  },
+  government: {
+    testId: "government_referral",
+    label: "Government",
+    icon: <Building className="h-4 w-4 shrink-0" />,
+  },
+  external: {
+    testId: "external_referral",
+    label: "Community",
+    icon: <Users className="h-4 w-4 shrink-0" />,
+  },
+} as const;
+
 const referralTypeIndicator = (referralType: string | undefined) => {
-  switch (referralType) {
-    case "goodwill": {
-      return (
-        <span
-          data-testid="goodwill_referral"
-          className="inline-flex items-center gap-1.5 bg-transparent text-blue-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
-        >
-          <img
-            src="/img/Goodwill_Industries_Logo.svg"
-            alt="Goodwill"
-            className="h-5 w-5 shrink-0"
-          />
-          <span className="truncate">Goodwill</span>
-        </span>
-      );
-    }
-    case "government": {
-      return (
-        <span
-          data-testid="government_referral"
-          className="inline-flex items-center gap-1.5 bg-transparent text-gray-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
-        >
-          <Building className="h-4 w-4 shrink-0" />
-          <span className="truncate">Government</span>
-        </span>
-      );
-    }
-    case "external": {
-      return (
-        <span
-          data-testid="external_referral"
-          className="inline-flex items-center gap-1.5 bg-transparent text-green-800 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
-        >
-          <Users className="h-4 w-4 shrink-0" />
-          <span className="truncate">Community</span>
-        </span>
-      );
-    }
-    default: {
-      // Loading placeholder - maintains spacing while streaming
-      return (
-        <span
-          data-testid="loading_referral"
-          className="inline-flex items-center gap-1.5 bg-transparent text-gray-400 ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold"
-        >
-          <span className="h-4 w-4 shrink-0 bg-gray-200 rounded animate-pulse" />
-          <span className="truncate bg-gray-200 rounded animate-pulse w-16 h-4" />
-        </span>
-      );
-    }
+  const colors = getResourceTypeColors(referralType);
+  const config =
+    referralType && referralType in REFERRAL_TYPE_CONFIG
+      ? REFERRAL_TYPE_CONFIG[referralType as keyof typeof REFERRAL_TYPE_CONFIG]
+      : null;
+
+  if (!config) {
+    // Loading placeholder - maintains spacing while streaming
+    return (
+      <span
+        data-testid="loading_referral"
+        className={`inline-flex items-center gap-1.5 bg-transparent ${colors.text} ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold`}
+      >
+        <span className="h-4 w-4 shrink-0 bg-gray-200 rounded animate-pulse" />
+        <span className="truncate bg-gray-200 rounded animate-pulse w-16 h-4" />
+      </span>
+    );
   }
+
+  return (
+    <span
+      data-testid={config.testId}
+      className={`inline-flex items-center gap-1.5 bg-transparent ${colors.text} ml-4 mt-3 px-2.5 py-1 max-w-[15rem] text-sm font-bold`}
+    >
+      {config.icon}
+      <span className="truncate">{config.label}</span>
+    </span>
+  );
 };
 
 export const getCardBorderClass = (referralType: string | undefined) => {
-  switch (referralType) {
-    case "goodwill":
-      return "border-t-4 border-t-blue-600 rounded-t-lg";
-    case "government":
-      return "border-t-4 border-t-gray-600 rounded-t-lg";
-    case "external":
-      return "border-t-4 border-t-green-600 rounded-t-lg";
-    default:
-      // Loading state - gray border maintains spacing while streaming
-      return "border-t-4 border-t-gray-300 rounded-t-lg";
-  }
+  const colors = getResourceTypeColors(referralType);
+  return `border-t-4 ${colors.border} rounded-t-lg`;
 };
 
 const getNumberBadgeClass = (referralType: string | undefined) => {
-  switch (referralType) {
-    case "goodwill":
-      return "bg-blue-600";
-    case "government":
-      return "bg-gray-600";
-    case "external":
-      return "bg-green-600";
-    default:
-      return "bg-blue-600";
-  }
+  return getResourceTypeColors(referralType).badge;
 };
 
 const normalizeUrl = (url: string) => {
