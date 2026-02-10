@@ -163,7 +163,7 @@ const WelcomeUserInputScreen = ({
                 !userEmailInput.trim() ||
                 !isValidEmail(userEmailInput)
               }
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold"
+              className="w-full py-6 text-base font-semibold"
             >
               Get Started
             </Button>

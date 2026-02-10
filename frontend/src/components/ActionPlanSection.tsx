@@ -80,7 +80,7 @@ export function ActionPlanSection({
               <Button
                 onClick={onGenerateActionPlan}
                 disabled={isGeneratingActionPlan}
-                className="bg-blue-600 hover:bg-blue-700"
+                className=""
               >
                 {!isGeneratingActionPlan && (
                   <>

@@ -175,7 +175,7 @@ export function EmailReferralsButton({
               <div className="flex gap-2 justify-end">
                 <DialogClose asChild>
                   <Button
-                    className="bg-white border-gray-300 text-gray-900 hover:bg-gray-100 hover:text-gray-900 cursor-pointer disabled:!cursor-not-allowed"
+                    className=""
                     type="button"
                     onClick={handleClose}
                     disabled={isLoading}
@@ -186,7 +186,7 @@ export function EmailReferralsButton({
                   </Button>
                 </DialogClose>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:cursor-not-allowed"
+                  className=""
                   type="submit"
                   onClick={() => void handleSendEmail()}
                   disabled={
@@ -218,7 +218,7 @@ export function EmailReferralsButton({
       {/* Email button trigger */}
       <Button
         variant="outline"
-        className="text-gray-900 border-gray-400 hover:bg-gray-100 hover:text-gray-900"
+        className="border-gray-400"
         data-testid="emailReferralsButton"
         disabled={disabled}
         onClick={handleEmailButtonClick}

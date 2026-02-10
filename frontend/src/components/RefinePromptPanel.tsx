@@ -6,12 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { resourceCategories, providerTypes } from "./ClientDetailsInput";
 
-// Shared button styles for toggle buttons (categories, providers)
-const TOGGLE_BUTTON_STYLES = {
-  selected: "bg-blue-600 text-white hover:bg-blue-700",
-  unselected: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-} as const;
-
 interface RefinePromptPanelProps {
   clientDescription: string;
   locationText: string;
@@ -262,11 +256,7 @@ export function RefinePromptPanel({
                       key={category.id}
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
-                      className={`text-sm cursor-pointer ${
-                        isSelected
-                          ? TOGGLE_BUTTON_STYLES.selected
-                          : TOGGLE_BUTTON_STYLES.unselected
-                      }`}
+                      className="text-sm"
                       onClick={() => handleToggleCategory(category.id)}
                       data-testid={`refine-category-${category.id}`}
                       aria-pressed={isSelected}
@@ -297,11 +287,7 @@ export function RefinePromptPanel({
                       key={provider.id}
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
-                      className={`text-sm cursor-pointer ${
-                        isSelected
-                          ? TOGGLE_BUTTON_STYLES.selected
-                          : TOGGLE_BUTTON_STYLES.unselected
-                      }`}
+                      className="text-sm"
                       onClick={() => handleToggleResourceType(provider.id)}
                       data-testid={`refine-provider-${provider.id}`}
                       aria-pressed={isSelected}
@@ -333,7 +319,7 @@ export function RefinePromptPanel({
                   !localClientDescription.trim() &&
                   localSelectedCategories.length === 0
                 }
-                className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:cursor-not-allowed"
+                className=""
                 data-testid="updateSearchButton"
               >
                 <Search className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -342,7 +328,7 @@ export function RefinePromptPanel({
               <Button
                 variant="outline"
                 onClick={handleCancel}
-                className="cursor-pointer hover:bg-gray-100 hover:text-gray-900"
+                className=""
                 data-testid="cancelEditButton"
               >
                 Cancel

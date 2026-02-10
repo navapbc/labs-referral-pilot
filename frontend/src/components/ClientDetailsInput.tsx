@@ -156,11 +156,7 @@ export function ClientDetailsInput({
                   key={category.id}
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
-                  className={`text-sm flex-col justify-center px-1 min-h-28 w-auto whitespace-normal break-words h-auto cursor-pointer disabled:cursor-not-allowed ${
-                    isSelected
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                  className="text-sm flex-col justify-center px-1 min-h-28 w-auto whitespace-normal break-words h-auto"
                   onClick={() => onToggleCategory(category.id)}
                   data-testid={"resourceCategoryToggle-" + category.id}
                   aria-pressed={isSelected}
@@ -201,11 +197,7 @@ export function ClientDetailsInput({
                   key={provider.id}
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
-                  className={`h-12 text-sm cursor-pointer disabled:cursor-not-allowed ${
-                    isSelected
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                  className="h-12 text-sm"
                   onClick={() => onToggleResourceType(provider.id)}
                   data-testid={`resourceCategoryToggle-${provider.id}`}
                   aria-pressed={isSelected}
@@ -245,7 +237,7 @@ export function ClientDetailsInput({
             variant="outline"
             size="sm"
             onClick={onClearAllFilters}
-            className="text-gray-600 border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400 cursor-pointer disabled:cursor-not-allowed"
+            className=""
             data-testid="clearFiltersButton"
             disabled={loading}
           >
