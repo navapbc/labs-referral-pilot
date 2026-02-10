@@ -11,7 +11,8 @@
   --card-foreground: 215 25% 27%;
   --popover: 0 0% 100%;
   --popover-foreground: 215 25% 27%;
-  --primary: 217 91% 60%;
+  /* Goodwill brand blue: #01529C */
+  --primary: 209 99% 31%;
   --primary-foreground: 0 0% 100%;
   --secondary: 160 84% 39%;
   --secondary-foreground: 0 0% 100%;
@@ -23,7 +24,7 @@
   --destructive-foreground: 0 0% 100%;
   --border: 220 13% 91%;
   --input: 210 40% 94%;
-  --ring: 217 91% 60%;
+  --ring: 209 99% 31%;
   --chart-1: 160 84% 39%;
   --chart-2: 158 64% 52%;
   --chart-3: 0 84.2% 60.2%;
@@ -43,6 +44,19 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Goodwill brand blue palette based on #01529C */
+  --color-blue-50: hsl(209 95% 97%);
+  --color-blue-100: hsl(209 90% 92%);
+  --color-blue-200: hsl(209 85% 82%);
+  --color-blue-300: hsl(209 80% 68%);
+  --color-blue-400: hsl(209 90% 52%);
+  --color-blue-500: hsl(209 95% 42%);
+  --color-blue-600: hsl(209 99% 31%);
+  --color-blue-700: hsl(209 99% 25%);
+  --color-blue-800: hsl(209 99% 20%);
+  --color-blue-900: hsl(209 99% 15%);
+  --color-blue-950: hsl(209 99% 10%);
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
