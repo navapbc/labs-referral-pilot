@@ -221,14 +221,33 @@ class RemoveResourcesForEmail:
                 excluded_resource_names,
             )
 
-            # Filter out resources with names in the exclusion list
+            # Convert excluded names to set for O(1) lookup
+            excluded_names_set = set(excluded_resource_names)
+
+            # Single pass: filter resources and collect all resource names
+            filtered_resources = []
+            existing_resource_names = set()
             original_count = len(resources)
-            filtered_resources = [
-                resource
-                for resource in resources
-                if resource.get("name") not in excluded_resource_names
-            ]
+
+            for resource in resources:
+                resource_name = resource.get("name")
+                existing_resource_names.add(resource_name)
+
+                # Keep resource if it's not in the exclusion list
+                if resource_name not in excluded_names_set:
+                    filtered_resources.append(resource)
+
             removed_count = original_count - len(filtered_resources)
+
+            # Check for excluded names that don't exist in the original list
+            for excluded_name in excluded_names_set:
+                if excluded_name not in existing_resource_names:
+                    logger.error(
+                        "RemoveResourcesForEmail: Excluded resource name '%s' not found in original resources list. Skipping"
+                        "Available names: %s",
+                        excluded_name,
+                        list(existing_resource_names),
+                    )
 
             # Log the result
             logger.info(
@@ -238,6 +257,7 @@ class RemoveResourcesForEmail:
             )
 
             # Create a new dict with filtered resources
+            # Unpack result_json to preserve other fields, then override the 'resources' key with filtered list
             filtered_result = {**result_json, "resources": filtered_resources}
             return {"resources_dict": filtered_result}
 
