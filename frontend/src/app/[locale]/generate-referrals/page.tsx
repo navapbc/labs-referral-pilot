@@ -47,9 +47,9 @@ export default function Page() {
   const [retainedResources, setRetainedResources] = useState<Resource[]>();
   const [resourcesResultId, setResourcesResultId] = useState("");
   const [showResultsView, setShowResultsView] = useState(false);
-  const [excludedResourceNames, setExcludedResourceNames] = useState<
-    string[]
-  >([]);
+  const [excludedResourceNames, setExcludedResourceNames] = useState<string[]>(
+    [],
+  );
 
   // ========== Resources Streaming (Custom Hook) ==========
   /**
