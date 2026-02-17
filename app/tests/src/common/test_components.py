@@ -11,6 +11,7 @@ from src.common.components import (
     LlmOutputValidator,
     LoadResultOptional,
     ReadableLogger,
+    RemoveResourcesForEmail,
     SaveResult,
     UploadFilesToByteStreams,
 )
@@ -436,3 +437,161 @@ def test_EmailResponses_message_format(monkeypatch):
     assert "## Test Plan" in message
     assert "Test summary" in message
     assert "Test content" in message
+
+
+def test_RemoveResourcesForEmail_with_exclusions():
+    """Test RemoveResourcesForEmail filters out excluded resources."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A", "description": "First resource"},
+            {"name": "Resource B", "description": "Second resource"},
+            {"name": "Resource C", "description": "Third resource"},
+        ]
+    }
+    excluded_names = ["Resource B"]
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    assert "resources_dict" in output
+    resources_dict = output["resources_dict"]
+    assert len(resources_dict["resources"]) == 2
+    assert resources_dict["resources"][0]["name"] == "Resource A"
+    assert resources_dict["resources"][1]["name"] == "Resource C"
+
+
+def test_RemoveResourcesForEmail_with_multiple_exclusions():
+    """Test RemoveResourcesForEmail filters out multiple excluded resources."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+            {"name": "Resource C"},
+            {"name": "Resource D"},
+        ]
+    }
+    excluded_names = ["Resource A", "Resource C"]
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    resources_dict = output["resources_dict"]
+    assert len(resources_dict["resources"]) == 2
+    assert resources_dict["resources"][0]["name"] == "Resource B"
+    assert resources_dict["resources"][1]["name"] == "Resource D"
+
+
+def test_RemoveResourcesForEmail_no_exclusions():
+    """Test RemoveResourcesForEmail passes through when no exclusions provided."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+        ]
+    }
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=None)
+
+    resources_dict = output["resources_dict"]
+    assert len(resources_dict["resources"]) == 2
+    assert resources_dict["resources"][0]["name"] == "Resource A"
+    assert resources_dict["resources"][1]["name"] == "Resource B"
+
+
+def test_RemoveResourcesForEmail_empty_exclusions_list():
+    """Test RemoveResourcesForEmail passes through with empty exclusions list."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+        ]
+    }
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=[])
+
+    resources_dict = output["resources_dict"]
+    assert len(resources_dict["resources"]) == 2
+
+
+def test_RemoveResourcesForEmail_empty_result_json():
+    """Test RemoveResourcesForEmail handles empty result_json."""
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json={}, excluded_resource_names=["Resource A"])
+
+    assert output["resources_dict"] == {}
+
+
+def test_RemoveResourcesForEmail_no_resources_key():
+    """Test RemoveResourcesForEmail handles result_json without resources key."""
+    result_json = {"other_key": "value"}
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=["Resource A"])
+
+    resources_dict = output["resources_dict"]
+    assert resources_dict == result_json
+
+
+def test_RemoveResourcesForEmail_nonexistent_exclusion():
+    """Test RemoveResourcesForEmail handles exclusion of nonexistent resource."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+        ]
+    }
+    excluded_names = ["Resource Z"]  # Does not exist
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    resources_dict = output["resources_dict"]
+    # Should return all resources unchanged since "Resource Z" doesn't exist
+    assert len(resources_dict["resources"]) == 2
+    assert resources_dict["resources"][0]["name"] == "Resource A"
+    assert resources_dict["resources"][1]["name"] == "Resource B"
+
+
+def test_RemoveResourcesForEmail_all_excluded():
+    """Test RemoveResourcesForEmail when all resources are excluded."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+        ]
+    }
+    excluded_names = ["Resource A", "Resource B"]
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    resources_dict = output["resources_dict"]
+    # Should return empty resources list
+    assert len(resources_dict["resources"]) == 0
+    assert resources_dict["resources"] == []
+
+
+def test_RemoveResourcesForEmail_preserves_other_fields():
+    """Test RemoveResourcesForEmail preserves other fields in result_json."""
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+        ],
+        "metadata": {"version": "1.0"},
+        "timestamp": "2024-01-01",
+    }
+    excluded_names = ["Resource B"]
+
+    component = RemoveResourcesForEmail()
+    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    resources_dict = output["resources_dict"]
+    # Should preserve other fields
+    assert resources_dict["metadata"] == {"version": "1.0"}
+    assert resources_dict["timestamp"] == "2024-01-01"
+    # And filter resources
+    assert len(resources_dict["resources"]) == 1
+    assert resources_dict["resources"][0]["name"] == "Resource A"
