@@ -170,6 +170,108 @@ class LoadResultOptional:
 
 
 @component
+class RemoveResourcesForEmail:
+    """
+    Filters out excluded resources from a resources dict before emailing.
+
+    This component is used in the email_responses pipeline to remove resources
+    that the user has chosen to exclude from the email.
+
+    Args:
+        result_json: Dict containing resources data (from LoadResultOptional)
+        excluded_resource_names: Optional list of resource names to exclude
+
+    Returns:
+        dict: {"resources_dict": dict} with excluded resources removed
+
+    Behavior:
+        - If no exclusions provided, passes through result_json unchanged
+        - If exclusions provided, filters out resources with matching names
+        - Handles errors gracefully - logs warning and continues with original data
+        - Logs exclusions for observability
+    """
+
+    @component.output_types(resources_dict=dict)
+    def run(self, result_json: dict, excluded_resource_names: Optional[List[str]] = None) -> dict:
+        # If result_json is empty or no exclusions, pass through unchanged
+        if not result_json or not excluded_resource_names:
+            logger.debug(
+                "RemoveResourcesForEmail: No exclusions or empty result, passing through unchanged"
+            )
+            return {"resources_dict": result_json}
+
+        # If exclusions list is empty, pass through unchanged
+        if not excluded_resource_names:
+            logger.debug(
+                "RemoveResourcesForEmail: Empty exclusions list, passing through unchanged"
+            )
+            return {"resources_dict": result_json}
+
+        try:
+            # Get the resources list from the result
+            resources = result_json.get("resources", [])
+            if not resources:
+                logger.debug("RemoveResourcesForEmail: No resources in result_json")
+                return {"resources_dict": result_json}
+
+            # Log the exclusion request
+            logger.info(
+                "RemoveResourcesForEmail: Filtering out %d resource(s): %s",
+                len(excluded_resource_names),
+                excluded_resource_names,
+            )
+
+            # Convert excluded names to set for O(1) lookup
+            excluded_names_set = set(excluded_resource_names)
+
+            # Single pass: filter resources and collect all resource names
+            filtered_resources = []
+            existing_resource_names = set()
+            original_count = len(resources)
+
+            for resource in resources:
+                resource_name = resource.get("name")
+                existing_resource_names.add(resource_name)
+
+                # Keep resource if it's not in the exclusion list
+                if resource_name not in excluded_names_set:
+                    filtered_resources.append(resource)
+
+            removed_count = original_count - len(filtered_resources)
+
+            # Check for excluded names that don't exist in the original list
+            for excluded_name in excluded_names_set:
+                if excluded_name not in existing_resource_names:
+                    logger.error(
+                        "RemoveResourcesForEmail: Excluded resource name '%s' not found in original resources list. Skipping"
+                        "Available names: %s",
+                        excluded_name,
+                        list(existing_resource_names),
+                    )
+
+            # Log the result
+            logger.info(
+                "RemoveResourcesForEmail: Removed %d resource(s), %d remaining",
+                removed_count,
+                len(filtered_resources),
+            )
+
+            # Create a new dict with filtered resources
+            # Unpack result_json to preserve other fields, then override the 'resources' key with filtered list
+            filtered_result = {**result_json, "resources": filtered_resources}
+            return {"resources_dict": filtered_result}
+
+        except Exception as e:
+            # Log the error and pass through original data
+            logger.warning(
+                "RemoveResourcesForEmail: Error filtering resources, passing through unchanged. Error: %s",
+                e,
+                exc_info=True,
+            )
+            return {"resources_dict": result_json}
+
+
+@component
 class OpenAIWebSearchGenerator:
     """Searches the web using OpenAI's web search capabilities and generates a response."""
 
