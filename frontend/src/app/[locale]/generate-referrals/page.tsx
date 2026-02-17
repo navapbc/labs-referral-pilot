@@ -188,6 +188,7 @@ export default function Page() {
       overrides?.selectedResourceTypes ?? selectedResourceTypes;
 
     setResourcesError(undefined);
+    setExcludedResourceNames([]);
     setShowResultsView(true);
 
     const {
@@ -344,8 +345,12 @@ export default function Page() {
   const handleRemoveResource = (resourceToRemove: Resource) => {
     handleRemoveFromHook(resourceToRemove, retainedResources);
 
-    // Track the removed resource name for email exclusion
-    setExcludedResourceNames((current) => [...current, resourceToRemove.name]);
+    // Track the removed resource name for email exclusion (avoid duplicates)
+    setExcludedResourceNames((current) =>
+      current.includes(resourceToRemove.name)
+        ? current
+        : [...current, resourceToRemove.name],
+    );
 
     // Immediately remove from retainedResources
     setRetainedResources((current) =>
