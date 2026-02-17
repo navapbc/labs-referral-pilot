@@ -221,6 +221,19 @@ class RemoveResourcesForEmail:
                 excluded_resource_names,
             )
 
+            # Create a set of all resource names for validation
+            existing_resource_names = {resource.get("name") for resource in resources}
+
+            # Check for excluded names that don't exist in the original list
+            for excluded_name in excluded_resource_names:
+                if excluded_name not in existing_resource_names:
+                    logger.error(
+                        "RemoveResourcesForEmail: Excluded resource name '%s' not found in original resources list. "
+                        "Available names: %s",
+                        excluded_name,
+                        list(existing_resource_names),
+                    )
+
             # Filter out resources with names in the exclusion list
             original_count = len(resources)
             filtered_resources = [

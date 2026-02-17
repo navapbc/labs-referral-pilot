@@ -534,8 +534,10 @@ def test_RemoveResourcesForEmail_no_resources_key():
     assert resources_dict == result_json
 
 
-def test_RemoveResourcesForEmail_nonexistent_exclusion():
+def test_RemoveResourcesForEmail_nonexistent_exclusion(caplog):
     """Test RemoveResourcesForEmail handles exclusion of nonexistent resource."""
+    import logging
+
     result_json = {
         "resources": [
             {"name": "Resource A"},
@@ -545,13 +547,21 @@ def test_RemoveResourcesForEmail_nonexistent_exclusion():
     excluded_names = ["Resource Z"]  # Does not exist
 
     component = RemoveResourcesForEmail()
-    output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    with caplog.at_level(logging.ERROR):
+        output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
 
     resources_dict = output["resources_dict"]
     # Should return all resources unchanged since "Resource Z" doesn't exist
     assert len(resources_dict["resources"]) == 2
     assert resources_dict["resources"][0]["name"] == "Resource A"
     assert resources_dict["resources"][1]["name"] == "Resource B"
+
+    # Verify error was logged
+    assert any("Resource Z" in record.message for record in caplog.records)
+    assert any(
+        "not found in original resources list" in record.message for record in caplog.records
+    )
 
 
 def test_RemoveResourcesForEmail_all_excluded():
@@ -595,3 +605,38 @@ def test_RemoveResourcesForEmail_preserves_other_fields():
     # And filter resources
     assert len(resources_dict["resources"]) == 1
     assert resources_dict["resources"][0]["name"] == "Resource A"
+
+
+def test_RemoveResourcesForEmail_mixed_valid_invalid_exclusions(caplog):
+    """Test RemoveResourcesForEmail with mix of valid and invalid exclusion names."""
+    import logging
+
+    result_json = {
+        "resources": [
+            {"name": "Resource A"},
+            {"name": "Resource B"},
+            {"name": "Resource C"},
+        ]
+    }
+    # Mix of valid and invalid exclusion names
+    excluded_names = ["Resource B", "Resource Z", "Nonexistent Resource"]
+
+    component = RemoveResourcesForEmail()
+
+    with caplog.at_level(logging.ERROR):
+        output = component.run(result_json=result_json, excluded_resource_names=excluded_names)
+
+    resources_dict = output["resources_dict"]
+    # Should only exclude valid resource (Resource B)
+    assert len(resources_dict["resources"]) == 2
+    assert resources_dict["resources"][0]["name"] == "Resource A"
+    assert resources_dict["resources"][1]["name"] == "Resource C"
+
+    # Verify errors were logged for invalid exclusions
+    error_messages = [record.message for record in caplog.records if record.levelname == "ERROR"]
+    assert any("Resource Z" in msg for msg in error_messages)
+    assert any("Nonexistent Resource" in msg for msg in error_messages)
+    # Should log 2 errors (one for each invalid name)
+    assert (
+        len([msg for msg in error_messages if "not found in original resources list" in msg]) == 2
+    )
