@@ -251,7 +251,7 @@ class RemoveResourcesForEmail:
             )
 
             # Create a new dict with filtered resources
-            # Note the use of the ** unpacking operator to over-write the resources key in the result JSON, preserving other fields
+            # Unpack result_json to preserve other fields, then override the 'resources' key with filtered list
             filtered_result = {**result_json, "resources": filtered_resources}
             return {"resources_dict": filtered_result}
 
