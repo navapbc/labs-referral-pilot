@@ -47,6 +47,9 @@ export default function Page() {
   const [retainedResources, setRetainedResources] = useState<Resource[]>();
   const [resourcesResultId, setResourcesResultId] = useState("");
   const [showResultsView, setShowResultsView] = useState(false);
+  const [excludedResourceNames, setExcludedResourceNames] = useState<string[]>(
+    [],
+  );
 
   // ========== Resources Streaming (Custom Hook) ==========
   /**
@@ -185,6 +188,7 @@ export default function Page() {
       overrides?.selectedResourceTypes ?? selectedResourceTypes;
 
     setResourcesError(undefined);
+    setExcludedResourceNames([]);
     setShowResultsView(true);
 
     const {
@@ -245,6 +249,7 @@ export default function Page() {
     setRetainedResources(undefined);
     setResourcesResultId("");
     setActionPlanResultId("");
+    setExcludedResourceNames([]);
     setLocationText("");
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
@@ -289,6 +294,7 @@ export default function Page() {
     // Clear previous results and action plan
     setRetainedResources(undefined);
     setSelectedResources([]);
+    setExcludedResourceNames([]);
     clearActionPlan();
     setActionPlanResultId("");
 
@@ -339,6 +345,13 @@ export default function Page() {
   const handleRemoveResource = (resourceToRemove: Resource) => {
     handleRemoveFromHook(resourceToRemove, retainedResources);
 
+    // Track the removed resource name for email exclusion (avoid duplicates)
+    setExcludedResourceNames((current) =>
+      current.includes(resourceToRemove.name)
+        ? current
+        : [...current, resourceToRemove.name],
+    );
+
     // Immediately remove from retainedResources
     setRetainedResources((current) =>
       current?.filter((r) => r.name !== resourceToRemove.name),
@@ -353,6 +366,11 @@ export default function Page() {
   // Undo remove handler - wrapper around hook
   const handleUndoRemove = () => {
     handleUndoFromHook((resource, index) => {
+      // Remove from excluded names list
+      setExcludedResourceNames((current) =>
+        current.filter((name) => name !== resource.name),
+      );
+
       // Add the resource back to retainedResources at its original index
       setRetainedResources((current) => {
         if (!current) {
@@ -417,6 +435,7 @@ export default function Page() {
                     resourcesResultId={resourcesResultId}
                     actionPlanResultId={actionPlanResultId}
                     userEmail={userEmail}
+                    excludedResourceNames={excludedResourceNames}
                     disabled={isStreamingActionPlan || isStreamingResources}
                   />
                 </div>
@@ -481,6 +500,7 @@ export default function Page() {
                   resourcesResultId={resourcesResultId}
                   actionPlanResultId={actionPlanResultId}
                   userEmail={userEmail}
+                  excludedResourceNames={excludedResourceNames}
                   className="justify-end"
                   testIdSuffix="bottom"
                   disabled={isStreamingActionPlan || isStreamingResources}

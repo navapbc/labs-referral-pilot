@@ -11,6 +11,7 @@ import { EMAIL_TIMEOUT } from "@/config/timeouts";
  * @param recipient_email - Recipient email address
  * @param requestor_email - Email address of the person requesting the share
  * @param mode - Share mode determining what content to include
+ * @param excludedResourceNames - Optional array of resource names to exclude from the email
  * @returns Promise with email address confirmation
  *
  * Scenarios:
@@ -24,6 +25,7 @@ export async function emailResponses(
   recipientEmail: string,
   requestorEmail: string,
   mode?: ShareMode,
+  excludedResourceNames?: string[],
 ) {
   const apiDomain = await getApiDomain();
 
@@ -31,7 +33,9 @@ export async function emailResponses(
   const endpoint = "email_responses";
 
   // Build request body based on mode - include only the relevant result IDs
-  const body: Record<string, string> = { recipient_email: recipientEmail };
+  const body: Record<string, string | string[]> = {
+    recipient_email: recipientEmail,
+  };
   body.requestor_email = requestorEmail;
 
   // Explicitly handle each scenario
@@ -61,6 +65,11 @@ export async function emailResponses(
       throw new Error("Resource result ID is required for resources-only mode");
     }
     body.resources_result_id = resultId;
+  }
+
+  // Add excluded resource names if provided
+  if (excludedResourceNames && excludedResourceNames.length > 0) {
+    body.excluded_resource_names = excludedResourceNames;
   }
 
   const url = `${apiDomain}${endpoint}/run`;

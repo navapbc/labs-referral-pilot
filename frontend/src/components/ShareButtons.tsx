@@ -8,6 +8,7 @@ interface ShareButtonsProps {
   resourcesResultId: string;
   actionPlanResultId: string;
   userEmail: string;
+  excludedResourceNames?: string[];
   className?: string;
   testIdSuffix?: string;
   disabled?: boolean;
@@ -18,6 +19,7 @@ export function ShareButtons({
   resourcesResultId,
   actionPlanResultId,
   userEmail,
+  excludedResourceNames = [],
   className,
   testIdSuffix,
   disabled = false,
@@ -39,6 +41,7 @@ export function ShareButtons({
           resultId={resourcesResultId}
           actionPlanResultId={actionPlanResultId || undefined}
           requestorEmail={userEmail}
+          excludedResourceNames={excludedResourceNames}
           disabled={disabled}
         />
       )}

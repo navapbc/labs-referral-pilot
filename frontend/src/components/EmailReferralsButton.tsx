@@ -21,6 +21,7 @@ interface EmailReferralsProps {
   resultId: string;
   actionPlanResultId?: string;
   requestorEmail: string;
+  excludedResourceNames?: string[];
   disabled?: boolean;
 }
 
@@ -28,6 +29,7 @@ export function EmailReferralsButton({
   resultId,
   actionPlanResultId,
   requestorEmail,
+  excludedResourceNames = [],
   disabled = false,
 }: EmailReferralsProps) {
   const [recipientEmail, setRecipientEmail] = useState(requestorEmail);
@@ -74,6 +76,7 @@ export function EmailReferralsButton({
         recipientEmail,
         requestorEmail,
         selectedMode,
+        excludedResourceNames,
       );
 
       setEmailSent(true);
