@@ -191,6 +191,7 @@ class PipelineWrapper(BasePipelineWrapper):
         prompt_version_id: str = "",
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
+        temperature: float | None = None,
         streaming: bool = False,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
@@ -221,7 +222,9 @@ class PipelineWrapper(BasePipelineWrapper):
                 "reasoning_effort": reasoning_effort
                 or config.generate_referrals_rag_reasoning_level,
                 "streaming": streaming,
-                "temperature": config.generate_referrals_rag_temperature,
+                "temperature": temperature
+                if temperature is not None
+                else config.generate_referrals_rag_temperature,
             },
             # For querying RAG DB
             "query_embedder": {"text": query},
@@ -257,6 +260,7 @@ class PipelineWrapper(BasePipelineWrapper):
             prompt_version_id=body.get("prompt_version_id", ""),
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
+            temperature=body.get("temperature", None),
             streaming=True,
         )
 
