@@ -96,7 +96,7 @@ const resourceCategories = [
   },
   {
     id: "substance",
-    label: "Substance Abuse Treatment",
+    label: "Substance Use & Treatment",
     icon: Shield,
     color: "bg-teal-100 text-teal-800",
   },

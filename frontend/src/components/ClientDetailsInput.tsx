@@ -13,17 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
 export const resourceCategories = [
-  { id: "employment", label: "Employment & Job Training", emoji: "💼" },
-  { id: "housing", label: "Housing & Shelter", emoji: "🏠" },
-  { id: "food", label: "Food Assistance", emoji: "🍽️" },
-  { id: "transportation", label: "Transportation", emoji: "🚗" },
-  { id: "healthcare", label: "Healthcare & Mental Health", emoji: "🩺" },
   { id: "childcare", label: "Childcare", emoji: "👶" },
-  { id: "financial", label: "Financial Assistance", emoji: "💵" },
-  { id: "education", label: "Education & GED", emoji: "🎓" },
-  { id: "legal", label: "Legal Services", emoji: "⚖️" },
-  { id: "substance", label: "Substance Abuse Treatment", emoji: "🛡️" },
   { id: "disability", label: "Disability Services", emoji: "♿" },
+  { id: "education", label: "Education & GED", emoji: "🎓" },
+  { id: "employment", label: "Employment & Job Training", emoji: "💼" },
+  { id: "financial", label: "Financial Assistance", emoji: "💵" },
+  { id: "food", label: "Food Assistance", emoji: "🍽️" },
+  { id: "healthcare", label: "Healthcare & Mental Health", emoji: "🩺" },
+  { id: "housing", label: "Housing & Shelter", emoji: "🏠" },
+  { id: "legal", label: "Legal Services", emoji: "⚖️" },
+  { id: "substance", label: "Substance Use & Treatment", emoji: "🛡️" },
+  { id: "transportation", label: "Transportation", emoji: "🚗" },
   { id: "veterans", label: "Veterans Services", emoji: "🎖️" },
 ];
 
