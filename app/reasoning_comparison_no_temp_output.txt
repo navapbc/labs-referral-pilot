@@ -1,0 +1,725 @@
+================================================================================
+REASONING LEVEL COMPARISON (NO TEMPERATURE)
+Testing: reasoning='low' vs reasoning='none'
+================================================================================
+Model: gpt-5.1
+Temperature: NOT SET (testing pure reasoning effect)
+Web Search: ENABLED
+Test prompts: 30
+================================================================================
+
+================================================================================
+Prompt 1/30: Single mother with 2 kids facing eviction in Austin, needs emergency housing ass...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.86s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: I Belong in Austin – Emergency Rental Assistance (City of Austin Housing Department, administered by El Buen Samaritano), Rathgeber Center for Families – The Salvation Army Austin Area Command, The Salvation Army Austin Area Command – Family Emergency Shelter & Services...
+
+================================================================================
+Prompt 1/30: Single mother with 2 kids facing eviction in Austin, needs emergency housing ass...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 40.77s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: I Belong in Austin Rental Assistance (City of Austin & El Buen Samaritano), Austin Public Health Neighborhood Services – Rent & Utility Assistance Line, Catholic Charities of Central Texas – Financial Stability Program...
+
+================================================================================
+Prompt 2/30: Homeless veteran in Travis County needs transitional housing and job training...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 19.21s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: VA Central Texas Health Care System – Homeless Veteran Care, Housing Authority of the City of Austin – HUD-VASH (Veterans Affairs Supportive Housing), Texas Veterans Commission – Homeless Veteran Program...
+
+================================================================================
+Prompt 2/30: Homeless veteran in Travis County needs transitional housing and job training...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 29.95s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Resources: Green Doors – Transitional Veterans Re-Entry Housing, VA Central Texas Health Care System – Homeless Veteran Care, Caritas of Austin – Veterans Assistance (SSVF)...
+
+================================================================================
+Prompt 3/30: Elderly couple on fixed income needs help with rising rent costs in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.86s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: I Belong in Austin (Emergency Rental Assistance – City of Austin), Austin Neighborhood Centers – Rent & Utility Assistance Line, Austin Senior Services Hub (City of Austin)...
+
+================================================================================
+Prompt 3/30: Elderly couple on fixed income needs help with rising rent costs in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 38.23s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: City of Austin Rental Assistance – I Belong in Austin (IBIA), Austin Public Health Neighborhood Centers – Rent & Utility Assistance Line, Foundation Communities...
+
+================================================================================
+Prompt 4/30: Family escaping domestic violence needs emergency shelter in Central Texas...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 19.55s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: Family Abuse Center, Family Crisis Center (Serving Bastrop, Colorado, Fayette & Lee Counties), Hill Country Crisis Council – The Red Doors Shelter...
+
+================================================================================
+Prompt 4/30: Family escaping domestic violence needs emergency shelter in Central Texas...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 27.76s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: The SAFE Alliance (SAFEline & Emergency Shelter – Austin/Travis County), Hope Alliance (Williamson County Resource Center & Emergency Shelter), Hays-Caldwell Women’s Center (HCWC – San Marcos/Hays & Caldwell Counties)...
+
+================================================================================
+Prompt 5/30: Young adult aging out of foster care needs affordable housing options in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.71s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: LifeWorks Austin – Housing & After Care Transitional Services (ACTS), Foundation Communities – Supportive Studio Housing & Affordable Apartments, Austin/Travis County Coordinated Entry (via ECHO & LifeWorks Youth Assessment)...
+
+================================================================================
+Prompt 5/30: Young adult aging out of foster care needs affordable housing options in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 48.70s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: LifeWorks Austin – Housing & After Care Transitional Services (ACTS), Upbring BeREAL Austin – Supervised Independent Living for Foster Youth, Foundation Communities – Affordable & Supportive Housing...
+
+================================================================================
+Prompt 6/30: Low-income family with 4 children needs food assistance in Austin, TX...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 24.00s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Central Texas Food Bank, 2-1-1 Texas / United Way Helpline, SNAP Food Benefits – Texas Health and Human Services...
+
+================================================================================
+Prompt 6/30: Low-income family with 4 children needs food assistance in Austin, TX...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 37.18s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: Central Texas Food Bank – Find Food Now & SNAP Help, 2-1-1 Texas / United Way Helpline, SNAP Food Benefits – YourTexasBenefits (Texas HHSC)...
+
+================================================================================
+Prompt 7/30: Elderly person living alone needs home-delivered meals in Travis County...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.85s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Resources: Meals on Wheels Central Texas – Home Delivered Meals, Central Texas Food Bank – Home Delivery Program (with Austin Public Health Neighborhood Services Unit & Amazon), Central Health – Food Is Medicine Medically Tailored Meal Delivery (for Central Health patients)...
+
+================================================================================
+Prompt 7/30: Elderly person living alone needs home-delivered meals in Travis County...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 31.47s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: Meals on Wheels Central Texas – Home Delivered Meals, Area Agency on Aging of the Capital Area (AAACAP) – Nutrition & Home-Delivered Meals, Aging and Disability Resource Center of the Capital Area (ADRC-CAP)...
+
+================================================================================
+Prompt 8/30: College student struggling with food insecurity needs food pantry locations near...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 17.19s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: UT Outpost (UT Austin On-Campus Food Pantry & Career Closet), Micah 6 of Austin Food Pantry, Central Texas Food Bank – Find Food Near Campus...
+
+================================================================================
+Prompt 8/30: College student struggling with food insecurity needs food pantry locations near...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 17.46s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Resources: UT Outpost (UT Austin On‑Campus Food Pantry & Career Closet), Central Texas Food Bank – Find Food Now & Mobile Pantries, Onion Creek Mobile Food Pantry (Central Texas Food Bank Site)...
+
+================================================================================
+Prompt 9/30: Undocumented immigrant family needs food assistance that doesn't require legal s...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 20.91s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: Central Texas Food Bank – Partner Pantry Network, El Buen Samaritano – Food Pantry & Food Access Services, ATX Free Fridge Network (Community Fridges)...
+
+================================================================================
+Prompt 9/30: Undocumented immigrant family needs food assistance that doesn't require legal s...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 55.61s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: Central Texas Food Bank – Regional Mobile & Partner Pantries, El Buen Samaritano – Food Access Services, Travis County Community Center at Del Valle – Food Pantry Program...
+
+================================================================================
+Prompt 10/30: Person with diabetes needs food assistance with dietary restrictions in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.37s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Central Texas Food Bank – Find Food & Nutrition Education, Meals on Wheels Central Texas – Medically Tailored Meals, 2-1-1 Texas / United Way of Greater Austin...
+
+================================================================================
+Prompt 10/30: Person with diabetes needs food assistance with dietary restrictions in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 35.02s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 18
+📝 Resources: Central Texas Food Bank – Find Food Now & SNAP Help, Austin Public Health – Neighborhood Centers (Food Pantries & Health Screening), Carol’s Kindness+ Food Pantry (Client-Choice Pantry in East Austin)...
+
+================================================================================
+Prompt 11/30: Unemployed single parent needs job training and childcare assistance in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 17.77s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Workforce Solutions Capital Area – Career Centers & Training Scholarships, Workforce Solutions Capital Area – Child Care Services (Travis County), Goodwill Central Texas – Job Training & Placement...
+
+================================================================================
+Prompt 11/30: Unemployed single parent needs job training and childcare assistance in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 32.56s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Workforce Solutions Capital Area, Goodwill Central Texas – Workforce Advancement, Goodwill Career & Technical Academy (GCTA)...
+
+================================================================================
+Prompt 12/30: Ex-offender needs employment programs for people with criminal records in Travis...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.15s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: Travis County Reentry Resources (Start Your Next Chapter), Workforce Solutions Capital Area – Austin/Travis County Career Centers, Texas Offenders Reentry Initiative (TORI) – Austin (with Austin Area Urban League)...
+
+================================================================================
+Prompt 12/30: Ex-offender needs employment programs for people with criminal records in Travis...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 41.45s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Travis County Reentry Resources – Start Your Next Chapter, Travis County Justice Planning Workforce Development (JPWD), Workforce Solutions Capital Area...
+
+================================================================================
+Prompt 13/30: Person with disability needs supported employment services in Central Texas...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.90s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Resources: Texas Workforce Solutions – Vocational Rehabilitation Services, Easterseals Central Texas – Employment & Training / Supported Employment, Goodwill Central Texas – Job Training & Placement (including GSG Talent Solutions)...
+
+================================================================================
+Prompt 13/30: Person with disability needs supported employment services in Central Texas...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 35.70s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Texas Workforce Solutions – Vocational Rehabilitation Services (Texas Workforce Commission), Workforce Solutions of Central Texas, Goodwill Central Texas – Career & Job Training Services...
+
+================================================================================
+Prompt 14/30: Recent immigrant needs ESL classes and job placement assistance in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.64s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Austin Community College Adult Education – ESL & Career Pathways, Austin ISD Adult Education & Literacy – ESL for Adults, Foundation Communities – Free English as a Second Language Classes...
+
+================================================================================
+Prompt 14/30: Recent immigrant needs ESL classes and job placement assistance in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 2362.81s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: Austin Community College Adult Education – ESL Program, Austin Community College ESOL (English for Speakers of Other Languages), Workforce Solutions Capital Area...
+
+================================================================================
+Prompt 15/30: Teenager needs summer job opportunities and youth employment programs...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 27.52s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Travis County / City of Austin Work-Based Learning – Summer Youth Employment Program (WBL/SYEP), Travis County Summer Youth Employment Program (SYEP), City of Austin High School Summer Internship Programs...
+
+================================================================================
+Prompt 15/30: Teenager needs summer job opportunities and youth employment programs...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 139.46s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 18
+📝 Resources: Travis County & City of Austin Summer Youth Employment Program (SYEP), Goodwill Central Texas – Summer Youth Employment Program & WIOA Youth, Workforce Solutions Capital Area – Youth Services...
+
+================================================================================
+Prompt 16/30: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 72.09s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: CommUnityCare Health Centers, People’s Community Clinic, People’s Center for Women’s Health...
+
+================================================================================
+Prompt 16/30: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 42.44s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: CommUnityCare Health Centers (Multiple Austin Clinics), People’s Community Clinic, Volunteer Healthcare Clinic...
+
+================================================================================
+Prompt 17/30: Person experiencing depression needs free or sliding-scale mental health counsel...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 19.22s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Integral Care (Local Mental Health Authority – Travis County), NAMI Central Texas, CommUnityCare Health Centers (Behavioral Health)...
+
+================================================================================
+Prompt 17/30: Person experiencing depression needs free or sliding-scale mental health counsel...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 49.88s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 18
+📝 Resources: Integral Care (Travis County Local Mental Health Authority), Capital Area Counseling, Samaritan Center – Healthy Community Program...
+
+================================================================================
+Prompt 18/30: Senior citizen needs help navigating Medicare and prescription drug costs...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.36s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: Area Agency on Aging of Central Texas – Benefits Counseling & SHIP, Central Texas Aging, Disability & Veterans Resource Center (CTADVRC), Texas Health Information, Counseling and Advocacy Program (HICAP) – State SHIP Line...
+
+================================================================================
+Prompt 18/30: Senior citizen needs help navigating Medicare and prescription drug costs...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 25.39s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 18
+📝 Resources: Area Agency on Aging of Central Texas (AAACT), Central Texas Aging, Disability & Veterans Resource Center (CTADVRC), Texas Health Information, Counseling, and Advocacy Program (HICAP/SHIP)...
+
+================================================================================
+Prompt 19/30: Pregnant woman without insurance needs prenatal care in Travis County...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 45.43s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: Central Health Medical Access Program (MAP & MAP Basic), CommUnityCare Health Centers – Women’s Health & Prenatal Services, People’s Community Clinic – Center for Women’s Health...
+
+================================================================================
+Prompt 19/30: Pregnant woman without insurance needs prenatal care in Travis County...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 95.77s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: People’s Center for Women’s Health (People’s Community Clinic), CommUnityCare OB/GYN & Women’s Health Clinics, Central Health Medical Access Program (MAP & MAP Basic)...
+
+================================================================================
+Prompt 20/30: Person with substance abuse issues needs addiction treatment programs in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 21.82s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Resources: Austin Drug and Alcohol Abuse Program (ADAAP), Austin Recovery (Outpatient Program), Communities for Recovery...
+
+================================================================================
+Prompt 20/30: Person with substance abuse issues needs addiction treatment programs in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 90.65s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 18
+📝 Resources: Integral Care – Drug and Alcohol Treatment Services, Austin-Travis County Sobering Center, Austin Drug and Alcohol Abuse Program (ADAAP)...
+
+================================================================================
+Prompt 21/30: Working parent needs affordable childcare for toddler and preschooler in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 18.26s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: Workforce Solutions Capital Area – Child Care Services (CCS) & Raising Travis County Scholarships, Texas Child Care Connection (TX3C) – Texas Workforce Commission, Head Start & Early Head Start – Travis County / Austin-area Providers...
+
+================================================================================
+Prompt 21/30: Working parent needs affordable childcare for toddler and preschooler in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 55.85s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Workforce Solutions Capital Area – Child Care Services (CCS), Texas Workforce Commission – Child Care & Early Learning (Texas Child Care Connections), Child Inc – Head Start & Early Head Start of Travis County...
+
+================================================================================
+Prompt 22/30: Family needs after-school programs for elementary school children in East Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 27.94s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Greater Austin YMCA – Afterschool Care (Multiple East Austin Elementary Sites), Boys & Girls Clubs of the Austin Area – East Austin Sites, Austin Parks and Recreation Department – After School Programs (East Austin Recreation Centers)...
+
+================================================================================
+Prompt 22/30: Family needs after-school programs for elementary school children in East Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 1900.08s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Resources: Greater Austin YMCA – Extend-A-Care Afterschool, City of Austin Parks & Recreation – After School Programs, Boys & Girls Clubs of the Austin Area (BGCAA) – East Austin Clubs...
+
+================================================================================
+Prompt 23/30: Low-income family needs Head Start or Pre-K programs for 3-year-old...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.92s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Head Start and Early Head Start – Central Texas (find local grantees), Local Independent School District Pre-K Programs (Texas Education Agency), Workforce Solutions Capital Area – Child Care Services (Travis County/Austin)...
+
+================================================================================
+Prompt 23/30: Low-income family needs Head Start or Pre-K programs for 3-year-old...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 34.57s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: Austin ISD Head Start Pre-K3 Program, Austin ISD Pre-K3 & Pre-K4 Programs, Child Inc – Head Start and Early Head Start (Travis County)...
+
+================================================================================
+Prompt 24/30: Parent needs tutoring services for child struggling in school...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.59s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: ACE Austin (Austin ISD Expanded Learning), VICTORY Tutorial Program – Austin ISD, Boys & Girls Clubs of the Austin Area – Academic Success Programs...
+
+================================================================================
+Prompt 24/30: Parent needs tutoring services for child struggling in school...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 31.16s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Resources: Austin Public Library – Homework Help & Brainfuse HelpNow, VICTORY Tutorial Program (Austin ISD & Austin Public Library), Boys & Girls Clubs of the Austin Area...
+
+================================================================================
+Prompt 25/30: Family needs summer camp programs with financial assistance in Travis County...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.03s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Austin Parks and Recreation Summer Camps & Youth Programs, Raising Travis County: Child Care and Out-of-School Time Fund, Manor ISD / Boys & Girls Club of Greater Austin – After-school and Summer Care...
+
+================================================================================
+Prompt 25/30: Family needs summer camp programs with financial assistance in Travis County...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 59.98s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 21
+📝 Resources: Austin Parks and Recreation – Summer Camps & Financial Aid, Greater Austin YMCA – Summer Day Camps & Camp Moody, Camp Fire Central Texas – Camp Balcones Summer Day Camp...
+
+================================================================================
+Prompt 26/30: Person recently laid off needs help applying for unemployment benefits in Texas...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.81s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Resources: Texas Workforce Commission – Unemployment Benefits, Workforce Solutions Capital Area (Travis County), Workforce Solutions Rural Capital Area...
+
+================================================================================
+Prompt 26/30: Person recently laid off needs help applying for unemployment benefits in Texas...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 21.71s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Texas Workforce Commission – Unemployment Benefits, Workforce Solutions Capital Area, 2-1-1 Texas / United Way Navigation Center...
+
+================================================================================
+Prompt 27/30: Immigrant family needs help applying for SNAP and Medicaid benefits...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.70s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Central Texas Food Bank – SNAP & State Benefits Assistance, Your Texas Benefits (Texas Health & Human Services), 2-1-1 Texas (Texas Information & Referral Network)...
+
+================================================================================
+Prompt 27/30: Immigrant family needs help applying for SNAP and Medicaid benefits...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 16.52s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Central Texas Food Bank – SNAP & State Benefits Assistance, El Buen Samaritano – Benefits Assistance, Foundation Communities – Prosper Health Coverage (Central Texas)...
+
+================================================================================
+Prompt 28/30: Senior citizen needs help with Social Security disability application...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 16.78s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: Area Agency on Aging of Central Texas (AAACT), Area Agency on Aging of the Capital Area (AAACAP), Social Security Administration – National and Local Offices (Central Texas)...
+
+================================================================================
+Prompt 28/30: Senior citizen needs help with Social Security disability application...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.68s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Resources: Area Agency on Aging of Central Texas, Texas Health and Human Services – Find Services / Benefits & Disability Help Line, Social Security Administration – Austin North Field Office...
+
+================================================================================
+Prompt 29/30: Person facing wage theft needs legal aid services in Austin...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.20s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: Equal Justice Center – Austin Office, Texas Legal Services Center (TLSC), City of Austin Wage Theft Program...
+
+================================================================================
+Prompt 29/30: Person facing wage theft needs legal aid services in Austin...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 42.68s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Resources: City of Austin Wage Theft Program, Travis County District Attorney – Wage Theft Unit, Workers Defense Project...
+
+================================================================================
+Prompt 30/30: Low-income family needs help with tax preparation and EITC...
+Reasoning: none
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.12s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Resources: United Way of Central Texas – VITA Free Tax Preparation, Foundation Communities – Community Tax Centers (Austin Area), United Way for Greater Austin – 2-1-1 Navigation Center...
+
+================================================================================
+Prompt 30/30: Low-income family needs help with tax preparation and EITC...
+Reasoning: low
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 20.50s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Resources: Foundation Communities – Prosper Tax Help, United Way of Central Texas – VITA Free Tax Preparation, United Way for Greater Austin – 2-1-1 Navigation Center...
+
+================================================================================
+ANALYSIS: Reasoning Level Comparison
+================================================================================
+
+📊 REASONING='NONE' (Current Production):
+  Success rate: 30/30 (100.0%)
+  Avg latency: 19.99s
+  Avg resources per query: 6.7
+  Web search usage: 30/30 (100.0%)
+  Avg URL indicators: 13.9
+
+📊 REASONING='LOW':
+  Success rate: 30/30 (100.0%)
+  Avg latency: 182.50s
+  Avg resources per query: 6.7
+  Web search usage: 30/30 (100.0%)
+  Avg URL indicators: 15.8
+
+🔍 COMPARISON:
+  Latency impact: +162.51s (+812.9%)
+  Web search usage difference: +0.0pp
+    reasoning='none': 100.0%
+    reasoning='low': 100.0%
+  Avg resources difference: -0.1
+  Avg URL indicators difference: +1.9
+
+================================================================================
+KEY FINDINGS:
+================================================================================
+❌ reasoning='low' does NOT significantly affect web search usage
+   Only 0.0pp difference
+
+⚠️  WARNING: reasoning='low' has MAJOR latency impact (+812.9%)
+
+================================================================================
+RECOMMENDATIONS:
+================================================================================
+✅ RECOMMENDATION: Stay with reasoning='none'
+   - No significant web search improvement with reasoning='low'
+   - Supports temperature parameter for consistency
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+⚠️  This test uses HEURISTICS to detect web search usage.
+   For ACCURATE counts, check trace spans in your observability platform:
+   - 'OpenAIWebSearch' component spans
+   - 'web_search_...' child spans
+   - 'websearch' tokens in payloads
+
+⚠️  CRITICAL: reasoning='low' does NOT support temperature parameter!
+   If you need temperature control, you MUST use reasoning='none'
+================================================================================
+
+💾 Detailed results saved to: reasoning_comparison_no_temp_results.json

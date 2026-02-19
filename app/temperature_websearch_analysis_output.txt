@@ -1,0 +1,684 @@
+================================================================================
+TEMPERATURE vs WEB SEARCH USAGE ANALYSIS
+================================================================================
+Model: gpt-5.1
+Reasoning: none (optimal production config)
+Temperature values: 0.0, 0.25, 0.5, 0.75, 1.0
+Prompts per temperature: 10
+Total tests: 50 API calls
+================================================================================
+
+Hypothesis: Temperature may affect how often the model invokes web search.
+================================================================================
+
+################################################################################
+# TESTING TEMPERATURE = 0.0
+################################################################################
+
+================================================================================
+Temperature 0.0 | Prompt 1/10
+Prompt: Single mother with 2 kids facing eviction in Austin, needs emergency h...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.70s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.0 | Prompt 2/10
+Prompt: Homeless veteran in Travis County needs transitional housing and job t...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.20s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: .gov, .com, http...
+
+================================================================================
+Temperature 0.0 | Prompt 3/10
+Prompt: Low-income family with 4 children needs food assistance in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.32s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.0 | Prompt 4/10
+Prompt: Unemployed single parent needs job training and childcare assistance i...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.58s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: as of, .org, .com...
+
+================================================================================
+Temperature 0.0 | Prompt 5/10
+Prompt: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.83s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.0 | Prompt 6/10
+Prompt: Working parent needs affordable childcare for toddler and preschooler ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.06s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.0 | Prompt 7/10
+Prompt: Person recently laid off needs help applying for unemployment benefits...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 10.78s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.0 | Prompt 8/10
+Prompt: Elderly couple on fixed income needs help with rising rent costs in Au...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 10.01s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.0 | Prompt 9/10
+Prompt: Ex-offender needs employment programs for people with criminal records...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.11s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.0 | Prompt 10/10
+Prompt: Person with substance abuse issues needs addiction treatment programs ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 10.64s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: .org, .com, http...
+
+################################################################################
+# TESTING TEMPERATURE = 0.25
+################################################################################
+
+================================================================================
+Temperature 0.25 | Prompt 1/10
+Prompt: Single mother with 2 kids facing eviction in Austin, needs emergency h...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.16s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.25 | Prompt 2/10
+Prompt: Homeless veteran in Travis County needs transitional housing and job t...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.61s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.25 | Prompt 3/10
+Prompt: Low-income family with 4 children needs food assistance in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.69s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.25 | Prompt 4/10
+Prompt: Unemployed single parent needs job training and childcare assistance i...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.13s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.25 | Prompt 5/10
+Prompt: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 10.31s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.25 | Prompt 6/10
+Prompt: Working parent needs affordable childcare for toddler and preschooler ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.80s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.25 | Prompt 7/10
+Prompt: Person recently laid off needs help applying for unemployment benefits...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.09s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 12
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.25 | Prompt 8/10
+Prompt: Elderly couple on fixed income needs help with rising rent costs in Au...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 16.52s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.25 | Prompt 9/10
+Prompt: Ex-offender needs employment programs for people with criminal records...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 19.42s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.25 | Prompt 10/10
+Prompt: Person with substance abuse issues needs addiction treatment programs ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.10s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: .org, .com, http...
+
+################################################################################
+# TESTING TEMPERATURE = 0.5
+################################################################################
+
+================================================================================
+Temperature 0.5 | Prompt 1/10
+Prompt: Single mother with 2 kids facing eviction in Austin, needs emergency h...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.49s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.5 | Prompt 2/10
+Prompt: Homeless veteran in Travis County needs transitional housing and job t...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.10s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 20
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.5 | Prompt 3/10
+Prompt: Low-income family with 4 children needs food assistance in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 11.77s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Web indicators: based on, .org, .com...
+
+================================================================================
+Temperature 0.5 | Prompt 4/10
+Prompt: Unemployed single parent needs job training and childcare assistance i...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 16.31s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.5 | Prompt 5/10
+Prompt: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.87s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Web indicators: based on, current information, as of...
+
+================================================================================
+Temperature 0.5 | Prompt 6/10
+Prompt: Working parent needs affordable childcare for toddler and preschooler ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 17.21s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.5 | Prompt 7/10
+Prompt: Person recently laid off needs help applying for unemployment benefits...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.65s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.5 | Prompt 8/10
+Prompt: Elderly couple on fixed income needs help with rising rent costs in Au...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.67s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: based on, .org, .gov...
+
+================================================================================
+Temperature 0.5 | Prompt 9/10
+Prompt: Ex-offender needs employment programs for people with criminal records...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.30s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 20
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.5 | Prompt 10/10
+Prompt: Person with substance abuse issues needs addiction treatment programs ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.39s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: .org, .com, http...
+
+################################################################################
+# TESTING TEMPERATURE = 0.75
+################################################################################
+
+================================================================================
+Temperature 0.75 | Prompt 1/10
+Prompt: Single mother with 2 kids facing eviction in Austin, needs emergency h...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.61s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.75 | Prompt 2/10
+Prompt: Homeless veteran in Travis County needs transitional housing and job t...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.57s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.75 | Prompt 3/10
+Prompt: Low-income family with 4 children needs food assistance in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 10.39s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 0.75 | Prompt 4/10
+Prompt: Unemployed single parent needs job training and childcare assistance i...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.80s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.75 | Prompt 5/10
+Prompt: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.68s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Web indicators: based on, as of, .org...
+
+================================================================================
+Temperature 0.75 | Prompt 6/10
+Prompt: Working parent needs affordable childcare for toddler and preschooler ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.94s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 16
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.75 | Prompt 7/10
+Prompt: Person recently laid off needs help applying for unemployment benefits...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 13.14s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 0.75 | Prompt 8/10
+Prompt: Elderly couple on fixed income needs help with rising rent costs in Au...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.10s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 19
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.75 | Prompt 9/10
+Prompt: Ex-offender needs employment programs for people with criminal records...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.47s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 0.75 | Prompt 10/10
+Prompt: Person with substance abuse issues needs addiction treatment programs ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 30.07s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, http...
+
+################################################################################
+# TESTING TEMPERATURE = 1.0
+################################################################################
+
+================================================================================
+Temperature 1.0 | Prompt 1/10
+Prompt: Single mother with 2 kids facing eviction in Austin, needs emergency h...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.65s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 1.0 | Prompt 2/10
+Prompt: Homeless veteran in Travis County needs transitional housing and job t...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 14.13s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 1.0 | Prompt 3/10
+Prompt: Low-income family with 4 children needs food assistance in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.16s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: based on, .org, .gov...
+
+================================================================================
+Temperature 1.0 | Prompt 4/10
+Prompt: Unemployed single parent needs job training and childcare assistance i...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.08s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 13
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 1.0 | Prompt 5/10
+Prompt: Uninsured family needs low-cost healthcare clinic in Austin, TX...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 12.98s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 11
+📝 Web indicators: based on, .org, http...
+
+================================================================================
+Temperature 1.0 | Prompt 6/10
+Prompt: Working parent needs affordable childcare for toddler and preschooler ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 36.64s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 14
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 1.0 | Prompt 7/10
+Prompt: Person recently laid off needs help applying for unemployment benefits...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.57s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 10
+📝 Web indicators: .org, .gov, .com...
+
+================================================================================
+Temperature 1.0 | Prompt 8/10
+Prompt: Elderly couple on fixed income needs help with rising rent costs in Au...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 18.02s
+📊 Resources found: 7
+🔍 Likely used web search: YES
+🔗 URL indicators: 17
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+Temperature 1.0 | Prompt 9/10
+Prompt: Ex-offender needs employment programs for people with criminal records...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 17.40s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 20
+📝 Web indicators: as of, .org, .gov...
+
+================================================================================
+Temperature 1.0 | Prompt 10/10
+Prompt: Person with substance abuse issues needs addiction treatment programs ...
+================================================================================
+✅ SUCCESS!
+⏱️  Response time: 15.86s
+📊 Resources found: 6
+🔍 Likely used web search: YES
+🔗 URL indicators: 15
+📝 Web indicators: .org, .gov, http...
+
+================================================================================
+ANALYSIS: Temperature Impact on Web Search Usage
+================================================================================
+
+📊 RESULTS BY TEMPERATURE:
+
+Temperature 0.0:
+  Tests: 10
+  Web search usage: 10/10 (100.0%)
+  Avg URL indicators: 13.8
+  Avg latency: 11.42s
+  Avg resources: 6.6
+
+Temperature 0.25:
+  Tests: 10
+  Web search usage: 10/10 (100.0%)
+  Avg URL indicators: 14.0
+  Avg latency: 13.98s
+  Avg resources: 6.9
+
+Temperature 0.5:
+  Tests: 10
+  Web search usage: 10/10 (100.0%)
+  Avg URL indicators: 14.7
+  Avg latency: 14.18s
+  Avg resources: 6.8
+
+Temperature 0.75:
+  Tests: 10
+  Web search usage: 10/10 (100.0%)
+  Avg URL indicators: 14.8
+  Avg latency: 15.08s
+  Avg resources: 6.5
+
+Temperature 1.0:
+  Tests: 10
+  Web search usage: 10/10 (100.0%)
+  Avg URL indicators: 14.5
+  Avg latency: 17.55s
+  Avg resources: 6.4
+
+================================================================================
+COMPARATIVE ANALYSIS
+================================================================================
+
+🔝 HIGHEST web search usage: temperature=0.0
+   10/10 queries (100.0%)
+
+🔻 LOWEST web search usage: temperature=0.0
+   10/10 queries (100.0%)
+
+📈 Difference: 0.0 percentage points
+
+✅ MINIMAL IMPACT: Temperature does not significantly affect web search usage
+   Current temperature=0.25 is fine for web search frequency
+
+================================================================================
+LATENCY vs WEB SEARCH TRADE-OFF
+================================================================================
+
+Ranked by web search usage:
+  temp=0.0: 100.0% web search, 11.42s avg latency
+  temp=0.25: 100.0% web search, 13.98s avg latency
+  temp=0.5: 100.0% web search, 14.18s avg latency
+  temp=0.75: 100.0% web search, 15.08s avg latency
+  temp=1.0: 100.0% web search, 17.55s avg latency
+
+================================================================================
+KEY FINDINGS
+================================================================================
+  1. Overall web search usage: 100.0% of queries
+  2. Temperature does NOT significantly affect web search: only 0.0pp difference
+  3. Best temperature for web search: 0.0 (100.0% usage)
+  4. Fastest temperature: 0.0 (11.42s avg)
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+✅ RECOMMENDATION: Keep current temperature=0.25
+   - Temperature does not significantly affect web search frequency
+   - Current config already provides 100.0% web search usage
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+⚠️  This test uses HEURISTICS to detect web search usage:
+   - Looks for URL patterns (.org, .gov, .com, http)
+   - Looks for phrases like 'according to', 'based on', etc.
+   - Counts >= 2 indicators as likely web search
+
+⚠️  For ACCURATE web search counts, check your observability traces:
+   - Look for 'OpenAIWebSearch' component spans
+   - Check for 'web_search_...' child spans
+   - Verify 'websearch' tokens in span payloads
+
+⚠️  Manual trace inspection is REQUIRED to confirm these findings!
+================================================================================
+
+💾 Detailed results saved to: temperature_websearch_analysis_results.json
+
+================================================================================
