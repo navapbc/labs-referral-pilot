@@ -162,12 +162,12 @@ export function EmailReferralsButton({
                 data-testid="emailInput"
                 className={
                   recipientEmail && !isValidEmail(recipientEmail)
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                    ? "border-red-600 focus:border-red-600 focus:ring-red-600"
                     : ""
                 }
               />
               {recipientEmail && !isValidEmail(recipientEmail) && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-600">
                   Please enter a valid email address
                 </p>
               )}
@@ -206,7 +206,7 @@ export function EmailReferralsButton({
                 <p
                   className={`text-sm ${
                     statusMessage.includes("error sending the email")
-                      ? "text-red-500"
+                      ? "text-red-600"
                       : "text-green-900"
                   }`}
                 >

@@ -214,7 +214,7 @@ export function RefinePromptPanel({
               >
                 What kind of resources is your client looking for?
               </label>
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-gray-600 mb-2">
                 Include details about your client&apos;s circumstances
               </p>
               <Textarea
