@@ -125,19 +125,3 @@
   }
 }
 
-/* Added custom button style to force proper contrast */
-@layer components {
-  .generate-referrals-button {
-    background-color: #2563eb !important;
-    color: #ffffff !important;
-  }
-
-  .generate-referrals-button:hover {
-    background-color: #1d4ed8 !important;
-  }
-
-  .generate-referrals-button:disabled {
-    background-color: #9ca3af !important;
-    color: #ffffff !important;
-  }
-}

@@ -94,7 +94,7 @@ export function ClientDetailsInput({
             <UserRound className="w-4 h-4 text-blue-600" aria-hidden="true" />
             What kind of resources is your client looking for?
           </h2>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Include details about your client&apos;s circumstances to help find
             better resources
           </p>
@@ -120,7 +120,7 @@ export function ClientDetailsInput({
             <MapPin className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Location
           </h2>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Optional - helps find resources near your client
           </p>
           <Input
@@ -145,7 +145,7 @@ export function ClientDetailsInput({
             <Layers className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Resource Categories
           </h2>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Optional - select categories to narrow your search
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -190,7 +190,7 @@ export function ClientDetailsInput({
             <Search className="w-4 h-4 text-blue-600" aria-hidden="true" />
             Resource Provider Selection
           </h2>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Select up to 3 provider types, or leave empty to search all
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -268,7 +268,7 @@ export function ClientDetailsInput({
               loading ||
               (selectedCategories.length === 0 && !clientDescription.trim())
             }
-            className="w-full generate-referrals-button text-lg pt-6 pb-6 cursor-pointer disabled:!cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-500 disabled:text-white text-lg pt-6 pb-6 cursor-pointer disabled:cursor-not-allowed"
             data-testid="findResourcesButton"
           >
             {!loading && (

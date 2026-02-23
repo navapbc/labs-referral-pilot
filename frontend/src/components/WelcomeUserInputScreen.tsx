@@ -147,7 +147,7 @@ const WelcomeUserInputScreen = ({
                 data-form-type="other"
                 className={`w-full bg-white focus-visible:ring-offset-0 ${
                   userEmailTouched && userEmailError
-                    ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+                    ? "border-red-600 focus-visible:ring-red-600 focus-visible:border-red-600"
                     : "focus-visible:ring-blue-600 focus-visible:border-blue-600"
                 }`}
               />
