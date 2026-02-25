@@ -118,5 +118,6 @@ def test_format_context_documents_multiple_documents():
     docs = ["First doc about food banks", "Second doc about job training"]
     result = format_context_documents(docs)
     assert (
-        result == "Source Documents:\n- First doc about food banks\n\n- Second doc about job training"
+        result
+        == "Source Documents:\n- First doc about food banks\n\n- Second doc about job training"
     )
