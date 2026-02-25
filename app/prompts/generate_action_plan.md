@@ -7,7 +7,9 @@ The client asked: {{user_query}}
 Based on the client's request, generate a CONCISE action plan for accessing each listed resource. Use simple language (8th grade reading level max).
 
 STRUCTURE (for each resource):
-### [Short Resource Name]
+## {Resource Name — EXACT MATCH}
+(Use the exact resource name from the list below. Copy it exactly from the "Name:" field in the resources section. Do NOT shorten or paraphrase.)
+
 **How to apply:**
 - 2-3 simple steps with actual links/locations
 
@@ -25,7 +27,7 @@ STRUCTURE (for each resource):
 2. **Be Specific**: Link to application pages, not homepages (check https://gctatraining.org/class-schedule/ for GCTA courses) if the location is in the Central Texas - Austin area
 3. **Plain Language**: Write at 8th grade level - short words, clear sentences, no jargon
 4. **Keep It Brief**: Each section takes 5-10 seconds to read
-5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
+5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (## and ###)
 6. **Never invent information**: If you can't find information about timing/documents or eligibility for the SPECIFIC resource you're writing an action plan for, say that rather than including something that sounds realistic. 
 
 IMPORTANT:
