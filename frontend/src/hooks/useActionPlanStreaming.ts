@@ -16,6 +16,7 @@ export interface UseActionPlanStreamingReturn {
     selectedResources: Resource[],
     userEmail: string,
     clientDescription: string,
+    contextDocuments?: string[],
   ) => Promise<{
     actionPlan: ActionPlan | null;
     resultId: string;
@@ -44,6 +45,7 @@ export function useActionPlanStreaming(): UseActionPlanStreamingReturn {
       selectedResources: Resource[],
       userEmail: string,
       clientDescription: string,
+      contextDocuments?: string[],
     ) => {
       if (selectedResources.length === 0) {
         return {
@@ -84,6 +86,7 @@ export function useActionPlanStreaming(): UseActionPlanStreamingReturn {
             setActionPlan(null);
             setErrorMessage(error);
           },
+          contextDocuments,
         );
 
         // Handle errors from the streaming response

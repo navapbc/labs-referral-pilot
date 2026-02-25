@@ -24,6 +24,7 @@ export async function fetchResourcesStreaming(
 ): Promise<{
   resources: Resource[];
   resultId: string;
+  documents: string[];
   errorMessage?: string;
 }> {
   const apiDomain = await getApiDomain();
@@ -57,6 +58,8 @@ export async function fetchResourcesStreaming(
     requestBody.suffix = suffix;
   }
 
+  let capturedDocuments: string[] = [];
+
   const result = await createStreamingFetcher<Resource[], PartialResource[]>({
     url,
     timeout: STREAMING_TIMEOUT, // 10 minutes
@@ -65,6 +68,17 @@ export async function fetchResourcesStreaming(
     onComplete,
     onError,
     shouldAccumulateContent: (content) => !content.includes("result_id"),
+    extractMetadata: (content) => {
+      try {
+        const meta = JSON.parse(content.trim()) as {
+          result_id?: string;
+          documents?: string[];
+        };
+        if (meta.documents) capturedDocuments = meta.documents;
+      } catch {
+        // Ignore malformed metadata chunks
+      }
+    },
     parsePartial: (accumulatedJson) => {
       return parseStreamingResources(accumulatedJson);
     },
@@ -81,6 +95,7 @@ export async function fetchResourcesStreaming(
     return {
       resultId: result.resultId,
       resources: [],
+      documents: capturedDocuments,
       errorMessage: "No Referrals Found",
     };
   }
@@ -88,6 +103,7 @@ export async function fetchResourcesStreaming(
   return {
     resources: result.data || [],
     resultId: result.resultId,
+    documents: capturedDocuments,
     errorMessage: result.errorMessage,
   };
 }
