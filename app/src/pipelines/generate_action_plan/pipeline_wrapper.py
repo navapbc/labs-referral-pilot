@@ -186,7 +186,7 @@ def format_context_documents(documents: list[str] | None) -> str:
     """Format a list of retrieved RAG documents into a readable string for the LLM prompt."""
     if not documents:
         return ""
-    doc_lines = "\n".join(f"- {doc}" for doc in documents)
+    doc_lines = "\n\n".join(f"- {doc}" for doc in documents)
     return f"Source Documents:\n{doc_lines}"
 
 
