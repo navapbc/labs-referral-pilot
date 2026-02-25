@@ -11,9 +11,10 @@ so the components must be thread-safe.
 
 import json
 import logging
+import threading
 from json import JSONDecodeError
 from pprint import pformat
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, ClassVar, List, Optional, TypeVar
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -673,6 +674,35 @@ class ReadableLogger:
                 return content.text
 
         return content
+
+
+@component
+class DocumentCapture:
+    """Passes Haystack Documents through unchanged while capturing their content as strings.
+
+    Acts as a side-effect component: documents flow to the next component as normal,
+    but their text content is stored in a class-level dict keyed by result_id so that
+    the content can be retrieved later (e.g. in a streaming generator hook).
+
+    Thread-safe: multiple concurrent pipeline runs are isolated by result_id.
+    """
+
+    _storage: ClassVar[dict[str, list[str]]] = {}
+    _lock: ClassVar[threading.Lock] = threading.Lock()
+
+    @component.output_types(documents=list)
+    def run(self, documents: list, result_id: str = "") -> dict:
+        if result_id:
+            contents = [d.content for d in documents if d.content]
+            with self.__class__._lock:
+                self.__class__._storage[result_id] = contents
+        return {"documents": documents}
+
+    @classmethod
+    def pop(cls, result_id: str) -> list[str]:
+        """Retrieve and remove stored document content for the given result_id."""
+        with cls._lock:
+            return cls._storage.pop(result_id, [])
 
 
 @component

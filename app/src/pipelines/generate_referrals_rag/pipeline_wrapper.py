@@ -12,6 +12,7 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter
 from haystack.components.embedders import SentenceTransformersTextEmbedder
+from haystack.dataclasses.streaming_chunk import StreamingChunk
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 from pydantic import BaseModel
 
@@ -105,8 +106,11 @@ class PipelineWrapper(BasePipelineWrapper):
                 output_type=list,
             ),
         )
+        pipeline.add_component("document_capture", components.DocumentCapture())
+
         pipeline.connect("query_embedder.embedding", "retriever.query_embedding")
-        pipeline.connect("retriever.documents", "output_adapter")
+        pipeline.connect("retriever.documents", "document_capture.documents")
+        pipeline.connect("document_capture.documents", "output_adapter")
 
         pipeline.add_component(
             "prompt_builder",
@@ -173,7 +177,7 @@ class PipelineWrapper(BasePipelineWrapper):
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
-            include_outputs_from={"llm", "save_result"},
+            include_outputs_from={"llm", "save_result", "retriever"},
             input_=query,
             extract_output=extract_output,
             parent_span_name_suffix=suffix,
@@ -263,6 +267,14 @@ class PipelineWrapper(BasePipelineWrapper):
         # Generate result_id upfront to pass to both SaveResult and the hook
         result_id = str(uuid.uuid4())
         pipeline_run_args["save_result"] = {"result_id": result_id}
+        # Pass result_id to DocumentCapture so retrieved docs can be retrieved in the hook below
+        pipeline_run_args["document_capture"] = {"result_id": result_id}
+
+        def result_and_docs_hook(pipeline_run_args: dict) -> Generator:
+            docs = components.DocumentCapture.pop(result_id)
+            yield StreamingChunk(
+                content=json.dumps({"result_id": result_id, "documents": docs}) + "\n"
+            )
 
         logger.info("Streaming referrals: %s", pipeline_run_args)
         return self.runner.stream_response(
@@ -272,5 +284,5 @@ class PipelineWrapper(BasePipelineWrapper):
             input_=query,
             shorten_output=shorten_output,
             parent_span_name_suffix=suffix,
-            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
+            generator_hook=result_and_docs_hook,
         )
