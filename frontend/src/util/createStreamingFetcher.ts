@@ -24,6 +24,8 @@ export interface StreamingConfig<T, TPartial> {
   parseFinal: (accumulatedJson: string) => T;
   /** Optional function to determine if content should be accumulated (default: always true) */
   shouldAccumulateContent?: (content: string) => boolean;
+  /** Called with non-accumulated content chunks (e.g. metadata excluded by shouldAccumulateContent) */
+  extractMetadata?: (content: string) => void;
 }
 
 export interface StreamingResult<T> {
@@ -49,6 +51,7 @@ export async function createStreamingFetcher<T, TPartial>(
     parsePartial,
     parseFinal,
     shouldAccumulateContent = () => true,
+    extractMetadata,
   } = config;
 
   const ac = new AbortController();
@@ -164,6 +167,8 @@ export async function createStreamingFetcher<T, TPartial>(
                   // Partial parse errors are expected during streaming
                   // Continue accumulating
                 }
+              } else {
+                extractMetadata?.(content);
               }
             }
 

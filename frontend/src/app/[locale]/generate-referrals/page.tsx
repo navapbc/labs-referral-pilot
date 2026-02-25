@@ -50,6 +50,8 @@ export default function Page() {
   const [excludedResourceNames, setExcludedResourceNames] = useState<string[]>(
     [],
   );
+  // RAG source documents — invisible to user, passed to action plan LLM as context
+  const [contextDocuments, setContextDocuments] = useState<string[]>([]);
 
   // ========== Resources Streaming (Custom Hook) ==========
   /**
@@ -194,6 +196,7 @@ export default function Page() {
     const {
       resources,
       resultId,
+      documents,
       errorMessage: streamError,
     } = await findResourcesFromHook(
       {
@@ -212,15 +215,18 @@ export default function Page() {
     // Handle errors from the streaming response
     if (streamError) {
       setResourcesResultId("");
+      setContextDocuments([]);
       return;
     }
 
     // Set the final parsed resources
     if (resources && resources.length > 0) {
       setResourcesResultId(resultId);
+      setContextDocuments(documents);
       onResources(resources);
     } else {
       setResourcesResultId("");
+      setContextDocuments([]);
     }
   }
 
@@ -250,6 +256,7 @@ export default function Page() {
     setResourcesResultId("");
     setActionPlanResultId("");
     setExcludedResourceNames([]);
+    setContextDocuments([]);
     setLocationText("");
     setSelectedCategories([]);
     setSelectedResourceTypes([]);
@@ -295,6 +302,7 @@ export default function Page() {
     setRetainedResources(undefined);
     setSelectedResources([]);
     setExcludedResourceNames([]);
+    setContextDocuments([]);
     clearActionPlan();
     setActionPlanResultId("");
 
@@ -320,6 +328,7 @@ export default function Page() {
       selectedResources,
       userEmail,
       clientDescription,
+      contextDocuments,
     );
 
     // Handle errors from the streaming response

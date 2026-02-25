@@ -24,6 +24,7 @@ export interface UseResourcesStreamingReturn {
   ) => Promise<{
     resources: Resource[];
     resultId: string;
+    documents: string[];
     errorMessage?: string;
   }>;
   setErrorMessage: (error: string | undefined) => void;
@@ -78,6 +79,7 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
         const {
           resources: finalResources,
           resultId,
+          documents,
           errorMessage: streamError,
         } = await fetchResourcesStreaming(
           request,
@@ -119,6 +121,7 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
           return {
             resources: [],
             resultId: "",
+            documents: [],
             errorMessage: streamError,
           };
         }
@@ -130,6 +133,7 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
           return {
             resources: finalResources,
             resultId,
+            documents,
           };
         } else {
           const errorMsg =
@@ -138,6 +142,7 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
           return {
             resources: [],
             resultId: "",
+            documents: [],
             errorMessage: errorMsg,
           };
         }
@@ -153,6 +158,7 @@ export function useResourcesStreaming(): UseResourcesStreamingReturn {
         return {
           resources: [],
           resultId: "",
+          documents: [],
           errorMessage: errorMsg,
         };
       } finally {
