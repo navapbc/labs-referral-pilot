@@ -277,7 +277,7 @@ class PipelineWrapper(BasePipelineWrapper):
             )
 
         logger.info("Streaming referrals: %s", pipeline_run_args)
-        return self.runner.stream_response(
+        stream_gen = self.runner.stream_response(
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
@@ -286,3 +286,14 @@ class PipelineWrapper(BasePipelineWrapper):
             parent_span_name_suffix=suffix,
             generator_hook=result_and_docs_hook,
         )
+
+        def _with_cleanup() -> Generator:
+            try:
+                yield from stream_gen
+            finally:
+                # No-op if the hook already ran (pop returns [] for missing keys).
+                # Ensures the storage entry is always removed even when the pipeline
+                # raises before the hook executes.
+                components.DocumentCapture.pop(result_id)
+
+        return _with_cleanup()

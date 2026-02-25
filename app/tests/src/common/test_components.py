@@ -7,6 +7,7 @@ from haystack.dataclasses.chat_message import ChatMessage
 
 from src.adapters import db
 from src.common.components import (
+    DocumentCapture,
     EmailResponses,
     LlmOutputValidator,
     LoadResultOptional,
@@ -605,6 +606,60 @@ def test_RemoveResourcesForEmail_preserves_other_fields():
     # And filter resources
     assert len(resources_dict["resources"]) == 1
     assert resources_dict["resources"][0]["name"] == "Resource A"
+
+
+def test_DocumentCapture_stores_and_pops_content():
+    """DocumentCapture stores document content and pop() retrieves and removes it."""
+    from haystack import Document
+
+    component = DocumentCapture()
+    docs = [Document(content="First doc"), Document(content="Second doc")]
+
+    output = component.run(documents=docs, result_id="test-id-1")
+
+    # Documents pass through unchanged
+    assert output["documents"] == docs
+
+    # Content was stored
+    retrieved = DocumentCapture.pop("test-id-1")
+    assert retrieved == ["First doc", "Second doc"]
+
+    # Second pop returns empty (entry removed)
+    assert DocumentCapture.pop("test-id-1") == []
+
+
+def test_DocumentCapture_no_op_without_result_id():
+    """DocumentCapture does not store anything when result_id is empty."""
+    from haystack import Document
+
+    component = DocumentCapture()
+    docs = [Document(content="Some content")]
+
+    output = component.run(documents=docs, result_id="")
+
+    # Documents still pass through
+    assert output["documents"] == docs
+
+    # Nothing stored (pop of any key returns [])
+    assert DocumentCapture.pop("") == []
+
+
+def test_DocumentCapture_pop_nonexistent_key():
+    """pop() returns an empty list for an unknown result_id."""
+    assert DocumentCapture.pop("nonexistent-key") == []
+
+
+def test_DocumentCapture_skips_documents_without_content():
+    """DocumentCapture only stores documents that have non-empty content."""
+    from haystack import Document
+
+    component = DocumentCapture()
+    docs = [Document(content="Has content"), Document(content=None), Document(content="")]
+
+    component.run(documents=docs, result_id="test-id-2")
+
+    retrieved = DocumentCapture.pop("test-id-2")
+    assert retrieved == ["Has content"]
 
 
 def test_RemoveResourcesForEmail_mixed_valid_invalid_exclusions(caplog):

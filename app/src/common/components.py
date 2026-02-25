@@ -690,8 +690,8 @@ class DocumentCapture:
     _storage: ClassVar[dict[str, list[str]]] = {}
     _lock: ClassVar[threading.Lock] = threading.Lock()
 
-    @component.output_types(documents=list)
-    def run(self, documents: list, result_id: str = "") -> dict:
+    @component.output_types(documents=list[Document])
+    def run(self, documents: list[Document], result_id: str = "") -> dict:
         if result_id:
             contents = [d.content for d in documents if d.content]
             with self.__class__._lock:
