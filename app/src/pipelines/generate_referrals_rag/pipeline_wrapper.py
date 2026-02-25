@@ -105,8 +105,11 @@ class PipelineWrapper(BasePipelineWrapper):
                 output_type=list,
             ),
         )
+        pipeline.add_component("document_capture", components.DocumentCapture())
+
         pipeline.connect("query_embedder.embedding", "retriever.query_embedding")
-        pipeline.connect("retriever.documents", "output_adapter")
+        pipeline.connect("retriever.documents", "document_capture.documents")
+        pipeline.connect("document_capture.documents", "output_adapter")
 
         pipeline.add_component(
             "prompt_builder",
@@ -173,7 +176,7 @@ class PipelineWrapper(BasePipelineWrapper):
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
-            include_outputs_from={"llm", "save_result"},
+            include_outputs_from={"llm", "save_result", "retriever"},
             input_=query,
             extract_output=extract_output,
             parent_span_name_suffix=suffix,
@@ -192,6 +195,7 @@ class PipelineWrapper(BasePipelineWrapper):
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
+        result_id: str | None = None,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
         assert suffix, "suffix is required"
@@ -207,7 +211,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved",
             ) from e
 
-        return {
+        args = {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email}],
             },
@@ -230,6 +234,10 @@ class PipelineWrapper(BasePipelineWrapper):
                 "filters": {"field": "region", "operator": "==", "value": region},
             },
         }
+        if result_id:
+            args["save_result"] = {"result_id": result_id}
+            args["document_capture"] = {"result_id": result_id}
+        return args
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # This function is called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
@@ -249,6 +257,8 @@ class PipelineWrapper(BasePipelineWrapper):
         if not user_email:
             raise ValueError("user_email parameter is required")
 
+        # Generate result_id upfront to pass to both SaveResult and DocumentCapture via pipeline args
+        result_id = str(uuid.uuid4())
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
@@ -258,11 +268,8 @@ class PipelineWrapper(BasePipelineWrapper):
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
+            result_id=result_id,
         )
-
-        # Generate result_id upfront to pass to both SaveResult and the hook
-        result_id = str(uuid.uuid4())
-        pipeline_run_args["save_result"] = {"result_id": result_id}
 
         logger.info("Streaming referrals: %s", pipeline_run_args)
         return self.runner.stream_response(
@@ -272,5 +279,13 @@ class PipelineWrapper(BasePipelineWrapper):
             input_=query,
             shorten_output=shorten_output,
             parent_span_name_suffix=suffix,
-            generator_hook=haystack_utils.create_result_id_hook(self.pipeline, result_id),
+            generator_hook=haystack_utils.create_result_id_hook(
+                self.pipeline,
+                result_id,
+                pop_documents_fn=lambda: {"documents": components.DocumentCapture.pop(result_id)},
+            ),
+            # No-op if the hook already ran (pop returns [] for missing keys).
+            # Ensures the DocumentCapture entry is always removed even when the pipeline
+            # raises before the hook executes.
+            cleanup_fn=lambda: components.DocumentCapture.pop(result_id),
         )

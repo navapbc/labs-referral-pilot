@@ -45,7 +45,7 @@ class PipelineWrapper(BasePipelineWrapper):
 
         pipeline.add_component(
             instance=ChatPromptBuilder(
-                variables=["resources", "action_plan_json", "user_query"],
+                variables=["resources", "action_plan_json", "user_query", "context_documents"],
             ),
             name="prompt_builder",
         )
@@ -68,16 +68,20 @@ class PipelineWrapper(BasePipelineWrapper):
         resources: list[Resource] | list[dict],
         user_email: str,
         user_query: str,
+        context_documents: list[str] | None = None,
     ) -> dict:
         """
         Generate an action plan based on the given resources.
         The user query provides more context to the generation process.
+        The optional context_documents are RAG source documents from the referrals pipeline,
+        passed as additional context to the LLM prompt.
         """
         resource_objects = get_resources(resources)
         pipeline_run_args = self.create_pipeline_args(
             user_email,
             resource_objects,
             user_query,
+            context_documents=context_documents,
         )
         response = self.runner.return_response(
             pipeline_run_args,
@@ -100,6 +104,7 @@ class PipelineWrapper(BasePipelineWrapper):
         resource_objects: list[Resource],
         user_query: str,
         *,
+        context_documents: list[str] | None = None,
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
@@ -116,6 +121,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 "resources": format_resources(resource_objects),
                 "action_plan_json": action_plan_as_json,
                 "user_query": user_query,
+                "context_documents": format_context_documents(context_documents),
             },
             "llm": {
                 "model": llm_model or config.generate_action_plan_model_version,
@@ -135,6 +141,7 @@ class PipelineWrapper(BasePipelineWrapper):
         resources = body.get("resources", [])
         user_email = body.get("user_email", "")
         user_query = body.get("user_query", "")
+        context_documents = body.get("context_documents", None)
 
         if not resources:
             raise ValueError("resources parameter is required")
@@ -146,6 +153,7 @@ class PipelineWrapper(BasePipelineWrapper):
             user_email,
             resource_objects,
             user_query,
+            context_documents=context_documents,
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
@@ -172,6 +180,14 @@ def get_resources(resources: list[Resource] | list[dict]) -> list[Resource]:
     if isinstance(resources[0], Resource):
         return resources  # type: ignore[return-value]
     return [Resource(**res) for res in resources]  # type: ignore[arg-type]
+
+
+def format_context_documents(documents: list[str] | None) -> str:
+    """Format a list of retrieved RAG documents into a readable string for the LLM prompt."""
+    if not documents:
+        return ""
+    doc_lines = "\n\n".join(f"- {doc}" for doc in documents)
+    return f"Source Documents:\n{doc_lines}"
 
 
 def format_resources(resources: list[Resource]) -> str:
