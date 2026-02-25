@@ -12,7 +12,6 @@ from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
 from haystack.components.converters import OutputAdapter
 from haystack.components.embedders import SentenceTransformersTextEmbedder
-from haystack.dataclasses.streaming_chunk import StreamingChunk
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 from pydantic import BaseModel
 
@@ -196,6 +195,7 @@ class PipelineWrapper(BasePipelineWrapper):
         llm_model: str | None = None,
         reasoning_effort: str | None = None,
         streaming: bool = False,
+        result_id: str | None = None,
     ) -> dict:
         """Create pipeline run arguments with optional overrides for model, reasoning effort, and streaming."""
         assert suffix, "suffix is required"
@@ -211,7 +211,7 @@ class PipelineWrapper(BasePipelineWrapper):
                 detail=f"The requested prompt version '{prompt_version_id}' with suffix '{suffix}' could not be retrieved",
             ) from e
 
-        return {
+        args = {
             "logger": {
                 "messages_list": [{"query": query, "user_email": user_email}],
             },
@@ -234,6 +234,10 @@ class PipelineWrapper(BasePipelineWrapper):
                 "filters": {"field": "region", "operator": "==", "value": region},
             },
         }
+        if result_id:
+            args["save_result"] = {"result_id": result_id}
+            args["document_capture"] = {"result_id": result_id}
+        return args
 
     # https://docs.haystack.deepset.ai/docs/hayhooks#openai-compatibility
     # This function is called for the `{pipeline_name}/chat`, `/chat/completions`, or `/v1/chat/completions` streaming endpoint using Server-Sent Events (SSE)
@@ -253,6 +257,8 @@ class PipelineWrapper(BasePipelineWrapper):
         if not user_email:
             raise ValueError("user_email parameter is required")
 
+        # Generate result_id upfront to pass to both SaveResult and DocumentCapture via pipeline args
+        result_id = str(uuid.uuid4())
         pipeline_run_args = self.create_pipeline_args(
             query,
             user_email,
@@ -262,38 +268,24 @@ class PipelineWrapper(BasePipelineWrapper):
             llm_model=body.get("llm_model", None),
             reasoning_effort=body.get("reasoning_effort", None),
             streaming=True,
+            result_id=result_id,
         )
 
-        # Generate result_id upfront to pass to both SaveResult and the hook
-        result_id = str(uuid.uuid4())
-        pipeline_run_args["save_result"] = {"result_id": result_id}
-        # Pass result_id to DocumentCapture so retrieved docs can be retrieved in the hook below
-        pipeline_run_args["document_capture"] = {"result_id": result_id}
-
-        def result_and_docs_hook(pipeline_run_args: dict) -> Generator:
-            docs = components.DocumentCapture.pop(result_id)
-            yield StreamingChunk(
-                content=json.dumps({"result_id": result_id, "documents": docs}) + "\n"
-            )
-
         logger.info("Streaming referrals: %s", pipeline_run_args)
-        stream_gen = self.runner.stream_response(
+        return self.runner.stream_response(
             pipeline_run_args,
             user_id=user_email,
             metadata={"user_id": user_email},
             input_=query,
             shorten_output=shorten_output,
             parent_span_name_suffix=suffix,
-            generator_hook=result_and_docs_hook,
+            generator_hook=haystack_utils.create_result_id_hook(
+                self.pipeline,
+                result_id,
+                pop_documents_fn=lambda: {"documents": components.DocumentCapture.pop(result_id)},
+            ),
+            # No-op if the hook already ran (pop returns [] for missing keys).
+            # Ensures the DocumentCapture entry is always removed even when the pipeline
+            # raises before the hook executes.
+            cleanup_fn=lambda: components.DocumentCapture.pop(result_id),
         )
-
-        def _with_cleanup() -> Generator:
-            try:
-                yield from stream_gen
-            finally:
-                # No-op if the hook already ran (pop returns [] for missing keys).
-                # Ensures the storage entry is always removed even when the pipeline
-                # raises before the hook executes.
-                components.DocumentCapture.pop(result_id)
-
-        return _with_cleanup()
