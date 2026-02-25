@@ -662,6 +662,55 @@ def test_DocumentCapture_skips_documents_without_content():
     assert retrieved == ["Has content"]
 
 
+def test_DocumentCapture_concurrent_isolation():
+    """Multiple concurrent pipeline runs store and retrieve documents without cross-contamination.
+
+    Verifies the thread-safety contract stated in components.py:1-10: pipeline components
+    are shared across threads and must be safe for concurrent use.
+    """
+    import concurrent.futures
+    import time
+
+    from haystack import Document
+
+    component = DocumentCapture()
+    n_runs = 20
+
+    def run_and_pop(run_id: str) -> list[str]:
+        docs = [Document(content=f"{run_id}_doc_{i}") for i in range(5)]
+        component.run(documents=docs, result_id=run_id)
+        # Brief sleep to increase thread interleaving
+        time.sleep(0.01)
+        return DocumentCapture.pop(run_id)
+
+    errors: list[Exception] = []
+    results: dict[str, list[str]] = {}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_runs) as executor:
+        future_to_run_id = {
+            executor.submit(run_and_pop, f"concurrent-run-{i}"): f"concurrent-run-{i}"
+            for i in range(n_runs)
+        }
+        for future in concurrent.futures.as_completed(future_to_run_id):
+            run_id = future_to_run_id[future]
+            try:
+                results[run_id] = future.result()
+            except Exception as e:
+                errors.append(e)
+
+    assert not errors, f"Concurrent runs raised errors: {errors}"
+    assert len(results) == n_runs
+
+    for i in range(n_runs):
+        run_id = f"concurrent-run-{i}"
+        expected = [f"{run_id}_doc_{j}" for j in range(5)]
+        assert results[run_id] == expected, f"{run_id} got wrong docs: {results[run_id]}"
+
+    # All entries should have been popped — storage is clean
+    for i in range(n_runs):
+        assert DocumentCapture.pop(f"concurrent-run-{i}") == []
+
+
 def test_RemoveResourcesForEmail_mixed_valid_invalid_exclusions(caplog):
     """Test RemoveResourcesForEmail with mix of valid and invalid exclusion names."""
     import logging
