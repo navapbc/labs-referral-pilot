@@ -32,6 +32,7 @@ describe("Generate Referrals Page", () => {
   const mockFetchResourcesResult = {
     resultId: "test-result-id",
     resources: mockResources,
+    documents: [],
   };
 
   beforeEach(() => {
@@ -1138,6 +1139,7 @@ describe("Generate Referrals Page", () => {
           return Promise.resolve({
             resultId: "test-result-id",
             resources: mockMultipleResources,
+            documents: [],
           });
         });
 
@@ -1210,6 +1212,7 @@ describe("Generate Referrals Page", () => {
           return Promise.resolve({
             resultId: "test-result-id",
             resources: mockMultipleResources,
+            documents: [],
           });
         });
 
@@ -1293,6 +1296,7 @@ describe("Generate Referrals Page", () => {
           return Promise.resolve({
             resultId: "test-result-id",
             resources: mockMultipleResources,
+            documents: [],
           });
         });
 
