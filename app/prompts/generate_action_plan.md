@@ -39,3 +39,7 @@ Create a separate action plan for each of the following resources below:
 
 {{resources}}
 
+When provided, use the context in the related context_documents to support your response:
+
+{{context_documents}}
+
