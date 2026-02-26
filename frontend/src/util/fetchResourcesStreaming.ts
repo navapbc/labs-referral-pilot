@@ -27,7 +27,7 @@ export async function fetchResourcesStreaming(
   documents: string[];
   errorMessage?: string;
 }> {
-  const apiDomain = await getApiDomain();
+  const apiDomain = "https://p-201-app-dev-941409567.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
   const useNonRag = process.env.NEXT_PUBLIC_USE_NONRAG === "true";
   const model = useNonRag ? "generate_referrals" : "generate_referrals_rag";
 
