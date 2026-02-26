@@ -137,7 +137,7 @@ export async function fetchActionPlanStreaming(
   resultId: string;
   errorMessage?: string;
 }> {
-  const apiDomain = "https://p-201-app-dev-941409567.us-east-1.elb.amazonaws.com/"; //await getApiDomain();
+  const apiDomain = await getApiDomain();
   const url = `${apiDomain}chat/completions`;
 
   const result = await createStreamingFetcher<ActionPlan, PartialActionPlan>({
