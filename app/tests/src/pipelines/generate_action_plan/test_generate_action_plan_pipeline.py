@@ -1,6 +1,9 @@
 import pytest
 
-from src.pipelines.generate_action_plan.pipeline_wrapper import format_resources
+from src.pipelines.generate_action_plan.pipeline_wrapper import (
+    format_context_documents,
+    format_resources,
+)
 from src.pipelines.generate_referrals_rag.pipeline_wrapper import Resource
 
 
@@ -93,3 +96,28 @@ def test_format_resources_with_missing_fields():
     assert "Name: Minimal Resource" in formatted
     # Should include addresses even if only one
     assert "Addresses: 100 Test St" in formatted
+
+
+# --- format_context_documents tests ---
+
+
+def test_format_context_documents_none():
+    assert format_context_documents(None) == ""
+
+
+def test_format_context_documents_empty_list():
+    assert format_context_documents([]) == ""
+
+
+def test_format_context_documents_single_document():
+    result = format_context_documents(["Housing assistance program details"])
+    assert result == "Source Documents:\n- Housing assistance program details"
+
+
+def test_format_context_documents_multiple_documents():
+    docs = ["First doc about food banks", "Second doc about job training"]
+    result = format_context_documents(docs)
+    assert (
+        result
+        == "Source Documents:\n- First doc about food banks\n\n- Second doc about job training"
+    )

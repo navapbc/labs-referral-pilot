@@ -34,6 +34,7 @@ export async function fetchActionPlan(
   resources: Resource[],
   userEmail: string,
   userQuery: string,
+  contextDocuments?: string[],
 ): Promise<{
   actionPlan: ActionPlan | null;
   resultId: string;
@@ -53,10 +54,14 @@ export async function fetchActionPlan(
       resources: Resource[];
       user_email: string;
       user_query: string;
+      context_documents?: string[];
     } = {
       resources: resources,
       user_email: userEmail,
       user_query: userQuery,
+      ...(contextDocuments?.length
+        ? { context_documents: contextDocuments }
+        : {}),
     };
 
     const upstream = await fetch(url, {
@@ -126,6 +131,7 @@ export async function fetchActionPlanStreaming(
   onChunk: (partialPlan: PartialActionPlan) => void,
   onComplete: () => void,
   onError: (error: string) => void,
+  contextDocuments?: string[],
 ): Promise<{
   actionPlan: ActionPlan | null;
   resultId: string;
@@ -144,6 +150,9 @@ export async function fetchActionPlanStreaming(
       resources: resources,
       user_email: userEmail,
       user_query: userQuery,
+      ...(contextDocuments?.length
+        ? { context_documents: contextDocuments }
+        : {}),
     },
     onChunk,
     onComplete,

@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, Callable, Generator, Sequence
 
@@ -67,7 +68,11 @@ def to_chat_messages(
     return messages
 
 
-def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict], Generator]:
+def create_result_id_hook(
+    pipeline: Pipeline,
+    result_id: str,
+    pop_documents_fn: Callable[[], dict] | None = None,
+) -> Callable[[dict], Generator]:
     """Creates a generator hook that yields the result_id as the last chunk in a streaming response,
     i.e., TracedPipelineRunner.stream_response() calls a generator_hook() after pipeline.run() completes.
 
@@ -77,6 +82,8 @@ def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict]
     Args:
         pipeline: The Haystack pipeline to check for SaveResult component
         result_id: The result_id that will be used by SaveResult and yielded to frontend
+        pop_documents_fn: Optional callable that retrieves and clears captured documents,
+            returning them as a dict to merge into the yielded JSON
 
     Raises:
         ValueError: If the pipeline does not have a SaveResult component
@@ -96,8 +103,10 @@ def create_result_id_hook(pipeline: Pipeline, result_id: str) -> Callable[[dict]
         )
 
     def hook(pipeline_run_args: dict) -> Generator:
-        # Yield result_id as last chunk for frontend
-        yield StreamingChunk(content=f'{{"result_id": "{result_id}"}}\n')
+        data: dict = {"result_id": result_id}
+        if pop_documents_fn:
+            data.update(pop_documents_fn())
+        yield StreamingChunk(content=json.dumps(data) + "\n")
 
     return hook
 
@@ -132,6 +141,7 @@ class TracedPipelineRunner:
         shorten_output: Callable[[str], str] = lambda resp: resp,
         parent_span_name_suffix: str | None = None,
         generator_hook: Callable[[dict], Generator] | None = None,
+        cleanup_fn: Callable[[], Any] | None = None,
     ) -> Generator:
         """
         Run the pipeline with tracing and return a streaming response using hayhooks.streaming_generator().
@@ -140,6 +150,9 @@ class TracedPipelineRunner:
         The parent_span_name_suffix is appended to the parent span name for easier region identification in Phoenix.
         The generator_hook can be used to yield additional chunks after the main pipeline.run() completes,
         such as yielding the result_id for reference by the frontend.
+        The cleanup_fn is called in a finally block, guaranteeing execution even when the pipeline raises
+        before the generator_hook runs (e.g., to release class-level component state like DocumentCapture entries).
+        Its return value is ignored.
         """
         # Must set using attributes and metadata tracer context before calling tracer.start_as_current_span()
         with using_attributes(user_id=user_id, metadata=metadata):
@@ -191,6 +204,9 @@ class TracedPipelineRunner:
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
                     raise HTTPException(status_code=500, detail=str(e)) from e
+                finally:
+                    if cleanup_fn:
+                        cleanup_fn()
 
     def return_response(
         self,
