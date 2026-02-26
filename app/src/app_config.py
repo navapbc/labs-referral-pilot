@@ -46,7 +46,7 @@ class AppConfig(PydanticBaseEnvConfig):
     PROMPT_VERSIONS: dict = {
         "generate_referrals_centraltx": "UHJvbXB0VmVyc2lvbjoxNDM=",
         "generate_referrals_keystone": "UHJvbXB0VmVyc2lvbjo3OQ==",
-        "generate_action_plan": "UHJvbXB0VmVyc2lvbjo3NQ==",
+        "generate_action_plan": "UHJvbXB0VmVyc2lvbjoxNTk=",
     }
 
     # For RAG vector DB
