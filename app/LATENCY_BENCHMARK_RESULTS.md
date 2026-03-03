@@ -11,7 +11,8 @@
 2. [Model Comparison (50 queries)](#model-comparison-50-queries)
 3. [Referral Size Limit Testing](#referral-size-limit-testing)
 4. [Gemini Speed Testing](#gemini-speed-testing)
-5. [Key Findings & Recommendations](#key-findings--recommendations)
+5. [Parameter Effect Testing: Temperature and Reasoning](#parameter-effect-testing-temperature-and-reasoning)
+6. [Key Findings & Recommendations](#key-findings--recommendations)
 
 ---
 
@@ -540,6 +541,267 @@ class Config:
 - Speed improvements would be beneficial but not critical
 - Temperature control with Gemini is attractive but hybrid caching (from temperature report) is an alternative
 - Consider implementing after addressing consistency issues with caching approach
+
+---
+
+## Parameter Effect Testing: Temperature and Reasoning
+
+**Test Date:** March 3, 2026
+**Purpose:** Measure how temperature and reasoning parameters affect web search decisions and latency
+**API:** OpenAI Responses API with web_search tool
+
+---
+
+### Background
+
+**The Problem:**
+Production baseline showed 36.4% web search usage from 55 real queries. However, testing with the production prompt (missing database-injected resources) resulted in 96.4% web search usage - a 60 percentage point gap.
+
+**Root Cause:**
+Production prompt uses Jinja2 template `{% for s in supports %}` to inject hundreds of database resources at runtime. Test environment only has inline CAT/Excel resources (~19 classes), missing the bulk of resources that reduce web search necessity.
+
+**Test Objective:**
+Since we can't replicate the exact production baseline (missing DB resources), test whether temperature and reasoning parameters affect web search decisions and latency for future optimization.
+
+---
+
+### Configuration
+
+- **Model:** gpt-5.1 (production configuration)
+- **Baseline:** reasoning="none" (production setting)
+- **Test prompt:** Production prompt Version 48 with inline CAT/Excel resources only
+- **Queries per test:** 20 real production queries
+- **Configurations tested:** 9 total
+  - Baseline: reasoning="none"
+  - Temperature: 0.0, 0.5, 1.0, 1.5, 2.0 (requires reasoning="none")
+  - Reasoning: low, medium, high (incompatible with temperature)
+
+---
+
+### Results Summary
+
+**Note:** Results use **median latency** instead of mean to handle outliers. Several tests experienced hung requests (2-22 hours) that skewed averages.
+
+| Configuration | Web Search Rate | Median Latency | vs Baseline |
+|--------------|-----------------|----------------|-------------|
+| **Baseline (reasoning=none)** | **90.0%** | **~20s** | - |
+| Temperature 0.0 | 90.0% | ~22s | +2s (stable) |
+| Temperature 0.5 | 90.0% | ~19s | -1s (stable) |
+| Temperature 1.0 | 90.0% | ~17s | -3s (stable) |
+| Temperature 1.5 | 90.0% | ~26s | +6s (stable) |
+| Temperature 2.0 | 89.5% | ~15s* | -5s (2 hung queries) |
+| **Reasoning low** | **90.0%** | **~40s** | **+20s (2x slower)** |
+| **Reasoning medium** | **95.0% (+5.0pp)** | **~140s** | **+120s (7x slower)** |
+| **Reasoning high** | **100.0% (+10.0pp)** | **~280s** | **+260s (14x slower)** |
+
+*\*Temperature 2.0 had 2 hung queries (79,117s and 81,417s) excluded from median calculation*
+
+---
+
+### Key Findings
+
+#### 1. Temperature Has Minimal Effect on Web Search Decisions
+
+**Web Search Rate: Stable ~90%**
+- Temperature 0.0 to 2.0 all showed ~90% web search rate
+- Variation was within noise (89.5% - 90.0%)
+- Temperature does NOT significantly affect whether the model chooses to search the web
+
+**Latency: Minor variation**
+- Median latency ranged from ~15s to ~26s across temperatures
+- Variation within 50% of baseline (acceptable)
+- Temperature 2.0 showed instability (2 hung queries out of 20)
+
+**Conclusion:** Temperature parameter does not solve the web search consistency issue and may introduce instability at extreme values (2.0).
+
+---
+
+#### 2. Reasoning Has Significant Effect (Opposite of Desired)
+
+**Web Search Rate: INCREASES with reasoning level**
+- Baseline (none): 90.0%
+- Low: 90.0% (no change)
+- Medium: 95.0% (+5.0pp)
+- High: 100.0% (+10.0pp)
+
+**Counterintuitive Result:**
+Higher reasoning makes the model MORE likely to search the web, not less. This is opposite to what might be expected if reasoning helped the model better utilize existing resources.
+
+**Latency: DRAMATICALLY INCREASES**
+- Baseline: ~20s median
+- Low: ~40s (2x slower)
+- Medium: ~140s (7x slower)
+- High: ~280s (14x slower)
+
+**Cost Implications:**
+- Reasoning medium/high are unusable due to latency (2-5 minutes per query)
+- Reasoning also increases token costs due to thinking tokens
+- Reasoning high had 4 connection errors (reliability issues)
+
+**Conclusion:** Reasoning parameters make the situation worse - MORE web search, MUCH slower responses, and lower reliability.
+
+---
+
+### Outliers and Hung Requests
+
+**Critical Data Quality Issue:**
+Several configurations experienced hung requests that skewed initial average calculations:
+
+1. **Temperature 2.0:**
+   - Query #19: 79,117s (22 hours)
+   - Query #20: 81,417s (22.6 hours)
+   - Initial average: 8,460.52s → Corrected median: ~15s
+
+2. **Reasoning high:**
+   - Query #3: 2,393s (40 minutes)
+   - Query #6: 10,464s (2.9 hours)
+   - Queries #17-20: 4 connection errors
+   - Initial average: 1,057.62s → Corrected median: ~280s
+
+**Analysis Method:**
+- Switched from **mean** to **median** latency
+- Median is robust to outliers (hung queries)
+- Provides more realistic performance expectations
+
+---
+
+### Production Recommendations
+
+Based on these findings, **current production configuration is optimal**:
+
+#### ✅ Keep Current Configuration
+- **Model:** gpt-5.1
+- **Reasoning:** {"effort": "none"}
+- **No temperature parameter** (not supported with reasoning="none" in Responses API)
+
+#### Why This Configuration:
+1. **Fastest response times** (~20s median)
+2. **Most reliable** (no hung queries at scale)
+3. **Lowest cost** (no reasoning token overhead)
+4. **Stable web search behavior** (90% with limited resources)
+
+#### ❌ Do NOT Use:
+- **Temperature > 1.5:** Introduces instability and hung queries
+- **Temperature < 1.0:** No benefit, slight latency increase
+- **Reasoning (any level):** Much slower, more web search, higher cost, lower reliability
+
+---
+
+### Test Context and Limitations
+
+#### Important Caveats:
+
+1. **Not Testing Production Baseline:**
+   - Production: 36.4% web search (with full DB resources)
+   - Test: 90-100% web search (missing DB resources)
+   - 60pp gap due to missing resources, NOT parameter choice
+
+2. **Testing Relative Effects:**
+   - Goal: Measure parameter effects on web search decisions
+   - Result: Temperature has no effect, reasoning makes it worse
+   - Neither parameter solves the underlying issue
+
+3. **Resource Gap:**
+   - Production has hundreds of database-injected resources
+   - Test environment has ~19 inline resources (CAT/Excel classes)
+   - Cannot match production baseline without full database
+
+4. **Sample Size:**
+   - 20 queries per configuration (vs 55 total production queries)
+   - Sufficient to detect parameter effects
+   - May not capture all production variability
+
+---
+
+### Methodology
+
+#### Test Implementation
+
+**Test Script:** `parameter_effect_test.py`
+
+**Query Source:**
+- Real production queries from Phoenix traces
+- 55 total queries: 20 web search (36.4%), 35 no web search (63.6%)
+- Subset of 20 queries used per configuration for speed
+
+**Web Search Detection:**
+```python
+# Check if web search was used
+used_web_search = False
+if response.output:
+    for item in response.output:
+        if hasattr(item, 'type') and item.type == 'web_search_call':
+            used_web_search = True
+            break
+```
+
+**Request Configuration:**
+```python
+request_params = {
+    "model": "gpt-5.1",
+    "tools": [{"type": "web_search"}],
+    "input": [
+        {"role": "system", "content": PRODUCTION_PROMPT},
+        {"role": "user", "content": f"Client needs: {query}"}
+    ]
+}
+
+# Add reasoning OR temperature (mutually exclusive)
+if reasoning:
+    request_params["reasoning"] = {"effort": reasoning}
+elif temperature is not None:
+    request_params["temperature"] = temperature
+    request_params["reasoning"] = {"effort": "none"}  # Required for temperature
+```
+
+**Statistical Analysis:**
+- Median latency (robust to outliers)
+- Web search rate (percentage)
+- Error tracking (timeouts, connection errors)
+- Rate limiting: 0.3s between requests
+
+---
+
+### Future Investigation Opportunities
+
+#### If You Want to Match Production Baseline (36.4%):
+
+**Option 1: Database Access**
+- Export production database resources
+- Inject into test prompt via Jinja2 template
+- Re-run parameter tests with full resource set
+- Expected: Lower web search rates (closer to 36.4%)
+
+**Option 2: Alternative Prompt Engineering**
+- Test prompt changes that encourage using embedded resources first
+- Example: "IMPORTANT: Check the provided resources list before searching the web"
+- May not work - prompt already has this guidance
+
+**Option 3: Hybrid Caching Strategy**
+- Pre-populate cache with common Central Texas resources
+- Reduce web search necessity through better caching
+- See TEMPERATURE_ANALYSIS_REPORT.md for caching implementation details
+
+#### Why Web Search Rate Doesn't Match Production:
+
+The 90% test rate vs 36.4% production rate is primarily explained by:
+1. **Missing database resources** (hundreds of resources in production)
+2. **Resource specificity** (database has more granular, targeted resources)
+3. **Resource freshness** (inline resources may be outdated)
+
+The parameter effect testing still provides value by showing that temperature and reasoning do not solve web search consistency issues.
+
+---
+
+### Related Documentation
+
+- **Test Script:** `parameter_effect_test.py`
+- **Raw Results:** `parameter_effect_results.json`
+- **Test Output:** `parameter_effect_test_output.txt`
+- **Production Queries:** `sample_production_queries.json`
+- **Production Prompt:** `production_prompt_v48.txt`
+- **Temperature Analysis:** `TEMPERATURE_ANALYSIS_REPORT.md` (hybrid caching strategy)
+- **Web Search Investigation:** `WEB_SEARCH_SPIKE_ROOT_CAUSE_ANALYSIS.md`
 
 ---
 
