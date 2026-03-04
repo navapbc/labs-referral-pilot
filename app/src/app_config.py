@@ -44,8 +44,8 @@ class AppConfig(PydanticBaseEnvConfig):
     # Be aware: Version ids are base64 encodings of 'PromptVersion:N' where N is simply a counter,
     # so they are not unique across different Phoenix instances.
     PROMPT_VERSIONS: dict = {
-        "generate_referrals_centraltx": "UHJvbXB0VmVyc2lvbjoxNjE=",
-        "generate_referrals_keystone": "UHJvbXB0VmVyc2lvbjo3OQ==",
+        "generate_referrals_centraltx": "UHJvbXB0VmVyc2lvbjoxNjI=",
+        "generate_referrals_keystone": "UHJvbXB0VmVyc2lvbjoxNjM=",
         "generate_action_plan": "UHJvbXB0VmVyc2lvbjoxNTk=",
     }
 
