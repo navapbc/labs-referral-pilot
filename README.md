@@ -17,38 +17,11 @@
 
 ## Product Description
 
-The GenAI Referral Tool is a pilot application developed by Nava PBC in partnership with Goodwill. It assists case managers in identifying relevant community resources and generating personalized action plans for Goodwill clients. Case managers enter client information into the tool, which uses a Retrieval-Augmented Generation (RAG) pipeline and a large language model to surface trusted resources and create a tailored action plan. Results can be printed or emailed directly to clients.
+The GenAI Referral Tool is a pilot application developed by NavaLabs, a research and development team within Nava PBC, in partnership with Goodwill. It assists case managers in identifying relevant community resources and generating personalized action plans for Goodwill clients. Case managers enter client information into the tool, which uses a Retrieval-Augmented Generation (RAG) pipeline and a large language model to surface trusted resources and create a tailored action plan. Results can be printed or emailed directly to clients.
 
 The pilot aimed to assess the effectiveness of LLMs at identifying relevant resources, and evaluated the accuracy of identifying prerequisite steps and constraints relevant to case managers' clients. Over the course of the pilot, generative AI tools were increasingly incorporated into the development workflow to expedite prototyping of frontend components.
 
 ---
-
-## Architecture
-
-```mermaid
-graph TD
-    CaseManager["Case Manager (Browser)"]
-
-    subgraph AWS
-        Frontend["Frontend\nNext.js / React\n(ECS)"]
-        Backend["Backend / API\nPython / Hayhooks\n(ECS)"]
-        DB["PostgreSQL Database\n(RDS)"]
-        VectorDB["Vector Database\nChromaDB\n(ECS)"]
-        KnowledgeBase["Knowledge Base\nTrusted Resources & Job Listings\n(S3)"]
-        Email["Email Service\nAWS SES"]
-        Monitoring["Monitoring\nPhoenix Arize\n(ECS)"]
-        LLM["LLM Provider\nOpenAI"]
-    end
-
-    CaseManager -->|"HTTPS"| Frontend
-    Frontend -->|"REST / SSE streaming"| Backend
-    Backend --> DB
-    Backend --> VectorDB
-    VectorDB --> KnowledgeBase
-    Backend --> LLM
-    Backend --> Email
-    Backend --> Monitoring
-```
 
 ### Components
 
@@ -97,7 +70,7 @@ Then navigate to `localhost:3001`.
 
 The following describes a typical end-to-end session for a case manager using the GenAI Referral Tool.
 
-1. **Open the tool** — Navigate to the application in a browser. No login is required for case managers during the pilot.
+1. **Open the tool** — Navigate to the application in a browser.
 2. **Enter client information** — Fill out the intake form with details such as the client's employment goals, barriers to employment, and location. The UI components are designed to structure this input in a way that automatically enriches the LLM prompt, reducing the need for case managers to manually phrase queries.
 3. **Generate referrals** — Submit the form to trigger the RAG pipeline. The tool retrieves relevant resources from the knowledge base and passes them along with the client context to the LLM, which returns a structured list of community resources.
 4. **Review resources** — Browse the returned resource list. Each resource includes relevant details to help the case manager assess fit for the client.
