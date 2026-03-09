@@ -17,7 +17,7 @@
 
 ## Product Description
 
-The GenAI Referral Tool is a pilot application developed by NavaLabs, a research and development team within Nava PBC, in partnership with Goodwill. It assists case managers in identifying relevant community resources and generating personalized action plans for Goodwill clients. Case managers enter client information into the tool, which uses a Retrieval-Augmented Generation (RAG) pipeline and a large language model to surface trusted resources and create a tailored action plan. Results can be printed or emailed directly to clients.
+The GenAI Referral Tool is a pilot application developed by Nava Labs, a research and development team within Nava PBC, in partnership with Goodwill. It assists case managers in identifying relevant community resources and generating personalized action plans for Goodwill clients. Case managers enter client information into the tool, which uses a Retrieval-Augmented Generation (RAG) pipeline and a large language model to surface trusted resources and create a tailored action plan. Results can be printed or emailed directly to clients.
 
 The pilot aimed to assess the effectiveness of LLMs at identifying relevant resources, and evaluated the accuracy of identifying prerequisite steps and constraints relevant to case managers' clients. Over the course of the pilot, generative AI tools were increasingly incorporated into the development workflow to expedite prototyping of frontend components.
 
@@ -68,7 +68,7 @@ The following describes a typical end-to-end session for a case manager using th
 
 ## Contact
 
-For questions about this project, reach out to the NavaLabs team at [labs-dst@navapbc.com](mailto:labs-dst@navapbc.com).
+For questions about this project, reach out to the Nava Labs team at [labs-dst@navapbc.com](mailto:labs-dst@navapbc.com).
 
 ---
 
