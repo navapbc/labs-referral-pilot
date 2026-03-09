@@ -25,44 +25,31 @@ The pilot aimed to assess the effectiveness of LLMs at identifying relevant reso
 
 ### Components
 
-| Component | Technology | AWS Service | Role |
-|---|---|---|---|
-| Frontend | Next.js / React | ECS | Case manager UI — enter client info, view referrals & action plan, print/email results |
-| Backend / API | Python / Hayhooks | ECS | LLM pipeline orchestration, streaming and synchronous API endpoints |
-| Database | PostgreSQL | RDS | Stores LLM responses, user data, and monitoring trace data |
-| Vector Database | ChromaDB | ECS | RAG retrieval — improves referral speed and accuracy |
-| Knowledge Base | File storage | S3 | Trusted community resources and job listings used by the RAG system |
-| Email Service | AWS SES | SES | Sends referral lists and action plans to case managers and clients |
-| Monitoring | Phoenix Arize | ECS | LLM trace data and prompt version management |
+| Component | Technology | AWS Service | Role                                                                                                                     |
+|---|---|---|--------------------------------------------------------------------------------------------------------------------------|
+| Frontend | Next.js / React | ECS | Case manager UI — enter client info, view referrals & action plan, print/email results                                   |
+| Backend / API | Python / Hayhooks | ECS | LLM pipeline orchestration, streaming and synchronous API endpoints                                                      |
+| Database | PostgreSQL | RDS | Stores LLM responses, user data, and monitoring trace data                                                               |
+| Vector Database | ChromaDB | ECS | RAG retrieval — improves referral speed and accuracy                                                                     |
+| Knowledge Base | File storage | S3 | Trusted community resources and job listings used by the RAG system. This information is maintained and updated by a SME |
+| Email Service | AWS SES | SES | Sends referral lists and action plans to case managers and clients                                                       |
+| Monitoring | Phoenix Arize | ECS | LLM trace data and prompt version management                                                                             |
 
 ---
 
 ## Setup
 
+Ensure the following prerequisites are installed on your machine: [Docker Desktop](https://www.docker.com/products/docker-desktop/), [Python 3.12](https://github.com/pyenv/pyenv#installation), [Poetry](https://python-poetry.org/docs/#installation), and [Node.js ≥ 20](https://nodejs.org/).
+
+For a deeper look at the system design, see [docs/system-architecture.md](docs/system-architecture.md).
+
 ### Backend (app)
 
 See [docs/app/getting-started.md](docs/app/getting-started.md) for full setup instructions.
 
-**Quick start** (from `app/`):
-
-```bash
-make init start
-```
-
-Then navigate to `localhost:3000/docs` for the Swagger UI.
-
 ### Frontend
 
 See [frontend/README.md](frontend/README.md) for full setup instructions.
-
-**Quick start** (from `frontend/`):
-
-```bash
-npm install
-npm run dev
-```
-
-Then navigate to `localhost:3001`.
 
 ---
 
@@ -70,7 +57,7 @@ Then navigate to `localhost:3001`.
 
 The following describes a typical end-to-end session for a case manager using the GenAI Referral Tool.
 
-1. **Open the tool** — Navigate to the application in a browser.
+1. **Open the tool** — Navigate to the application in a browser. A login screen will show. There is no authentication, this is merely to capture user information which is used in evaluations and application tracing
 2. **Enter client information** — Fill out the intake form with details such as the client's employment goals, barriers to employment, and location. The UI components are designed to structure this input in a way that automatically enriches the LLM prompt, reducing the need for case managers to manually phrase queries.
 3. **Generate referrals** — Submit the form to trigger the RAG pipeline. The tool retrieves relevant resources from the knowledge base and passes them along with the client context to the LLM, which returns a structured list of community resources.
 4. **Review resources** — Browse the returned resource list. Each resource includes relevant details to help the case manager assess fit for the client.
@@ -87,4 +74,5 @@ For questions about this project, reach out to the NavaLabs team at [labs-dst@na
 
 ## Open Source
 
-This project is made available as open source for future research purposes. It was developed by [Nava PBC](https://www.navapbc.com) in partnership with Goodwill.
+This project is made available as open source for future research purposes and extension. It was developed by [Nava PBC](https://www.navapbc.com) in partnership with Goodwill.
+The initial research pilot started in August 2025 and the Pilot usage ended in Early March 2026.
