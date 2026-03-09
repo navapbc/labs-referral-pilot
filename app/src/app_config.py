@@ -68,16 +68,16 @@ class AppConfig(PydanticBaseEnvConfig):
     retrieval_top_k: int = 10
 
     # LLM Model Configuration per pipeline
-    default_openai_model_version: str = "gpt-5.1"
+    default_openai_model_version: str = "gpt-5.4-2026-03-05"
     default_openai_reasoning_level: str = "none"
 
-    generate_referrals_rag_model_version: str = "gpt-5.1"
+    generate_referrals_rag_model_version: str = "gpt-5.4-2026-03-05"
     generate_referrals_rag_reasoning_level: str = "none"
-    generate_referrals_rag_temperature: float = 0.9
+    generate_referrals_rag_temperature: float = 0.5
 
-    generate_action_plan_model_version: str = "gpt-5.1"
+    generate_action_plan_model_version: str = "gpt-5.4-2026-03-05"
     generate_action_plan_reasoning_level: str = "none"
-    generate_action_plan_temperature: float = 0.9
+    generate_action_plan_temperature: float = 0.5
 
     def chroma_client(self) -> ClientAPI:
         return chromadb.HttpClient(host=self.rag_db_host, port=self.rag_db_port)

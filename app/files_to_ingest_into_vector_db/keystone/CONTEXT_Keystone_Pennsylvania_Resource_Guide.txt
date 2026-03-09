@@ -1,0 +1,235 @@
+PROJECT OVERVIEW
+You are building a verified, comprehensive, client-facing basic needs guide for South Central Pennsylvania / Goodwill Keystone Area.
+The goal is to produce and maintain a guide with consistent rules that can be refined and expanded over time.
+The guide focuses on:
+South Central Pennsylvania counties served by Goodwill Keystone Area: Dauphin, Cumberland, Perry, Lebanon, Lancaster, York, Northumberland, Schuylkill, and Juniata.
+Non-food services primarily (though some food pantries are included if they also provide diapers / baby supplies).
+Resources that are genuinely useful for case managers and clients (not just generic directories).
+This context is for future updates, verification, new resources, and spot-fixes.
+OUTPUT REQUIREMENTS
+All future work with this guide should:
+Produce ONE unified text file / text block:
+Grouped by service type (e.g., Housing, Mental Health, Legal, Diapers, etc.).
+Within each service type, resources listed alphabetically by agency name.
+Plain text only:
+No markdown-style formatting, no citation tags.
+Just text and URLs.
+EVERY listing must include:
+Organization name.
+Street address for each location (including city, ZIP, and county).
+Best client-facing phone number (no staff-only/admin back lines).
+Website URL (plain text).
+Clear description of services.
+Eligibility (who they serve, age, income, geographic limits, documentation, etc.).
+Basic access info (appointment vs walk-in, hours if relevant, how to start, any required documents).
+For multi-site orgs, list all relevant local locations (not just admin HQ).
+SOURCE & VERIFICATION RULES
+Verification is non-negotiable:
+Use the organization's own website FIRST whenever possible.
+Then supplement with:
+findhelp.org
+Official government sites (.gov, county assistance offices, Pennsylvania DHS, school districts, transit authorities, etc.)
+211 Pennsylvania (pa211.org)
+DO NOT USE (or cite from) these:
+shelterlistings.org
+needhelppayingbills.com
+thehelplist.com
+yelp.com
+loc8nearme.com
+mapquest.com
+other unverified aggregator sites or scraped directories
+Rules for claims:
+Every non-obvious detail should be verifiable on a trusted URL.
+If you can't find support for a claim, DO NOT include it.
+If you find conflicting info (e.g., hours), prefer the most official and most recent: the organization's own site > PDF flyer > third-party listing.
+URLs:
+For each listing, include the main website and, when relevant, specific pages you used to verify details (e.g., a "Programs" or "Get Help" page).
+URLs go directly in the text (e.g., "Website: https://www.example.org"), not as citation tags.
+PROCESS STEPS
+Whenever you refine or extend the guide:
+Combine & deduplicate:
+Read all provided text files.
+Consolidate duplicate listings (same org, different versions).
+Keep the most accurate and complete info; merge details.
+Verify:
+For each resource, open its website and check:
+Name, addresses, phone, services, eligibility, hours, intake process.
+Correct anything that's off.
+Add any missing details that are clearly stated on the site.
+Expand:
+Add missing but relevant resources (e.g., diaper banks, key regional agencies) when requested.
+Stick to the Goodwill Keystone service area (Dauphin, Cumberland, Perry, Lebanon, Lancaster, York, Northumberland, Schuylkill, Juniata counties) and service categories that match the brief (non-food basic needs, housing, legal, diapers, etc.).
+Document:
+For each listing, include at least one URL you used to verify.
+Keep everything in a single plain-text document organized by service type then alphabetical.
+CORE PROMPT (WITH UPDATED RULES)
+Use this prompt as your base going forward:
+Look through the provided text files and combine all duplicate resource listings. Create one unified list where each resource appears only once.
+For every single resource, perform a full verification using trusted web sources. Update any incorrect information and add missing information. For every update or new detail, record the exact URL where you found the information. Use the organization's own website whenever possible. If additional verification is needed, you may supplement with findhelp.org, pa211.org, or official government sites. Do not use sources like shelterlistings.org, needhelppayingbills.com, thehelplist.com, yelp.com, loc8nearme.com, mapquest.com, or any other unverified aggregator site.
+Every listing must include:
+A valid website URL for the organization (plain text)
+A full street address for every location the organization operates, including the county
+The best client-facing phone number (not administrative or staff-only numbers)
+A clear, accurate description of services
+Eligibility criteria (including populations served, income criteria, geographic restrictions, age limits, and counties served)
+Instructions on how to access services (appointment vs walk-in, intake process, required documents, etc)
+All locations listed if the organization has more than one site
+Also:
+Add new relevant resources if they were missing, using only trusted sources, with URLs included.
+Everything should be plain text with no formatting or citation tags.
+Organize the final document by service type, alphabetized within each category.
+DO:
+DO verify every detail using trusted sources such as an organization's official website, findhelp.org, pa211.org, or government sites.
+DO include all known locations for an organization. (Example: listing all Goodwill Keystone career center locations across the service area.)
+DO correct inaccurate or unverified statements.
+DO include full eligibility information from the official source. (Example: adding county residence requirements for county assistance programs.)
+DO replace vague listings with specific ones. (Example: replacing "diaper distribution sites" with a list of named partner locations, with addresses and hours.)
+DON'T:
+DON'T include unverified claims that do not appear on official or trusted sites.
+DON'T link to or use sites like Yelp, Loc8NearMe, MapQuest, ShelterListings, NeedHelpPayingBills, or similar aggregator websites.
+DON'T omit addresses or counties. For each listing, you must have a full street address and county if applicable.
+DON'T use citation tags, footnotes, or embedded reference codes. All URLs must be plain text only.
+DON'T include admin-only or staff-only numbers. Use only public client-facing numbers.
+DON'T collapse organizations that share a name but provide different services or have different locations.
+FULL LISTING DO/DON'T EXAMPLES (KEEP THESE AS TEMPLATES)
+DO EXAMPLE 1 – LGBTQ+ SERVICES (GOOD)
+LGBTQ+ CENTER OF CENTRAL PA
+Address: 1306 N 3rd St, Harrisburg, PA 17102, Dauphin County
+Client Phone: 717-920-9534
+Website: https://centralpalgbtqcenter.org
+Services: Drop-in space, support groups, counseling referrals, youth programs, and community education focused on LGBTQIA+ individuals.
+Eligibility: LGBTQIA+ individuals and allies of all ages. Serves individuals from across Central Pennsylvania.
+How to access: Call the main line or visit during drop-in hours. Some programs require registration; others are open groups or drop-in.
+Source URLs used to verify:
+https://centralpalgbtqcenter.org/contact
+https://centralpalgbtqcenter.org/programs
+DON'T EXAMPLE 1 – LGBTQ+ SERVICES (BAD)
+LGBTQ Center
+County: Dauphin
+Phone: 717-920-9534
+Website: https://centralpalgbtqcenter.org
+Services: LGBTQ support
+Eligibility: Anyone
+(Too vague; missing addresses, county for each site, eligibility details, and access info.)
+
+DO EXAMPLE 2 – DIAPER DISTRIBUTION (GOOD)
+CENTRAL PENNSYLVANIA DIAPER BANK (PARTNER SITE EXAMPLE)
+Address: 123 Main St, Lancaster, PA 17603, Lancaster County
+Client Phone: 717-555-1234
+Website: https://example.org/diaper-program
+Services: Monthly diaper distribution (diapers, wipes, and period products) for families in need.
+Eligibility: Households with children in diapers or individuals needing period products in Lancaster County. No appointment required; first-come, first-served until supplies are gone.
+Hours:
+Diaper distribution: 2nd Saturday of each month, 9:00 am–11:00 am (check website for holiday changes).
+Source URLs:
+https://example.org/diaper-program
+https://examplediaperbankpa.org/get-help
+DON'T EXAMPLE 2 – DIAPER DISTRIBUTION (BAD)
+Diaper Bank
+Food pantry, diapers.
+Hours vary.
+(Vague, no address, no county, no eligibility, no specific hours, no URLs.)
+
+DO EXAMPLE 3 – COUNTY ASSISTANCE (GOOD)
+DAUPHIN COUNTY ASSISTANCE OFFICE
+Address: 2932 N 7th St, Harrisburg, PA 17110, Dauphin County
+Client Phone: 717-787-2323
+Website: https://www.dhs.pa.gov/Services/Assistance/Pages/CAO-Contact.aspx
+Services: County-administered public assistance programs including SNAP (food assistance), Medical Assistance (Medicaid), LIHEAP (heating assistance), and cash assistance (TANF) for eligible Pennsylvania residents.
+Eligibility: Must live in Dauphin County, meet income and asset limits for each program. Citizenship or eligible immigration status required for most programs.
+How to access: Apply online at www.compass.state.pa.us or visit the office in person. Bring proof of identity, residency, income, and household composition.
+Source URLs:
+https://www.dhs.pa.gov/Services/Assistance/Pages/CAO-Contact.aspx
+https://www.compass.state.pa.us
+DON'T EXAMPLE 3 – COUNTY ASSISTANCE (BAD)
+CAO
+Helps with benefits.
+(Too vague; no address, no county, no phone, no eligibility specifics, no URL.)
+
+DO EXAMPLE 4 – GOODWILL KEYSTONE AREA (GOOD)
+GOODWILL KEYSTONE AREA – CAREER DEVELOPMENT CENTER (HARRISBURG)
+Address: 1150 Goodwill Dr, Harrisburg, PA 17104, Dauphin County
+Client Phone: 717-232-1831
+Website: https://www.yourgoodwill.org
+Services: Job training, GED preparation, job placement assistance, computer skills training, and career counseling for individuals with barriers to employment.
+Eligibility: Adults with low income and/or barriers to employment such as criminal history, disability, limited education, or language barriers. Serves residents of Dauphin, Cumberland, Perry, Lebanon, Lancaster, York, Northumberland, Schuylkill, and Juniata counties.
+How to access: Walk in or call to schedule an intake appointment. Some programs require orientation; details are on the website.
+Source URL:
+https://www.yourgoodwill.org/services
+DON'T EXAMPLE 4 – GOODWILL (BAD)
+Goodwill
+Helps people find jobs.
+(Too vague; missing address, county, website, eligibility, and access process.)
+
+COUNTIES SERVED BY GOODWILL KEYSTONE AREA
+Dauphin County (Harrisburg area)
+Cumberland County (Carlisle, Mechanicsburg, Camp Hill area)
+Perry County
+Lebanon County
+Lancaster County
+York County
+Northumberland County
+Schuylkill County
+Juniata County
+
+KEY REGIONAL RESOURCES TO INCLUDE
+When building resources for these counties, consider including:
+Pennsylvania CareerLink locations in each county
+County Assistance Offices (CAOs) for each county
+Community Action Agencies serving each county
+Legal aid organizations (MidPenn Legal Services, etc.)
+Housing authorities in each county
+Mental health/crisis services (local and statewide hotlines)
+Transportation assistance (rabbittransit, CAT, RRTA, etc.)
+Domestic violence services (YWCA locations, etc.)
+Veteran services (VA facilities, county veteran affairs offices)
+Senior services (Area Agency on Aging, senior centers)
+Reentry services for returning citizens
+
+CROSS-FILE CONSISTENCY RULES
+When the same organization appears in multiple files, ALL of the following must be identical across every occurrence:
+1. Organization name (exact spelling and capitalization)
+2. Street address(es) — if an org has moved or has multiple locations, list all locations in every file where the org appears, or clearly label which location is referenced (e.g., "Address (Main Office):" vs "Address (Satellite):")
+3. Phone number(s) — use the same primary client-facing number everywhere. If two different numbers appear for the same org in different files, investigate and resolve the discrepancy before publishing.
+4. Website URL — use the same canonical URL everywhere. Watch for:
+   - .com vs .org vs .net variations (verify which actually loads)
+   - Old domain names that redirect or are parked (always use the current working domain)
+   - Trailing characters in URLs (especially trailing hyphens on pa.gov URLs, which break links)
+
+URL VALIDATION CHECKLIST
+Before adding or updating any URL:
+1. Verify the URL actually loads (not a 404, not a parked domain page)
+2. Confirm the domain matches the organization (e.g., don't link to lancasterhistory.org for Lancaster Public Library)
+3. For pa.gov URLs: check for accidental trailing hyphens (common copy-paste error). Example: "area-agencies-on-aging-" should be "area-agencies-on-aging/"
+4. If an org's website has changed domains, update ALL files that reference it
+5. Always prefer the organization's own website over "Contact through PA 211" or "Contact through findhelp.org" — only use those as a fallback if no org website exists
+6. Prefer direct URLs (e.g., https://ywcayork.org/victim-services/) over generic parent org URLs
+
+KNOWN DOMAIN MAPPINGS (Updated February 2026)
+These organizations have specific correct domains. Always use these, not alternatives:
+- Capital Area Coalition on Homelessness (CACH): https://cachpa.com (NOT cachpa.org, which is a parked page)
+- Shalom House (Harrisburg): https://shalomhouse.net (NOT shalomhousehbg.org)
+- Safe Harbour (Cumberland County): https://safeharbour.org (NOT safeharbourcarlisle.org)
+- ACCESS-York / YWCA York Victim Services: https://ywcayork.org/victim-services/ (NOT accessyork.org)
+- Community CARES (Cumberland County): https://www.morethanshelter.org (NOT commcarescarlisle.org)
+- RASE Project: https://www.rfraseproject.org
+- Brethren Housing Association: https://www.brethrenhousing.org
+- Lancaster Public Library: https://www.lancasterpubliclibrary.org (NOT lancasterhistory.org)
+- Veterans Crisis Line: Dial 988, then press 1 (primary); 1-800-273-8255 press 1 (alternate)
+
+MULTI-FILE ORGANIZATIONS — CANONICAL DETAILS
+When an organization appears in more than one section file, use these canonical details:
+- Dauphin County Crisis Intervention: 717-232-7511 (24/7 crisis line), toll-free 1-888-596-4447
+- Lebanon County CAP: 220 E. Lehman Street, Lebanon, PA 17046 (primary office address)
+- Community CARES: 50 W. Penn Street, Carlisle, PA 17013 (Emergency Shelter & Day Center)
+- PA CareerLink Harrisburg: Main Office at 4201 Crums Mill Road, Suite 200, Harrisburg, PA 17112; Satellite at 100 North Cameron Street, Harrisburg, PA 17101
+
+COMMON ERRORS TO WATCH FOR
+1. Domain confusion: Organizations that have rebranded (e.g., Carlisle C.A.R.E.S. → Community CARES) may have old domains still floating around
+2. Stale placeholder URLs: "Contact through PA 211" or "Contact through findhelp.org" when the org actually has a website — always search for the org's actual site first
+3. Phone number transposition: Crisis lines are especially important to get right — always cross-reference with the county government or org website
+4. Copy-paste URL artifacts: Trailing hyphens, missing trailing slashes, or truncated paths
+5. Address drift: Organizations move offices; when updating one file, search for the org name across ALL files and update consistently
+
+That's the full context doc for Goodwill Keystone Pennsylvania.
+Later, if you paste this back to me and say "use this context," I'll know exactly how to keep verifying, adding, and cleaning up the guide in the same style for the South Central Pennsylvania / Goodwill Keystone service area.

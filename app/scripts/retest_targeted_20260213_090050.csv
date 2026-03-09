@@ -1,0 +1,805 @@
+label,suffix,target_resource,error_check,error_found,error_details,resource_count,resource_names,result_id,elapsed_seconds,full_response,timestamp
+targeted-goodwill-keystone-shower,keystone,Goodwill Keystone Area,wrong phone 717-232-1831 or wrong address 3001 St. Lawrence Ave,NO,"Target resource present, bad patterns absent",3,Hope Rescue Mission – Safe Haven Men’s Shelter; LightHouse Women’s & Children’s Center (Hope Rescue Mission); Goodwill Keystone Area – Goodwill Store & Donation Center (Reading – Lancaster Ave),81695992-d891-42f9-9190-fd4d283738dd,22.2,"{
+  ""resources"": [
+    {
+      ""name"": ""Hope Rescue Mission – Safe Haven Men’s Shelter"",
+      ""addresses"": [
+        ""645 N 6th St, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""(610) 375-4224""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.hopeforreading.org"",
+      ""description"": ""Hope Rescue Mission’s Safe Haven program is an emergency shelter for adult men experiencing homelessness in Reading. The shelter provides nightly beds plus access to showers, restrooms, laundry, meals, and Wi‑Fi in a dormitory-style setting. Safe Haven typically operates daily in the late afternoon through morning hours and can accommodate around 85 men. Additional Code Blue beds may be available in cold weather. This is a male-only program; men must complete intake and follow shelter rules. Contact or visit in the afternoon/early evening for current bed availability and intake requirements."",
+      ""justification"": ""Client needs showers and restrooms in Reading, PA. Hope Rescue Mission’s Safe Haven specifically lists showers and operates as a men’s emergency shelter within the city limits, making it an appropriate option for adult male clients needing hygiene facilities."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""LightHouse Women’s & Children’s Center (Hope Rescue Mission)"",
+      ""addresses"": [
+        ""715 N 6th St, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""(610) 484-4495""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.hopeforreading.org/about-lighthouse"",
+      ""description"": ""LightHouse is a women’s and children’s center operated by Hope Rescue Mission in Reading. The 43-room facility offers emergency and transitional housing for single women and mothers with children. Each room has access to a private bathroom and shower, along with a microwave and small refrigerator/freezer. Stays range from 1–3 nights for emergency shelter to up to six months for transitional housing. Several rooms are ADA-compliant. This program is limited to women and their children; uncaged pets are not allowed in transitional housing. Call for current intake process, availability, and any documentation requirements."",
+      ""justification"": ""Client needs access to showers and restrooms. LightHouse provides private bathrooms and showers as part of its emergency and transitional housing for women and children, and it is located in Reading, PA, close to the client’s stated location."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Goodwill Keystone Area – Goodwill Store & Donation Center (Reading – Lancaster Ave)"",
+      ""addresses"": [
+        ""602 E Lancaster Ave, Reading, PA 19607""
+      ],
+      ""phones"": [
+        ""(610) 777-5250""
+      ],
+      ""emails"": [
+        ""stores@yourgoodwill.org""
+      ],
+      ""website"": ""https://www.yourgoodwill.org"",
+      ""description"": ""This is a Goodwill Keystone Area retail store and donation center serving the Reading region. It does not advertise public shower or restroom facilities for community use. However, as the local Goodwill presence, store staff may be able to confirm whether any Goodwill-operated programs or nearby partner agencies currently offer hygiene or shower access and can provide up-to-date contact information or referrals. Call or visit during store hours to inquire about any Goodwill programs or collaborations that may support individuals experiencing homelessness."",
+      ""justification"": ""The case manager asked specifically about Goodwill locations with showers in Reading. Publicly available information for this Goodwill store does not indicate showers or public restrooms for client use, but it is the closest Goodwill Keystone Area site; staff may offer guidance or referrals. It should not be presented as a shower resource itself."",
+      ""referral_type"": ""goodwill""
+    }
+  ]
+}",2026-02-13T09:01:13.183447
+targeted-united-way-berks,keystone,United Way of Berks County,wrong address 631 Penn St (correct: 25 N 2nd St Suite 101),YES,"Bad patterns found: ['631 Penn St', '631 Penn Street']",3,United Way of Berks County – PA 211 Information and Referral; United Way of Berks County – Safety Net Services (Funded Basic Needs Programs); United Way of Berks County – Guide for Help (Basic Needs Resource Guide),080fb9e1-2c20-4442-8c86-fde4839ede04,28.8,"{
+  ""resources"": [
+    {
+      ""name"": ""United Way of Berks County – PA 211 Information and Referral"",
+      ""addresses"": [
+        ""631 Penn Street, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""211"",
+        ""610-685-4550""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.uwberks.org/call-211/"",
+      ""description"": ""United Way of Berks County operates PA 211 for Berks residents, a free 24/7 information and referral line that connects people to basic-needs assistance. Trained specialists assess needs and refer callers to local resources for food pantries and meals, emergency shelter and housing help (including rent and utility assistance), transportation, health and mental health services, elder care, childcare, and more. Help is available in multiple languages. You can dial 211, text your ZIP code to 898211, or search online for services. This is the primary United Way–run access point for basic-needs help in and around Reading."",
+      ""justification"": ""Client asked specifically what United Way of Berks County offers for basic-needs assistance near Reading, PA. United Way’s core basic-needs support is delivered through the PA 211 information and referral service, which is listed by United Way of Berks County and local school district guides as the main entry point for food, housing, utilities, and other emergency help for Berks County residents. The office is located in downtown Reading and serves all city residents."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""United Way of Berks County – Safety Net Services (Funded Basic Needs Programs)"",
+      ""addresses"": [
+        ""631 Penn Street, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""610-685-4550""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.uwberks.org/safety-net-services/"",
+      ""description"": ""Through its Safety Net Services focus area, United Way of Berks County funds a network of local agencies that provide basic-needs assistance to Berks residents. These include emergency shelter (Opportunity House), food access and soup kitchen services (New Journey Community Outreach, Helping Harvest), rent and utility assistance to prevent homelessness (Berks Coalition to End Homelessness, Salvation Army Reading Corps and Service Extension Unit), domestic violence and sexual assault crisis shelter (Safe Berks), legal aid for low-income clients to secure basic needs (MidPenn Legal Services), and other crisis and emergency aid. Residents typically access these programs either by contacting the partner agencies directly or by calling 211 for referrals."",
+      ""justification"": ""Client wants to know what United Way of Berks County offers for basic-needs assistance. United Way itself does not usually provide direct basic-needs services but funds Safety Net Services through partner agencies located in Reading and throughout Berks County. The Safety Net Services page describes these funded programs and confirms they cover basic needs such as shelter, food, utilities, and crisis support for Berks County residents, including those in Reading."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""United Way of Berks County – Guide for Help (Basic Needs Resource Guide)"",
+      ""addresses"": [
+        ""631 Penn Street, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""211"",
+        ""610-685-4550""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.uwberks.org/guide-for-help/"",
+      ""description"": ""United Way of Berks County publishes a \""Guide for Help\"" for individuals and families facing income gaps, delayed benefits, or job instability. The guide walks residents through assessing their situation and prioritizing essential bills, and it compiles local contacts for food, housing, utility assistance, mental health, and other basic-needs services. It highlights PA 211 as the one-stop information source, and includes local providers such as Helping Harvest, Centro Hispano, and other community organizations. The guide is available in English and Spanish as a downloadable PDF and is tailored specifically to Berks County residents, including those in Reading."",
+      ""justification"": ""Because the client asked what United Way of Berks County offers for basic-needs assistance, this official United Way guide is directly relevant. It is created and maintained by United Way of Berks County as a practical tool to connect Berks County residents to food, housing, utilities, and other emergency resources, and it centers on local options accessible from Reading."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:01:41.976088
+targeted-bcap-berks,keystone,BCAP,wrong URL berkscap.org (correct: bcapberks.org),NO,"Target resource present, bad patterns absent",3,"Berks Community Action Program (BCAP) – Budget Counseling, Rental & Utility Assistance; Berks Community Action Program (BCAP) – Homeless Assistance Program; Berks Community Action Program (BCAP) – Mortgage Diversion / Mortgage Assistance",deec1be6-a451-487b-b95f-fe662a2307fe,29.9,"{
+  ""resources"": [
+    {
+      ""name"": ""Berks Community Action Program (BCAP) – Budget Counseling, Rental & Utility Assistance"",
+      ""addresses"": [
+        ""645 Penn Street, 3rd Floor, PO Box 22, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""610-376-6571"",
+        ""610-375-7866 x41""
+      ],
+      ""emails"": [
+        ""info@bcapberks.org""
+      ],
+      ""website"": ""https://bcapberks.org/budget-counseling/"",
+      ""description"": ""BCAP’s Budget Counseling Center provides rental and utilities assistance for income-eligible Berks County residents, along with budget counseling, homeownership counseling, delinquency and mortgage assistance, and credit repair. For rental and/or utility help, clients must meet federal, state, and local poverty guidelines; BCAP staff screen for eligibility and can advise on documentation needed. Services are designed to stabilize housing and prevent loss of utilities while improving long‑term financial management. Appointments are required; applicants are encouraged to complete BCAP’s rental/utility assistance forms before meeting with a counselor."",
+      ""justification"": ""Client is in Reading, PA and needs help with utility bills and housing. BCAP is the primary community action agency for Berks County and explicitly offers rental and utilities assistance tied to budget counseling for low‑income residents, with clear eligibility based on poverty guidelines. The Reading office is located in downtown Reading, within the city specified by the case manager, making it highly accessible for the client."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Berks Community Action Program (BCAP) – Homeless Assistance Program"",
+      ""addresses"": [
+        ""645 Penn Street, 3rd Floor, PO Box 22, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""610-376-6571""
+      ],
+      ""emails"": [
+        ""info@bcapberks.org""
+      ],
+      ""website"": ""https://bcapberks.org/homeless-assistance/"",
+      ""description"": ""BCAP’s Homeless Assistance Program provides rental-related payments directly to landlords for eligible households who are homeless or at immediate risk of homelessness due to eviction or similar circumstances. Assistance may cover security deposits, first month’s rent, or both, after the client meets income and other eligibility criteria and can demonstrate ability to maintain ongoing rent. Applicants complete a pre‑screening application prior to an appointment. This program is targeted to Berks County residents facing housing crises and is designed to prevent or shorten episodes of homelessness."",
+      ""justification"": ""Client has housing instability concerns in Reading, PA. BCAP’s Homeless Assistance Program specifically addresses rental support to avoid eviction and homelessness for Berks County residents and is administered at the same central Reading office, minimizing travel. It is appropriate for clients either currently homeless or facing eviction who can sustain rent going forward."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Berks Community Action Program (BCAP) – Mortgage Diversion / Mortgage Assistance"",
+      ""addresses"": [
+        ""645 Penn Street, 3rd Floor, PO Box 22, Reading, PA 19601""
+      ],
+      ""phones"": [
+        ""610-376-6571""
+      ],
+      ""emails"": [
+        ""info@bcapberks.org""
+      ],
+      ""website"": ""https://bcapberks.org/mortgage-assistant/"",
+      ""description"": ""BCAP’s Mortgage Diversion Program supports homeowners who are behind on their mortgage and have received a sheriff’s (Urgent) Notice. HUD‑certified housing counselors work with the mortgage company at no cost to the homeowner to explore options that may help them stay in their home while they regain financial stability. Clients are instructed to contact one of the listed counseling agencies within 10 days of receiving the notice; BCAP is one of these agencies and provides forms and checklists to prepare for appointments. This program is best suited for low‑ to moderate‑income homeowners in Berks County at risk of foreclosure rather than renters."",
+      ""justification"": ""If the client is a homeowner in or near Reading, PA who has fallen behind on mortgage payments, this BCAP program is directly relevant to preventing loss of housing. It is administered from the same central Reading office and is tailored to low‑income households needing structured foreclosure prevention help."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:02:11.866758
+targeted-bucks-county-hub,keystone,Bucks County Human Services,wrong phone 215-348-6000 (courthouse number),NO,"Target resource present, bad patterns absent",6,Bucks County Human Services Hub; Bucks County Housing Link Helpline (Emergency Shelter & Homeless Services Entry); Coalition to Shelter and Support the Homeless (CSSH – Central Bucks Code Blue & Outreach); Doylestown FISH (Friends In Serving Humanity) – Central Bucks Emergency Services; Reach Out Foundation Day Center (Lower Bucks Daytime Shelter & Drop-In); Bucks County Opportunity Council (BCOC) – Doylestown Office,60f2117f-23cb-4755-8336-a36b2b335696,34.3,"{
+  ""resources"": [
+    {
+      ""name"": ""Bucks County Human Services Hub"",
+      ""addresses"": [
+        ""55 East Court Street, Doylestown, PA 18901""
+      ],
+      ""phones"": [
+        ""215-348-6201"",
+        ""1-888-942-8257""
+      ],
+      ""emails"": [
+        ""TheHub@buckscounty.org""
+      ],
+      ""website"": ""https://www.buckscounty.gov/1299/Find-Help"",
+      ""description"": ""County-run walk-in human services hub in downtown Doylestown providing in-person resource navigation and connection to housing, shelter (including Housing Link and Code Blue), benefits (COMPASS partner), SOAR (SSI/SSDI), and other social services. Open Monday–Friday, 9:00am–4:00pm. Can complete Housing Link intakes for residents experiencing or at risk of homelessness and help connect to day centers, emergency shelter, and other supports across Bucks County."",
+      ""justification"": ""Closest centralized daytime access point (in Doylestown) for low-income Bucks County residents needing human services and housing/shelter navigation, including those experiencing homelessness."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Bucks County Housing Link Helpline (Emergency Shelter & Homeless Services Entry)"",
+      ""addresses"": [
+        ""55 East Court Street, Doylestown, PA 18901""
+      ],
+      ""phones"": [
+        ""1-800-810-4434""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.buckscounty.gov/1381/Emergency-Shelter"",
+      ""description"": ""Centralized county-wide coordinated entry line for anyone in Bucks County experiencing a housing-related crisis or homelessness. Staff conduct assessments and make referrals to emergency shelter, Code Blue overnight shelters, outreach, and related supports. Can provide information on current shelter availability, including Central Bucks Code Blue sites in/near Doylestown, and connect callers to community providers for emergency assistance and case management."",
+      ""justification"": ""Primary access point for all Bucks County emergency shelter and homelessness services, required for referrals into many programs; appropriate for a client in Doylestown needing daytime and ongoing support around homelessness."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Coalition to Shelter and Support the Homeless (CSSH – Central Bucks Code Blue & Outreach)"",
+      ""addresses"": [
+        ""Central Bucks County, PA (Code Blue sites vary; recent locations include Our Lady of Guadalupe, 5194 Cold Spring Creamery Road, Doylestown, PA 18902, and Doylestown Presbyterian Church, 125 Mechanic Street, Doylestown, PA 18901)""
+      ],
+      ""phones"": [
+        ""1-866-390-0291 x703""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.buckscounty.gov/1381/Emergency-Shelter"",
+      ""description"": ""Volunteer-driven coalition operating Central Bucks Code Blue overnight shelters during declared cold-weather emergencies and working to link homeless and financially distressed residents to needed resources. On Code Blue nights, guests can stay overnight at church-based shelters in the Doylestown area; when shelters are closed, individuals can call the CSSH number for assistance and linkage to meals, outreach, and other supports. Specific shelter sites and dates vary by Code Blue declaration."",
+      ""justification"": ""Key Central Bucks homeless resource serving Doylestown area residents; offers overnight shelter during Code Blue and ongoing connection to services, which can complement daytime supports arranged via the Hub/Housing Link."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Doylestown FISH (Friends In Serving Humanity) – Central Bucks Emergency Services"",
+      ""addresses"": [
+        ""Central Bucks County, PA (serves residents with Central Bucks ID)""
+      ],
+      ""phones"": [
+        ""215-348-7172""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.buckscounty.gov/1381/Emergency-Shelter"",
+      ""description"": ""Volunteer-run organization providing emergency assistance to residents in Central Bucks who have a Central Bucks ID. Supports may include help with basic needs, limited financial assistance, and linkage to other community resources. Referrals often come through the Bucks County Human Services Hub and Housing Link for residents facing homelessness or housing instability."",
+      ""justification"": ""Local Central Bucks emergency assistance resource that can help stabilize a Doylestown-area client’s basic needs while they pursue shelter and services via Housing Link and the Hub."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Reach Out Foundation Day Center (Lower Bucks Daytime Shelter & Drop-In)"",
+      ""addresses"": [
+        ""152 Monroe Avenue, Penndel, PA 19047""
+      ],
+      ""phones"": [
+        ""215-970-5462""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.buckscounty.gov/1381/Emergency-Shelter"",
+      ""description"": ""Day-center for Bucks County residents experiencing homelessness, open Monday–Friday, 7:00am–7:00pm. Provides a safe daytime space with access to laundry, showers, computers, and other basic services. Serves Bucks County residents only; clients may need to arrange their own transportation from Central Bucks (Doylestown area) to Penndel."",
+      ""justification"": ""Identified by Bucks County as the primary daytime drop-in center for homeless residents; although in Lower Bucks, it offers true daytime shelter and basic services that can supplement local case management and emergency supports for a Doylestown client."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Bucks County Opportunity Council (BCOC) – Doylestown Office"",
+      ""addresses"": [
+        ""100 Doyle Street, Doylestown, PA 18901""
+      ],
+      ""phones"": [
+        ""215-345-8175""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.buckscounty.gov/721/Bucks-County-Opportunity-Council"",
+      ""description"": ""County-designated Community Action Agency for Bucks County, with an office in Doylestown. Provides economic self-sufficiency programs, emergency services, utility assistance, food assistance, and case management for low-income residents. While not a shelter, BCOC can help address financial barriers, connect clients to housing resources, and coordinate with Housing Link and other providers to support people experiencing or at risk of homelessness."",
+      ""justification"": ""Local anti-poverty agency in Doylestown that can provide ongoing case management and emergency assistance to stabilize a low-income client experiencing homelessness or housing crisis."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:02:46.193917
+targeted-starkey-hearing,centraltx,Starkey Hearing Foundation,wrong address 6801 vs 6700 Washington Ave S,NOT_RETURNED,Target resource not in response,5,"Texas Workforce Solutions – Vocational Rehabilitation Services (Hearing Aids for Employment); Starkey Cares – Hear Now Program (National Low-Cost Hearing Aids); Local Lions Clubs – Hearing Aid Assistance (Austin Area); Central Health – Medical Access Program (MAP) (Travis County); People’s Community Clinic (Primary Care & Referrals, Austin)",eca6ce6b-2014-4344-9cac-0e1e2646de3f,36.4,"{
+  ""resources"": [
+    {
+      ""name"": ""Texas Workforce Solutions – Vocational Rehabilitation Services (Hearing Aids for Employment)"",
+      ""addresses"": [
+        ""North Austin Workforce Solutions Office, 9001 N IH 35, Suite 110, Austin, TX 78753"",
+        ""East Austin Workforce Solutions Office, 3401 Webberville Rd, Building 1000, Austin, TX 78702""
+      ],
+      ""phones"": [
+        ""512-936-6400""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.twc.texas.gov/services/vocational-rehabilitation-services"",
+      ""description"": ""State vocational rehabilitation (VR) program that can purchase hearing aids and related assistive devices for eligible people with hearing loss when needed for work or vocational training. VR serves adults and youth with disabilities whose condition makes it hard to get, keep, or advance in a job. Income does not affect basic eligibility, and SSI/SSDI recipients are generally not required to share costs. Services can include audiology evaluations, hearing aids, earmolds, assistive listening devices, job placement, and other supports tied to employment goals."",
+      ""justification"": ""Best fit if the client has a documented or suspected hearing loss that affects employment or training. TWC-VR policy specifically authorizes paying for hearing aids for deaf or hard-of-hearing customers when recommended by an audiologist and needed for work or training. Client must be able to pursue work or education; no strict income cap, which helps low-income adults in Austin."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Starkey Cares – Hear Now Program (National Low-Cost Hearing Aids)"",
+      ""addresses"": [],
+      ""phones"": [
+        ""855-686-2202""
+      ],
+      ""emails"": [
+        ""starkeycares@starkey.com""
+      ],
+      ""website"": ""https://www.starkey.com/starkeycares"",
+      ""description"": ""Manufacturer-based assistance program that provides Starkey hearing aids at significantly reduced cost to low-income individuals nationwide through partner clinics. Applicants must meet income guidelines and work with a participating hearing provider who agrees to fit the aids and provide several follow-up visits at no charge. Clients typically pay only a modest application fee rather than full hearing-aid cost."",
+      ""justification"": ""Appropriate if the client is low-income, uninsured or underinsured, and does not have another payer for hearing aids. Can be combined with a local Austin audiology clinic that participates in Starkey Cares. Good option when commercial insurance or Medicaid does not cover hearing aids for adults."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Local Lions Clubs – Hearing Aid Assistance (Austin Area)"",
+      ""addresses"": [],
+      ""phones"": [
+        ""512-936-3270""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.lionsclubs.org"",
+      ""description"": ""Lions Clubs may offer help with eye exams, eyeglasses, and sometimes hearing aids for low-income community members. Assistance is handled locally by each club and depends on available funds. Clients generally complete an application and may need proof of income and a recent hearing evaluation or quote for hearing aids. Case managers or clients can use the Lions Club \""Find a Club\"" tool to locate Austin-area clubs and email them directly to request help."",
+      ""justification"": ""Relevant because Lions International directs people needing help with hearing aids to apply through their local Lions Club, which may provide partial or full funding depending on resources. This is a common charitable option for adults in Austin who cannot afford hearing aids."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Central Health – Medical Access Program (MAP) (Travis County)"",
+      ""addresses"": [
+        ""Central Health Administrative Offices, 1111 E. Cesar Chavez St., Austin, TX 78702""
+      ],
+      ""phones"": [
+        ""512-978-8130""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/map/"",
+      ""description"": ""County medical assistance program for low-income Travis County residents. MAP and MAP Basic are not insurance but can cover primary and specialty care, diagnostics, and prescriptions through a network of clinics. While MAP does not advertise direct payment for hearing aids, enrollment can connect clients to primary care providers and specialists (including audiology or ENT) and reduce or eliminate visit costs. Having MAP can also help when applying to manufacturer or charity programs that require recent hearing evaluations or physician documentation."",
+      ""justification"": ""Useful foundational resource for low-income clients in Austin who lack insurance. Even if MAP does not pay directly for hearing aids, it can cover the audiology/ENT visits and testing needed to qualify for Starkey Cares, Lions Club assistance, or VR services."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""People’s Community Clinic (Primary Care & Referrals, Austin)"",
+      ""addresses"": [
+        ""1101 Camino La Costa, Austin, TX 78752""
+      ],
+      ""phones"": [
+        ""512-478-4939""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.austinpcc.org/"",
+      ""description"": ""Nonprofit community health center providing low-cost primary care, chronic disease management, women’s health, pediatrics, and behavioral health regardless of insurance or immigration status. Uses sliding-scale fees based on income and accepts MAP, Medicaid, and many insurance plans. While they do not directly advertise free hearing aids, they can evaluate basic hearing concerns, provide referrals to audiology or ENT, and document medical need for hearing aids, which is often required for assistance programs."",
+      ""justification"": ""Good starting point if the client has no regular doctor or needs a low-cost evaluation and referral for hearing loss. Located in Austin and accustomed to serving low-income and uninsured patients, which aligns with the client’s financial situation."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:03:22.624843
+targeted-wilco-care,centraltx,WilCo Care,WilCo Care doesn't cover hearing aids (only medical/dental/vision),MANUAL,No automated check — needs manual review,2,Williamson County & Cities Health District (WCCHD) – Healthcare Helpline (WilCo Care); Lone Star Circle of Care – Round Rock Health Clinic,3f2ab880-2952-4e53-9238-8931bef71621,19.7,"{
+  ""resources"": [
+    {
+      ""name"": ""Williamson County & Cities Health District (WCCHD) – Healthcare Helpline (WilCo Care)"",
+      ""addresses"": [
+        ""355 Texas Ave, Round Rock, TX 78664""
+      ],
+      ""phones"": [
+        ""512-248-3252""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.wcchd.org/"",
+      ""description"": ""WCCHD operates the Healthcare Helpline for uninsured Williamson County residents, including screening for the county’s indigent healthcare program, WilCo Care. WilCo Care covers office visits, diagnostics, some specialty care, hospitalizations, ER care, limited prescriptions, mental health services, and biennial vision exams/eyewear. However, WilCo Care explicitly does NOT cover hearing aids or durable medical equipment. The Helpline can still help your client review eligibility for WilCo Care and other possible medical or financial resources, but you should not expect direct coverage for hearing aids through WilCo Care."",
+      ""justification"": ""Direct county source information confirms WilCo Care does not cover hearing aids or durable medical equipment. This resource is included so the case manager can accurately advise the client that WilCo Care will not pay for hearing aids, while still connecting them to the Healthcare Helpline for broader healthcare navigation."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Lone Star Circle of Care – Round Rock Health Clinic"",
+      ""addresses"": [
+        ""2120 N Mays St, Suite 430, Round Rock, TX 78665""
+      ],
+      ""phones"": [
+        ""877-800-5722""
+      ],
+      ""emails"": [],
+      ""website"": ""https://lonestarcares.org/"",
+      ""description"": ""Lone Star Circle of Care is a Federally Qualified Health Center with a clinic in Round Rock. They provide primary care and can evaluate hearing concerns, make referrals to audiology or ENT specialists, and help patients explore insurance options or manufacturer assistance programs that may reduce the cost of hearing aids. As an FQHC, they use a sliding-fee scale and serve uninsured and low‑income patients. While they do not directly pay for hearing aids, they are a strong first stop for medical assessment and navigation toward any available low‑cost options."",
+      ""justification"": ""Located in Round Rock (Williamson County) and serving uninsured/low-income patients, this clinic is close to the client and can provide hearing-related evaluation and referrals even though WilCo Care will not cover hearing aids."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:03:42.282630
+targeted-day-labor-austin,centraltx,City of Austin Day Labor / First Workers,wrong address 2514 Sol Wilson / wrong phone 512-974-1730,NOT_RETURNED,Target resource not in response,1,City of Austin First Workers' Day Labor Program,3c0246f8-abe0-4cba-8fe2-00fad5ba9820,15.1,"{
+  ""resources"": [
+    {
+      ""name"": ""City of Austin First Workers' Day Labor Program"",
+      ""addresses"": [
+        ""700 East 7th Street, Austin, TX 78701""
+      ],
+      ""phones"": [
+        ""512-972-4100""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.austintexas.gov/department/day-labor"",
+      ""description"": ""The City of Austin’s First Workers' Day Labor Program is a city-run day labor center that connects people seeking immediate, same-day work with employers who need temporary labor. Typical jobs include construction cleanup, moving, landscaping, painting, roofing, carpentry, plumbing assistance, welding, demolition, and other general labor. Workers are usually paid in cash by the employer at the end of the day. The program also offers access to case management referrals, community health nursing, and referrals for food and rent/utility assistance. Re-entry supports include a four-week Moral Reconation Therapy (MRT) series focused on anger management, cognitive skills, and job readiness. The program primarily serves people experiencing homelessness, migrant workers, and individuals returning from incarceration, but is open to anyone seeking day labor work."",
+      ""justification"": ""This is the City of Austin’s official day labor program and the primary same-day work option in Travis County. It offers exactly what the client is requesting: immediate, cash-paid day labor jobs. From Austin ZIP code 78704, this downtown site (700 E 7th St, 78701) is roughly 3–5 miles away depending on the starting point in 78704 and is reachable via public transit or car. The program is government-operated, low-barrier, and specifically designed for individuals with unstable housing, migrant workers, and re-entry clients."",
+      ""referral_type"": ""government""
+    }
+  ]
+}",2026-02-13T09:03:57.352956
+targeted-svdp-austin,centraltx,St. Vincent de Paul Austin,broken URL austinsvdp.info/locate-assistance (404),NOT_RETURNED,Target resource not in response,4,Society of St. Vincent de Paul – Diocesan Council of Austin (Central Referral & Locator); St. Vincent de Paul – Locator via St. Mary Cathedral / Austin SVdP; St. Louis King of France Catholic Church – St. Vincent de Paul Conference (North/Central Austin); St. Austin Catholic Parish – St. Vincent de Paul Conference (Central Austin),500b05a5-489f-4864-aa31-6dbf70f1c67b,35.1,"{
+  ""resources"": [
+    {
+      ""name"": ""Society of St. Vincent de Paul – Diocesan Council of Austin (Central Referral & Locator)"",
+      ""addresses"": [
+        ""901 W. Braker Ln, Austin, TX 78758""
+      ],
+      ""phones"": [
+        ""512-251-6995""
+      ],
+      ""emails"": [],
+      ""website"": ""https://ssvdp.org/"",
+      ""description"": ""Central Texas St. Vincent de Paul (SVdP) coordinates local parish conferences that provide emergency financial assistance and basic needs to people in crisis across Austin/Travis County and surrounding counties. Typical help may include limited rent or utility assistance to prevent eviction or disconnection, help with medications, transportation, food, clothing, and referrals to other agencies. Assistance is generally provided through a ‘home visit’ or phone intake by volunteers who serve specific geographic areas. Veterans can be served like any other neighbor in need; being homeless may increase urgency but does not guarantee funding. To get help, the client must first be matched to the correct parish conference for their current sleeping/location address using the SVdP locator or by contacting the Council office."",
+      ""justification"": ""Client is a homeless veteran in Austin/Travis County needing emergency financial assistance. The Austin Diocesan Council oversees SVdP conferences that provide financial aid (rent, utilities, other emergency bills, transportation, food, clothing, etc.) to people in need across Central Texas and directs callers to the correct parish-based conference for their location. This is the best single entry point when the client’s exact address and parish boundaries are not yet known."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""St. Vincent de Paul – Locator via St. Mary Cathedral / Austin SVdP"",
+      ""addresses"": [
+        ""203 E. 10th St, Austin, TX 78701""
+      ],
+      ""phones"": [],
+      ""emails"": [],
+      ""website"": ""https://austinsvdp.info"",
+      ""description"": ""The Austin-area St. Vincent de Paul locator site helps neighbors find the specific SVdP conference that serves their address. After entering a full current address (or closest intersection/shelter address for people experiencing homelessness), the tool lists the parish conference name, phone number, and instructions for requesting assistance. Local conferences commonly help with emergency financial needs such as rent, utilities, limited other bills, food, and basic needs, subject to available funds and parish boundaries. Many conferences conduct an intake interview and may do a home or site visit before providing assistance."",
+      ""justification"": ""Case manager asked what St. Vincent de Paul offers in Austin for emergency financial assistance. The client’s exact sleeping address and parish boundary are unknown, so the SVdP locator is the appropriate way to identify the correct Austin/Travis County conference and its intake phone number for financial help."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""St. Louis King of France Catholic Church – St. Vincent de Paul Conference (North/Central Austin)"",
+      ""addresses"": [
+        ""7601 Burnet Rd, Austin, TX 78757""
+      ],
+      ""phones"": [
+        ""512-419-1667""
+      ],
+      ""emails"": [],
+      ""website"": ""https://st-louis.org/svdp"",
+      ""description"": ""The St. Louis King of France SVdP conference serves neighbors within its parish boundaries (including ZIP 78757 and portions of 78758, 78752, and 78753). Volunteers provide emergency financial assistance with rent and utilities, other critical payments, help with medications, and may offer H‑E‑B/Walmart gift cards and bus passes when available. They also give referrals to additional community resources. Clients must live within the covered ZIP codes or parish boundaries and funds are limited. To request help, neighbors call the SVdP office line during weekday morning hours for intake and follow the instructions provided."",
+      ""justification"": ""Client is a homeless veteran in Austin needing emergency financial assistance. St. Louis is one of the major Austin SVdP conferences explicitly listing rent, utilities, and other financial help. It is appropriate to highlight as an example of what SVdP offers in Austin, with the caveat that assistance is restricted to specific ZIP codes and subject to available funds."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""St. Austin Catholic Parish – St. Vincent de Paul Conference (Central Austin)"",
+      ""addresses"": [
+        ""2026 Guadalupe St, Austin, TX 78705""
+      ],
+      ""phones"": [
+        ""512-477-1589""
+      ],
+      ""emails"": [],
+      ""website"": ""https://staustin.org/svdp-help"",
+      ""description"": ""The St. Austin SVdP conference serves neighbors in ZIP codes 78703, 78705, 78722, 78751, and 78756. They offer financial help with rent, utilities, medicine, clothing, and other urgent needs, as well as spiritual and emotional support. The core of their work is a confidential ‘home visit’ or phone-based equivalent to understand each neighbor’s situation and determine the type and amount of assistance they can provide. To request help, clients call the SVdP assistance line and leave their full name, address (or shelter location), ZIP code, phone number, and a brief description of the help needed. Calls are returned as soon as possible, and funding is limited and based on parish boundaries."",
+      ""justification"": ""This is another central Austin SVdP conference clearly describing the kinds of emergency financial assistance SVdP offers (rent, utilities, medicine, clothing, etc.). It is relevant for a homeless veteran in Austin if their current location falls within these ZIP codes, and it illustrates typical SVdP support in the city."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:04:32.446601
+targeted-central-health-bridge,centraltx,Central Health Bridge Mobile,wrong address 601 E 15th / fabricated phone 512-978-8130,YES,Bad patterns found: ['512-978-8130'],5,Central Health Bridge Program – Capital Plaza Bridge Clinic; Central Health Bridge Mobile Team (Bridge Mobile); Central Health Bridge Program – Partnership at Integral Care Therapeutic Diversion Center; Central Health / CommUnityCare Mobile Health Clinic (Clinic on Wheels); Central Health Medical Respite Center (for People Experiencing Homelessness),1ef53c65-6603-4e8d-a712-f002d2455645,35.7,"{
+  ""resources"": [
+    {
+      ""name"": ""Central Health Bridge Program – Capital Plaza Bridge Clinic"",
+      ""addresses"": [
+        ""Capital Plaza Clinic (exact suite and entrance details should be confirmed when calling – located at or near 5339 N Interstate 35, Austin, TX 78723)""
+      ],
+      ""phones"": [
+        ""512-978-8130"",
+        ""512-978-9015""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/bridge-clinic/"",
+      ""description"": ""Central Health’s Bridge Program is specifically designed for people experiencing homelessness in Travis County who are enrolled in or eligible for MAP/MAP Basic. The Bridge Clinic at Capital Plaza provides comprehensive acute, chronic, and preventive medical care, connects patients to a long‑term primary care home (usually through CommUnityCare), and coordinates specialty care. Since mid‑2024 it has operated at Capital Plaza, serving unhoused patients including those coming from Central Health’s medical respite program. In partnership with Austin‑Travis County EMS, first responders can take MAP‑enrolled or MAP‑eligible patients directly to the Bridge Clinic instead of the ER or jail when appropriate. Clients should call Central Health MAP (512‑978‑8130, option 1) to confirm eligibility and how to access the Bridge Clinic, or CommUnityCare (512‑978‑9015) to ask about appointments and transportation options."",
+      ""justification"": ""This is Central Health’s dedicated Bridge program for people experiencing homelessness in Travis County, offering a clinical site (Capital Plaza) plus wraparound linkage to ongoing care for MAP/MAP Basic clients. It directly answers the question about a Bridge program for unhoused clients in Austin."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Central Health Bridge Mobile Team (Bridge Mobile)"",
+      ""addresses"": [
+        ""Central Health Downtown Campus / Clinical Education Center, Austin, TX 78701 (mobile team launches from this site and travels to shelters and street locations in Austin)""
+      ],
+      ""phones"": [
+        ""512-978-8130""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/bridge-clinic/"",
+      ""description"": ""Bridge Mobile is the mobile component of Central Health’s Bridge Program, launched in January 2025 to bring care directly to people experiencing homelessness. The mobile team, based at Central Health’s Downtown Campus, travels with a fully equipped van to locations such as the City of Austin’s Eighth Street Shelter for Women and other shelters, supportive housing sites, and street locations. Services have included blood draws, Pap smears, follow‑ups after hospitalizations, MAP renewals and printing MAP cards, vision vouchers, prescription refills/OTC medications, vaccinations, and health education. Future and current stops include the Eighth Street Shelter, Integral Care’s Therapeutic Diversion Center, and supportive housing sites like Waterloo Terrace and Hungry Hill. Clients or case managers should contact Central Health MAP at 512‑978‑8130 to ask where Bridge Mobile is currently operating and how unsheltered clients can be connected."",
+      ""justification"": ""The client specifically asked about a Central Health mobile clinic for people experiencing homelessness. Bridge Mobile is Central Health’s mobile clinical team serving unhoused patients at shelters and on the street in Austin."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Central Health Bridge Program – Partnership at Integral Care Therapeutic Diversion Center"",
+      ""addresses"": [
+        ""Integral Care Therapeutic Diversion Center, Austin, TX (exact street address should be confirmed directly with Integral Care or Central Health)""
+      ],
+      ""phones"": [
+        ""512-978-8130""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/central-health-launches-medical-partnership-with-integral-cares-therapeutic-diversion-center/"",
+      ""description"": ""Central Health’s Bridge Program operates an outreach/clinical team at Integral Care’s Therapeutic Diversion Center, serving people at the intersection of homelessness, mental health conditions, substance use, and justice involvement. The Bridge team provides onsite physical health care and connects clients to ongoing services (e.g., MAP enrollment, primary care, and specialty referrals), while Integral Care provides intensive behavioral health services. This site is not a general walk‑in clinic; access is typically via law‑enforcement/EMS diversion or referral through Integral Care. Case managers working with homeless clients who cycle through jail or crisis services can coordinate with Integral Care and Central Health to see if the Bridge team at the Diversion Center is appropriate."",
+      ""justification"": ""Although not a general mobile clinic, this is a Bridge Program location specifically focused on unhoused and justice‑involved clients in Austin and is part of the same homeless‑focused Bridge system the case manager is asking about."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Central Health / CommUnityCare Mobile Health Clinic (Clinic on Wheels)"",
+      ""addresses"": [
+        ""Mobile unit serving Travis County; early sites included Turner Roberts Recreation Center (7201 Colony Loop Dr, Austin, TX 78724) and Creedmoor Community Center (12511 FM 1625, Creedmoor, TX 78610). Exact current locations and schedule must be confirmed by phone.""
+      ],
+      ""phones"": [
+        ""512-978-9015""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/central-health-buys-clinic-on-wheels-to-deliver-care-to-more-underserved-areas-of-travis-county/"",
+      ""description"": ""Central Health funds a CommUnityCare mobile health clinic (“clinic on wheels”) that brings primary and preventive care, vaccines, lab services, and chronic disease management to underserved areas of Travis County. Initial routes focused on neighborhoods like Colony Park and Creedmoor. While this mobile clinic primarily targets geographically underserved communities rather than only people experiencing homelessness, unhoused residents in those areas can receive care regardless of ability to pay, often with help enrolling in MAP or sliding‑fee programs. For the most current schedule and to verify if the mobile unit is operating near a client’s location, case managers should call CommUnityCare’s Appointment/Navigation line at 512‑978‑9015."",
+      ""justification"": ""This is Central Health’s long‑standing mobile clinic operated by CommUnityCare that can serve low‑income and potentially homeless clients in different parts of Travis County, complementing the newer Bridge Mobile team."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Central Health Medical Respite Center (for People Experiencing Homelessness)"",
+      ""addresses"": [
+        ""Clinical Education Center (CEC), Former Children’s Hospital of Austin, Austin, TX 78701 (exact street address should be confirmed when calling Central Health)""
+      ],
+      ""phones"": [
+        ""512-978-8130""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.centralhealth.net/central-health-opens-new-respite-center-at-clinical-education-center-former-childrens-hospital-of-austin/"",
+      ""description"": ""Central Health operates a 48‑bed Medical Respite Center at the Clinical Education Center in downtown Austin for people experiencing homelessness or unstable housing who are recovering from illness, surgery, or injury. Patients are referred from hospitals, clinics, jails, and Central Health outreach/street teams. The respite center provides short‑term housing with onsite medical care, wound care, physical therapy, and linkage to ongoing primary and specialty care (often via the Bridge Program and CommUnityCare). This is not a drop‑in shelter; admission requires a medical referral and clinical screening. For case managers, the key role is to coordinate with hospital discharge planners, CommUnityCare, or Central Health’s high‑risk populations team to determine eligibility and referral pathways."",
+      ""justification"": ""While not the same as a mobile clinic, this Central Health program is tightly linked with the Bridge Program and specifically serves homeless clients in Austin who need a safe place to heal after hospitalization, making it a closely related resource for this population."",
+      ""referral_type"": ""government""
+    }
+  ]
+}",2026-02-13T09:05:08.134003
+targeted-host-outreach,centraltx,HOST,"fabricated address 1000 E 11th St (mobile team, no fixed office)",NO,"Target resource present, bad patterns absent",2,Homeless Outreach Street Team (HOST) – City of Austin; Sunrise Homeless Navigation Center – Mobile Outreach (Alternative/Complement to HOST),2031cde5-0892-4caa-8cc7-a4162fb242bc,18.3,"{
+  ""resources"": [
+    {
+      ""name"": ""Homeless Outreach Street Team (HOST) – City of Austin"",
+      ""addresses"": [
+        ""Downtown Austin and West Campus service area, Austin, TX 78701""
+      ],
+      ""phones"": [
+        ""512-804-3720""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.austintexas.gov/homelessness/host"",
+      ""description"": ""HOST is an interdisciplinary street outreach team (Austin Police Department, EMS, Downtown Austin Community Court, and Integral Care) that proactively engages people living on the streets in downtown Austin and West Campus. They provide basic needs support, crisis intervention, behavioral health support, case management, and connections to housing and medical care. HOST is not a shelter; instead, they meet clients where they are and help complete Coordinated Entry assessments, connect to the HEAL initiative, and link to other homeless services and stabilization resources. They typically operate weekdays and focus on unsheltered individuals in the greater downtown/UT area."",
+      ""justification"": ""This is the specific City of Austin HOST program the client is asking about. Case managers or clients can call 512-804-3720 during business hours to request HOST outreach to a specific person or encampment in Austin, or to consult about how HOST can engage a client who is unsheltered in the downtown/UT area."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Sunrise Homeless Navigation Center – Mobile Outreach (Alternative/Complement to HOST)"",
+      ""addresses"": [
+        ""4430 Menchaca Rd, Austin, TX 78745""
+      ],
+      ""phones"": [
+        ""512-522-1097""
+      ],
+      ""emails"": [],
+      ""website"": ""https://sunrisenavigationcenter.org/get-help-folder/"",
+      ""description"": ""Sunrise operates a mobile outreach team and day center that serves unsheltered people across Austin–Travis County. Through its Sunrise Mobile program, case managers or community members can submit an online Outreach Request Form or call/text the hotline to dispatch a social-work-based outreach team to a specific location. Services include humanitarian aid (water, food, clothing), Coordinated Housing Assessments, housing navigation, benefits enrollment, physical and mental health connections, and support with move‑in costs when available. The Hub day center offers walk‑in services on weekdays."",
+      ""justification"": ""If HOST is unavailable, slow to respond, or the client would prefer a non‑law‑enforcement–linked outreach team, Sunrise Mobile is a key partner listed by ECHO for street outreach in Austin. You can call or text 512-522-1097 or submit an Outreach Request Form online to have Sunrise engage the same client or encampment you might otherwise refer to HOST."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:05:26.447390
+targeted-vital-records,centraltx,Austin/Travis County Vital Records,wrong phone 512-972-5017 (correct: 512-972-5208),NO,"Target resource present, bad patterns absent",2,City of Austin Office of Vital Records; Travis County Clerk – Recording Division (Historic Birth & Death Records),8034c46e-69ef-4a35-b4f4-212d0974aacc,17.9,"{
+  ""resources"": [
+    {
+      ""name"": ""City of Austin Office of Vital Records"",
+      ""addresses"": [
+        ""7201 Levander Loop, Building C, Austin, TX 78702""
+      ],
+      ""phones"": [
+        ""512-972-4784""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.austintexas.gov/department/birth-and-death-certificates"",
+      ""description"": ""The City of Austin Office of Vital Records issues certified copies of birth certificates for births that occurred within Austin city limits, as well as abstract (short-form) Texas birth certificates. Clients can request certificates in person, online, by phone, or by mail. The walk-in office is located on the Betty Dunkerley Campus next to the Austin Animal Center. Typical lobby hours are Monday–Friday, 8:00 a.m.–4:30 p.m., with walk-in applications accepted until 4:15 p.m. A current government-issued photo ID (or approved secondary documents) is required, and fees apply per copy requested."",
+      ""justification"": ""This is the primary local office for Austin/Travis County vital records and is the correct location for most clients in Austin needing a certified copy of a birth certificate."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Travis County Clerk – Recording Division (Historic Birth & Death Records)"",
+      ""addresses"": [
+        ""5501 Airport Blvd, Suite 100B, Austin, TX 78751""
+      ],
+      ""phones"": [
+        ""512-854-9188""
+      ],
+      ""emails"": [],
+      ""website"": ""https://countyclerk.traviscountytx.gov/departments/recording/vital-stats/"",
+      ""description"": ""The Travis County Clerk Recording Division provides certified copies of older birth and death records for events that occurred in Travis County generally between 1903 and 1956. Requests can be made by mail or in person, and fees apply per certified copy. This office is useful when the client’s birth took place in Travis County but is not available through the City of Austin’s more recent vital records system."",
+      ""justification"": ""This is the county-level office handling historic Travis County birth and death records, which may be needed if the client’s birth record is too old to be available through the City of Austin Office of Vital Records."",
+      ""referral_type"": ""government""
+    }
+  ]
+}",2026-02-13T09:05:44.392954
+targeted-wsrca,centraltx,WSRCA,"wrong URLs: /job-seekers (should be /seekers), /events (should be /calendar/events)",NO,"Target resource present, bad patterns absent",3,Workforce Solutions Rural Capital Area – Williamson County Career Center (Round Rock); Workforce Solutions Rural Capital Area – Mobile Office in Georgetown; SkillUp Rural Capital (Online Job Search & Training Portal – WSRCA Partner),c1113776-1d6b-4afe-9ec2-49aad8fc80b1,20.4,"{
+  ""resources"": [
+    {
+      ""name"": ""Workforce Solutions Rural Capital Area – Williamson County Career Center (Round Rock)"",
+      ""addresses"": [
+        ""575 Round Rock West Drive, Building H, Suite 240, Round Rock, TX 78681""
+      ],
+      ""phones"": [
+        ""(512) 244-2207"",
+        ""1-844-344-2780""
+      ],
+      ""emails"": [],
+      ""website"": ""https://workforcesolutionsrca.com/locations"",
+      ""description"": ""Primary Workforce Solutions Rural Capital Area (WSRCA) career center serving Williamson County, including Georgetown (78626). Provides no-cost job search assistance (WorkInTexas registration, job matching, resume help, interview prep), referrals to hiring events and job fairs, training and upskilling options through WIOA and other programs (when eligible), and priority services for veterans. Job seekers can walk in during business hours or call to schedule an appointment with a career coach. Services are available to all eligible job seekers residing in the WSRCA nine‑county region, including Williamson County."",
+      ""justification"": ""Client is in Georgetown, Williamson County (78626) and specifically requested job search help through WSRCA. This is the main Williamson County WSRCA center and closest fixed-site career office listed for the county, making it the primary referral for in‑person job search assistance, workshops, and ongoing case management through Workforce Solutions Rural Capital Area."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Workforce Solutions Rural Capital Area – Mobile Office in Georgetown"",
+      ""addresses"": [
+        ""Georgetown, TX 78626""
+      ],
+      ""phones"": [
+        ""1-844-344-2780""
+      ],
+      ""emails"": [],
+      ""website"": ""https://workforcesolutionsrca.com/find-a-center"",
+      ""description"": ""WSRCA operates a Mobile Outreach Satellite Office in Georgetown as part of its Rural Capital Area network. The mobile unit periodically brings Workforce Solutions staff and services directly into Georgetown to assist with WorkInTexas registration, job search support, resume and interview guidance, and connections to training and hiring events. Exact dates, times, and locations vary and are posted on WSRCA’s website and events calendar; job seekers should call or check online to confirm the next Georgetown mobile visit."",
+      ""justification"": ""Client requested WSRCA services specifically near Georgetown (78626). WSRCA lists a Mobile Office in Georgetown as one of its official locations, making it the closest possible WSRCA access point by proximity. This is ideal when the client needs services within Georgetown city limits or has transportation barriers to Round Rock."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""SkillUp Rural Capital (Online Job Search & Training Portal – WSRCA Partner)"",
+      ""addresses"": [
+        ""Online resource serving Williamson County and the Rural Capital Area""
+      ],
+      ""phones"": [],
+      ""emails"": [],
+      ""website"": ""https://ruralcapital.skillupamerica.org/"",
+      ""description"": ""Free online platform supported by Workforce Solutions Rural Capital Area for residents of its nine‑county region, including Williamson County. Job seekers can explore career pathways, view local job postings, enroll in free online courses in workplace, business, and information technology skills, and connect back to WSRCA workforce services. Accessible 24/7 via computer or smartphone and can complement in‑person coaching from the Williamson County Career Center or Georgetown mobile office."",
+      ""justification"": ""Client wants job search help through WSRCA and lives in Georgetown (78626). SkillUp Rural Capital is a WSRCA‑affiliated online tool available to all Williamson County residents and can be used immediately, even before or between in‑person appointments at the Williamson County Career Center or Georgetown mobile office."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:06:04.744899
+targeted-st-austin-parish,centraltx,St. Austin Catholic Parish,"fabricated date 'Jan 1, 2026' rule",YES,Bad patterns found: ['January 1'],1,St. Austin Catholic Parish – Outreach to Persons in Need (Rent & Utilities),7161e2a4-54f6-4189-9900-41fffa927f18,15.0,"{
+  ""resources"": [
+    {
+      ""name"": ""St. Austin Catholic Parish – Outreach to Persons in Need (Rent & Utilities)"",
+      ""addresses"": [
+        ""2026 Guadalupe St, Austin, TX 78705""
+      ],
+      ""phones"": [
+        ""512-477-9471""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.staustin.org/outreach"",
+      ""description"": ""St. Austin Catholic Parish operates the Outreach to Persons in Need ministry, which offers limited financial assistance with ONE bill: rent, a City of Austin Utilities bill, or a Texas Gas Service bill. Residents of ZIP codes 78702, 78723, 78724, 78741, 78744, 78745, 78753, and 78758 may apply. Outreach uses a weekly random lottery to select a small number of applicants for help; most applicants will not be assisted. Assistance is not emergency-based and does not cover deposits, first month’s rent, hotel/motel bills, internet, cell phones, or more than one month of rent owed. As of January 1, 2026, rental help is only for people living in apartment complexes or certain pre-approved sober/communal living homes. Checks are mailed directly to the apartment complex or utility, not to individuals."",
+      ""justification"": ""Client is in Austin, TX 78724, which is one of the Outreach service ZIP codes. St. Austin’s Outreach explicitly provides limited rent and utility assistance to these ZIPs via a lottery system, making it an appropriate and geographically relevant referral for rental or financial help."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:06:19.718775
+targeted-cpr-cert,centraltx,CPR Certification Austin,wrong address 3430 W William Cannon (correct: 701 Tillery St),NOT_RETURNED,Target resource not in response,6,American Red Cross – CPR & First Aid Training (Austin Area); CPR Training Clinic – Austin (AHA-Authorized Training Center); ATX CPR – Professional CPR Training in Austin; Save A Life CPR ATX (Domain Area – Outdoor Skills Sessions); University of Texas at Austin School of Nursing – AHA Certification Courses; Sav-A-Heart CPR Training – Austin/San Antonio,9fdb55ac-879d-4db4-9a84-609e454965f3,32.4,"{
+  ""resources"": [
+    {
+      ""name"": ""American Red Cross – CPR & First Aid Training (Austin Area)"",
+      ""addresses"": [
+        ""Austin, TX 78701""
+      ],
+      ""phones"": [
+        ""1-800-733-2767""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.redcross.org/local/texas/take-a-class/cpr"",
+      ""description"": ""The American Red Cross offers OSHA-compliant CPR, First Aid, and AED certification classes in Austin and across Central Texas. Classes are available in-person, online, or as blended learning (online coursework plus an in-person skills session), and result in a 2‑year certification accepted by most employers. Case managers can search by Austin ZIP code to find nearby class dates, times, and price options. Courses are open to the general public and suitable for workplace, childcare, and community requirements."",
+      ""justification"": ""Client needs widely accepted CPR certification in Austin. Red Cross is a trusted national provider offering multiple low-barrier options (including blended learning), with many class dates in and around Austin and recognized by employers."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""CPR Training Clinic – Austin (AHA-Authorized Training Center)"",
+      ""addresses"": [
+        ""11617 Research Blvd, Austin, TX 78759""
+      ],
+      ""phones"": [
+        ""512-503-2320""
+      ],
+      ""emails"": [],
+      ""website"": ""https://austin.cprtrainingclinic.org/"",
+      ""description"": ""CPR Training Clinic is an American Heart Association National Training Center providing BLS Provider, CPR/AED, First Aid, and instructor-level courses in Austin. Classes are held at the Hilton Garden Inn Austin Arboretum and other local venues, with same‑day AHA certification cards valid for 2 years. They specialize in healthcare and workplace requirements and guarantee employer acceptance or money back. Open to both healthcare professionals and community members."",
+      ""justification"": ""Client is in Austin/Travis County and may need AHA‑branded CPR for employment. This site is in North Austin and offers frequent classes with same‑day AHA cards, making it a strong option for quick certification."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""ATX CPR – Professional CPR Training in Austin"",
+      ""addresses"": [
+        ""Austin, TX 78701""
+      ],
+      ""phones"": [
+        ""512-277-7290""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.atxcpr.com/"",
+      ""description"": ""ATX CPR provides American Heart Association–certified BLS, CPR, AED, and First Aid classes in Austin. They offer small-group classes and HeartCode BLS skills checks after completion of the AHA online module. Courses cover adult, child, and infant CPR with AED use and are appropriate for healthcare workers, educators, and general community members. Scheduling and pricing are available online, and classes are held at locations in the Austin area."",
+      ""justification"": ""Local AHA‑certified provider based in Austin, helpful if the client’s employer specifically requires AHA BLS/CPR and they prefer small classes or flexible HeartCode skills sessions."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Save A Life CPR ATX (Domain Area – Outdoor Skills Sessions)"",
+      ""addresses"": [
+        ""3225 Amy Donovan Plaza, Austin, TX 78758""
+      ],
+      ""phones"": [],
+      ""emails"": [],
+      ""website"": ""https://savealifecpratx.com/"",
+      ""description"": ""Save A Life CPR ATX offers American Heart Association BLS CPR courses for healthcare providers, childcare providers, teachers, fitness instructors, and community members. Classes use a hybrid model: participants complete the AHA online course, then attend an in‑person hands‑on skills and testing session, often held outdoors near the Domain (Amy Donovan Plaza). AHA certification is valid for 2 years. Scheduling and specific course links are provided on their website."",
+      ""justification"": ""North Austin option near the Domain that may be convenient for clients living or working in that area, especially those who prefer outdoor or hybrid-format AHA CPR training."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""University of Texas at Austin School of Nursing – AHA Certification Courses"",
+      ""addresses"": [
+        ""1710 Red River St, Austin, TX 78712""
+      ],
+      ""phones"": [],
+      ""emails"": [],
+      ""website"": ""https://nursing.utexas.edu/academics/aha-certification-courses"",
+      ""description"": ""UT Austin School of Nursing is an authorized American Heart Association Training Center (TX21038) offering CPR and other AHA certification courses. Classes are open to UT students, staff, healthcare professionals, and members of the public, and lead to a 2‑year AHA card. Schedules are posted online and updated regularly; registration is required and space can be limited."",
+      ""justification"": ""Central Austin, university-based AHA Training Center that accepts community members. Good option for clients who prefer an academic setting or are already near campus."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""Sav-A-Heart CPR Training – Austin/San Antonio"",
+      ""addresses"": [
+        ""Austin, TX 78701""
+      ],
+      ""phones"": [
+        ""512-257-0508""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.savaheart.com/"",
+      ""description"": ""Sav-A-Heart is an American Heart Association–endorsed CPR, AED, First Aid, and BLS training provider serving Austin and Central Texas. They offer healthcare provider renewal and full courses, plus Heartsaver CPR for all ages. Some classes are scheduled on Mondays and select Saturdays, and group trainings are available. Courses result in AHA certification valid for 2 years and are suitable for both workplace and community requirements."",
+      ""justification"": ""Regional AHA-preferred training center serving Austin with recurring CPR/BLS offerings, useful if the client needs specific course times or group training."",
+      ""referral_type"": ""external""
+    }
+  ]
+}",2026-02-13T09:06:52.111156
+targeted-mission-possible,centraltx,Mission Possible B.A.G.S.,should mention 'at capacity' status,MANUAL,No automated check — needs manual review,3,Mission Possible Austin – B.A.G.S. (Bringing Assistance of Grace and Service); El Buen Samaritano – Food Pantry; APH – St. Johns Community Center Food Pantry (City of Austin),9ba616e1-d14d-42ff-aab6-c875c5353c5a,24.8,"{
+  ""resources"": [
+    {
+      ""name"": ""Mission Possible Austin – B.A.G.S. (Bringing Assistance of Grace and Service)"",
+      ""addresses"": [
+        ""1190 Chicon Street, Austin, TX 78702""
+      ],
+      ""phones"": [
+        ""512-368-2731""
+      ],
+      ""emails"": [
+        ""info@mpaustin.org""
+      ],
+      ""website"": ""https://mpaustin.org/programs/community/"",
+      ""description"": ""B.A.G.S. is Mission Possible Austin’s monthly grocery assistance program for elderly, homebound, and low‑income families in East/Central Austin. Volunteers deliver a box of supplemental groceries directly to clients’ homes and build ongoing relationships. The program is faith‑based but services are focused on food support and are open to low‑income community members in the service area. Because enrollment and delivery routes are coordinated by staff, households generally need to contact Mission Possible Austin to be added and to confirm current availability and delivery schedules."",
+      ""justification"": ""Mission Possible Austin’s official program page describes B.A.G.S. as a monthly grocery assistance program serving elderly, homebound, and low‑income families with boxes of groceries delivered to their homes. However, the site does not clearly state real‑time intake status or an online application for new clients. Given this, the safest, most accurate guidance is that the client or case manager should call 512‑368‑2731 or email info@mpaustin.org to confirm whether B.A.G.S. is currently accepting new households in Austin and what eligibility or geographic limits apply."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""El Buen Samaritano – Food Pantry"",
+      ""addresses"": [
+        ""7000 Woodhue Drive, Austin, TX 78745""
+      ],
+      ""phones"": [
+        ""512-439-8900""
+      ],
+      ""emails"": [
+        ""hello@elbuen.org""
+      ],
+      ""website"": ""https://elbuen.org/food-access-services/"",
+      ""description"": ""El Buen Samaritano operates a standing food pantry in South Austin that provides groceries to low‑income households, including families and individuals regardless of immigration status. Services are by drive‑through or walk‑up distribution on set weekday mornings, with bilingual staff and volunteers. Clients typically complete a brief intake with basic household and income information; repeat visits are allowed on a recurring schedule as pantry capacity allows. The site is in Travis County and accessible by car and public transit from most parts of Austin."",
+      ""justification"": ""Because Mission Possible B.A.G.S. does not publish live intake status online, a strong backup for a client needing groceries in Austin is a high‑capacity, established pantry nearby. El Buen Samaritano’s food access page confirms an ongoing food pantry program at 7000 Woodhue Dr., Austin, TX 78745 with weekday hours and no narrow eligibility beyond low income, making it an appropriate alternative if B.A.G.S. is full or not enrolling."",
+      ""referral_type"": ""external""
+    },
+    {
+      ""name"": ""APH – St. Johns Community Center Food Pantry (City of Austin)"",
+      ""addresses"": [
+        ""7500 Blessing Avenue, Austin, TX 78752""
+      ],
+      ""phones"": [
+        ""512-972-5159""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.austintexas.gov/services/get-help-neighborhood-centers"",
+      ""description"": ""Austin Public Health’s St. Johns Community Center offers a food pantry and related basic needs assistance for low‑income Travis County residents. The center is open weekdays, and food distribution typically occurs during daytime hours with some designated pantry times. Clients usually complete a short intake and may be asked for proof of identity and Travis County address, but services are generally available regardless of immigration status. This is a city‑run site in North/Central Austin, making it accessible for many Austin residents who need ongoing grocery assistance."",
+      ""justification"": ""If Mission Possible B.A.G.S. is not accepting new clients, a government‑run pantry in the same city and county is a strong alternative. The City of Austin’s neighborhood center page lists St. Johns Community Center at 7500 Blessing Ave, Austin, TX 78752 with food distribution and case management for low‑income residents, which should be available to most Austin clients who can visit during weekday hours."",
+      ""referral_type"": ""government""
+    }
+  ]
+}",2026-02-13T09:07:16.952563
+targeted-ssa-child-ssn,centraltx,SSA,online tool doesn't work for children SSN replacement,MANUAL,No automated check — needs manual review,3,Social Security Administration – Replace a Social Security Card (Online & In-Person Guidance); Social Security Administration – Austin North Office; Social Security Administration – Austin South / Oak Hill Office,791553e0-de6d-4307-8157-7bb18f29deca,24.6,"{
+  ""resources"": [
+    {
+      ""name"": ""Social Security Administration – Replace a Social Security Card (Online & In-Person Guidance)"",
+      ""addresses"": [],
+      ""phones"": [
+        ""800-772-1213"",
+        ""800-325-0778""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.ssa.gov/number-card/replace-card"",
+      ""description"": ""This SSA webpage explains who can replace a Social Security card online and when an in‑person visit is required. For many U.S. citizens age 18+ with a U.S. mailing address and a state‑issued driver’s license or ID from a participating state, replacement can be requested online through a personal my Social Security account. For children, parents generally must complete the application and submit original documents; in most cases this requires an in‑person or mail‑in process through a local SSA office. The page provides detailed rules, required documents (identity, age, and citizenship/immigration status), and links to create or sign in to a my Social Security account."",
+      ""justification"": ""Use this official SSA page first to determine whether the parent or child is eligible for online replacement. If the child does not meet SSA’s online criteria, the case manager should direct the family to schedule an in‑person appointment at a local Austin SSA office and bring required original identity documents for the child (e.g., school or medical records, state ID, or U.S. passport; birth certificate alone is not enough for identity)."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Social Security Administration – Austin North Office"",
+      ""addresses"": [
+        ""1029 Camino La Costa, Austin, TX 78752""
+      ],
+      ""phones"": [
+        ""866-627-6991"",
+        ""800-772-1213""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.ssa.gov/locator"",
+      ""description"": ""Local SSA field office serving Austin/Travis County. As of January 6, 2025, most services, including replacement Social Security cards, require a scheduled appointment. Walk‑ins are reserved for urgent or vulnerable situations. For a child’s replacement card, the parent or legal guardian typically must appear in person (or follow office instructions for mail‑in), complete the application, and present original documents: proof of the child’s identity (school or medical record, state ID, or U.S. passport) plus age/citizenship documents. Processing time is usually about 10 business days by mail. SSA limits replacements to 3 cards per year and 10 per lifetime."",
+      ""justification"": ""This is the closest SSA office for most clients in Austin (Travis County). If the child does not qualify for online replacement under SSA rules, the family should call to schedule an appointment here or via the national number. The case manager can coach the parent to bring original identity documents for the child and understand that walk‑ins are not guaranteed except for emergencies."",
+      ""referral_type"": ""government""
+    },
+    {
+      ""name"": ""Social Security Administration – Austin South / Oak Hill Office"",
+      ""addresses"": [
+        ""5508 Highway 290 W, Building B, Austin, TX 78735""
+      ],
+      ""phones"": [
+        ""855-221-3523"",
+        ""800-772-1213""
+      ],
+      ""emails"": [],
+      ""website"": ""https://www.ssa.gov/locator"",
+      ""description"": ""Second Austin‑area SSA office serving South Austin and nearby communities. As of January 6, 2025, most services, including replacement cards for children, require an appointment; walk‑ins are generally limited to urgent or vulnerable cases. Parents or legal guardians should call to schedule, then bring original documents for the child: proof of identity (such as school or medical records, state ID, or U.S. passport) and separate proof of age and citizenship/immigration status. Replacement cards are typically mailed within about 10 business days. SSA enforces limits of 3 replacement cards per year and 10 per lifetime."",
+      ""justification"": ""This office may be closer for clients in South or West/Southwest Austin. Use if the North office is fully booked or less convenient. The same rules apply: check online eligibility first; if the child cannot be served online, schedule an appointment here and bring the required original documents."",
+      ""referral_type"": ""government""
+    }
+  ]
+}",2026-02-13T09:07:41.550405

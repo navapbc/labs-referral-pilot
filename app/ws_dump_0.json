@@ -1,0 +1,77 @@
+{
+  "id": "ws_0dc3b2f0da81e797006986031ba240819c838e2270756bfc2d",
+  "action": {
+    "query": "food pantry near 78701 Austin TX",
+    "type": "search",
+    "sources": [
+      {
+        "type": "url",
+        "url": "https://www.micah6austin.org/food-pantry"
+      },
+      {
+        "type": "url",
+        "url": "https://www.centraltexasfoodbank.org/location/onion-creek-mobile-food-pantry"
+      },
+      {
+        "type": "url",
+        "url": "https://www.micah6austin.org/"
+      },
+      {
+        "type": "url",
+        "url": "https://www.micah6austin.org/donate-food"
+      },
+      {
+        "type": "url",
+        "url": "https://www.micah6austin.org/community-partners"
+      },
+      {
+        "type": "url",
+        "url": "https://www.centraltexasfoodbank.org/get-involved/volunteer/volunteer-mobile-food-pantry"
+      },
+      {
+        "type": "url",
+        "url": "https://upcaustin.org/serve/micah-6-of-austin/"
+      },
+      {
+        "type": "url",
+        "url": "https://uachurch.org/connect/micah-6"
+      },
+      {
+        "type": "url",
+        "url": "https://stdave.org/stewardship/cafe-divine/"
+      },
+      {
+        "type": "url",
+        "url": "https://stdave.org/ministries/hospitality/"
+      },
+      {
+        "type": "url",
+        "url": "https://staustin.org/micah-6"
+      },
+      {
+        "type": "url",
+        "url": "https://www.micah6austin.org/about-us"
+      },
+      {
+        "type": "url",
+        "url": "https://www.reddit.com//r/Austin/comments/18xor5s"
+      },
+      {
+        "type": "url",
+        "url": "https://www.reddit.com/r/Austin/comments/17zv18e"
+      },
+      {
+        "type": "url",
+        "url": "https://www.reddit.com/r/Austin/comments/fqux04"
+      }
+    ],
+    "queries": [
+      "food pantry near 78701 Austin TX",
+      "Central Texas Food Bank mobile pantry schedule downtown Austin",
+      "Micah 6 Food Pantry Austin",
+      "St. David's Episcopal Austin food pantry"
+    ]
+  },
+  "status": "completed",
+  "type": "web_search_call"
+}
