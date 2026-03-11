@@ -138,7 +138,9 @@ export function ActionPlanDisplay({
               <div
                 className="prose prose-sm max-w-none text-gray-800"
                 dangerouslySetInnerHTML={{
-                  __html: parseMarkdownToHTML(streamingPlan.content),
+                  __html: parseMarkdownToHTML(streamingPlan.content, {
+                    isStreaming: true,
+                  }),
                 }}
               />
               {/* Blinking cursor to indicate streaming */}

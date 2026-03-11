@@ -45,8 +45,14 @@ export function extractCitations(content: string): {
 /**
  * Converts markdown content to HTML using remark + rehype
  * Supports GitHub Flavored Markdown (GFM) including lists, links, bold, italic, etc.
+ * @param content - The markdown content to parse
+ * @param options - Optional configuration
+ * @param options.isStreaming - When true, applies styling to horizontal rules (used during streaming)
  */
-export function parseMarkdownToHTML(content: string): string {
+export function parseMarkdownToHTML(
+  content: string,
+  options?: { isStreaming?: boolean },
+): string {
   if (!content) return "";
 
   // Strip OpenAI web search citation markers like 【turn0search0】 that sometimes leak through
@@ -119,8 +125,10 @@ export function parseMarkdownToHTML(content: string): string {
     '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">',
   );
 
-  // Style horizontal rules (resource section dividers) with more spacing
-  html = html.replace(/<hr>/g, '<hr class="my-8 border-t border-gray-300">');
+  // Style horizontal rules only during streaming (used as section dividers)
+  if (options?.isStreaming) {
+    html = html.replace(/<hr>/g, '<hr class="my-8 border-t border-gray-300">');
+  }
 
   return html;
 }
