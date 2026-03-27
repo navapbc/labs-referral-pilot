@@ -106,6 +106,7 @@ export function ActionPlanSection({
           actionPlan={actionPlan}
           streamingPlan={streamingPlan}
           isStreaming={isStreaming}
+          selectedResources={selectedResources}
         />
       )}
     </>
