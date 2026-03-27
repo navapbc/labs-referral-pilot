@@ -5,7 +5,7 @@
 ## Table of Contents
 
 - [Product Description](#product-description)
-- [Architecture](#architecture)
+- [Components](#components)
 - [Setup](#setup)
   - [Backend (app)](#backend-app)
   - [Frontend](#frontend)
@@ -63,6 +63,8 @@ The following describes a typical end-to-end session for a case manager using th
 4. **Review resources** — Browse the returned resource list. Each resource includes relevant details to help the case manager assess fit for the client.
 5. **Generate an action plan** — With resources selected, request an action plan. The LLM uses the client information and resource list to produce a personalized, step-by-step plan that accounts for prerequisite steps and constraints specific to the client's situation.
 6. **Share results** — Print the referral list and action plan as a PDF, or email them directly to the client or relevant parties.
+
+[Demonstration Video](https://drive.google.com/file/d/1-h1UXtbFssYFsl6or0bE6PCFGXO7WOXS/view?usp=sharing)
 
 ---
 
