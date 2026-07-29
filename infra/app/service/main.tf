@@ -70,7 +70,8 @@ module "service" {
   hosted_zone_id  = module.domain.hosted_zone_id
   certificate_arn = module.domain.certificate_arn
 
-  enable_waf = module.app_config.enable_waf
+  enable_waf              = module.app_config.enable_waf
+  alb_ingress_cidr_blocks = module.app_config.alb_ingress_cidr_blocks
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

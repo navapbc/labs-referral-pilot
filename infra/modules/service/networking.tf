@@ -8,6 +8,14 @@ module "network" {
   project_name = var.project_name
 }
 
+locals {
+  # Temporary workspaces (e.g. Terratest runs) are short-lived and their ALB
+  # endpoint is hit directly from the test runner's IP, which won't be on any
+  # allow-list. Skip the restriction for those so ALB access-control changes
+  # don't break infra tests; persistent environments still get the allow-list.
+  alb_ingress_cidr_blocks = var.is_temporary ? ["0.0.0.0/0"] : var.alb_ingress_cidr_blocks
+}
+
 resource "aws_security_group" "alb" {
   # Specify name_prefix instead of name because when a change requires creating a new
   # security group, sometimes the change requires the new security group to be created
@@ -28,19 +36,19 @@ resource "aws_security_group" "alb" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
   # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
   ingress {
-    description = "Allow HTTP traffic from public internet"
+    description = "Allow HTTP traffic from allow-listed CIDR blocks"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.alb_ingress_cidr_blocks
   }
 
   ingress {
-    description = "Allow HTTPS traffic from public internet"
+    description = "Allow HTTPS traffic from allow-listed CIDR blocks"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.alb_ingress_cidr_blocks
   }
 
   egress {
