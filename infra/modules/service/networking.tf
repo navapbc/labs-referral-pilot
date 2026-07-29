@@ -28,19 +28,19 @@ resource "aws_security_group" "alb" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
   # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
   ingress {
-    description = "Allow HTTP traffic from public internet"
+    description = "Allow HTTP traffic from allow-listed CIDR blocks"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.alb_ingress_cidr_blocks
   }
 
   ingress {
-    description = "Allow HTTPS traffic from public internet"
+    description = "Allow HTTPS traffic from allow-listed CIDR blocks"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.alb_ingress_cidr_blocks
   }
 
   egress {

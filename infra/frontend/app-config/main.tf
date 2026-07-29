@@ -46,7 +46,13 @@ locals {
   # Whether or not the application should enable WAF for the load balancer.
   # If enabled:
   # 1. Creates an AWS WAF web ACL with AWSManagedRulesCommonRuleSet
-  enable_waf = false
+  enable_waf = true
+
+  # Temporary lockdown: this pilot has wrapped and its URL was leaked outside the
+  # intended user group. Restrict ALB access to known IPs until the service is
+  # decommissioned or reopened to a wider group.
+  # TODO: remove this restriction (or decommission the service) once the pilot concludes.
+  alb_ingress_cidr_blocks = ["174.51.194.156/32"]
 
   environment_configs = {
     dev     = module.dev_config

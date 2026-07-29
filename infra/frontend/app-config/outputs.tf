@@ -38,6 +38,10 @@ output "enable_waf" {
   value = local.enable_waf
 }
 
+output "alb_ingress_cidr_blocks" {
+  value = local.alb_ingress_cidr_blocks
+}
+
 output "shared_network_name" {
   value = local.shared_network_name
 }

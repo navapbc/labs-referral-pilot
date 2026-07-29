@@ -1,3 +1,9 @@
+variable "alb_ingress_cidr_blocks" {
+  type        = list(string)
+  description = "CIDR blocks allowed to reach the load balancer on ports 80/443"
+  default     = ["0.0.0.0/0"]
+}
+
 variable "certificate_arn" {
   type        = string
   description = "The ARN of the certificate to use for the application"
