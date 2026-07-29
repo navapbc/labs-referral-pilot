@@ -8,6 +8,14 @@ module "network" {
   project_name = var.project_name
 }
 
+locals {
+  # Temporary workspaces (e.g. Terratest runs) are short-lived and their ALB
+  # endpoint is hit directly from the test runner's IP, which won't be on any
+  # allow-list. Skip the restriction for those so ALB access-control changes
+  # don't break infra tests; persistent environments still get the allow-list.
+  alb_ingress_cidr_blocks = var.is_temporary ? ["0.0.0.0/0"] : var.alb_ingress_cidr_blocks
+}
+
 resource "aws_security_group" "alb" {
   # Specify name_prefix instead of name because when a change requires creating a new
   # security group, sometimes the change requires the new security group to be created
@@ -32,7 +40,7 @@ resource "aws_security_group" "alb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = var.alb_ingress_cidr_blocks
+    cidr_blocks = local.alb_ingress_cidr_blocks
   }
 
   ingress {
@@ -40,7 +48,7 @@ resource "aws_security_group" "alb" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.alb_ingress_cidr_blocks
+    cidr_blocks = local.alb_ingress_cidr_blocks
   }
 
   egress {
