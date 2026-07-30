@@ -119,6 +119,7 @@ Set up the following before launching to end users in production:
 - [Develop and test infrastructure in isolation using workspaces](../docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md)
 - [Making infrastructure changes](../docs/infra/making-infra-changes.md)
 - [Upgrade database](../docs/infra/upgrade-database.md)
+- [Update the pilot ALB IP allow-list](../docs/infra/update-alb-allowlist.md)
 
 ### Reference
 
