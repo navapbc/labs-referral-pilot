@@ -52,7 +52,7 @@ locals {
   # intended user group. Restrict ALB access to known IPs until the service is
   # decommissioned or reopened to a wider group.
   # TODO: remove this restriction (or decommission the service) once the pilot concludes.
-  alb_ingress_cidr_blocks = ["174.51.194.156/32", "173.56.203.62/32", "47.28.16.92/32"]
+  alb_ingress_cidr_blocks = ["174.51.194.156/32", "173.56.203.62/32", "47.28.16.92/32", "108.48.242.121/32"]
 
   environment_configs = {
     dev     = module.dev_config
